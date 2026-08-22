@@ -39,13 +39,27 @@ function rowToInventoryItem(row: typeof supports.$inferSelect): InventoryItem {
 
 export async function getAllSupportsFromDB(): Promise<InventoryItem[]> {
   const rows = await db.select().from(supports);
-  return rows.map(rowToInventoryItem);
+  const validItems: InventoryItem[] = [];
+
+  for (const row of rows) {
+    if (!row.canonicalId || !row.name || !row.ciudad || !row.tipoSoporte || !row.disponibilidad) {
+      console.warn(`[DB WARNING] Skipping incomplete or legacy support record (ID: ${row.id}, canonical_id: ${row.canonicalId}, name: ${row.name}, ciudad: ${row.ciudad}, tipo_soporte: ${row.tipoSoporte}): missing required core fields.`);
+      continue;
+    }
+    validItems.push(rowToInventoryItem(row));
+  }
+  return validItems;
 }
 
 export async function getSupportByIdFromDB(canonicalId: string): Promise<InventoryItem | null> {
   const rows = await db.select().from(supports).where(eq(supports.canonicalId, canonicalId));
   if (rows.length === 0) return null;
-  return rowToInventoryItem(rows[0]);
+  const row = rows[0];
+  if (!row.canonicalId || !row.name || !row.ciudad || !row.tipoSoporte || !row.disponibilidad) {
+    console.warn(`[DB WARNING] Support record with canonical_id '${canonicalId}' is incomplete/legacy and was ignored.`);
+    return null;
+  }
+  return rowToInventoryItem(row);
 }
 
 export async function validateSupportsForRequest(selectedIds: string[]): Promise<{
