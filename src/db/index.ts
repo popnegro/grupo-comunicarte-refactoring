@@ -21,54 +21,90 @@ export async function initDatabase() {
     // 1. Create tables if not exist and ensure columns exist
     await pool.query(`
       CREATE TABLE IF NOT EXISTS supports (
-        id SERIAL PRIMARY KEY
+        id SERIAL PRIMARY KEY,
+        canonical_id TEXT UNIQUE,
+        name TEXT,
+        ciudad TEXT,
+        tipo_soporte TEXT,
+        lat NUMERIC,
+        lng NUMERIC,
+        address TEXT,
+        description TEXT,
+        characteristics TEXT,
+        mapa_url TEXT,
+        image_urls JSONB,
+        disponibilidad TEXT DEFAULT 'disponible',
+        available_from TEXT,
+        is_featured BOOLEAN DEFAULT FALSE,
+        schedule TEXT,
+        duration TEXT,
+        waypoints JSONB,
+        route_path JSONB,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
-      ALTER TABLE supports ADD COLUMN IF NOT EXISTS canonical_id TEXT;
-      ALTER TABLE supports ADD COLUMN IF NOT EXISTS name TEXT;
-      ALTER TABLE supports ADD COLUMN IF NOT EXISTS ciudad TEXT;
-      ALTER TABLE supports ADD COLUMN IF NOT EXISTS tipo_soporte TEXT;
-      ALTER TABLE supports ADD COLUMN IF NOT EXISTS lat NUMERIC;
-      ALTER TABLE supports ADD COLUMN IF NOT EXISTS lng NUMERIC;
-      ALTER TABLE supports ADD COLUMN IF NOT EXISTS address TEXT;
-      ALTER TABLE supports ADD COLUMN IF NOT EXISTS description TEXT;
-      ALTER TABLE supports ADD COLUMN IF NOT EXISTS characteristics TEXT;
-      ALTER TABLE supports ADD COLUMN IF NOT EXISTS mapa_url TEXT;
-      ALTER TABLE supports ADD COLUMN IF NOT EXISTS image_urls JSONB;
-      ALTER TABLE supports ADD COLUMN IF NOT EXISTS disponibilidad TEXT DEFAULT 'disponible';
-      ALTER TABLE supports ADD COLUMN IF NOT EXISTS available_from TEXT;
-      ALTER TABLE supports ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT FALSE;
-      ALTER TABLE supports ADD COLUMN IF NOT EXISTS schedule TEXT;
-      ALTER TABLE supports ADD COLUMN IF NOT EXISTS duration TEXT;
-      ALTER TABLE supports ADD COLUMN IF NOT EXISTS waypoints JSONB;
-      ALTER TABLE supports ADD COLUMN IF NOT EXISTS route_path JSONB;
-      ALTER TABLE supports ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
-      ALTER TABLE supports ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+      ALTER TABLE supports DROP COLUMN IF EXISTS data;
+
+      CREATE SEQUENCE IF NOT EXISTS supports_id_seq;
+      ALTER TABLE supports ALTER COLUMN id SET DEFAULT nextval('supports_id_seq');
+      ALTER SEQUENCE supports_id_seq OWNED BY supports.id;
+
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_supports_canonical_id ON supports(canonical_id);
 
       CREATE TABLE IF NOT EXISTS mediakit_requests (
-        id SERIAL PRIMARY KEY
+        id SERIAL PRIMARY KEY,
+        request_id TEXT UNIQUE,
+        requester_name TEXT,
+        requester_email TEXT,
+        requester_company TEXT,
+        requester_phone TEXT,
+        message TEXT,
+        status TEXT DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
-      ALTER TABLE mediakit_requests ADD COLUMN IF NOT EXISTS request_id TEXT;
-      ALTER TABLE mediakit_requests ADD COLUMN IF NOT EXISTS requester_name TEXT;
-      ALTER TABLE mediakit_requests ADD COLUMN IF NOT EXISTS requester_email TEXT;
-      ALTER TABLE mediakit_requests ADD COLUMN IF NOT EXISTS requester_company TEXT;
-      ALTER TABLE mediakit_requests ADD COLUMN IF NOT EXISTS requester_phone TEXT;
-      ALTER TABLE mediakit_requests ADD COLUMN IF NOT EXISTS message TEXT;
-      ALTER TABLE mediakit_requests ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
-      ALTER TABLE mediakit_requests ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
-      ALTER TABLE mediakit_requests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+      ALTER TABLE mediakit_requests DROP COLUMN IF EXISTS data;
+
+      CREATE SEQUENCE IF NOT EXISTS mediakit_requests_id_seq;
+      ALTER TABLE mediakit_requests ALTER COLUMN id SET DEFAULT nextval('mediakit_requests_id_seq');
+      ALTER SEQUENCE mediakit_requests_id_seq OWNED BY mediakit_requests.id;
+
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_mediakit_requests_request_id ON mediakit_requests(request_id);
 
       CREATE TABLE IF NOT EXISTS mediakit_request_items (
-        id SERIAL PRIMARY KEY
+        id SERIAL PRIMARY KEY,
+        request_id TEXT,
+        support_id TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
-      ALTER TABLE mediakit_request_items ADD COLUMN IF NOT EXISTS request_id TEXT;
-      ALTER TABLE mediakit_request_items ADD COLUMN IF NOT EXISTS support_id TEXT;
-      ALTER TABLE mediakit_request_items ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+      ALTER TABLE mediakit_request_items DROP COLUMN IF EXISTS data;
+
+      CREATE SEQUENCE IF NOT EXISTS mediakit_request_items_id_seq;
+      ALTER TABLE mediakit_request_items ALTER COLUMN id SET DEFAULT nextval('mediakit_request_items_id_seq');
+      ALTER SEQUENCE mediakit_request_items_id_seq OWNED BY mediakit_request_items.id;
     `);
 
-    console.log('Database tables verified/created successfully.');
+    // 1.b Add Foreign Key Constraints & Cleanup Orphans (P0-4)
+    await pool.query(`
+      DELETE FROM mediakit_request_items WHERE support_id NOT IN (SELECT canonical_id FROM supports);
+      DELETE FROM mediakit_request_items WHERE request_id NOT IN (SELECT request_id FROM mediakit_requests);
+
+      ALTER TABLE mediakit_request_items DROP CONSTRAINT IF EXISTS fk_mediakit_request_items_request;
+      ALTER TABLE mediakit_request_items DROP CONSTRAINT IF EXISTS fk_mediakit_request_items_support;
+
+      ALTER TABLE mediakit_request_items 
+        ADD CONSTRAINT fk_mediakit_request_items_request 
+        FOREIGN KEY (request_id) REFERENCES mediakit_requests(request_id) ON DELETE CASCADE;
+
+      ALTER TABLE mediakit_request_items 
+        ADD CONSTRAINT fk_mediakit_request_items_support 
+        FOREIGN KEY (support_id) REFERENCES supports(canonical_id) ON DELETE CASCADE;
+    `);
+
+    console.log('Database tables and foreign key constraints verified/created successfully.');
 
     // 2. Idempotent Seed
     await seedInventory();
@@ -120,7 +156,7 @@ async function seedInventory() {
         routePath: rp,
       });
     } else {
-      // Update existing record to keep seed in sync if needed, or leave it. Updating ensures seed idempotency with latest fields.
+      // Existing record: DO NOT overwrite operational fields like disponibilidad (P0-3). Only sync static descriptive fields.
       await db.update(schema.supports).set({
         name: item.name,
         ciudad: item.ciudad,
@@ -132,7 +168,6 @@ async function seedInventory() {
         characteristics: item.characteristics,
         mapaUrl: mapaUrlVal,
         imageUrls: imgs,
-        disponibilidad: disp,
         availableFrom: availFrom,
         isFeatured: isFeat,
         schedule: sched,

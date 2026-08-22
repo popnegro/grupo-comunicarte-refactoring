@@ -5,8 +5,8 @@ import { buttonStyles } from '../../components/ui/Button';
 
 export default function Login() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('comunicarte2026');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

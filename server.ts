@@ -1,14 +1,14 @@
 import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
-import { initDatabase } from './src/db';
+import { initDatabase, pool } from './src/db';
 import { getAllSupportsFromDB, getSupportByIdFromDB } from './src/server/supportsService';
 import { handleMediakitRequest, getAllMediakitRequestsFromDB } from './src/server/mediakitService';
 import { authenticateAdmin, verifyAdminToken, getAdminStats, updateSupportByAdmin, updateRequestStatusByAdmin } from './src/server/adminService';
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json());
 
@@ -17,11 +17,17 @@ async function startServer() {
     await initDatabase();
   } catch (err) {
     console.error('Failed to initialize database during startup:', err);
+    process.exit(1); // Startup must fail if DB is mandatory (P1-5)
   }
 
-  // API health check
-  app.get('/api/health', (_req, res) => {
-    res.json({ status: 'ok' });
+  // API health check with DB connectivity check (P1-5)
+  app.get('/api/health', async (_req, res) => {
+    try {
+      await pool.query('SELECT 1');
+      res.status(200).json({ status: 'ok', database: 'connected' });
+    } catch (err: any) {
+      res.status(503).json({ status: 'degraded', database: 'disconnected', error: err.message });
+    }
   });
 
   // Supports API routes (Phase 3)
@@ -60,15 +66,8 @@ async function startServer() {
     }
   });
 
-  app.get('/api/mediakit/requests', async (_req, res) => {
-    try {
-      const records = await getAllMediakitRequestsFromDB();
-      res.status(200).json({ status: 'success', data: records });
-    } catch (err: any) {
-      console.error('Error fetching mediakit requests:', err);
-      res.status(500).json({ status: 'error', message: 'Error interno al obtener solicitudes.' });
-    }
-  });
+  // NOTE: GET /api/mediakit/requests is strictly removed from public exposure (P0-2).
+  // Only accessible via protected admin endpoint /api/admin/requests.
 
   // ==================== ADMIN API ROUTES (FASE 2) ====================
   app.post('/api/admin/login', (req, res) => {
@@ -116,7 +115,9 @@ async function startServer() {
       res.status(200).json({ status: 'success', data: updated, message: 'Soporte actualizado exitosamente.' });
     } catch (err: any) {
       console.error(`Error updating support ${req.params.id}:`, err);
-      res.status(500).json({ status: 'error', message: err.message || 'Error al actualizar el soporte.' });
+      const msg = err.message || '';
+      const status = msg.includes('no encontrado') ? 404 : msg.includes('inválido') ? 400 : 500;
+      res.status(status).json({ status: 'error', message: msg || 'Error al actualizar el soporte.' });
     }
   });
 
@@ -138,7 +139,9 @@ async function startServer() {
       res.status(200).json({ status: 'success', data: updated, message: 'Estado de solicitud actualizado.' });
     } catch (err: any) {
       console.error(`Error updating request ${req.params.id}:`, err);
-      res.status(500).json({ status: 'error', message: err.message || 'Error al actualizar la solicitud.' });
+      const msg = err.message || '';
+      const statusCode = msg.includes('no encontrada') ? 404 : msg.includes('inválido') ? 400 : 500;
+      res.status(statusCode).json({ status: 'error', message: msg || 'Error al actualizar la solicitud.' });
     }
   });
 

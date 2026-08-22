@@ -60,6 +60,9 @@ export async function handleMediakitRequest(body: any): Promise<{
 
     const { lead, selectedIds } = body as MediakitRequestBody;
 
+    // Deduplicate selectedIds (P1-2)
+    const uniqueSelectedIds = Array.from(new Set((selectedIds || []).filter((id): id is string => typeof id === 'string' && id.trim().length > 0)));
+
     // 1. Validate Lead data
     if (!lead || typeof lead !== 'object') {
       return {
@@ -94,8 +97,8 @@ export async function handleMediakitRequest(body: any): Promise<{
       };
     }
 
-    // 2. Validate selectedIds and availability against Database
-    const validation = await validateSupportsForRequest(selectedIds);
+    // 2. Validate uniqueSelectedIds and availability against Database
+    const validation = await validateSupportsForRequest(uniqueSelectedIds);
     if (!validation.valid) {
       return {
         statusCode: validation.statusCode || 400,
@@ -106,13 +109,23 @@ export async function handleMediakitRequest(body: any): Promise<{
       };
     }
 
-    // 3. Generate unique, formatted Request ID (REQ-2026-XXXX-XXXX)
-    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    const dateSegment = new Date().getFullYear();
-    // Count existing requests to get sequence number
-    const existingReqs = await db.select().from(mediakitRequests);
-    const seqNum = existingReqs.length + 1;
-    const requestId = `REQ-${dateSegment}-${String(seqNum).padStart(4, '0')}-${randomSuffix}`;
+    // 3. Generate concurrent-safe unique Request ID (REQ-2026-XXXX-XXXX) (P1-1)
+    let requestId = '';
+    let attempts = 0;
+    while (attempts < 5) {
+      attempts++;
+      const r1 = Math.floor(1000 + Math.random() * 9000);
+      const r2 = Math.floor(1000 + Math.random() * 9000);
+      const candidate = `REQ-${new Date().getFullYear()}-${r1}-${r2}`;
+      const found = await db.select().from(mediakitRequests).where(eq(mediakitRequests.requestId, candidate));
+      if (found.length === 0) {
+        requestId = candidate;
+        break;
+      }
+    }
+    if (!requestId) {
+      requestId = `REQ-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
+    }
 
     const createdAtStr = new Date().toISOString();
 
@@ -135,7 +148,7 @@ export async function handleMediakitRequest(body: any): Promise<{
         ]
       );
 
-      for (const sId of selectedIds) {
+      for (const sId of uniqueSelectedIds) {
         await client.query(
           `INSERT INTO mediakit_request_items (request_id, support_id) VALUES ($1, $2)`,
           [requestId, sId]
@@ -158,7 +171,7 @@ export async function handleMediakitRequest(body: any): Promise<{
         message: 'Solicitud de Media Kit registrada exitosamente.',
         data: {
           requestId,
-          selectedCount: selectedIds.length,
+          selectedCount: uniqueSelectedIds.length,
           createdAt: createdAtStr,
         },
       },

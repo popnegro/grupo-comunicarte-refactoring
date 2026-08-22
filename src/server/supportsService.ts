@@ -82,11 +82,11 @@ export async function validateSupportsForRequest(selectedIds: string[]): Promise
       };
     }
 
-    if (item.disponibilidad === 'reservado') {
+    if (item.disponibilidad !== 'disponible') {
       return {
         valid: false,
         statusCode: 409, // Conflict / not available
-        message: `El soporte '${item.name}' está actualmente reservado y no puede incluirse en el Media Kit.`,
+        message: `El soporte '${item.name}' no está disponible (estado: ${item.disponibilidad}) y no puede incluirse en el Media Kit.`,
       };
     }
 

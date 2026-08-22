@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { db } from '../db';
 import { supports, mediakitRequests } from '../db/schema';
 import { eq } from 'drizzle-orm';
@@ -5,12 +6,16 @@ import { getAllSupportsFromDB } from './supportsService';
 import { getAllMediakitRequestsFromDB } from './mediakitService';
 
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'comunicarte2026';
-const ADMIN_TOKEN = 'admin-token-grupo-comunicarte-2026';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || crypto.randomBytes(16).toString('hex');
+const ADMIN_SECRET = process.env.ADMIN_SECRET || crypto.randomBytes(32).toString('hex');
 
 export function authenticateAdmin(username: string, password: string): { success: boolean; token?: string; message?: string } {
   if (username === ADMIN_USER && password === ADMIN_PASSWORD) {
-    return { success: true, token: ADMIN_TOKEN };
+    const expiresAt = Date.now() + 8 * 3600 * 1000; // 8 hours expiration
+    const payload = `${username}:${expiresAt}`;
+    const signature = crypto.createHmac('sha256', ADMIN_SECRET).update(payload).digest('hex');
+    const token = Buffer.from(`${payload}:${signature}`).toString('base64');
+    return { success: true, token };
   }
   return { success: false, message: 'Credenciales inválidas. Verifica usuario y contraseña.' };
 }
@@ -19,7 +24,20 @@ export function verifyAdminToken(authHeader?: string): boolean {
   if (!authHeader) return false;
   const parts = authHeader.split(' ');
   if (parts.length !== 2 || parts[0] !== 'Bearer') return false;
-  return parts[1] === ADMIN_TOKEN;
+  try {
+    const decoded = Buffer.from(parts[1], 'base64').toString('utf8');
+    const [username, expiresAtStr, signature] = decoded.split(':');
+    if (!username || !expiresAtStr || !signature) return false;
+    const expiresAt = Number(expiresAtStr);
+    if (Date.now() > expiresAt) return false; // Token expired
+
+    const payload = `${username}:${expiresAt}`;
+    const expectedSignature = crypto.createHmac('sha256', ADMIN_SECRET).update(payload).digest('hex');
+    if (signature.length !== expectedSignature.length) return false;
+    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
+  } catch {
+    return false;
+  }
 }
 
 export async function getAdminStats() {
