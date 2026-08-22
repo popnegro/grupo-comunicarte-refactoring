@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   FileText,
   MonitorSmartphone,
@@ -7,27 +7,69 @@ import {
   MapPin,
   Sparkles,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
 import { Badge } from '../../components/ui/Badge';
-import { getInventoryStats } from '../../lib/dashboard-utils';
-import { getStoredLeads, subscribeToLeads, DashboardLead } from '../../lib/dashboard-store';
 
 export default function Dashboard() {
-  const stats = useMemo(() => getInventoryStats(), []);
-  const [leads, setLeads] = useState<DashboardLead[]>([]);
+  const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    total: 0,
+    available: 0,
+    reserved: 0,
+    inactive: 0,
+    mendozaTotal: 0,
+    mendozaAvailable: 0,
+    buenosAiresTotal: 0,
+    buenosAiresAvailable: 0,
+    tradicionalCount: 0,
+    ledCount: 0,
+    movilCount: 0,
+    totalRequests: 0,
+    pendingRequests: 0,
+  });
+  const [requests, setRequests] = useState<any[]>([]);
 
   useEffect(() => {
-    setLeads(getStoredLeads());
-    const unsubscribe = subscribeToLeads((updatedLeads) => {
-      setLeads(updatedLeads);
-    });
-    return () => unsubscribe();
-  }, []);
+    const token = localStorage.getItem('admin_token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
 
-  const pendingLeads = leads.filter((l) => l.status === 'nuevo').length;
+    async function fetchAdminData() {
+      try {
+        const headers = { Authorization: `Bearer ${token}` };
+        const [statsRes, reqsRes] = await Promise.all([
+          fetch('/api/admin/stats', { headers }),
+          fetch('/api/admin/requests', { headers }),
+        ]);
+
+        if (statsRes.status === 401 || reqsRes.status === 401) {
+          localStorage.removeItem('admin_token');
+          navigate('/login');
+          return;
+        }
+
+        const statsJson = await statsRes.json();
+        const reqsJson = await reqsRes.json();
+
+        if (statsJson.status === 'success') {
+          setStats(statsJson.data);
+        }
+        if (reqsJson.status === 'success') {
+          setRequests(reqsJson.data);
+        }
+      } catch (err) {
+        console.error('Error fetching admin dashboard data:', err);
+      }
+    }
+
+    fetchAdminData();
+  }, [navigate]);
+
   const occupancyRate = stats.total > 0 ? Math.round((stats.reserved / stats.total) * 100) : 0;
-  const recentLeads = leads.slice(0, 4);
+  const recentRequests = requests.slice(0, 4);
 
   return (
     <DashboardShell>
@@ -124,14 +166,14 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-gray-900 tracking-tight">{leads.length}</span>
+              <span className="text-3xl font-extrabold text-gray-900 tracking-tight">{requests.length}</span>
               <span className="text-xs text-gray-500 font-medium">totales</span>
             </div>
             <div className="mt-2 text-xs text-gray-500 flex items-center gap-1.5">
-              {pendingLeads > 0 ? (
+              {stats.pendingRequests > 0 ? (
                 <>
                   <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
-                  <span className="text-emerald-700 font-bold">{pendingLeads} nuevas por atender</span>
+                  <span className="text-emerald-700 font-bold">{stats.pendingRequests} nuevas por atender</span>
                 </>
               ) : (
                 <span className="text-gray-400">Al día con las respuestas</span>
@@ -324,46 +366,41 @@ export default function Dashboard() {
               to="/dashboard/mediakits"
               className="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1"
             >
-              <span>Ver todas ({leads.length})</span>
+              <span>Ver todas ({requests.length})</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
           <div className="divide-y divide-gray-100">
-            {recentLeads.map((lead) => (
+            {recentRequests.map((req: any) => (
               <div
-                key={lead.id}
+                key={req.id}
                 className="p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-gray-50/80 transition-colors"
               >
                 <div className="space-y-1 min-w-0">
                   <div className="flex items-center gap-2.5 flex-wrap">
                     <span className="font-mono text-[11px] font-bold text-gray-400">
-                      {lead.requestId}
+                      {req.requestId}
                     </span>
-                    <span className="font-bold text-sm text-gray-900">{lead.clientName}</span>
-                    {lead.company && (
-                      <span className="text-xs text-gray-500 font-medium">({lead.company})</span>
+                    <span className="font-bold text-sm text-gray-900">{req.requesterName}</span>
+                    {req.requesterCompany && (
+                      <span className="text-xs text-gray-500 font-medium">({req.requesterCompany})</span>
                     )}
-                    <LeadStatusBadge status={lead.status} />
+                    <LeadStatusBadge status={req.status} />
                   </div>
                   <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span>
-                      {lead.supportNames.length} {lead.supportNames.length === 1 ? 'soporte' : 'soportes'}:
-                    </span>
-                    <span className="text-gray-700 truncate max-w-md">
-                      {lead.supportNames.join(', ')}
-                    </span>
+                    <span>Solicitud de Media Kit</span>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
                   <span className="text-[11px] text-gray-400">
-                    {new Date(lead.createdAt).toLocaleDateString('es-AR', {
+                    {req.createdAt ? new Date(req.createdAt).toLocaleDateString('es-AR', {
                       day: '2-digit',
                       month: 'short',
                       hour: '2-digit',
                       minute: '2-digit',
-                    })}
+                    }) : ''}
                   </span>
                   <Link
                     to="/dashboard/mediakits"
@@ -375,7 +412,7 @@ export default function Dashboard() {
               </div>
             ))}
 
-            {leads.length === 0 && (
+            {requests.length === 0 && (
               <div className="p-8 text-center text-sm text-gray-500">
                 No hay solicitudes registradas todavía.
               </div>
@@ -387,12 +424,12 @@ export default function Dashboard() {
   );
 }
 
-function LeadStatusBadge({ status }: { status: DashboardLead['status'] }) {
-  if (status === 'nuevo') {
+function LeadStatusBadge({ status }: { status: string }) {
+  if (status === 'nuevo' || status === 'pending') {
     return <Badge variant="success">Nuevo</Badge>;
   }
-  if (status === 'enviado') {
-    return <Badge variant="info">Kit Enviado</Badge>;
+  if (status === 'enviado' || status === 'quoted') {
+    return <Badge variant="info">Cotizado</Badge>;
   }
   if (status === 'contactado') {
     return <Badge variant="warning">Contactado</Badge>;

@@ -9,27 +9,59 @@ import {
   ExternalLink,
   X,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
-import {
-  getStoredLeads,
-  updateLeadStatus,
-  subscribeToLeads,
-  DashboardLead,
-} from '../../lib/dashboard-store';
 
 export default function DashboardMediaKits() {
-  const [leads, setLeads] = useState<DashboardLead[]>([]);
+  const navigate = useNavigate();
+  const [leads, setLeads] = useState<any[]>([]);
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('todos');
-  const [selectedLead, setSelectedLead] = useState<DashboardLead | null>(null);
+  const [selectedLead, setSelectedLead] = useState<any | null>(null);
   const [toastMessage, setToastMessage] = useState<string>('');
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    setLeads(getStoredLeads());
-    const unsubscribe = subscribeToLeads((updatedLeads) => {
-      setLeads(updatedLeads);
-    });
+    const token = localStorage.getItem('admin_token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    async function fetchRequests() {
+      try {
+        const res = await fetch('/api/admin/requests', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.status === 401) {
+          localStorage.removeItem('admin_token');
+          navigate('/login');
+          return;
+        }
+        const json = await res.json();
+        if (json.status === 'success') {
+          // Map DB response to dashboard structure if needed
+          const mapped = json.data.map((item: any) => ({
+            id: item.id.toString(),
+            requestId: item.requestId,
+            clientName: item.requesterName,
+            email: item.requesterEmail,
+            company: item.requesterCompany || 'Particular',
+            phone: item.requesterPhone || '',
+            message: item.message || '',
+            status: item.status || 'pending',
+            supportIds: item.supportIds || [],
+            supportNames: item.supportNames || item.supportIds || [],
+            createdAt: item.createdAt || new Date().toISOString(),
+          }));
+          setLeads(mapped);
+        }
+      } catch (err) {
+        console.error('Error fetching admin requests:', err);
+      }
+    }
+
+    fetchRequests();
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -38,18 +70,35 @@ export default function DashboardMediaKits() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => {
-      unsubscribe();
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [navigate, refreshKey]);
 
-  const handleStatusChange = (leadId: string, nextStatus: DashboardLead['status']) => {
-    const updated = updateLeadStatus(leadId, nextStatus);
-    setLeads(updated);
-    if (selectedLead && selectedLead.id === leadId) {
-      setSelectedLead((prev) => (prev ? { ...prev, status: nextStatus } : null));
+  const handleStatusChange = async (requestId: string, nextStatus: string) => {
+    const token = localStorage.getItem('admin_token');
+    try {
+      const res = await fetch(`/api/admin/requests/${requestId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+
+      const json = await res.json();
+      if (!res.ok || json.status !== 'success') {
+        throw new Error(json.message || 'Error al actualizar estado');
+      }
+
+      setRefreshKey((prev) => prev + 1);
+      if (selectedLead && selectedLead.requestId === requestId) {
+        setSelectedLead((prev: any) => (prev ? { ...prev, status: nextStatus } : null));
+      }
+      showToast(`Estado actualizado exitosamente`);
+    } catch (err: any) {
+      showToast(err.message || 'Error al actualizar');
     }
-    showToast(`Estado actualizado a "${getStatusLabel(nextStatus)}"`);
   };
 
   const showToast = (msg: string) => {
@@ -68,7 +117,7 @@ export default function DashboardMediaKits() {
         lead.company.toLowerCase().includes(q) ||
         lead.email.toLowerCase().includes(q) ||
         lead.requestId.toLowerCase().includes(q) ||
-        lead.supportNames.some((s) => s.toLowerCase().includes(q));
+        lead.supportNames.some((s: string) => s.toLowerCase().includes(q));
 
       const matchStatus = statusFilter === 'todos' || lead.status === statusFilter;
 
@@ -282,7 +331,7 @@ export default function DashboardMediaKits() {
                     {/* Soportes */}
                     <td className="py-3.5 px-4 max-w-xs">
                       <div className="flex flex-wrap items-center gap-1">
-                        {lead.supportNames.slice(0, 2).map((s, idx) => (
+                        {lead.supportNames.slice(0, 2).map((s: any, idx: number) => (
                           <span
                             key={idx}
                             className="bg-gray-100 text-gray-800 text-[10px] font-semibold px-2 py-0.5 rounded-md truncate max-w-[140px]"
@@ -313,7 +362,7 @@ export default function DashboardMediaKits() {
                       <select
                         value={lead.status}
                         onChange={(e) =>
-                          handleStatusChange(lead.id, e.target.value as DashboardLead['status'])
+                          handleStatusChange(lead.id, e.target.value)
                         }
                         className={`text-xs font-bold py-1 px-2.5 rounded-lg border outline-none cursor-pointer ${
                           lead.status === 'nuevo'
@@ -364,9 +413,14 @@ export default function DashboardMediaKits() {
               {/* Modal Header */}
               <div className="flex items-start justify-between gap-3 border-b border-gray-100 pb-4">
                 <div>
-                  <span className="font-mono text-xs font-bold text-gray-400 block">
-                    {selectedLead.requestId}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-bold text-gray-400">
+                      {selectedLead.requestId}
+                    </span>
+                    <span className="bg-emerald-50 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                      {getStatusLabel(selectedLead.status)}
+                    </span>
+                  </div>
                   <h2 className="text-xl font-bold text-gray-900 mt-0.5">
                     Solicitud de {selectedLead.clientName}
                   </h2>
@@ -440,7 +494,7 @@ export default function DashboardMediaKits() {
                 </div>
 
                 <div className="divide-y divide-gray-100 border border-gray-200 rounded-xl overflow-hidden text-xs">
-                  {selectedLead.supportNames.map((name, idx) => (
+                  {selectedLead.supportNames.map((name: any, idx: number) => (
                     <div
                       key={idx}
                       className="p-3 bg-white flex items-center justify-between gap-3 hover:bg-gray-50 transition-colors"
@@ -520,15 +574,20 @@ export default function DashboardMediaKits() {
   );
 }
 
-function getStatusLabel(status: DashboardLead['status']): string {
+function getStatusLabel(status: string): string {
   switch (status) {
     case 'nuevo':
+    case 'pending':
       return 'Nuevo';
     case 'contactado':
       return 'Contactado';
     case 'enviado':
+    case 'quoted':
       return 'Kit Enviado';
     case 'cerrado':
+    case 'closed':
       return 'Cerrado';
+    default:
+      return status;
   }
 }

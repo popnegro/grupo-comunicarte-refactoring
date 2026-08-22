@@ -9,26 +9,19 @@ import {
   List,
   X,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
 import { Button } from '../../components/ui/Button';
 import { Input, Label } from '../../components/ui/Input';
 import {
-  listInventory,
-  getAddress,
-} from '../../lib/dashboard-utils';
-import {
-  setInventoryOverride,
-} from '../../lib/dashboard-store';
-import {
-  getDisponibilidad,
   type Disponibilidad,
-  type InventoryItem,
   type Plaza,
   type TipoSoporte,
 } from '../../types';
 
 export default function DashboardSoportes() {
+  const navigate = useNavigate();
+  const [supports, setSupports] = useState<any[]>([]);
   const [query, setQuery] = useState('');
   const [availability, setAvailability] = useState<'todos' | Disponibilidad>('todos');
   const [plaza, setPlaza] = useState<'todas' | Plaza>('todas');
@@ -38,7 +31,7 @@ export default function DashboardSoportes() {
   const [toastMessage, setToastMessage] = useState('');
 
   // Selected Item for Detail Modal
-  const [selectedSupport, setSelectedSupport] = useState<InventoryItem | null>(null);
+  const [selectedSupport, setSelectedSupport] = useState<any | null>(null);
 
   // New Support Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -49,12 +42,48 @@ export default function DashboardSoportes() {
   const [newFormat, setNewFormat] = useState('6.00 x 3.00 mts');
   const [newSuccessMsg, setNewSuccessMsg] = useState('');
 
+  const getDisponibilidad = (item: any): Disponibilidad => {
+    return item.disponibilidad ?? 'disponible';
+  };
+
+  const getAddress = (item: any): string => {
+    return item.address || 'Ubicación operativa';
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem('admin_token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    async function fetchSupports() {
+      try {
+        const res = await fetch('/api/admin/supports', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.status === 401) {
+          localStorage.removeItem('admin_token');
+          navigate('/login');
+          return;
+        }
+        const json = await res.json();
+        if (json.status === 'success') {
+          setSupports(json.data);
+        }
+      } catch (err) {
+        console.error('Error fetching admin supports:', err);
+      }
+    }
+
+    fetchSupports();
+  }, [navigate, refreshKey]);
+
   // Close modals on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setSelectedSupport(null);
-        setIsAddModalOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -68,31 +97,55 @@ export default function DashboardSoportes() {
     }, 2500);
   };
 
-  // Items derived from store
+  // Filtered items
   const items = useMemo(() => {
-    return listInventory({
-      query,
-      availability,
-      plaza,
-      tipo,
-    });
-  }, [query, availability, plaza, tipo, refreshKey]);
+    const q = query.trim().toLowerCase();
+    return supports.filter((item) => {
+      const matchQuery =
+        !q ||
+        item.name.toLowerCase().includes(q) ||
+        item.canonicalId.toLowerCase().includes(q) ||
+        item.ciudad.toLowerCase().includes(q) ||
+        (item.address && item.address.toLowerCase().includes(q));
 
-  const handleToggleAvailability = (item: InventoryItem) => {
-    const current = getDisponibilidad(item);
-    const next: Disponibilidad = current === 'disponible' ? 'reservado' : 'disponible';
-    setInventoryOverride(item.canonical_id, next);
-    setRefreshKey((prev) => prev + 1);
-    showToast(`Soporte "${item.name}" marcado como ${next === 'disponible' ? 'Disponible' : 'Reservado'}`);
+      const matchAvail = availability === 'todos' || item.disponibilidad === availability;
+      const matchPlaza = plaza === 'todas' || item.ciudad.toLowerCase() === (plaza === 'mendoza' ? 'mendoza' : 'buenos aires');
+      const matchTipo = tipo === 'todos' || item.tipoSoporte === tipo;
+
+      return matchQuery && matchAvail && matchPlaza && matchTipo;
+    });
+  }, [supports, query, availability, plaza, tipo]);
+
+  const handleToggleAvailability = async (item: any) => {
+    const token = localStorage.getItem('admin_token');
+    const current = item.disponibilidad;
+    const next = current === 'disponible' ? 'reservado' : 'disponible';
+
+    try {
+      const res = await fetch(`/api/admin/supports/${item.canonicalId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ disponibilidad: next }),
+      });
+
+      const json = await res.json();
+      if (!res.ok || json.status !== 'success') {
+        throw new Error(json.message || 'Error al actualizar disponibilidad');
+      }
+
+      setRefreshKey((prev) => prev + 1);
+      showToast(`Soporte "${item.name}" marcado como ${next === 'disponible' ? 'Disponible' : 'Reservado'}`);
+    } catch (err: any) {
+      showToast(err.message || 'Error al actualizar');
+    }
   };
 
   const handleCreateSupport = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newName.trim() || !newAddress.trim()) return;
-
-    // Simulate creation in override store
-    const generatedId = `${newPlaza === 'mendoza' ? 'mza' : 'bue'}-${newTipo === 'led' ? 'led' : newTipo === 'led_movil' ? 'mob' : 'trad'}-${Date.now().toString().slice(-4)}`;
-    setInventoryOverride(generatedId, 'disponible');
 
     setNewSuccessMsg(`Soporte "${newName}" agregado exitosamente al catálogo.`);
     setTimeout(() => {
@@ -453,7 +506,7 @@ export default function DashboardSoportes() {
                   <button
                     onClick={() => {
                       handleToggleAvailability(selectedSupport);
-                      setSelectedSupport((prev) =>
+                      setSelectedSupport((prev: any) =>
                         prev
                           ? {
                               ...prev,

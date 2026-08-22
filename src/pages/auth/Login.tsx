@@ -1,19 +1,40 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogIn } from 'lucide-react';
+import { LogIn, AlertCircle } from 'lucide-react';
 import { buttonStyles } from '../../components/ui/Button';
 
 export default function Login() {
   const navigate = useNavigate();
+  const [username, setUsername] = useState('admin');
+  const [password, setPassword] = useState('comunicarte2026');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Fake login
-    setTimeout(() => {
+    setError(null);
+
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.status !== 'success') {
+        throw new Error(data.message || 'Credenciales inválidas');
+      }
+
+      localStorage.setItem('admin_token', data.token);
       navigate('/dashboard');
-    }, 800);
+    } catch (err: any) {
+      setError(err.message || 'Error al iniciar sesión');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -25,22 +46,31 @@ export default function Login() {
             Grupo Comunicarte
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Ingresa a tu cuenta para gestionar el inventario.
+            Ingresa a tu cuenta para gestionar el inventario y solicitudes.
           </p>
         </div>
 
         <div className="rounded-3xl border border-border bg-surface p-8 shadow-sm">
+          {error && (
+            <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Correo electrónico
+              <label htmlFor="username" className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Usuario / Correo
               </label>
               <input
-                id="email"
-                type="email"
+                id="username"
+                type="text"
                 required
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="mt-2 h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm font-medium outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/10"
-                placeholder="admin@grupocomunicarte.com"
+                placeholder="admin"
               />
             </div>
             
@@ -52,6 +82,8 @@ export default function Login() {
                 id="password"
                 type="password"
                 required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="mt-2 h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm font-medium outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/10"
                 placeholder="••••••••"
               />
