@@ -4,7 +4,11 @@ import * as schema from './schema';
 import { fixedLocations, mobileRoutes } from '../data/inventory';
 import { eq } from 'drizzle-orm';
 
-const connectionString = process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/grupo_comunicarte';
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  throw new Error('FATAL: DATABASE_URL environment variable is missing. A valid PostgreSQL connection string is required.');
+}
 
 const pool = new Pool({
   connectionString,
