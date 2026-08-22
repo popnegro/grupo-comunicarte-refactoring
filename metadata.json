@@ -1,0 +1,8 @@
+{
+  "name": "Remix Grupo Comunicarte",
+  "description": "Plataforma comercial MVP de espacios publicitarios, incluyendo mapa de inventario.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
