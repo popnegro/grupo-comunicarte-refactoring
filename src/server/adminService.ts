@@ -31,17 +31,17 @@ export async function getAdminStats() {
   const reserved = allSupports.filter((s) => s.disponibilidad === 'reservado').length;
   const inactive = allSupports.filter((s) => (s as any).disponibilidad === 'inactivo').length;
 
-  const mendozaSupports = allSupports.filter((s) => s.ciudad.toLowerCase() === 'mendoza');
+  const mendozaSupports = allSupports.filter((s) => (s.ciudad || '').toLowerCase() === 'mendoza');
   const mendozaTotal = mendozaSupports.length;
   const mendozaAvailable = mendozaSupports.filter((s) => s.disponibilidad === 'disponible').length;
 
-  const buenosAiresSupports = allSupports.filter((s) => s.ciudad.toLowerCase() === 'buenos aires');
+  const buenosAiresSupports = allSupports.filter((s) => (s.ciudad || '').toLowerCase() === 'buenos aires');
   const buenosAiresTotal = buenosAiresSupports.length;
   const buenosAiresAvailable = buenosAiresSupports.filter((s) => s.disponibilidad === 'disponible').length;
 
-  const tradicionalCount = allSupports.filter((s) => s.tipo_soporte === 'tradicional').length;
-  const ledCount = allSupports.filter((s) => s.tipo_soporte === 'led').length;
-  const movilCount = allSupports.filter((s) => s.tipo_soporte === 'led_movil').length;
+  const tradicionalCount = allSupports.filter((s) => (s.tipo_soporte || '') === 'tradicional').length;
+  const ledCount = allSupports.filter((s) => (s.tipo_soporte || '') === 'led').length;
+  const movilCount = allSupports.filter((s) => (s.tipo_soporte || '') === 'led_movil').length;
 
   const totalRequests = allRequests.length;
   const pendingRequests = allRequests.filter((r: any) => r.status === 'pending' || r.status === 'nuevo').length;
