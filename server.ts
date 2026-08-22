@@ -1,7 +1,9 @@
 import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
-import { handleMediakitRequest, getAllMediakitRequests } from './src/server/mediakitService';
+import { initDatabase } from './src/db';
+import { getAllSupportsFromDB, getSupportByIdFromDB } from './src/server/supportsService';
+import { handleMediakitRequest, getAllMediakitRequestsFromDB } from './src/server/mediakitService';
 
 async function startServer() {
   const app = express();
@@ -9,20 +11,62 @@ async function startServer() {
 
   app.use(express.json());
 
+  // Initialize Database & Idempotent Seed
+  try {
+    await initDatabase();
+  } catch (err) {
+    console.error('Failed to initialize database during startup:', err);
+  }
+
   // API health check
   app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok' });
   });
 
-  // API routes
-  app.post('/api/mediakit/request', (req, res) => {
-    const result = handleMediakitRequest(req.body);
-    res.status(result.statusCode).json(result.response);
+  // Supports API routes (Phase 3)
+  app.get('/api/supports', async (_req, res) => {
+    try {
+      const supports = await getAllSupportsFromDB();
+      res.status(200).json({ status: 'success', data: supports });
+    } catch (err: any) {
+      console.error('Error fetching supports:', err);
+      res.status(500).json({ status: 'error', message: 'Error interno al obtener el inventario de soportes.' });
+    }
   });
 
-  app.get('/api/mediakit/requests', (_req, res) => {
-    const records = getAllMediakitRequests();
-    res.status(200).json({ status: 'success', data: records });
+  app.get('/api/supports/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const support = await getSupportByIdFromDB(id);
+      if (!support) {
+        return res.status(404).json({ status: 'error', message: `Soporte con ID '${id}' no encontrado.` });
+      }
+      res.status(200).json({ status: 'success', data: support });
+    } catch (err: any) {
+      console.error(`Error fetching support ${req.params.id}:`, err);
+      res.status(500).json({ status: 'error', message: 'Error interno al obtener el soporte.' });
+    }
+  });
+
+  // MediaKit API routes (Phase 8, 10)
+  app.post('/api/mediakit/request', async (req, res) => {
+    try {
+      const result = await handleMediakitRequest(req.body);
+      res.status(result.statusCode).json(result.response);
+    } catch (err: any) {
+      console.error('Error in /api/mediakit/request:', err);
+      res.status(500).json({ status: 'error', message: 'Error interno del servidor.' });
+    }
+  });
+
+  app.get('/api/mediakit/requests', async (_req, res) => {
+    try {
+      const records = await getAllMediakitRequestsFromDB();
+      res.status(200).json({ status: 'success', data: records });
+    } catch (err: any) {
+      console.error('Error fetching mediakit requests:', err);
+      res.status(500).json({ status: 'error', message: 'Error interno al obtener solicitudes.' });
+    }
   });
 
   // Vite middleware for development / static serving for production
@@ -48,4 +92,4 @@ async function startServer() {
 startServer().catch((err) => {
   console.error('Failed to start server:', err);
   process.exit(1);
-});
+} );

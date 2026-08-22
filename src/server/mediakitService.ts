@@ -1,5 +1,7 @@
-import { fixedLocations, mobileRoutes } from '../data/inventory';
-import { getDisponibilidad, InventoryItem } from '../types';
+import { db, pool } from '../db';
+import { mediakitRequests, mediakitRequestItems } from '../db/schema';
+import { validateSupportsForRequest, getSupportByIdFromDB } from './supportsService';
+import { eq, desc } from 'drizzle-orm';
 
 export interface LeadPayload {
   name: string;
@@ -33,13 +35,10 @@ export interface MediakitRecord {
   createdAt: string;
 }
 
-// In-memory lead repository for PMV
-const leadsStore: MediakitRecord[] = [];
-
 /**
- * Validates lead request and processes submission against inventory rules.
+ * Handles Media Kit request submission with DB transaction and validation.
  */
-export function handleMediakitRequest(body: any): {
+export async function handleMediakitRequest(body: any): Promise<{
   statusCode: number;
   response: {
     status: 'success' | 'error';
@@ -47,7 +46,7 @@ export function handleMediakitRequest(body: any): {
     message: string;
     data?: any;
   };
-} {
+}> {
   try {
     if (!body || typeof body !== 'object') {
       return {
@@ -95,85 +94,61 @@ export function handleMediakitRequest(body: any): {
       };
     }
 
-    // 2. Validate selectedIds
-    if (!Array.isArray(selectedIds) || selectedIds.length === 0) {
+    // 2. Validate selectedIds and availability against Database
+    const validation = await validateSupportsForRequest(selectedIds);
+    if (!validation.valid) {
       return {
-        statusCode: 400,
+        statusCode: validation.statusCode || 400,
         response: {
           status: 'error',
-          message: 'Debes seleccionar al menos un soporte para solicitar el Media Kit.',
+          message: validation.message || 'Error de validación de soportes.',
         },
       };
     }
 
-    // 3. Security Rule: Verify against real inventory and exclude 'reservado'
-    const allInventory: InventoryItem[] = [...fixedLocations, ...mobileRoutes];
-    const inventoryMap = new Map<string, InventoryItem>();
-    for (const item of allInventory) {
-      inventoryMap.set(item.canonical_id, item);
-    }
-
-    const matchedSupports: InventoryItem[] = [];
-    for (const id of selectedIds) {
-      if (typeof id !== 'string') {
-        return {
-          statusCode: 400,
-          response: {
-            status: 'error',
-            message: `Identificador de soporte inválido: ${String(id)}`,
-          },
-        };
-      }
-
-      const item = inventoryMap.get(id);
-      if (!item) {
-        return {
-          statusCode: 400,
-          response: {
-            status: 'error',
-            message: `El soporte con ID '${id}' no existe en el catálogo.`,
-          },
-        };
-      }
-
-      if (getDisponibilidad(item) === 'reservado') {
-        return {
-          statusCode: 400,
-          response: {
-            status: 'error',
-            message: `El soporte '${item.name}' está actualmente reservado y no puede incluirse en el Media Kit.`,
-          },
-        };
-      }
-
-      matchedSupports.push(item);
-    }
-
-    // 4. Generate unique, formatted Request ID
+    // 3. Generate unique, formatted Request ID (REQ-2026-XXXX-XXXX)
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
     const dateSegment = new Date().getFullYear();
-    const requestId = `REQ-${dateSegment}-${String(leadsStore.length + 1).padStart(4, '0')}-${randomSuffix}`;
+    // Count existing requests to get sequence number
+    const existingReqs = await db.select().from(mediakitRequests);
+    const seqNum = existingReqs.length + 1;
+    const requestId = `REQ-${dateSegment}-${String(seqNum).padStart(4, '0')}-${randomSuffix}`;
 
-    const newRecord: MediakitRecord = {
-      requestId,
-      lead: {
-        name,
-        email,
-        company: typeof lead.company === 'string' ? lead.company.trim() : '',
-        phone: typeof lead.phone === 'string' ? lead.phone.trim() : '',
-        message: typeof lead.message === 'string' ? lead.message.trim() : '',
-      },
-      selectedIds,
-      selectedSupports: matchedSupports.map((s) => ({
-        canonical_id: s.canonical_id,
-        name: s.name,
-        ciudad: s.ciudad,
-        tipo_soporte: s.tipo_soporte,
-      })),
-      createdAt: new Date().toISOString(),
-    };
+    const createdAtStr = new Date().toISOString();
 
-    leadsStore.push(newRecord);
+    // 4. Atomic Transaction: Insert Request and Items
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      await client.query(
+        `INSERT INTO mediakit_requests (request_id, requester_name, requester_email, requester_company, requester_phone, message, status)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [
+          requestId,
+          name,
+          email,
+          typeof lead.company === 'string' ? lead.company.trim() : '',
+          typeof lead.phone === 'string' ? lead.phone.trim() : '',
+          typeof lead.message === 'string' ? lead.message.trim() : '',
+          'pending',
+        ]
+      );
+
+      for (const sId of selectedIds) {
+        await client.query(
+          `INSERT INTO mediakit_request_items (request_id, support_id) VALUES ($1, $2)`,
+          [requestId, sId]
+        );
+      }
+
+      await client.query('COMMIT');
+    } catch (txErr) {
+      await client.query('ROLLBACK');
+      throw txErr;
+    } finally {
+      client.release();
+    }
 
     return {
       statusCode: 201,
@@ -184,7 +159,7 @@ export function handleMediakitRequest(body: any): {
         data: {
           requestId,
           selectedCount: selectedIds.length,
-          createdAt: newRecord.createdAt,
+          createdAt: createdAtStr,
         },
       },
     };
@@ -200,6 +175,45 @@ export function handleMediakitRequest(body: any): {
   }
 }
 
-export function getAllMediakitRequests(): MediakitRecord[] {
-  return [...leadsStore];
+export async function getAllMediakitRequestsFromDB(): Promise<MediakitRecord[]> {
+  const reqRows = await db.select().from(mediakitRequests).orderBy(desc(mediakitRequests.createdAt));
+  const results: MediakitRecord[] = [];
+
+  for (const req of reqRows) {
+    const itemRows = await db
+      .select()
+      .from(mediakitRequestItems)
+      .where(eq(mediakitRequestItems.requestId, req.requestId));
+
+    const selectedIds = itemRows.map((i) => i.supportId);
+    const selectedSupports = [];
+
+    for (const sId of selectedIds) {
+      const sup = await getSupportByIdFromDB(sId);
+      if (sup) {
+        selectedSupports.push({
+          canonical_id: sup.canonical_id,
+          name: sup.name,
+          ciudad: sup.ciudad,
+          tipo_soporte: sup.tipo_soporte,
+        });
+      }
+    }
+
+    results.push({
+      requestId: req.requestId,
+      lead: {
+        name: req.requesterName,
+        email: req.requesterEmail,
+        company: req.requesterCompany || '',
+        phone: req.requesterPhone || '',
+        message: req.message || '',
+      },
+      selectedIds,
+      selectedSupports,
+      createdAt: req.createdAt ? new Date(req.createdAt).toISOString() : new Date().toISOString(),
+    });
+  }
+
+  return results;
 }

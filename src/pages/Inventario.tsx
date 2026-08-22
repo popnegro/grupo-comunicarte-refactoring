@@ -4,19 +4,19 @@ import InventoryMap from '../components/map/InventoryMap';
 import { MediakitPanel } from '../components/map/MediakitPanel';
 import { StickySelectionBar } from '../components/map/StickySelectionBar';
 import { SelectionToast } from '../components/map/SelectionToast';
-import { fixedLocations, mobileRoutes } from '../data/inventory';
+import { useInventory } from '../hooks/useInventory';
 import { Plaza, TipoSoporte, Disponibilidad, InventoryItem } from '../types';
 import { MapFilterPanel } from '../components/map/MapFilterPanel';
-import { SlidersHorizontal, X } from 'lucide-react';
+import { SlidersHorizontal, X, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useSelection } from '../context/SelectionContext';
+import { Button } from '../components/ui/Button';
 
 type DisponibilidadFilter = Disponibilidad | 'todos';
 
-const allItems: InventoryItem[] = [...fixedLocations, ...mobileRoutes];
-
 export default function Inventario() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { items: allItems, fixedLocations, mobileRoutes, loading, error, refetch } = useInventory();
 
   const plazaParam = searchParams.get('plaza') as Plaza | 'todos' | null;
   const tipoParam = searchParams.get('tipo') as TipoSoporte | 'todos' | null;
@@ -111,6 +111,37 @@ export default function Inventario() {
 
   const selectedItems = getSelectedItems(allItems);
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex h-[calc(100vh-80px)] items-center justify-center bg-gray-50">
+        <div className="text-center flex flex-col items-center gap-4">
+          <Loader2 className="w-10 h-10 animate-spin text-black" />
+          <p className="text-sm font-semibold text-gray-600">Cargando inventario comercial desde base de datos...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state (No silent mock fallback as per Phase 12)
+  if (error) {
+    return (
+      <div className="flex h-[calc(100vh-80px)] items-center justify-center bg-gray-50 px-4">
+        <div className="bg-white p-8 rounded-2xl shadow-lg border border-red-100 max-w-md w-full text-center">
+          <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-6 h-6" />
+          </div>
+          <h2 className="text-lg font-bold text-gray-900 mb-2">Error de conexión con la Base de Datos</h2>
+          <p className="text-sm text-gray-600 mb-6">{error}</p>
+          <Button onClick={refetch} className="w-full flex items-center justify-center gap-2">
+            <RefreshCw className="w-4 h-4" />
+            Reintentar conexión
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-[calc(100vh-80px)] relative overflow-hidden">
       {/* Mobile Filter Toggle Button */}
@@ -175,13 +206,13 @@ export default function Inventario() {
           onResetToPlaza={selectedPlaza !== 'todos' ? handleResetToPlaza : undefined}
         />
 
-        {/* Global Sticky Selection Bar (Decoupled & Always visible when items selected) */}
+        {/* Global Sticky Selection Bar */}
         <StickySelectionBar
           onOpenMediakit={handleOpenMediakit}
           currentPlaza={selectedPlaza}
         />
 
-        {/* Lightweight Selection Toast Feedback (H-02, H-05) */}
+        {/* Lightweight Selection Toast Feedback */}
         <SelectionToast />
 
         {/* Mediakit Request Panel Modal */}
