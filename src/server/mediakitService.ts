@@ -17,7 +17,16 @@ export interface MediakitRequestBody {
 }
 
 export interface MediakitRecord {
+  id: string;
   requestId: string;
+  requesterName: string;
+  requesterEmail: string;
+  requesterCompany: string;
+  requesterPhone: string;
+  message: string;
+  status: string;
+  supportIds: string[];
+  supportNames: string[];
   lead: {
     name: string;
     email: string;
@@ -213,18 +222,34 @@ export async function getAllMediakitRequestsFromDB(): Promise<MediakitRecord[]> 
       }
     }
 
+    const requesterCompany = req.requesterCompany || '';
+    const requesterPhone = req.requesterPhone || '';
+    const message = req.message || '';
+    const status = req.status || 'pending';
+    const supportNames = selectedSupports.map((support) => support.name);
+    const createdAt = req.createdAt ? new Date(req.createdAt).toISOString() : new Date().toISOString();
+
     results.push({
+      id: req.requestId,
       requestId: req.requestId,
+      requesterName: req.requesterName,
+      requesterEmail: req.requesterEmail,
+      requesterCompany: requesterCompany,
+      requesterPhone: requesterPhone,
+      message,
+      status,
+      supportIds: selectedIds,
+      supportNames,
       lead: {
         name: req.requesterName,
         email: req.requesterEmail,
-        company: req.requesterCompany || '',
-        phone: req.requesterPhone || '',
-        message: req.message || '',
+        company: requesterCompany,
+        phone: requesterPhone,
+        message,
       },
       selectedIds,
       selectedSupports,
-      createdAt: req.createdAt ? new Date(req.createdAt).toISOString() : new Date().toISOString(),
+      createdAt,
     });
   }
 
