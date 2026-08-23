@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { CheckCircle2, Edit3, ExternalLink, Eye, Plus, RefreshCw, Save, Search, Trash2, X } from 'lucide-react';
+import { CheckCircle2, Edit3, ExternalLink, Plus, RefreshCw, Save, Search, Trash2, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
 import { Button } from '../../components/ui/Button';
@@ -345,6 +345,8 @@ export default function DashboardSoportes() {
   const [plaza, setPlaza] = useState<'todas' | Plaza>('todas');
   const [tipo, setTipo] = useState<'todos' | TipoSoporte>('todos');
   const [activeFilter, setActiveFilter] = useState<'todos' | 'activos' | 'inactivos'>('todos');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [refreshKey, setRefreshKey] = useState(0);
   const [toastMessage, setToastMessage] = useState('');
   const [toastTone, setToastTone] = useState<'ok' | 'error'>('ok');
@@ -409,6 +411,23 @@ export default function DashboardSoportes() {
       return matchQuery && matchAvail && matchPlaza && matchTipo && matchActive;
     });
   }, [supports, query, availability, plaza, tipo, activeFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+
+  const paginatedItems = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return items.slice(start, start + pageSize);
+  }, [items, page, pageSize]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [query, availability, plaza, tipo, activeFilter, pageSize]);
+
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, totalPages]);
 
   async function openEditor(mode: Mode, support?: InventoryItem | null) {
     setEditorMode(mode);
@@ -492,6 +511,70 @@ export default function DashboardSoportes() {
       showToast(next ? 'Soporte reactivado.' : 'Soporte desactivado.');
     } catch (err: any) {
       showToast(err.message || 'Error al cambiar el estado', 'error');
+    }
+  }
+
+  async function duplicateSupport(item: any) {
+    try {
+      const detailRes = await fetch(`/api/admin/supports/${item.canonical_id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const detailJson = await detailRes.json();
+
+      if (!detailRes.ok || detailJson.status !== 'success') {
+        throw new Error(detailJson.message || 'No se pudo cargar el soporte para duplicar.');
+      }
+
+      const source = detailJson.data;
+
+      const payload = {
+        name: `${source.name || 'Soporte'} - Copia`,
+        ciudad: source.ciudad,
+        family: source.family,
+        tipo_soporte: source.tipo_soporte,
+        active: true,
+        disponibilidad: 'disponible',
+        availableFrom: null,
+        isFeatured: false,
+        lat: source.lat ?? null,
+        lng: source.lng ?? null,
+        address: source.address || '',
+        description: source.description || '',
+        characteristics: source.characteristics || '',
+        mapa_url: source.mapa_url || '',
+        imageUrls: Array.isArray(source.imageUrls) ? source.imageUrls : [],
+        technical: source.technical || {},
+        pricing: source.pricing || {},
+        ...(source.family === 'led_mobile'
+          ? {
+              route: {
+                ...(source.route || {}),
+                routePath: Array.isArray(source.routePath) ? source.routePath : [],
+                waypoints: Array.isArray(source.waypoints) ? source.waypoints : [],
+              },
+            }
+          : {}),
+      };
+
+      const res = await fetch('/api/admin/supports', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok || json.status !== 'success') {
+        throw new Error(json.message || 'No se pudo duplicar el soporte.');
+      }
+
+      setRefreshKey((v) => v + 1);
+      showToast('Soporte duplicado correctamente.');
+    } catch (err: any) {
+      showToast(err.message || 'Error al duplicar soporte.', 'error');
     }
   }
 
@@ -628,11 +711,26 @@ export default function DashboardSoportes() {
               />
             </div>
 
-            <select value={plaza} onChange={(e) => setPlaza(e.target.value as typeof plaza)} className="h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700">
-              <option value="todas">Todas las plazas</option>
-              <option value="mendoza">Mendoza</option>
-              <option value="buenos-aires">Buenos Aires</option>
-            </select>
+            <div className="inline-flex items-center rounded-lg border border-gray-200 bg-gray-50 p-1">
+              {[
+                ['todas', 'Todas'],
+                ['mendoza', 'Mendoza'],
+                ['buenos-aires', 'Buenos Aires'],
+              ].map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setPlaza(value as typeof plaza)}
+                  className={`rounded-md px-3 py-2 text-xs font-bold transition ${
+                    plaza === value
+                      ? 'bg-gray-900 text-white shadow-2xs'
+                      : 'text-gray-600 hover:bg-white hover:text-gray-900'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
 
             <select value={tipo} onChange={(e) => setTipo(e.target.value as typeof tipo)} className="h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700">
               <option value="todos">Todos los formatos</option>
@@ -692,6 +790,48 @@ export default function DashboardSoportes() {
           </div>
         </div>
 
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-xs text-gray-500">
+          <div className="flex items-center gap-2">
+            <span>Mostrar</span>
+            <select
+              value={pageSize}
+              onChange={(e) => setPageSize(Number(e.target.value))}
+              className="h-9 rounded-lg border border-gray-200 bg-white px-2 font-semibold text-gray-700"
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+            <span>por página</span>
+            <span className="font-semibold text-gray-900">
+              {items.length === 0 ? 0 : (page - 1) * pageSize + 1}–{Math.min(page * pageSize, items.length)} de {items.length}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              disabled={page <= 1}
+              onClick={() => setPage((value) => Math.max(1, value - 1))}
+              className="rounded-lg border border-gray-200 bg-white px-3 py-2 font-bold text-gray-700 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Anterior
+            </button>
+            <span className="px-2 font-bold text-gray-700">
+              {page} / {totalPages}
+            </span>
+            <button
+              type="button"
+              disabled={page >= totalPages}
+              onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
+              className="rounded-lg border border-gray-200 bg-white px-3 py-2 font-bold text-gray-700 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+
         <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
@@ -704,7 +844,7 @@ export default function DashboardSoportes() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {items.map((item: any) => {
+                {paginatedItems.map((item: any) => {
                   const isActive = item.active !== false;
                   const disp = item.disponibilidad || 'disponible';
                   return (
@@ -717,7 +857,7 @@ export default function DashboardSoportes() {
                         <div className="font-semibold text-gray-700">{item.ciudad === 'mendoza' ? 'Mendoza' : 'Buenos Aires'}</div>
                         <div className="text-[11px] text-gray-500 capitalize">{item.tipo_soporte?.replace('_', ' ')}</div>
                       </td>
-                      <td className="py-3.5 px-4 space-y-2">
+                      <td className="py-3.5 px-4">
                         <button
                           type="button"
                           onClick={() => toggleAvailability(item)}
@@ -728,29 +868,37 @@ export default function DashboardSoportes() {
                           <span className={`w-2 h-2 rounded-full ${disp === 'disponible' ? 'bg-emerald-600' : 'bg-amber-600'}`} />
                           {disp === 'disponible' ? 'Disponible' : 'Reservado'}
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => toggleActive(item)}
-                          className={`block text-[11px] font-bold underline ${isActive ? 'text-gray-600' : 'text-emerald-700'}`}
-                        >
-                          {isActive ? 'Desactivar' : 'Reactivar'}
-                        </button>
+                        {!isActive && (
+                          <div className="mt-1 text-[10px] font-semibold text-gray-400">
+                            Archivado
+                          </div>
+                        )}
                       </td>
                       <td className="py-3.5 px-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
                             type="button"
                             onClick={() => openEditor('edit', item)}
-                            className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100"
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-gray-700 hover:border-gray-300 hover:bg-gray-50"
                           >
-                            <Eye className="w-4 h-4" />
+                            <Edit3 className="w-3.5 h-3.5" />
+                            Editar
                           </button>
-                          <Link
-                            to={`/inventario?soporte=${encodeURIComponent(item.canonical_id)}`}
-                            className="p-1.5 rounded-lg text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50"
+                          <button
+                            type="button"
+                            onClick={() => duplicateSupport(item)}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-gray-700 hover:border-gray-300 hover:bg-gray-50"
                           >
-                            <ExternalLink className="w-4 h-4" />
-                          </Link>
+                            Duplicar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => toggleActive(item)}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-red-700 hover:border-red-300 hover:bg-red-50"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Archivar
+                          </button>
                         </div>
                       </td>
                     </tr>
