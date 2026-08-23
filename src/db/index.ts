@@ -30,6 +30,8 @@ export async function initDatabase() {
         name TEXT,
         ciudad TEXT,
         tipo_soporte TEXT,
+        family TEXT DEFAULT 'traditional',
+        active BOOLEAN DEFAULT TRUE,
         lat NUMERIC,
         lng NUMERIC,
         address TEXT,
@@ -48,6 +50,8 @@ export async function initDatabase() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
+      ALTER TABLE supports ADD COLUMN IF NOT EXISTS family TEXT DEFAULT 'traditional';
+      ALTER TABLE supports ADD COLUMN IF NOT EXISTS active BOOLEAN DEFAULT TRUE;
       ALTER TABLE supports DROP COLUMN IF EXISTS data;
 
       CREATE SEQUENCE IF NOT EXISTS supports_id_seq;
@@ -55,6 +59,111 @@ export async function initDatabase() {
       ALTER SEQUENCE supports_id_seq OWNED BY supports.id;
 
       CREATE UNIQUE INDEX IF NOT EXISTS idx_supports_canonical_id ON supports(canonical_id);
+
+      CREATE TABLE IF NOT EXISTS support_locations (
+        support_canonical_id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        ciudad TEXT NOT NULL,
+        family TEXT NOT NULL,
+        category TEXT NOT NULL,
+        lat NUMERIC,
+        lng NUMERIC,
+        address TEXT,
+        mapa_url TEXT,
+        availability TEXT NOT NULL DEFAULT 'disponible',
+        available_from TEXT,
+        active BOOLEAN NOT NULL DEFAULT TRUE,
+        is_featured BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS support_faces (
+        id SERIAL PRIMARY KEY,
+        support_canonical_id TEXT NOT NULL,
+        face_key TEXT NOT NULL,
+        label TEXT NOT NULL,
+        side TEXT,
+        width_meters NUMERIC,
+        height_meters NUMERIC,
+        width_pixels INTEGER,
+        height_pixels INTEGER,
+        substrate TEXT,
+        notes TEXT,
+        active BOOLEAN NOT NULL DEFAULT TRUE,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        metadata JSONB,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS support_technical (
+        support_canonical_id TEXT PRIMARY KEY,
+        summary TEXT,
+        measures TEXT,
+        resolution TEXT,
+        turn_on_schedule TEXT,
+        daily_frequency TEXT,
+        requirements TEXT,
+        spot_duration_seconds INTEGER,
+        minimum_daily_outings INTEGER,
+        max_advertisers INTEGER,
+        route_duration_hours NUMERIC,
+        operation_days TEXT,
+        video_mode TEXT,
+        metadata JSONB,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS support_pricing (
+        support_canonical_id TEXT PRIMARY KEY,
+        exhibition_price NUMERIC,
+        installation_price NUMERIC,
+        printing_price NUMERIC,
+        monthly_price NUMERIC,
+        exclusive_price NUMERIC,
+        currency TEXT NOT NULL DEFAULT 'ARS',
+        tax_included BOOLEAN NOT NULL DEFAULT FALSE,
+        price_public BOOLEAN NOT NULL DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS support_media (
+        id SERIAL PRIMARY KEY,
+        support_canonical_id TEXT NOT NULL,
+        media_type TEXT NOT NULL,
+        url TEXT NOT NULL,
+        title TEXT,
+        alt TEXT,
+        mime_type TEXT,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        metadata JSONB,
+        active BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS support_routes (
+        support_canonical_id TEXT PRIMARY KEY,
+        route_name TEXT,
+        route_mode TEXT,
+        route_path JSONB,
+        waypoints JSONB,
+        default_route BOOLEAN NOT NULL DEFAULT FALSE,
+        schedule TEXT,
+        duration TEXT,
+        hours TEXT,
+        weekdays TEXT,
+        max_advertisers INTEGER,
+        spot_duration_seconds INTEGER,
+        minimum_daily_outings INTEGER,
+        metadata JSONB,
+        active BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
 
       CREATE TABLE IF NOT EXISTS mediakit_requests (
         id SERIAL PRIMARY KEY,
@@ -106,6 +215,54 @@ export async function initDatabase() {
       ALTER TABLE mediakit_request_items 
         ADD CONSTRAINT fk_mediakit_request_items_support 
         FOREIGN KEY (support_id) REFERENCES supports(canonical_id) ON DELETE CASCADE;
+
+      ALTER TABLE support_locations DROP CONSTRAINT IF EXISTS fk_support_locations_support;
+      ALTER TABLE support_faces DROP CONSTRAINT IF EXISTS fk_support_faces_support;
+      ALTER TABLE support_technical DROP CONSTRAINT IF EXISTS fk_support_technical_support;
+      ALTER TABLE support_pricing DROP CONSTRAINT IF EXISTS fk_support_pricing_support;
+      ALTER TABLE support_media DROP CONSTRAINT IF EXISTS fk_support_media_support;
+      ALTER TABLE support_routes DROP CONSTRAINT IF EXISTS fk_support_routes_support;
+
+      ALTER TABLE support_locations
+        ADD CONSTRAINT fk_support_locations_support
+        FOREIGN KEY (support_canonical_id) REFERENCES supports(canonical_id) ON DELETE CASCADE;
+
+      ALTER TABLE support_faces
+        ADD CONSTRAINT fk_support_faces_support
+        FOREIGN KEY (support_canonical_id) REFERENCES supports(canonical_id) ON DELETE CASCADE;
+
+      ALTER TABLE support_technical
+        ADD CONSTRAINT fk_support_technical_support
+        FOREIGN KEY (support_canonical_id) REFERENCES supports(canonical_id) ON DELETE CASCADE;
+
+      ALTER TABLE support_pricing
+        ADD CONSTRAINT fk_support_pricing_support
+        FOREIGN KEY (support_canonical_id) REFERENCES supports(canonical_id) ON DELETE CASCADE;
+
+      ALTER TABLE support_media
+        ADD CONSTRAINT fk_support_media_support
+        FOREIGN KEY (support_canonical_id) REFERENCES supports(canonical_id) ON DELETE CASCADE;
+
+      ALTER TABLE support_routes
+        ADD CONSTRAINT fk_support_routes_support
+        FOREIGN KEY (support_canonical_id) REFERENCES supports(canonical_id) ON DELETE CASCADE;
+
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_support_faces_unique_face_key
+        ON support_faces(support_canonical_id, face_key);
+    `);
+
+    await pool.query(`
+      UPDATE supports
+      SET family = CASE
+        WHEN tipo_soporte = 'led_movil' THEN 'led_mobile'
+        WHEN tipo_soporte = 'led' THEN 'led'
+        ELSE 'traditional'
+      END
+      WHERE family IS NULL OR family = '';
+
+      UPDATE supports
+      SET active = FALSE
+      WHERE canonical_id IS NULL OR canonical_id = '' OR name IS NULL OR name = '' OR ciudad IS NULL OR ciudad = '' OR tipo_soporte IS NULL OR tipo_soporte = '';
     `);
 
     console.log('Database tables and foreign key constraints verified/created successfully.');
@@ -125,6 +282,7 @@ async function seedInventory() {
     const existing = await db.select().from(schema.supports).where(eq(schema.supports.canonicalId, canonicalId));
 
     const isMobile = 'waypoints' in item;
+    const family = isMobile ? 'led_mobile' : item.tipo_soporte === 'led' ? 'led' : 'traditional';
     const latVal = 'lat' in item && item.lat !== null && item.lat !== undefined ? String(item.lat) : null;
     const lngVal = 'lng' in item && item.lng !== null && item.lng !== undefined ? String(item.lng) : null;
     const disp = item.disponibilidad ?? 'disponible';
@@ -144,6 +302,8 @@ async function seedInventory() {
         name: item.name,
         ciudad: item.ciudad,
         tipoSoporte: item.tipo_soporte,
+        family,
+        active: true,
         lat: latVal,
         lng: lngVal,
         address: addr,
@@ -160,26 +320,185 @@ async function seedInventory() {
         routePath: rp,
       });
     } else {
-      // Existing record: DO NOT overwrite operational fields like disponibilidad (P0-3). Only sync static descriptive fields.
-      await db.update(schema.supports).set({
+      // Sync only structural/descriptive fields.
+      // Preserve operational state such as disponibilidad.
+      await db
+        .update(schema.supports)
+        .set({
+          name: item.name,
+          ciudad: item.ciudad,
+          tipoSoporte: item.tipo_soporte,
+          family,
+          lat: latVal,
+          lng: lngVal,
+          address: addr,
+          description: item.description,
+          characteristics: item.characteristics,
+          mapaUrl: mapaUrlVal,
+          imageUrls: imgs,
+          availableFrom: availFrom,
+          isFeatured: isFeat,
+          schedule: sched,
+          duration: dur,
+          waypoints: wp,
+          routePath: rp,
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.supports.canonicalId, canonicalId));
+    }
+
+    const locationRows = await db.select().from(schema.supportLocations).where(eq(schema.supportLocations.supportCanonicalId, canonicalId));
+    if (locationRows.length === 0) {
+      await db.insert(schema.supportLocations).values({
+        supportCanonicalId: canonicalId,
         name: item.name,
         ciudad: item.ciudad,
-        tipoSoporte: item.tipo_soporte,
+        family,
+        category: family,
         lat: latVal,
         lng: lngVal,
         address: addr,
-        description: item.description,
-        characteristics: item.characteristics,
         mapaUrl: mapaUrlVal,
-        imageUrls: imgs,
+        availability: disp,
         availableFrom: availFrom,
+        active: true,
         isFeatured: isFeat,
-        schedule: sched,
-        duration: dur,
-        waypoints: wp,
-        routePath: rp,
-        updatedAt: new Date(),
-      }).where(eq(schema.supports.canonicalId, canonicalId));
+      });
+    }
+
+    const technicalRows = await db.select().from(schema.supportTechnical).where(eq(schema.supportTechnical.supportCanonicalId, canonicalId));
+    if (technicalRows.length === 0) {
+      await db.insert(schema.supportTechnical).values({
+        supportCanonicalId: canonicalId,
+        summary: item.description,
+        measures: item.characteristics,
+        requirements: isMobile ? 'Requiere recepción de video por campaña' : null,
+        turnOnSchedule: isMobile ? (item as any).schedule ?? null : null,
+        dailyFrequency: isMobile ? 'Mínimo 180 salidas diarias' : null,
+        spotDurationSeconds: isMobile ? 10 : null,
+        minimumDailyOutings: isMobile ? 180 : null,
+        maxAdvertisers: isMobile ? 8 : null,
+        routeDurationHours: isMobile ? '4' : null,
+        operationDays: isMobile ? 'Lunes a Viernes' : null,
+        videoMode: isMobile ? 'single_campaign_video' : null,
+      });
+    }
+
+    const pricingRows = await db.select().from(schema.supportPricing).where(eq(schema.supportPricing.supportCanonicalId, canonicalId));
+    if (pricingRows.length === 0) {
+      await db.insert(schema.supportPricing).values({
+        supportCanonicalId: canonicalId,
+        exhibitionPrice: '0',
+        installationPrice: '0',
+        printingPrice: '0',
+        monthlyPrice: '0',
+        exclusivePrice: '0',
+        currency: 'ARS',
+        taxIncluded: false,
+        pricePublic: false,
+      });
+    }
+
+    // support_routes aplica únicamente a soportes móviles.
+    // No crear rutas artificiales para cartelería/LED fijo.
+    if (isMobile) {
+      const routeRows = await db
+        .select()
+        .from(schema.supportRoutes)
+        .where(eq(schema.supportRoutes.supportCanonicalId, canonicalId));
+
+      if (routeRows.length === 0) {
+        await db.insert(schema.supportRoutes).values({
+          supportCanonicalId: canonicalId,
+          routeName: 'Recorrido predeterminado',
+          routeMode: family,
+          routePath: rp || [],
+          waypoints: wp || [],
+          defaultRoute: true,
+          schedule: sched,
+          duration: dur,
+          hours: '09:00-20:00',
+          weekdays: 'lunes-viernes',
+          maxAdvertisers: 8,
+          spotDurationSeconds: 10,
+          minimumDailyOutings: 180,
+          metadata: {
+            modalities: [
+              'pauta compartida',
+              'uso exclusivo',
+              'recorrido personalizado',
+              'activaciones',
+            ],
+          },
+          active: true,
+        });
+      }
+    }
+
+    const faceRows = await db.select().from(schema.supportFaces).where(eq(schema.supportFaces.supportCanonicalId, canonicalId));
+    if (faceRows.length === 0) {
+      if (isMobile) {
+        await db.insert(schema.supportFaces).values({
+          supportCanonicalId: canonicalId,
+          faceKey: 'left',
+          label: 'Cara lateral izquierda',
+          side: 'left',
+          widthMeters: '4',
+          heightMeters: '2',
+          widthPixels: 1024,
+          heightPixels: 512,
+          substrate: 'LED P3',
+          sortOrder: 1,
+        });
+        await db.insert(schema.supportFaces).values({
+          supportCanonicalId: canonicalId,
+          faceKey: 'right',
+          label: 'Cara lateral derecha',
+          side: 'right',
+          widthMeters: '4',
+          heightMeters: '2',
+          widthPixels: 1024,
+          heightPixels: 512,
+          substrate: 'LED P3',
+          sortOrder: 2,
+        });
+        await db.insert(schema.supportFaces).values({
+          supportCanonicalId: canonicalId,
+          faceKey: 'rear',
+          label: 'Cara posterior',
+          side: 'rear',
+          widthMeters: '2',
+          heightMeters: '2',
+          widthPixels: 512,
+          heightPixels: 512,
+          substrate: 'LED P3',
+          sortOrder: 3,
+        });
+      } else {
+        await db.insert(schema.supportFaces).values({
+          supportCanonicalId: canonicalId,
+          faceKey: 'front',
+          label: 'Cara principal',
+          side: 'front',
+          substrate: item.characteristics,
+          sortOrder: 1,
+        });
+      }
+    }
+
+    const mediaRows = await db.select().from(schema.supportMedia).where(eq(schema.supportMedia.supportCanonicalId, canonicalId));
+    if (mediaRows.length === 0) {
+      for (const [index, imageUrl] of imgs.entries()) {
+        await db.insert(schema.supportMedia).values({
+          supportCanonicalId: canonicalId,
+          mediaType: 'image',
+          url: imageUrl,
+          title: item.name,
+          alt: item.name,
+          sortOrder: index,
+          active: true,
+        });
+      }
     }
   }
   console.log('Inventory seed completed successfully.');
