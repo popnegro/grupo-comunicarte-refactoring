@@ -726,7 +726,7 @@ export async function upsertSupportRecord(canonicalId: string, payload: SupportW
     await syncSupportRoute(canonicalId, payload, core);
   }
   const faceRows = await db.select({ id: supportFaces.id }).from(supportFaces).where(eq(supportFaces.supportCanonicalId, canonicalId));
-  if (payload.faces !== undefined || payload.family !== undefined || payload.category !== undefined || payload.tipo_soporte !== undefined || faceRows.length === 0) {
+  if (payload.faces !== undefined || faceRows.length === 0) {
     await syncSupportFaces(canonicalId, payload, core.family);
   }
   if (payload.media !== undefined) {
@@ -773,12 +773,7 @@ export async function patchSupportRecord(canonicalId: string, payload: SupportWr
     active: hasOwn(payload, 'active') ? payload.active : coreSource.active,
     technical: payload.technical,
     pricing: payload.pricing,
-    route: payload.route ?? {
-      schedule: coreSource.schedule,
-      duration: coreSource.duration,
-      waypoints: coreSource.waypoints,
-      routePath: coreSource.routePath,
-    },
+    ...(payload.route !== undefined ? { route: payload.route } : {}),
     media: payload.media,
     faces: payload.faces,
   });
