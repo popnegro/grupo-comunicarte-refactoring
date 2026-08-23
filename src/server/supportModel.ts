@@ -733,7 +733,7 @@ export async function upsertSupportRecord(canonicalId: string, payload: SupportW
     await syncSupportMedia(canonicalId, payload);
   }
 
-  const item = await getSupportDetail(canonicalId);
+  const item = await getSupportDetail(canonicalId, { includeInactive: true });
   if (!item) {
     throw new Error(`No se pudo reconstruir el soporte '${canonicalId}'.`);
   }
@@ -741,7 +741,7 @@ export async function upsertSupportRecord(canonicalId: string, payload: SupportW
 }
 
 export async function patchSupportRecord(canonicalId: string, payload: SupportWritePayload) {
-  const existing = await getSupportDetail(canonicalId);
+  const existing = await getSupportDetail(canonicalId, { includeInactive: true });
   if (!existing) {
     throw new Error(`Soporte con ID '${canonicalId}' no encontrado.`);
   }
@@ -780,7 +780,7 @@ export async function patchSupportRecord(canonicalId: string, payload: SupportWr
 }
 
 export async function deleteSupportRecord(canonicalId: string) {
-  const existing = await getSupportDetail(canonicalId);
+  const existing = await getSupportDetail(canonicalId, { includeInactive: true });
   if (!existing) {
     throw new Error(`Soporte con ID '${canonicalId}' no encontrado.`);
   }
