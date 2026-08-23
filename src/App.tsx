@@ -47,6 +47,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/soportes" element={<DashboardSoportes />} />
+          <Route path="/dashboard/solicitudes" element={<DashboardMediaKits />} />
           <Route path="/dashboard/mediakits" element={<DashboardMediaKits />} />
           <Route path="*" element={<PublicRoutes />} />
         </Routes>
