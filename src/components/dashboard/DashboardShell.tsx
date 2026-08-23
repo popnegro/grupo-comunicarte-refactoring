@@ -56,10 +56,10 @@ export function DashboardShell({ children }: DashboardShellProps) {
 
             {/* Notification Indicator */}
             <Link
-              to="/dashboard/mediakits"
+              to="/dashboard/solicitudes"
               className="relative p-2 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
               title={`${newLeadsCount} solicitudes nuevas`}
-              aria-label="Notificaciones de solicitudes"
+              aria-label="Solicitudes nuevas"
             >
               <Bell className="h-4 w-4" />
               {newLeadsCount > 0 && (
@@ -140,7 +140,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
                 </NavLink>
 
                 <NavLink
-                  to="/dashboard/mediakits"
+                  to="/dashboard/solicitudes"
                   className={({ isActive }) =>
                     `flex items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-bold transition whitespace-nowrap ${
                       isActive
@@ -153,7 +153,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
                     <>
                       <div className="flex items-center gap-2.5">
                         <FileText className={`h-4 w-4 shrink-0 ${isActive ? 'text-emerald-400' : 'text-gray-400'}`} />
-                        <span>Media Kits & Leads</span>
+                        <span>Solicitudes</span>
                       </div>
                       {newLeadsCount > 0 && (
                         <span
