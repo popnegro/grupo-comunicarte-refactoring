@@ -5,7 +5,25 @@ import { createServer as createViteServer } from 'vite';
 import { initDatabase, pool } from './src/db';
 import { getAllSupportsFromDB, getSupportByIdFromDB } from './src/server/supportsService';
 import { handleMediakitRequest, getAllMediakitRequestsFromDB } from './src/server/mediakitService';
-import { authenticateAdmin, verifyAdminToken, getAdminStats, updateSupportByAdmin, updateRequestStatusByAdmin } from './src/server/adminService';
+import {
+  authenticateAdmin,
+  verifyAdminToken,
+  getAdminStats,
+  updateRequestStatusByAdmin,
+  listAdminSupports,
+  getAdminSupportById,
+  createAdminSupport,
+  updateSupportByAdmin,
+  deactivateSupportByAdmin,
+  getSupportMediaByAdmin,
+  addSupportMediaByAdmin,
+  updateSupportMediaByAdmin,
+  removeSupportMediaByAdmin,
+  getSupportPricingByAdmin,
+  patchSupportPricingByAdmin,
+  getSupportRouteByAdmin,
+  patchSupportRouteByAdmin,
+} from './src/server/adminService';
 
 async function startServer() {
   const app = express();
@@ -101,11 +119,35 @@ async function startServer() {
 
   app.get('/api/admin/supports', requireAdmin, async (_req, res) => {
     try {
-      const supports = await getAllSupportsFromDB();
+      const supports = await listAdminSupports();
       res.status(200).json({ status: 'success', data: supports });
     } catch (err: any) {
       console.error('Error fetching admin supports:', err);
       res.status(500).json({ status: 'error', message: 'Error interno al obtener inventario.' });
+    }
+  });
+
+  app.get('/api/admin/supports/:id', requireAdmin, async (req, res) => {
+    try {
+      const support = await getAdminSupportById(req.params.id);
+      res.status(200).json({ status: 'success', data: support });
+    } catch (err: any) {
+      console.error(`Error fetching admin support ${req.params.id}:`, err);
+      const msg = err.message || '';
+      const status = msg.includes('no encontrado') ? 404 : 500;
+      res.status(status).json({ status: 'error', message: msg || 'Error al obtener el soporte.' });
+    }
+  });
+
+  app.post('/api/admin/supports', requireAdmin, async (req, res) => {
+    try {
+      const created = await createAdminSupport(req.body || {});
+      res.status(201).json({ status: 'success', data: created, message: 'Soporte creado exitosamente.' });
+    } catch (err: any) {
+      console.error('Error creating admin support:', err);
+      const msg = err.message || '';
+      const status = msg.includes('vacío') || msg.includes('inválida') || msg.includes('desconocida') ? 400 : 500;
+      res.status(status).json({ status: 'error', message: msg || 'Error al crear el soporte.' });
     }
   });
 
@@ -119,6 +161,110 @@ async function startServer() {
       const msg = err.message || '';
       const status = msg.includes('no encontrado') ? 404 : msg.includes('inválido') ? 400 : 500;
       res.status(status).json({ status: 'error', message: msg || 'Error al actualizar el soporte.' });
+    }
+  });
+
+  app.delete('/api/admin/supports/:id', requireAdmin, async (req, res) => {
+    try {
+      const result = await deactivateSupportByAdmin(req.params.id);
+      res.status(200).json({ status: 'success', data: result, message: 'Soporte desactivado exitosamente.' });
+    } catch (err: any) {
+      console.error(`Error deleting support ${req.params.id}:`, err);
+      const msg = err.message || '';
+      const status = msg.includes('no encontrado') ? 404 : 500;
+      res.status(status).json({ status: 'error', message: msg || 'Error al desactivar el soporte.' });
+    }
+  });
+
+  app.get('/api/admin/supports/:id/media', requireAdmin, async (req, res) => {
+    try {
+      const media = await getSupportMediaByAdmin(req.params.id);
+      res.status(200).json({ status: 'success', data: media });
+    } catch (err: any) {
+      console.error(`Error fetching support media ${req.params.id}:`, err);
+      res.status(500).json({ status: 'error', message: 'Error al obtener media.' });
+    }
+  });
+
+  app.post('/api/admin/supports/:id/media', requireAdmin, async (req, res) => {
+    try {
+      const created = await addSupportMediaByAdmin(req.params.id, req.body || {});
+      res.status(201).json({ status: 'success', data: created });
+    } catch (err: any) {
+      console.error(`Error creating support media ${req.params.id}:`, err);
+      const msg = err.message || '';
+      const status = msg.includes('inválido') ? 400 : 500;
+      res.status(status).json({ status: 'error', message: msg || 'Error al crear media.' });
+    }
+  });
+
+  app.patch('/api/admin/supports/:id/media/:mediaId', requireAdmin, async (req, res) => {
+    try {
+      const mediaId = Number(req.params.mediaId);
+      const updated = await updateSupportMediaByAdmin(req.params.id, mediaId, req.body || {});
+      res.status(200).json({ status: 'success', data: updated });
+    } catch (err: any) {
+      console.error(`Error updating support media ${req.params.id}/${req.params.mediaId}:`, err);
+      const msg = err.message || '';
+      const status = msg.includes('no encontrada') ? 404 : msg.includes('inválido') ? 400 : 500;
+      res.status(status).json({ status: 'error', message: msg || 'Error al actualizar media.' });
+    }
+  });
+
+  app.delete('/api/admin/supports/:id/media/:mediaId', requireAdmin, async (req, res) => {
+    try {
+      const mediaId = Number(req.params.mediaId);
+      const deleted = await removeSupportMediaByAdmin(req.params.id, mediaId);
+      res.status(200).json({ status: 'success', data: deleted });
+    } catch (err: any) {
+      console.error(`Error deleting support media ${req.params.id}/${req.params.mediaId}:`, err);
+      const msg = err.message || '';
+      const status = msg.includes('no encontrada') ? 404 : 500;
+      res.status(status).json({ status: 'error', message: msg || 'Error al eliminar media.' });
+    }
+  });
+
+  app.get('/api/admin/supports/:id/pricing', requireAdmin, async (req, res) => {
+    try {
+      const pricing = await getSupportPricingByAdmin(req.params.id);
+      res.status(200).json({ status: 'success', data: pricing });
+    } catch (err: any) {
+      console.error(`Error fetching support pricing ${req.params.id}:`, err);
+      res.status(500).json({ status: 'error', message: 'Error al obtener pricing.' });
+    }
+  });
+
+  app.patch('/api/admin/supports/:id/pricing', requireAdmin, async (req, res) => {
+    try {
+      const pricing = await patchSupportPricingByAdmin(req.params.id, req.body || {});
+      res.status(200).json({ status: 'success', data: pricing });
+    } catch (err: any) {
+      console.error(`Error updating support pricing ${req.params.id}:`, err);
+      const msg = err.message || '';
+      const status = msg.includes('negativo') || msg.includes('inválido') ? 400 : 500;
+      res.status(status).json({ status: 'error', message: msg || 'Error al actualizar pricing.' });
+    }
+  });
+
+  app.get('/api/admin/supports/:id/route', requireAdmin, async (req, res) => {
+    try {
+      const route = await getSupportRouteByAdmin(req.params.id);
+      res.status(200).json({ status: 'success', data: route });
+    } catch (err: any) {
+      console.error(`Error fetching support route ${req.params.id}:`, err);
+      res.status(500).json({ status: 'error', message: 'Error al obtener la ruta.' });
+    }
+  });
+
+  app.patch('/api/admin/supports/:id/route', requireAdmin, async (req, res) => {
+    try {
+      const route = await patchSupportRouteByAdmin(req.params.id, req.body || {});
+      res.status(200).json({ status: 'success', data: route });
+    } catch (err: any) {
+      console.error(`Error updating support route ${req.params.id}:`, err);
+      const msg = err.message || '';
+      const status = msg.includes('inválido') ? 400 : 500;
+      res.status(status).json({ status: 'error', message: msg || 'Error al actualizar la ruta.' });
     }
   });
 

@@ -1,57 +1,367 @@
-import { useMemo, useState, useEffect } from 'react';
-import {
-  Search,
-  Plus,
-  ExternalLink,
-  CheckCircle2,
-  Eye,
-  LayoutGrid,
-  List,
-  X,
-} from 'lucide-react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { CheckCircle2, Edit3, ExternalLink, Eye, Plus, RefreshCw, Save, Search, Trash2, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
 import { Button } from '../../components/ui/Button';
-import { Input, Label } from '../../components/ui/Input';
+import { Input, Label, Textarea } from '../../components/ui/Input';
 import {
   type Disponibilidad,
+  type InventoryItem,
   type Plaza,
+  type SupportFamily,
+  type SupportMediaItem,
+  type SupportMediaType,
   type TipoSoporte,
 } from '../../types';
 
+type Mode = 'create' | 'edit';
+
+type EditorSupport = {
+  canonical_id: string;
+  name: string;
+  ciudad: Plaza;
+  family: SupportFamily;
+  tipo_soporte: TipoSoporte;
+  active: boolean;
+  disponibilidad: Disponibilidad;
+  availableFrom: string;
+  isFeatured: boolean;
+  lat: string;
+  lng: string;
+  address: string;
+  description: string;
+  characteristics: string;
+  mapa_url: string;
+  imageUrlsText: string;
+  technical: {
+    summary: string;
+    measures: string;
+    resolution: string;
+    turn_on_schedule: string;
+    daily_frequency: string;
+    requirements: string;
+    spot_duration_seconds: string;
+    minimum_daily_outings: string;
+    max_advertisers: string;
+    route_duration_hours: string;
+    operation_days: string;
+    video_mode: string;
+  };
+  pricing: {
+    exhibition_price: string;
+    installation_price: string;
+    printing_price: string;
+    monthly_price: string;
+    exclusive_price: string;
+    currency: 'ARS' | 'USD';
+    tax_included: boolean;
+    price_public: boolean;
+  };
+  route: {
+    route_name: string;
+    route_mode: string;
+    schedule: string;
+    duration: string;
+    hours: string;
+    weekdays: string;
+    default_route: boolean;
+    max_advertisers: string;
+    spot_duration_seconds: string;
+    minimum_daily_outings: string;
+    routePathText: string;
+    waypointsText: string;
+  };
+  mediaDraft: {
+    editingId: number | null;
+    media_type: SupportMediaType;
+    url: string;
+    title: string;
+    alt: string;
+    mime_type: string;
+    sort_order: string;
+  };
+  media: SupportMediaItem[];
+};
+
+const emptySupport: EditorSupport = {
+  canonical_id: '',
+  name: '',
+  ciudad: 'mendoza',
+  family: 'traditional',
+  tipo_soporte: 'tradicional',
+  active: true,
+  disponibilidad: 'disponible',
+  availableFrom: '',
+  isFeatured: false,
+  lat: '',
+  lng: '',
+  address: '',
+  description: '',
+  characteristics: '',
+  mapa_url: '',
+  imageUrlsText: '',
+  technical: {
+    summary: '',
+    measures: '',
+    resolution: '',
+    turn_on_schedule: '',
+    daily_frequency: '',
+    requirements: '',
+    spot_duration_seconds: '0',
+    minimum_daily_outings: '0',
+    max_advertisers: '0',
+    route_duration_hours: '0',
+    operation_days: '',
+    video_mode: '',
+  },
+  pricing: {
+    exhibition_price: '0',
+    installation_price: '0',
+    printing_price: '0',
+    monthly_price: '0',
+    exclusive_price: '0',
+    currency: 'ARS',
+    tax_included: false,
+    price_public: false,
+  },
+  route: {
+    route_name: '',
+    route_mode: 'led_mobile',
+    schedule: '',
+    duration: '',
+    hours: '',
+    weekdays: '',
+    default_route: true,
+    max_advertisers: '8',
+    spot_duration_seconds: '10',
+    minimum_daily_outings: '180',
+    routePathText: '',
+    waypointsText: '',
+  },
+  mediaDraft: {
+    editingId: null,
+    media_type: 'image',
+    url: '',
+    title: '',
+    alt: '',
+    mime_type: '',
+    sort_order: '0',
+  },
+  media: [],
+};
+
+function typeToFamily(tipo: TipoSoporte): SupportFamily {
+  if (tipo === 'led') return 'led';
+  if (tipo === 'led_movil') return 'led_mobile';
+  return 'traditional';
+}
+
+function familyToTipo(family: SupportFamily): TipoSoporte {
+  if (family === 'led') return 'led';
+  if (family === 'led_mobile') return 'led_movil';
+  return 'tradicional';
+}
+
+function blankEditor(): EditorSupport {
+  return structuredClone(emptySupport);
+}
+
+function mapItemToEditor(item: any): EditorSupport {
+  const media = Array.isArray(item.media) ? item.media : [];
+  const imageUrls = Array.isArray(item.imageUrls) ? item.imageUrls : [];
+  const pricing = item.pricing || {};
+  const technical = item.technical || {};
+  const route = item.waypoints || item.routePath ? item : item.route || {};
+
+  return {
+    canonical_id: item.canonical_id || '',
+    name: item.name || '',
+    ciudad: item.ciudad || 'mendoza',
+    family: item.family || typeToFamily(item.tipo_soporte || 'tradicional'),
+    tipo_soporte: item.tipo_soporte || 'tradicional',
+    active: item.active !== false,
+    disponibilidad: item.disponibilidad || 'disponible',
+    availableFrom: item.availableFrom || '',
+    isFeatured: item.isFeatured ?? false,
+    lat: item.lat === null || item.lat === undefined ? '' : String(item.lat),
+    lng: item.lng === null || item.lng === undefined ? '' : String(item.lng),
+    address: item.address || '',
+    description: item.description || '',
+    characteristics: item.characteristics || '',
+    mapa_url: item.mapa_url || '',
+    imageUrlsText: imageUrls.join('\n'),
+    technical: {
+      summary: technical.summary || '',
+      measures: technical.measures || '',
+      resolution: technical.resolution || '',
+      turn_on_schedule: technical.turn_on_schedule || '',
+      daily_frequency: technical.daily_frequency || '',
+      requirements: technical.requirements || '',
+      spot_duration_seconds: String(technical.spot_duration_seconds ?? 0),
+      minimum_daily_outings: String(technical.minimum_daily_outings ?? 0),
+      max_advertisers: String(technical.max_advertisers ?? 0),
+      route_duration_hours: String(technical.route_duration_hours ?? 0),
+      operation_days: technical.operation_days || '',
+      video_mode: technical.video_mode || '',
+    },
+    pricing: {
+      exhibition_price: String(pricing.exhibition_price ?? 0),
+      installation_price: String(pricing.installation_price ?? 0),
+      printing_price: String(pricing.printing_price ?? 0),
+      monthly_price: String(pricing.monthly_price ?? 0),
+      exclusive_price: String(pricing.exclusive_price ?? 0),
+      currency: pricing.currency || 'ARS',
+      tax_included: pricing.tax_included ?? false,
+      price_public: pricing.price_public ?? false,
+    },
+    route: {
+      route_name: route.route_name || '',
+      route_mode: route.route_mode || item.family || typeToFamily(item.tipo_soporte || 'tradicional'),
+      schedule: route.schedule || item.schedule || '',
+      duration: route.duration || item.duration || '',
+      hours: route.hours || '',
+      weekdays: route.weekdays || '',
+      default_route: route.default_route ?? true,
+      max_advertisers: String(route.max_advertisers ?? 8),
+      spot_duration_seconds: String(route.spot_duration_seconds ?? 10),
+      minimum_daily_outings: String(route.minimum_daily_outings ?? 180),
+      routePathText: JSON.stringify(route.routePath || item.routePath || [], null, 2),
+      waypointsText: JSON.stringify(route.waypoints || item.waypoints || [], null, 2),
+    },
+    mediaDraft: {
+      editingId: null,
+      media_type: 'image',
+      url: '',
+      title: '',
+      alt: '',
+      mime_type: '',
+      sort_order: '0',
+    },
+    media,
+  };
+}
+
+function parseJsonArray<T>(value: string, fallback: T[]): T[] {
+  const text = value.trim();
+  if (!text) return fallback;
+  const parsed = JSON.parse(text);
+  return Array.isArray(parsed) ? parsed : fallback;
+}
+
+function mapCorePayload(editor: EditorSupport) {
+  const payload: Record<string, unknown> = {
+    name: editor.name.trim(),
+    ciudad: editor.ciudad,
+    family: editor.family,
+    tipo_soporte: editor.tipo_soporte,
+    active: editor.active,
+    disponibilidad: editor.disponibilidad,
+    availableFrom: editor.availableFrom || null,
+    isFeatured: editor.isFeatured,
+    lat: editor.lat === '' ? null : Number(editor.lat),
+    lng: editor.lng === '' ? null : Number(editor.lng),
+    address: editor.address,
+    description: editor.description,
+    characteristics: editor.characteristics,
+    mapa_url: editor.mapa_url,
+    imageUrls: editor.imageUrlsText
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean),
+
+    technical: {
+      summary: editor.technical.summary,
+      measures: editor.technical.measures,
+      resolution: editor.technical.resolution,
+      turn_on_schedule: editor.technical.turn_on_schedule,
+      daily_frequency: editor.technical.daily_frequency,
+      requirements: editor.technical.requirements,
+      spot_duration_seconds: Number(editor.technical.spot_duration_seconds || 0),
+      minimum_daily_outings: Number(editor.technical.minimum_daily_outings || 0),
+      max_advertisers: Number(editor.technical.max_advertisers || 0),
+      route_duration_hours: Number(editor.technical.route_duration_hours || 0),
+      operation_days: editor.technical.operation_days,
+      video_mode: editor.technical.video_mode,
+    },
+
+    pricing: {
+      exhibition_price: Number(editor.pricing.exhibition_price || 0),
+      installation_price: Number(editor.pricing.installation_price || 0),
+      printing_price: Number(editor.pricing.printing_price || 0),
+      monthly_price: Number(editor.pricing.monthly_price || 0),
+      exclusive_price: Number(editor.pricing.exclusive_price || 0),
+      currency: editor.pricing.currency,
+      tax_included: editor.pricing.tax_included,
+      price_public: editor.pricing.price_public,
+    },
+  };
+
+  if (editor.family === 'led_mobile') {
+    payload.route = {
+      route_name: editor.route.route_name,
+      route_mode: editor.route.route_mode,
+      schedule: editor.route.schedule,
+      duration: editor.route.duration,
+      hours: editor.route.hours,
+      weekdays: editor.route.weekdays,
+      default_route: editor.route.default_route,
+      max_advertisers: Number(editor.route.max_advertisers || 0),
+      spot_duration_seconds: Number(editor.route.spot_duration_seconds || 0),
+      minimum_daily_outings: Number(editor.route.minimum_daily_outings || 0),
+      routePath: parseJsonArray<[number, number]>(
+        editor.route.routePathText,
+        []
+      ),
+      waypoints: parseJsonArray<{
+        name: string;
+        lat: number | null;
+        lng: number | null;
+      }>(
+        editor.route.waypointsText,
+        []
+      ),
+    };
+  }
+
+  return payload;
+}
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 shadow-2xs space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="text-sm font-bold text-gray-900">{title}</h3>
+      </div>
+      {children}
+    </section>
+  );
+}
+
 export default function DashboardSoportes() {
   const navigate = useNavigate();
-  const [supports, setSupports] = useState<any[]>([]);
+  const [supports, setSupports] = useState<InventoryItem[]>([]);
   const [query, setQuery] = useState('');
   const [availability, setAvailability] = useState<'todos' | Disponibilidad>('todos');
   const [plaza, setPlaza] = useState<'todas' | Plaza>('todas');
   const [tipo, setTipo] = useState<'todos' | TipoSoporte>('todos');
-  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
+  const [activeFilter, setActiveFilter] = useState<'todos' | 'activos' | 'inactivos'>('todos');
   const [refreshKey, setRefreshKey] = useState(0);
   const [toastMessage, setToastMessage] = useState('');
+  const [toastTone, setToastTone] = useState<'ok' | 'error'>('ok');
+  const [editor, setEditor] = useState<EditorSupport | null>(null);
+  const [editorMode, setEditorMode] = useState<Mode>('create');
+  const [loadingEditor, setLoadingEditor] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  // Selected Item for Detail Modal
-  const [selectedSupport, setSelectedSupport] = useState<any | null>(null);
+  const token = localStorage.getItem('admin_token');
 
-  // New Support Modal State
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [newName, setNewName] = useState('');
-  const [newPlaza, setNewPlaza] = useState<Plaza>('mendoza');
-  const [newTipo, setNewTipo] = useState<TipoSoporte>('led');
-  const [newAddress, setNewAddress] = useState('');
-  const [newFormat, setNewFormat] = useState('6.00 x 3.00 mts');
-  const [newSuccessMsg, setNewSuccessMsg] = useState('');
-
-  const getDisponibilidad = (item: any): Disponibilidad => {
-    return item.disponibilidad ?? 'disponible';
-  };
-
-  const getAddress = (item: any): string => {
-    return item.address || 'Ubicación operativa';
+  const showToast = (msg: string, tone: 'ok' | 'error' = 'ok') => {
+    setToastMessage(msg);
+    setToastTone(tone);
+    window.setTimeout(() => setToastMessage(''), 2500);
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('admin_token');
     if (!token) {
       navigate('/login');
       return;
@@ -69,60 +379,126 @@ export default function DashboardSoportes() {
         }
         const json = await res.json();
         if (json.status === 'success') {
-          setSupports(json.data);
+          setSupports(Array.isArray(json.data) ? json.data : []);
         }
       } catch (err) {
         console.error('Error fetching admin supports:', err);
+        showToast('No se pudo cargar el inventario administrativo.', 'error');
       }
     }
 
     fetchSupports();
-  }, [navigate, refreshKey]);
+  }, [navigate, refreshKey, token]);
 
-  // Close modals on Escape key
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setSelectedSupport(null);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage('');
-    }, 2500);
-  };
-
-  // Filtered items
   const items = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return supports.filter((item) => {
+    return supports.filter((item: any) => {
       const matchQuery =
         !q ||
-        item.name.toLowerCase().includes(q) ||
-        item.canonicalId.toLowerCase().includes(q) ||
-        item.ciudad.toLowerCase().includes(q) ||
-        (item.address && item.address.toLowerCase().includes(q));
-
+        item.name?.toLowerCase().includes(q) ||
+        item.canonical_id?.toLowerCase().includes(q) ||
+        item.ciudad?.toLowerCase().includes(q) ||
+        item.address?.toLowerCase().includes(q);
       const matchAvail = availability === 'todos' || item.disponibilidad === availability;
-      const matchPlaza = plaza === 'todas' || item.ciudad.toLowerCase() === (plaza === 'mendoza' ? 'mendoza' : 'buenos aires');
-      const matchTipo = tipo === 'todos' || item.tipoSoporte === tipo;
-
-      return matchQuery && matchAvail && matchPlaza && matchTipo;
+      const matchPlaza = plaza === 'todas' || item.ciudad === plaza;
+      const matchTipo = tipo === 'todos' || item.tipo_soporte === tipo;
+      const matchActive =
+        activeFilter === 'todos' ||
+        (activeFilter === 'activos' && item.active !== false) ||
+        (activeFilter === 'inactivos' && item.active === false);
+      return matchQuery && matchAvail && matchPlaza && matchTipo && matchActive;
     });
-  }, [supports, query, availability, plaza, tipo]);
+  }, [supports, query, availability, plaza, tipo, activeFilter]);
 
-  const handleToggleAvailability = async (item: any) => {
-    const token = localStorage.getItem('admin_token');
-    const current = item.disponibilidad;
-    const next = current === 'disponible' ? 'reservado' : 'disponible';
-
+  async function openEditor(mode: Mode, support?: InventoryItem | null) {
+    setEditorMode(mode);
+    setLoadingEditor(true);
     try {
-      const res = await fetch(`/api/admin/supports/${item.canonicalId}`, {
+      if (mode === 'create') {
+        setEditor(blankEditor());
+      } else if (support) {
+        const res = await fetch(`/api/admin/supports/${support.canonical_id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const json = await res.json();
+        if (!res.ok || json.status !== 'success') {
+          throw new Error(json.message || 'No se pudo cargar el soporte');
+        }
+        setEditor(mapItemToEditor(json.data));
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Error al abrir soporte', 'error');
+    } finally {
+      setLoadingEditor(false);
+    }
+  }
+
+  async function refreshSupportDetail(canonicalId: string) {
+    const res = await fetch(`/api/admin/supports/${canonicalId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const json = await res.json();
+    if (res.ok && json.status === 'success') {
+      setEditor(mapItemToEditor(json.data));
+    }
+  }
+
+  async function submitSupport() {
+    if (!editor) return;
+    setSaving(true);
+    try {
+      const payload = mapCorePayload(editor);
+      const url = editorMode === 'create' ? '/api/admin/supports' : `/api/admin/supports/${editor.canonical_id}`;
+      const method = editorMode === 'create' ? 'POST' : 'PATCH';
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json();
+      if (!res.ok || json.status !== 'success') {
+        throw new Error(json.message || 'No se pudo guardar el soporte');
+      }
+      const savedId = json.data?.canonical_id || json.data?.canonicalId || editor.canonical_id;
+      showToast(editorMode === 'create' ? 'Soporte creado correctamente.' : 'Soporte actualizado correctamente.');
+      setRefreshKey((v) => v + 1);
+      if (savedId) {
+        await refreshSupportDetail(savedId);
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Error al guardar el soporte', 'error');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function toggleActive(item: any) {
+    try {
+      const next = item.active === false;
+      const res = await fetch(`/api/admin/supports/${item.canonical_id}`, {
+        method: next ? 'PATCH' : 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: next ? JSON.stringify({ active: true }) : undefined,
+      });
+      const json = await res.json();
+      if (!res.ok || json.status !== 'success') throw new Error(json.message || 'No se pudo cambiar el estado');
+      setRefreshKey((v) => v + 1);
+      showToast(next ? 'Soporte reactivado.' : 'Soporte desactivado.');
+    } catch (err: any) {
+      showToast(err.message || 'Error al cambiar el estado', 'error');
+    }
+  }
+
+  async function toggleAvailability(item: any) {
+    try {
+      const next = item.disponibilidad === 'disponible' ? 'reservado' : 'disponible';
+      const res = await fetch(`/api/admin/supports/${item.canonical_id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -130,63 +506,101 @@ export default function DashboardSoportes() {
         },
         body: JSON.stringify({ disponibilidad: next }),
       });
-
       const json = await res.json();
-      if (!res.ok || json.status !== 'success') {
-        throw new Error(json.message || 'Error al actualizar disponibilidad');
-      }
-
-      setRefreshKey((prev) => prev + 1);
-      showToast(`Soporte "${item.name}" marcado como ${next === 'disponible' ? 'Disponible' : 'Reservado'}`);
+      if (!res.ok || json.status !== 'success') throw new Error(json.message || 'No se pudo cambiar disponibilidad');
+      setRefreshKey((v) => v + 1);
+      showToast(`Disponibilidad cambiada a ${next}.`);
     } catch (err: any) {
-      showToast(err.message || 'Error al actualizar');
+      showToast(err.message || 'Error al cambiar disponibilidad', 'error');
     }
-  };
+  }
 
-  const handleCreateSupport = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newName.trim() || !newAddress.trim()) return;
+  async function deleteMedia(mediaId: number, canonicalId: string) {
+    try {
+      const res = await fetch(`/api/admin/supports/${canonicalId}/media/${mediaId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json();
+      if (!res.ok || json.status !== 'success') throw new Error(json.message || 'No se pudo eliminar la media');
+      await refreshSupportDetail(canonicalId);
+      showToast('Media eliminada.');
+    } catch (err: any) {
+      showToast(err.message || 'Error al eliminar media', 'error');
+    }
+  }
 
-    setNewSuccessMsg(`Soporte "${newName}" agregado exitosamente al catálogo.`);
-    setTimeout(() => {
-      setNewSuccessMsg('');
-      setIsAddModalOpen(false);
-      setNewName('');
-      setNewAddress('');
-      setRefreshKey((prev) => prev + 1);
-    }, 1200);
-  };
+  async function saveMedia(canonicalId: string) {
+    if (!editor) return;
+    try {
+      const draft = editor.mediaDraft;
+      const payload = {
+        media_type: draft.media_type,
+        url: draft.url,
+        title: draft.title,
+        alt: draft.alt,
+        mime_type: draft.mime_type,
+        sort_order: Number(draft.sort_order || 0),
+      };
+      const url = draft.editingId ? `/api/admin/supports/${canonicalId}/media/${draft.editingId}` : `/api/admin/supports/${canonicalId}/media`;
+      const method = draft.editingId ? 'PATCH' : 'POST';
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json();
+      if (!res.ok || json.status !== 'success') throw new Error(json.message || 'No se pudo guardar la media');
+      await refreshSupportDetail(canonicalId);
+      showToast(draft.editingId ? 'Media actualizada.' : 'Media creada.');
+    } catch (err: any) {
+      showToast(err.message || 'Error al guardar media', 'error');
+    }
+  }
+
+  function startEditMedia(media: SupportMediaItem) {
+    if (!editor) return;
+    setEditor({
+      ...editor,
+      mediaDraft: {
+        editingId: media.id,
+        media_type: media.media_type,
+        url: media.url,
+        title: media.title || '',
+        alt: media.alt || '',
+        mime_type: media.mime_type || '',
+        sort_order: String(media.sort_order ?? 0),
+      },
+    });
+  }
 
   return (
     <DashboardShell>
-      <div className="space-y-6 max-w-6xl">
-        {/* Toast alert */}
+      <div className="space-y-6 max-w-7xl">
         {toastMessage && (
-          <div className="fixed top-20 right-6 z-50 bg-gray-900 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+          <div className={`fixed top-20 right-6 z-50 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 ${toastTone === 'ok' ? 'bg-gray-900' : 'bg-red-600'}`}>
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
             <span>{toastMessage}</span>
           </div>
         )}
 
-        {/* Header */}
-        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-eyebrow text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full">
-                Inventario
-              </span>
-            </div>
-            <h1 className="mt-2 text-page-title text-gray-900">
-              Gestión de Soportes
-            </h1>
+            <span className="text-eyebrow text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full">
+              Inventario
+            </span>
+            <h1 className="mt-2 text-page-title text-gray-900">Gestión de Soportes</h1>
             <p className="mt-1 text-sm text-gray-500">
-              Supervisión de ubicaciones, formatos técnicos y control de disponibilidad en tiempo real.
+              Administración de inventario, pricing interno, media y recorridos del LED móvil.
             </p>
           </div>
 
           <div className="flex items-center gap-2.5">
             <button
-              onClick={() => setIsAddModalOpen(true)}
+              onClick={() => openEditor('create')}
               className="px-4 py-2.5 bg-gray-900 text-white hover:bg-gray-800 rounded-xl text-xs font-bold transition-all shadow-2xs flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
@@ -202,438 +616,496 @@ export default function DashboardSoportes() {
           </div>
         </header>
 
-        {/* Filter Controls Bar */}
         <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-2xs space-y-3">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {/* Search */}
-            <div className="relative">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="relative lg:col-span-2">
               <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <input
+              <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Buscar por nombre, código o calle..."
-                className="h-10 w-full rounded-xl border border-gray-200 bg-gray-50/50 pl-10 pr-3 text-xs font-medium outline-none transition focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-600/10"
+                className="pl-10"
               />
             </div>
 
-            {/* Plaza Filter */}
-            <select
-              value={plaza}
-              onChange={(e) => setPlaza(e.target.value as typeof plaza)}
-              className="h-10 rounded-xl border border-gray-200 bg-gray-50/50 px-3 text-xs font-semibold text-gray-700 outline-none focus:border-emerald-600 focus:bg-white"
-            >
-              <option value="todas">Todas las Plazas</option>
+            <select value={plaza} onChange={(e) => setPlaza(e.target.value as typeof plaza)} className="h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700">
+              <option value="todas">Todas las plazas</option>
               <option value="mendoza">Mendoza</option>
               <option value="buenos-aires">Buenos Aires</option>
             </select>
 
-            {/* Tipo Filter */}
-            <select
-              value={tipo}
-              onChange={(e) => setTipo(e.target.value as typeof tipo)}
-              className="h-10 rounded-xl border border-gray-200 bg-gray-50/50 px-3 text-xs font-semibold text-gray-700 outline-none focus:border-emerald-600 focus:bg-white"
-            >
-              <option value="todos">Todos los Formatos</option>
-              <option value="tradicional">Cartelería Tradicional</option>
-              <option value="led">Pantallas LED Digitales</option>
-              <option value="led_movil">LED Móvil & Circuitos</option>
+            <select value={tipo} onChange={(e) => setTipo(e.target.value as typeof tipo)} className="h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700">
+              <option value="todos">Todos los formatos</option>
+              <option value="tradicional">Tradicional</option>
+              <option value="led">LED</option>
+              <option value="led_movil">LED móvil</option>
             </select>
 
-            {/* Disponibilidad Filter */}
-            <select
-              value={availability}
-              onChange={(e) => setAvailability(e.target.value as typeof availability)}
-              className="h-10 rounded-xl border border-gray-200 bg-gray-50/50 px-3 text-xs font-semibold text-gray-700 outline-none focus:border-emerald-600 focus:bg-white"
-            >
-              <option value="todos">Todas las Disponibilidades</option>
+            <select value={availability} onChange={(e) => setAvailability(e.target.value as typeof availability)} className="h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700">
+              <option value="todos">Todas las disponibilidades</option>
               <option value="disponible">Disponibles</option>
               <option value="reservado">Reservados</option>
             </select>
           </div>
 
-          {/* Results summary & View Toggle */}
-          <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-gray-100 text-xs text-gray-500">
             <div className="flex items-center gap-2">
               <span className="font-bold text-gray-900">{items.length}</span>
               <span>soportes encontrados</span>
-              {(query || plaza !== 'todas' || tipo !== 'todos' || availability !== 'todos') && (
+              {(query || plaza !== 'todas' || tipo !== 'todos' || availability !== 'todos' || activeFilter !== 'todos') && (
                 <button
+                  type="button"
                   onClick={() => {
                     setQuery('');
                     setPlaza('todas');
                     setTipo('todos');
                     setAvailability('todos');
+                    setActiveFilter('todos');
                   }}
-                  className="text-emerald-700 font-bold hover:underline ml-2"
+                  className="text-emerald-700 font-bold hover:underline"
                 >
                   Limpiar filtros
                 </button>
               )}
             </div>
 
-            {/* View Mode Toggle */}
-            <div className="flex items-center gap-1 bg-gray-100 p-0.5 rounded-lg">
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500">Estado</span>
+              <select
+                value={activeFilter}
+                onChange={(e) => setActiveFilter(e.target.value as typeof activeFilter)}
+                className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700"
+              >
+                <option value="todos">Todos</option>
+                <option value="activos">Activos</option>
+                <option value="inactivos">Inactivos</option>
+              </select>
               <button
                 type="button"
-                onClick={() => setViewMode('table')}
-                className={`p-1.5 rounded-md text-xs font-bold flex items-center gap-1 transition-colors ${
-                  viewMode === 'table' ? 'bg-white text-gray-900 shadow-2xs' : 'text-gray-500 hover:text-gray-900'
-                }`}
-                title="Vista de tabla"
+                onClick={() => setRefreshKey((v) => v + 1)}
+                className="h-9 px-3 rounded-lg border border-gray-200 bg-white text-xs font-bold text-gray-700 inline-flex items-center gap-2"
               >
-                <List className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Tabla</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-md text-xs font-bold flex items-center gap-1 transition-colors ${
-                  viewMode === 'grid' ? 'bg-white text-gray-900 shadow-2xs' : 'text-gray-500 hover:text-gray-900'
-                }`}
-                title="Vista de tarjetas"
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Tarjetas</span>
+                <RefreshCw className="w-3.5 h-3.5" />
+                Refrescar
               </button>
             </div>
           </div>
         </div>
 
-        {/* Content View: Table or Grid */}
-        {viewMode === 'table' ? (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-gray-50 border-b border-gray-200 text-[11px] font-bold uppercase tracking-wider text-gray-500">
-                  <tr>
-                    <th className="py-3.5 px-4">Soporte / Código</th>
-                    <th className="py-3.5 px-4">Plaza & Tipo</th>
-                    <th className="py-3.5 px-4">Ubicación</th>
-                    <th className="py-3.5 px-4">Disponibilidad (Click para cambiar)</th>
-                    <th className="py-3.5 px-4 text-right">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {items.map((item) => {
-                    const disp = getDisponibilidad(item);
-                    return (
-                      <tr key={item.canonical_id} className="hover:bg-gray-50/80 transition-colors">
-                        <td className="py-3.5 px-4">
-                          <div className="font-bold text-gray-900 text-sm">{item.name}</div>
-                          <div className="font-mono text-[11px] text-gray-400">{item.canonical_id}</div>
-                        </td>
-                        <td className="py-3.5 px-4">
-                          <span className="font-semibold text-gray-700 block">
-                            {item.ciudad === 'mendoza' ? 'Mendoza' : 'Buenos Aires'}
-                          </span>
-                          <span className="text-[11px] text-gray-500 capitalize">
-                            {item.tipo_soporte.replace('_', ' ')}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-4 max-w-xs truncate text-gray-600">
-                          {getAddress(item)}
-                        </td>
-                        <td className="py-3.5 px-4">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-gray-50 border-b border-gray-200 text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                <tr>
+                  <th className="py-3.5 px-4">Soporte / Código</th>
+                  <th className="py-3.5 px-4">Plaza / Tipo</th>
+                  <th className="py-3.5 px-4">Estado</th>
+                  <th className="py-3.5 px-4 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {items.map((item: any) => {
+                  const isActive = item.active !== false;
+                  const disp = item.disponibilidad || 'disponible';
+                  return (
+                    <tr key={item.canonical_id} className={!isActive ? 'bg-gray-50/60' : 'hover:bg-gray-50/80'}>
+                      <td className="py-3.5 px-4">
+                        <div className="font-bold text-gray-900 text-sm">{item.name}</div>
+                        <div className="font-mono text-[11px] text-gray-400">{item.canonical_id}</div>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <div className="font-semibold text-gray-700">{item.ciudad === 'mendoza' ? 'Mendoza' : 'Buenos Aires'}</div>
+                        <div className="text-[11px] text-gray-500 capitalize">{item.tipo_soporte?.replace('_', ' ')}</div>
+                      </td>
+                      <td className="py-3.5 px-4 space-y-2">
+                        <button
+                          type="button"
+                          onClick={() => toggleAvailability(item)}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                            disp === 'disponible' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                          }`}
+                        >
+                          <span className={`w-2 h-2 rounded-full ${disp === 'disponible' ? 'bg-emerald-600' : 'bg-amber-600'}`} />
+                          {disp === 'disponible' ? 'Disponible' : 'Reservado'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => toggleActive(item)}
+                          className={`block text-[11px] font-bold underline ${isActive ? 'text-gray-600' : 'text-emerald-700'}`}
+                        >
+                          {isActive ? 'Desactivar' : 'Reactivar'}
+                        </button>
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
                           <button
                             type="button"
-                            onClick={() => handleToggleAvailability(item)}
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold transition-all ${
-                              disp === 'disponible'
-                                ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
-                                : 'bg-amber-100 text-amber-800 hover:bg-amber-200'
-                            }`}
-                            title="Haz clic para alternar disponibilidad en tiempo real"
+                            onClick={() => openEditor('edit', item)}
+                            className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100"
                           >
-                            <span
-                              className={`w-2 h-2 rounded-full ${
-                                disp === 'disponible' ? 'bg-emerald-600' : 'bg-amber-600'
-                              }`}
-                            />
-                            {disp === 'disponible' ? 'Disponible' : 'Reservado'}
+                            <Eye className="w-4 h-4" />
                           </button>
-                        </td>
-                        <td className="py-3.5 px-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setSelectedSupport(item)}
-                              className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
-                              title="Ver ficha técnica"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </button>
-                            <Link
-                              to={`/inventario?soporte=${encodeURIComponent(item.canonical_id)}`}
-                              className="p-1.5 rounded-lg text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50 transition-colors"
-                              title="Ver en mapa público"
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                            </Link>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-
-                  {items.length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="py-12 text-center text-gray-400">
-                        No se encontraron soportes con los filtros seleccionados.
+                          <Link
+                            to={`/inventario?soporte=${encodeURIComponent(item.canonical_id)}`}
+                            className="p-1.5 rounded-lg text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </Link>
+                        </div>
                       </td>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  );
+                })}
+                {items.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="py-12 text-center text-gray-400">
+                      No se encontraron soportes con los filtros seleccionados.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
-        ) : (
-          /* Grid View */
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((item) => {
-              const disp = getDisponibilidad(item);
-              return (
-                <div
-                  key={item.canonical_id}
-                  className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-2xs flex flex-col justify-between hover:border-gray-300 transition-all"
-                >
-                  <div className="p-4 space-y-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <span className="font-mono text-[10px] text-gray-400 block font-bold">
-                          {item.canonical_id}
-                        </span>
-                        <h3 className="font-bold text-sm text-gray-900 mt-0.5">{item.name}</h3>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleToggleAvailability(item)}
-                        className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${
-                          disp === 'disponible'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-amber-100 text-amber-800'
-                        }`}
-                        title="Clic para cambiar estado"
-                      >
-                        {disp === 'disponible' ? 'Disponible' : 'Reservado'}
-                      </button>
-                    </div>
+        </div>
 
-                    <p className="text-xs text-gray-500 line-clamp-2">
-                      {getAddress(item)}
-                    </p>
-
-                    <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-gray-600">
-                      <span className="bg-gray-100 px-2 py-0.5 rounded-md font-semibold">
-                        {item.ciudad === 'mendoza' ? 'Mendoza' : 'Buenos Aires'}
-                      </span>
-                      <span className="bg-gray-100 px-2 py-0.5 rounded-md capitalize">
-                        {item.tipo_soporte.replace('_', ' ')}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedSupport(item)}
-                      className="text-xs font-bold text-gray-700 hover:text-black"
-                    >
-                      Ficha Técnica
-                    </button>
-                    <Link
-                      to={`/inventario?soporte=${encodeURIComponent(item.canonical_id)}`}
-                      className="text-xs font-bold text-emerald-700 hover:text-emerald-900 flex items-center gap-1"
-                    >
-                      <span>Mapa</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </Link>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Modal: Support Technical Detail */}
-        {selectedSupport && (
-          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 space-y-5 animate-in fade-in zoom-in-95">
-              <div className="flex items-start justify-between gap-3 border-b border-gray-100 pb-4">
+        {editor && (
+          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-start md:items-center justify-center p-4 overflow-y-auto">
+            <div className="bg-gray-50 rounded-3xl max-w-6xl w-full p-5 sm:p-6 shadow-2xl border border-gray-100 space-y-5">
+              <div className="flex items-start justify-between gap-3">
                 <div>
                   <span className="text-[10px] font-mono font-bold text-gray-400">
-                    {selectedSupport.canonical_id}
+                    {editorMode === 'create' ? 'Nuevo soporte' : editor.canonical_id || 'Soporte'}
                   </span>
-                  <h2 className="text-xl font-bold text-gray-900">{selectedSupport.name}</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 mt-1">
+                    {editorMode === 'create' ? 'Crear soporte' : editor.name || 'Editar soporte'}
+                  </h2>
                 </div>
-                <button
-                  onClick={() => setSelectedSupport(null)}
-                  className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700"
-                >
+                <button onClick={() => setEditor(null)} className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="space-y-4 text-xs">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 rounded-xl bg-gray-50 border border-gray-100">
-                    <span className="text-gray-400 font-bold uppercase text-[9px] block">Plaza</span>
-                    <span className="text-sm font-bold text-gray-900 mt-0.5 block capitalize">
-                      {selectedSupport.ciudad}
-                    </span>
-                  </div>
-                  <div className="p-3 rounded-xl bg-gray-50 border border-gray-100">
-                    <span className="text-gray-400 font-bold uppercase text-[9px] block">Tipo de Soporte</span>
-                    <span className="text-sm font-bold text-gray-900 mt-0.5 block capitalize">
-                      {selectedSupport.tipo_soporte.replace('_', ' ')}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-xl bg-gray-50 border border-gray-100">
-                  <span className="text-gray-400 font-bold uppercase text-[9px] block">Ubicación exacta</span>
-                  <p className="text-xs font-semibold text-gray-800 mt-1">
-                    {getAddress(selectedSupport)}
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-50/60 border border-emerald-100">
-                  <div>
-                    <span className="text-emerald-900 font-bold block">Estado Comercial</span>
-                    <span className="text-[11px] text-emerald-700">
-                      Actualmente {getDisponibilidad(selectedSupport)} para contratación.
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => {
-                      handleToggleAvailability(selectedSupport);
-                      setSelectedSupport((prev: any) =>
-                        prev
-                          ? {
-                              ...prev,
-                              disponibilidad:
-                                getDisponibilidad(prev) === 'disponible' ? 'reservado' : 'disponible',
-                            }
-                          : null
-                      );
-                    }}
-                    className="px-3 py-1.5 rounded-lg bg-white border border-emerald-200 text-xs font-bold text-emerald-800 hover:bg-emerald-50 transition-colors shadow-2xs"
-                  >
-                    Alternar Estado
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
-                <Link
-                  to={`/inventario?soporte=${encodeURIComponent(selectedSupport.canonical_id)}`}
-                  className="px-4 py-2 bg-gray-900 text-white rounded-xl text-xs font-bold hover:bg-gray-800 transition-colors flex items-center gap-1.5"
-                >
-                  <span>Abrir en Mapa Público</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Modal: Add New Support Demo */}
-        {isAddModalOpen && (
-          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 space-y-4 animate-in fade-in zoom-in-95">
-              <div className="flex items-start justify-between gap-3 border-b border-gray-100 pb-3">
-                <div>
-                  <h2 className="text-lg font-bold text-gray-900">Agregar Nuevo Soporte</h2>
-                  <p className="text-xs text-gray-500">Alta de ubicación para el catálogo comercial.</p>
-                </div>
-                <button
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {newSuccessMsg ? (
-                <div className="p-4 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-bold text-center flex items-center justify-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  {newSuccessMsg}
-                </div>
+              {loadingEditor ? (
+                <div className="py-20 text-center text-gray-500">Cargando soporte...</div>
               ) : (
-                <form onSubmit={handleCreateSupport} className="space-y-3.5 text-xs">
-                  <div>
-                    <Label htmlFor="new-name">Nombre del Soporte</Label>
-                    <Input
-                      id="new-name"
-                      value={newName}
-                      onChange={(e) => setNewName(e.target.value)}
-                      placeholder="Ej. Pantalla Peatonal San Martín"
-                      required
-                    />
+                <div className="grid gap-5 lg:grid-cols-2">
+                  <div className="space-y-5">
+                    <Section title="Datos comerciales">
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="sm:col-span-2">
+                          <Label htmlFor="name">Nombre</Label>
+                          <Input id="name" value={editor.name} onChange={(e) => setEditor({ ...editor, name: e.target.value })} />
+                        </div>
+                        <div>
+                          <Label>Ciudad</Label>
+                          <select className="w-full h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm" value={editor.ciudad} onChange={(e) => setEditor({ ...editor, ciudad: e.target.value as Plaza })}>
+                            <option value="mendoza">Mendoza</option>
+                            <option value="buenos-aires">Buenos Aires</option>
+                          </select>
+                        </div>
+                        <div>
+                          <Label>Familia</Label>
+                          <select className="w-full h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm" value={editor.family} onChange={(e) => setEditor({ ...editor, family: e.target.value as SupportFamily, tipo_soporte: familyToTipo(e.target.value as SupportFamily) })}>
+                            <option value="traditional">traditional</option>
+                            <option value="medium_format">medium_format</option>
+                            <option value="led">led</option>
+                            <option value="led_mobile">led_mobile</option>
+                          </select>
+                        </div>
+                        <div>
+                          <Label>Disponibilidad</Label>
+                          <select className="w-full h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm" value={editor.disponibilidad} onChange={(e) => setEditor({ ...editor, disponibilidad: e.target.value as Disponibilidad })}>
+                            <option value="disponible">disponible</option>
+                            <option value="reservado">reservado</option>
+                          </select>
+                        </div>
+                        <div>
+                          <Label>Activo</Label>
+                          <select className="w-full h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm" value={editor.active ? 'true' : 'false'} onChange={(e) => setEditor({ ...editor, active: e.target.value === 'true' })}>
+                            <option value="true">Sí</option>
+                            <option value="false">No</option>
+                          </select>
+                        </div>
+                        <div>
+                          <Label>Destacado</Label>
+                          <select className="w-full h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm" value={editor.isFeatured ? 'true' : 'false'} onChange={(e) => setEditor({ ...editor, isFeatured: e.target.value === 'true' })}>
+                            <option value="false">No</option>
+                            <option value="true">Sí</option>
+                          </select>
+                        </div>
+                        <div>
+                          <Label>Liberación</Label>
+                          <Input value={editor.availableFrom} onChange={(e) => setEditor({ ...editor, availableFrom: e.target.value })} placeholder="15 OCT 2026" />
+                        </div>
+                        <div>
+                          <Label>Mapa URL</Label>
+                          <Input value={editor.mapa_url} onChange={(e) => setEditor({ ...editor, mapa_url: e.target.value })} />
+                        </div>
+                        <div>
+                          <Label>Latitud</Label>
+                          <Input value={editor.lat} onChange={(e) => setEditor({ ...editor, lat: e.target.value })} />
+                        </div>
+                        <div>
+                          <Label>Longitud</Label>
+                          <Input value={editor.lng} onChange={(e) => setEditor({ ...editor, lng: e.target.value })} />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <Label>Dirección</Label>
+                          <Input value={editor.address} onChange={(e) => setEditor({ ...editor, address: e.target.value })} />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <Label>Descripción</Label>
+                          <Textarea rows={4} value={editor.description} onChange={(e) => setEditor({ ...editor, description: e.target.value })} />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <Label>Características</Label>
+                          <Textarea rows={3} value={editor.characteristics} onChange={(e) => setEditor({ ...editor, characteristics: e.target.value })} />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <Label>Image URLs, una por línea</Label>
+                          <Textarea rows={3} value={editor.imageUrlsText} onChange={(e) => setEditor({ ...editor, imageUrlsText: e.target.value })} />
+                        </div>
+                      </div>
+                    </Section>
+
+                    <Section title="Media">
+                      <div className="space-y-3">
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div>
+                            <Label>Tipo</Label>
+                            <select className="w-full h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm" value={editor.mediaDraft.media_type} onChange={(e) => setEditor({ ...editor, mediaDraft: { ...editor.mediaDraft, media_type: e.target.value as SupportMediaType } })}>
+                              <option value="image">image</option>
+                              <option value="video">video</option>
+                              <option value="document">document</option>
+                            </select>
+                          </div>
+                          <div>
+                            <Label>Orden</Label>
+                            <Input value={editor.mediaDraft.sort_order} onChange={(e) => setEditor({ ...editor, mediaDraft: { ...editor.mediaDraft, sort_order: e.target.value } })} />
+                          </div>
+                          <div className="sm:col-span-2">
+                            <Label>URL</Label>
+                            <Input value={editor.mediaDraft.url} onChange={(e) => setEditor({ ...editor, mediaDraft: { ...editor.mediaDraft, url: e.target.value } })} />
+                          </div>
+                          <div className="sm:col-span-2">
+                            <Label>Título</Label>
+                            <Input value={editor.mediaDraft.title} onChange={(e) => setEditor({ ...editor, mediaDraft: { ...editor.mediaDraft, title: e.target.value } })} />
+                          </div>
+                          <div className="sm:col-span-2">
+                            <Label>Alt</Label>
+                            <Input value={editor.mediaDraft.alt} onChange={(e) => setEditor({ ...editor, mediaDraft: { ...editor.mediaDraft, alt: e.target.value } })} />
+                          </div>
+                          <div className="sm:col-span-2">
+                            <Label>MIME type</Label>
+                            <Input value={editor.mediaDraft.mime_type} onChange={(e) => setEditor({ ...editor, mediaDraft: { ...editor.mediaDraft, mime_type: e.target.value } })} />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Button type="button" variant="outline" size="sm" onClick={() => editor.canonical_id && saveMedia(editor.canonical_id)}>
+                            {editor.mediaDraft.editingId ? 'Actualizar media' : 'Agregar media'}
+                          </Button>
+                          {editor.mediaDraft.editingId && (
+                            <button
+                              type="button"
+                              className="text-xs font-bold text-gray-500 hover:text-gray-900"
+                              onClick={() => setEditor({ ...editor, mediaDraft: { editingId: null, media_type: 'image', url: '', title: '', alt: '', mime_type: '', sort_order: '0' } })}
+                            >
+                              Cancelar edición
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          {editor.media.map((media) => (
+                            <div key={media.id} className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
+                              <div className="min-w-0">
+                                <div className="text-xs font-bold text-gray-900 truncate">{media.title || media.url}</div>
+                                <div className="text-[11px] text-gray-500 truncate">{media.media_type} · {media.url}</div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button type="button" onClick={() => startEditMedia(media)} className="text-xs font-bold text-emerald-700 hover:underline inline-flex items-center gap-1">
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                  Editar
+                                </button>
+                                <button type="button" onClick={() => editor.canonical_id && deleteMedia(media.id, editor.canonical_id)} className="text-xs font-bold text-red-600 hover:underline inline-flex items-center gap-1">
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                  Borrar
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </Section>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label htmlFor="new-plaza">Plaza</Label>
-                      <select
-                        id="new-plaza"
-                        value={newPlaza}
-                        onChange={(e) => setNewPlaza(e.target.value as Plaza)}
-                        className="h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-xs font-semibold outline-none focus:border-emerald-600"
-                      >
-                        <option value="mendoza">Mendoza</option>
-                        <option value="buenos-aires">Buenos Aires</option>
-                      </select>
+                  <div className="space-y-5">
+                    <Section title="Tecnología">
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="sm:col-span-2">
+                          <Label>Resumen técnico</Label>
+                          <Textarea rows={3} value={editor.technical.summary} onChange={(e) => setEditor({ ...editor, technical: { ...editor.technical, summary: e.target.value } })} />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <Label>Medidas</Label>
+                          <Input value={editor.technical.measures} onChange={(e) => setEditor({ ...editor, technical: { ...editor.technical, measures: e.target.value } })} />
+                        </div>
+                        {editor.family === 'led' && (
+                          <>
+                            <div className="sm:col-span-2">
+                              <Label>Resolución</Label>
+                              <Input value={editor.technical.resolution} onChange={(e) => setEditor({ ...editor, technical: { ...editor.technical, resolution: e.target.value } })} />
+                            </div>
+                            <div className="sm:col-span-2">
+                              <Label>Horario de encendido</Label>
+                              <Input value={editor.technical.turn_on_schedule} onChange={(e) => setEditor({ ...editor, technical: { ...editor.technical, turn_on_schedule: e.target.value } })} />
+                            </div>
+                            <div>
+                              <Label>Frecuencia diaria</Label>
+                              <Input value={editor.technical.daily_frequency} onChange={(e) => setEditor({ ...editor, technical: { ...editor.technical, daily_frequency: e.target.value } })} />
+                            </div>
+                            <div>
+                              <Label>Requisitos técnicos</Label>
+                              <Input value={editor.technical.requirements} onChange={(e) => setEditor({ ...editor, technical: { ...editor.technical, requirements: e.target.value } })} />
+                            </div>
+                          </>
+                        )}
+                        {editor.family === 'led_mobile' && (
+                          <>
+                            <div>
+                              <Label>Spot segundos</Label>
+                              <Input value={editor.technical.spot_duration_seconds} onChange={(e) => setEditor({ ...editor, technical: { ...editor.technical, spot_duration_seconds: e.target.value } })} />
+                            </div>
+                            <div>
+                              <Label>Salidas diarias mín.</Label>
+                              <Input value={editor.technical.minimum_daily_outings} onChange={(e) => setEditor({ ...editor, technical: { ...editor.technical, minimum_daily_outings: e.target.value } })} />
+                            </div>
+                            <div>
+                              <Label>Máx. anunciantes</Label>
+                              <Input value={editor.technical.max_advertisers} onChange={(e) => setEditor({ ...editor, technical: { ...editor.technical, max_advertisers: e.target.value } })} />
+                            </div>
+                            <div>
+                              <Label>Duración recorrido hs</Label>
+                              <Input value={editor.technical.route_duration_hours} onChange={(e) => setEditor({ ...editor, technical: { ...editor.technical, route_duration_hours: e.target.value } })} />
+                            </div>
+                            <div className="sm:col-span-2">
+                              <Label>Días de operación</Label>
+                              <Input value={editor.technical.operation_days} onChange={(e) => setEditor({ ...editor, technical: { ...editor.technical, operation_days: e.target.value } })} />
+                            </div>
+                            <div className="sm:col-span-2">
+                              <Label>Modo de video</Label>
+                              <Input value={editor.technical.video_mode} onChange={(e) => setEditor({ ...editor, technical: { ...editor.technical, video_mode: e.target.value } })} />
+                            </div>
+                            <div className="sm:col-span-2">
+                              <Label>Requisitos</Label>
+                              <Textarea rows={3} value={editor.technical.requirements} onChange={(e) => setEditor({ ...editor, technical: { ...editor.technical, requirements: e.target.value } })} />
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </Section>
+
+                    <Section title="Pricing interno">
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div><Label>Exhibition</Label><Input value={editor.pricing.exhibition_price} onChange={(e) => setEditor({ ...editor, pricing: { ...editor.pricing, exhibition_price: e.target.value } })} /></div>
+                        <div><Label>Installation</Label><Input value={editor.pricing.installation_price} onChange={(e) => setEditor({ ...editor, pricing: { ...editor.pricing, installation_price: e.target.value } })} /></div>
+                        <div><Label>Printing</Label><Input value={editor.pricing.printing_price} onChange={(e) => setEditor({ ...editor, pricing: { ...editor.pricing, printing_price: e.target.value } })} /></div>
+                        <div><Label>Monthly</Label><Input value={editor.pricing.monthly_price} onChange={(e) => setEditor({ ...editor, pricing: { ...editor.pricing, monthly_price: e.target.value } })} /></div>
+                        <div><Label>Exclusive</Label><Input value={editor.pricing.exclusive_price} onChange={(e) => setEditor({ ...editor, pricing: { ...editor.pricing, exclusive_price: e.target.value } })} /></div>
+                        <div>
+                          <Label>Currency</Label>
+                          <select className="w-full h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm" value={editor.pricing.currency} onChange={(e) => setEditor({ ...editor, pricing: { ...editor.pricing, currency: e.target.value as 'ARS' | 'USD' } })}>
+                            <option value="ARS">ARS</option>
+                            <option value="USD">USD</option>
+                          </select>
+                        </div>
+                        <div>
+                          <Label>Tax included</Label>
+                          <select className="w-full h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm" value={editor.pricing.tax_included ? 'true' : 'false'} onChange={(e) => setEditor({ ...editor, pricing: { ...editor.pricing, tax_included: e.target.value === 'true' } })}>
+                            <option value="false">No</option>
+                            <option value="true">Sí</option>
+                          </select>
+                        </div>
+                        <div>
+                          <Label>Public price</Label>
+                          <select className="w-full h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm" value={editor.pricing.price_public ? 'true' : 'false'} onChange={(e) => setEditor({ ...editor, pricing: { ...editor.pricing, price_public: e.target.value === 'true' } })}>
+                            <option value="false">No</option>
+                            <option value="true">Sí</option>
+                          </select>
+                        </div>
+                      </div>
+                    </Section>
+
+                    {editor.family === 'led_mobile' && (
+                      <Section title="Ruta LED móvil">
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <div className="sm:col-span-2">
+                            <Label>Nombre de recorrido</Label>
+                            <Input value={editor.route.route_name} onChange={(e) => setEditor({ ...editor, route: { ...editor.route, route_name: e.target.value } })} />
+                          </div>
+                          <div>
+                            <Label>Modo de ruta</Label>
+                            <Input value={editor.route.route_mode} onChange={(e) => setEditor({ ...editor, route: { ...editor.route, route_mode: e.target.value } })} />
+                          </div>
+                          <div>
+                            <Label>Horario</Label>
+                            <Input value={editor.route.schedule} onChange={(e) => setEditor({ ...editor, route: { ...editor.route, schedule: e.target.value } })} />
+                          </div>
+                          <div>
+                            <Label>Duración</Label>
+                            <Input value={editor.route.duration} onChange={(e) => setEditor({ ...editor, route: { ...editor.route, duration: e.target.value } })} />
+                          </div>
+                          <div>
+                            <Label>Horas</Label>
+                            <Input value={editor.route.hours} onChange={(e) => setEditor({ ...editor, route: { ...editor.route, hours: e.target.value } })} />
+                          </div>
+                          <div className="sm:col-span-2">
+                            <Label>Días</Label>
+                            <Input value={editor.route.weekdays} onChange={(e) => setEditor({ ...editor, route: { ...editor.route, weekdays: e.target.value } })} />
+                          </div>
+                          <div>
+                            <Label>Default route</Label>
+                            <select className="w-full h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm" value={editor.route.default_route ? 'true' : 'false'} onChange={(e) => setEditor({ ...editor, route: { ...editor.route, default_route: e.target.value === 'true' } })}>
+                              <option value="true">Sí</option>
+                              <option value="false">No</option>
+                            </select>
+                          </div>
+                          <div>
+                            <Label>Máx. anunciantes</Label>
+                            <Input value={editor.route.max_advertisers} onChange={(e) => setEditor({ ...editor, route: { ...editor.route, max_advertisers: e.target.value } })} />
+                          </div>
+                          <div>
+                            <Label>Spot seg</Label>
+                            <Input value={editor.route.spot_duration_seconds} onChange={(e) => setEditor({ ...editor, route: { ...editor.route, spot_duration_seconds: e.target.value } })} />
+                          </div>
+                          <div>
+                            <Label>Salidas mín.</Label>
+                            <Input value={editor.route.minimum_daily_outings} onChange={(e) => setEditor({ ...editor, route: { ...editor.route, minimum_daily_outings: e.target.value } })} />
+                          </div>
+                          <div className="sm:col-span-2">
+                            <Label>Waypoints JSON</Label>
+                            <Textarea rows={5} value={editor.route.waypointsText} onChange={(e) => setEditor({ ...editor, route: { ...editor.route, waypointsText: e.target.value } })} />
+                          </div>
+                          <div className="sm:col-span-2">
+                            <Label>RoutePath JSON</Label>
+                            <Textarea rows={5} value={editor.route.routePathText} onChange={(e) => setEditor({ ...editor, route: { ...editor.route, routePathText: e.target.value } })} />
+                          </div>
+                        </div>
+                      </Section>
+                    )}
+
+                    <div className="flex items-center justify-end gap-3 pt-1">
+                      <Button type="button" variant="outline" onClick={() => setEditor(null)}>
+                        Cancelar
+                      </Button>
+                      <Button type="button" onClick={submitSupport} disabled={saving}>
+                        <Save className="w-4 h-4" />
+                        {saving ? 'Guardando...' : editorMode === 'create' ? 'Crear soporte' : 'Guardar cambios'}
+                      </Button>
                     </div>
-
-                    <div>
-                      <Label htmlFor="new-tipo">Tipo</Label>
-                      <select
-                        id="new-tipo"
-                        value={newTipo}
-                        onChange={(e) => setNewTipo(e.target.value as TipoSoporte)}
-                        className="h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-xs font-semibold outline-none focus:border-emerald-600"
-                      >
-                        <option value="led">Pantalla LED</option>
-                        <option value="tradicional">Tradicional</option>
-                        <option value="led_movil">LED Móvil</option>
-                      </select>
-                    </div>
                   </div>
-
-                  <div>
-                    <Label htmlFor="new-address">Dirección / Punto Clave</Label>
-                    <Input
-                      id="new-address"
-                      value={newAddress}
-                      onChange={(e) => setNewAddress(e.target.value)}
-                      placeholder="Ej. Av. San Martín y Garibaldi"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="new-format">Formato / Medidas</Label>
-                    <Input
-                      id="new-format"
-                      value={newFormat}
-                      onChange={(e) => setNewFormat(e.target.value)}
-                      placeholder="Ej. 8.00 x 4.00 mts"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
-                    <button
-                      type="button"
-                      onClick={() => setIsAddModalOpen(false)}
-                      className="px-3.5 py-2 rounded-xl border border-gray-200 text-gray-700 font-bold hover:bg-gray-50"
-                    >
-                      Cancelar
-                    </button>
-                    <Button type="submit">
-                      Guardar Soporte
-                    </Button>
-                  </div>
-                </form>
+                </div>
               )}
             </div>
           </div>
