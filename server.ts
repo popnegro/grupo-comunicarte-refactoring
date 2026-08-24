@@ -25,7 +25,7 @@ import {
   patchSupportRouteByAdmin,
 } from './src/server/adminService';
 
-async function startServer() {
+export async function createApp() {
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
 
@@ -36,7 +36,7 @@ async function startServer() {
     await initDatabase();
   } catch (err) {
     console.error('Failed to initialize database during startup:', err);
-    process.exit(1); // Startup must fail if DB is mandatory (P1-5)
+    throw err;
   }
 
   // API health check with DB connectivity check (P1-5)
@@ -307,12 +307,19 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on http://0.0.0.0:${PORT}`);
-  });
+  return app;
 }
 
-startServer().catch((err) => {
-  console.error('Failed to start server:', err);
-  process.exit(1);
-} );
+if (!process.env.VERCEL) {
+  createApp()
+    .then((app) => {
+      const PORT = Number(process.env.PORT) || 3000;
+      app.listen(PORT, '0.0.0.0', () => {
+        console.log(`Server running on http://0.0.0.0:${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error('Failed to start server:', err);
+      process.exit(1);
+    });
+}
