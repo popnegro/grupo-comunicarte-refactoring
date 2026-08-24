@@ -7,66 +7,85 @@ export default function Soluciones() {
     {
       title: 'Campañas de Cobertura Masiva',
       description: 'Maximizamos el alcance de tu marca utilizando circuitos estratégicos de cartelería tradicional en los principales nudos viales y accesos.',
-      icon: Zap
+      icon: Zap,
+      label: 'OOH'
     },
     {
       title: 'Activaciones Digitales DOOH',
-      description: 'Formatos dinámicos en pantallas LED de alta resolución. Permiten actualización de creatividades en tiempo real y comunicación por franjas horarias.',
-      icon: Lightbulb
+      description: 'Formatos dinámicos en pantallas LED de alta resolución, con contenidos flexibles y actualización por franjas horarias.',
+      icon: Lightbulb,
+      label: 'DOOH'
     },
     {
-      title: 'Circuitos Móviles (Camiones LED)',
-      description: 'Llevamos tu mensaje directamente a zonas de alto tránsito peatonal y vehicular, ideal para lanzamientos, eventos y posicionamiento de marca en movimiento.',
-      icon: TrendingUp
+      title: 'Circuitos Móviles',
+      description: 'Llevamos tu mensaje directamente a zonas de alto tránsito peatonal y vehicular, ideal para lanzamientos, eventos y posicionamiento.',
+      icon: TrendingUp,
+      label: 'LED Móvil'
     }
   ];
 
   return (
     <div className="flex flex-col w-full bg-white">
-      {/* Hero Section */}
-      <section 
-        className="relative pt-32 pb-24 px-4 sm:px-6 lg:px-8 border-b border-gray-100 bg-gray-50"
-        style={{
-          backgroundImage: 'url(/brand/pattern-light.webp)',
-          backgroundRepeat: 'repeat'
-        }}
-      >
-        <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px]"></div>
+      <section className="relative overflow-hidden border-b border-gray-200 bg-[#F9F9F9] px-4 py-24 sm:px-6 lg:px-8 md:py-32">
+        <div className="absolute inset-0 bg-[url('/brand/pattern-light.webp')] bg-repeat opacity-30" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/80 to-[#F9F9F9]" />
         <div className="relative max-w-7xl mx-auto z-10 text-center">
-          <span className="text-red-600 font-bold tracking-wider uppercase text-sm mb-4 block">Nuestros Servicios</span>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-6">
-            Soluciones
-          </h1>
-          <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
-            Grupo Comunicarte ofrece soluciones de comunicación y publicidad exterior (OOH) y digital (DOOH), diseñadas para conectar tu marca con la audiencia correcta.
+          <span className="inline-flex items-center gap-2 text-red-600 font-bold tracking-[0.16em] uppercase text-xs mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
+            Nuestros servicios
+          </span>
+          <h1 className="text-4xl md:text-6xl font-bold text-gray-950 tracking-[-0.035em] mb-6">Soluciones para ganar presencia.</h1>
+          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Combinamos medios OOH, tecnología DOOH y circuitos móviles para conectar tu marca con la audiencia correcta.
           </p>
         </div>
       </section>
 
-      {/* Solutions Grid */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-12">
+          <div>
+            <p className="text-eyebrow mb-3">Elegí tu formato</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Una solución para cada objetivo</h2>
+          </div>
+          <p className="text-gray-500 max-w-md md:text-right leading-relaxed">Desde cobertura masiva hasta experiencias digitales y campañas en movimiento.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {soluciones.map((solucion, idx) => {
             const Icon = solucion.icon;
             return (
-              <div key={idx} className="flex flex-col items-start bg-gray-50 p-8 rounded-3xl border border-gray-100">
-                <div className="w-14 h-14 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mb-6 border border-red-100">
-                  <Icon className="w-7 h-7" />
+              <article key={idx} className="group flex flex-col bg-white p-8 md:p-9 rounded-3xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 min-h-[360px]">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="w-14 h-14 bg-gray-950 text-white rounded-2xl flex items-center justify-center group-hover:bg-red-600 transition-colors">
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-gray-400 border border-gray-200 rounded-full px-2.5 py-1">{solucion.label}</span>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{solucion.title}</h3>
-                <p className="text-gray-500 leading-relaxed mb-6 flex-grow">
-                  {solucion.description}
-                </p>
-              </div>
+                <div className="mt-auto pt-12">
+                  <h3 className="text-xl font-bold text-gray-950 mb-3">{solucion.title}</h3>
+                  <p className="text-gray-500 leading-relaxed">{solucion.description}</p>
+                </div>
+              </article>
             );
           })}
         </div>
-        
-        <div className="mt-16 text-center">
-            <Link to="/inventario" className={buttonStyles({ size: "lg", className: "rounded-full" })}>
-                Explorar Inventario
-                <ArrowRight className="w-4 h-4 ml-2" />
-            </Link>
+
+        <div className="mt-14 flex justify-center">
+          <Link to="/inventario" className={buttonStyles({ size: 'lg', className: 'rounded-full px-7' })}>
+            Explorar inventario <ArrowRight className="w-4 h-4 ml-2" />
+          </Link>
+        </div>
+      </section>
+
+      <section className="border-t border-gray-200 bg-gray-950 py-20 px-4 sm:px-6 lg:px-8 text-white">
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-red-400 mb-3">Planificá con contexto</p>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Encontrá el soporte que mejor acompaña tu objetivo.</h2>
+          </div>
+          <Link to="/inventario" className={buttonStyles({ variant: 'secondary', size: 'lg', className: 'rounded-full bg-white text-gray-950 hover:bg-gray-100 shrink-0' })}>
+            Ver soportes <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </section>
     </div>
