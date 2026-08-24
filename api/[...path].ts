@@ -1,6 +1,25 @@
-import { createApp } from '../dist/server.cjs';
+function useNeonPooler(connectionString: string): string {
+  try {
+    const url = new URL(connectionString);
+    if (!url.hostname.endsWith('.neon.tech')) return connectionString;
+    if (url.hostname.includes('-pooler.')) return connectionString;
 
-const appPromise = createApp();
+    const endpoint = url.hostname.split('.')[0];
+    if (!endpoint.startsWith('ep-')) return connectionString;
+
+    url.hostname = `${endpoint}-pooler.${url.hostname.split('.').slice(1).join('.')}`;
+    return url.toString();
+  } catch {
+    return connectionString;
+  }
+}
+
+const configuredDatabaseUrl = process.env.DATABASE_URL;
+if (configuredDatabaseUrl) {
+  process.env.DATABASE_URL = useNeonPooler(configuredDatabaseUrl);
+}
+
+const appPromise = import('../dist/server.cjs').then(({ createApp }) => createApp());
 
 export default async function handler(req: any, res: any) {
   try {
