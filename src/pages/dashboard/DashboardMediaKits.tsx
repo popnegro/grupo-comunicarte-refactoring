@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
+import { apiFetch } from '../../lib/api';
 
 export default function DashboardMediaKits() {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ export default function DashboardMediaKits() {
 
     async function fetchRequests() {
       try {
-        const res = await fetch('/api/admin/requests', {
+        const res = await apiFetch('/api/admin/requests', {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.status === 401) {
@@ -179,11 +180,10 @@ export default function DashboardMediaKits() {
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           <button
             onClick={() => setStatusFilter('todos')}
-            className={`p-3.5 rounded-2xl border text-left transition-all ${
-              statusFilter === 'todos'
-                ? 'bg-gray-900 text-white border-gray-900 shadow-xs'
-                : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
-            }`}
+            className={`p-3.5 rounded-2xl border text-left transition-all ${statusFilter === 'todos'
+              ? 'bg-gray-900 text-white border-gray-900 shadow-xs'
+              : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+              }`}
           >
             <span className="text-[10px] font-bold uppercase tracking-wider block opacity-70">
               Todas
@@ -193,11 +193,10 @@ export default function DashboardMediaKits() {
 
           <button
             onClick={() => setStatusFilter('nuevo')}
-            className={`p-3.5 rounded-2xl border text-left transition-all ${
-              statusFilter === 'nuevo'
-                ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                : 'bg-white text-gray-700 border-gray-200 hover:border-emerald-200'
-            }`}
+            className={`p-3.5 rounded-2xl border text-left transition-all ${statusFilter === 'nuevo'
+              ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+              : 'bg-white text-gray-700 border-gray-200 hover:border-emerald-200'
+              }`}
           >
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider block opacity-80">
@@ -212,11 +211,10 @@ export default function DashboardMediaKits() {
 
           <button
             onClick={() => setStatusFilter('contactado')}
-            className={`p-3.5 rounded-2xl border text-left transition-all ${
-              statusFilter === 'contactado'
-                ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
-                : 'bg-white text-gray-700 border-gray-200 hover:border-amber-200'
-            }`}
+            className={`p-3.5 rounded-2xl border text-left transition-all ${statusFilter === 'contactado'
+              ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
+              : 'bg-white text-gray-700 border-gray-200 hover:border-amber-200'
+              }`}
           >
             <span className="text-[10px] font-bold uppercase tracking-wider block opacity-70">
               Contactados
@@ -226,11 +224,10 @@ export default function DashboardMediaKits() {
 
           <button
             onClick={() => setStatusFilter('enviado')}
-            className={`p-3.5 rounded-2xl border text-left transition-all ${
-              statusFilter === 'enviado'
-                ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                : 'bg-white text-gray-700 border-gray-200 hover:border-blue-200'
-            }`}
+            className={`p-3.5 rounded-2xl border text-left transition-all ${statusFilter === 'enviado'
+              ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+              : 'bg-white text-gray-700 border-gray-200 hover:border-blue-200'
+              }`}
           >
             <span className="text-[10px] font-bold uppercase tracking-wider block opacity-70">
               Kit Enviado
@@ -240,11 +237,10 @@ export default function DashboardMediaKits() {
 
           <button
             onClick={() => setStatusFilter('cerrado')}
-            className={`p-3.5 rounded-2xl border text-left transition-all ${
-              statusFilter === 'cerrado'
-                ? 'bg-gray-700 text-white border-gray-700 shadow-xs'
-                : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
-            }`}
+            className={`p-3.5 rounded-2xl border text-left transition-all ${statusFilter === 'cerrado'
+              ? 'bg-gray-700 text-white border-gray-700 shadow-xs'
+              : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+              }`}
           >
             <span className="text-[10px] font-bold uppercase tracking-wider block opacity-70">
               Cerrados
@@ -364,15 +360,14 @@ export default function DashboardMediaKits() {
                         onChange={(e) =>
                           handleStatusChange(lead.id, e.target.value)
                         }
-                        className={`text-xs font-bold py-1 px-2.5 rounded-lg border outline-none cursor-pointer ${
-                          lead.status === 'nuevo'
-                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                            : lead.status === 'contactado'
+                        className={`text-xs font-bold py-1 px-2.5 rounded-lg border outline-none cursor-pointer ${lead.status === 'nuevo'
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                          : lead.status === 'contactado'
                             ? 'bg-amber-50 text-amber-800 border-amber-200'
                             : lead.status === 'enviado'
-                            ? 'bg-blue-50 text-blue-800 border-blue-200'
-                            : 'bg-gray-100 text-gray-700 border-gray-200'
-                        }`}
+                              ? 'bg-blue-50 text-blue-800 border-blue-200'
+                              : 'bg-gray-100 text-gray-700 border-gray-200'
+                          }`}
                       >
                         <option value="nuevo">Nuevo</option>
                         <option value="contactado">Contactado</option>

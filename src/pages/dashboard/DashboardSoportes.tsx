@@ -13,6 +13,7 @@ import {
   type SupportMediaType,
   type TipoSoporte,
 } from '../../types';
+import { apiFetch } from '../../lib/api';
 
 type Mode = 'create' | 'edit';
 
@@ -371,7 +372,7 @@ export default function DashboardSoportes() {
 
     async function fetchSupports() {
       try {
-        const res = await fetch('/api/admin/supports', {
+        const res = await apiFetch('/api/admin/supports', {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.status === 401) {
@@ -436,7 +437,7 @@ export default function DashboardSoportes() {
       if (mode === 'create') {
         setEditor(blankEditor());
       } else if (support) {
-        const res = await fetch(`/api/admin/supports/${support.canonical_id}`, {
+        const res = await apiFetch(`/api/admin/supports/${support.canonical_id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const json = await res.json();
@@ -453,7 +454,7 @@ export default function DashboardSoportes() {
   }
 
   async function refreshSupportDetail(canonicalId: string) {
-    const res = await fetch(`/api/admin/supports/${canonicalId}`, {
+    const res = await apiFetch(`/api/admin/supports/${canonicalId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const json = await res.json();
@@ -547,12 +548,12 @@ export default function DashboardSoportes() {
         pricing: source.pricing || {},
         ...(source.family === 'led_mobile'
           ? {
-              route: {
-                ...(source.route || {}),
-                routePath: Array.isArray(source.routePath) ? source.routePath : [],
-                waypoints: Array.isArray(source.waypoints) ? source.waypoints : [],
-              },
-            }
+            route: {
+              ...(source.route || {}),
+              routePath: Array.isArray(source.routePath) ? source.routePath : [],
+              waypoints: Array.isArray(source.waypoints) ? source.waypoints : [],
+            },
+          }
           : {}),
       };
 
@@ -721,11 +722,10 @@ export default function DashboardSoportes() {
                   key={value}
                   type="button"
                   onClick={() => setPlaza(value as typeof plaza)}
-                  className={`rounded-md px-3 py-2 text-xs font-bold transition ${
-                    plaza === value
-                      ? 'bg-gray-900 text-white shadow-2xs'
-                      : 'text-gray-600 hover:bg-white hover:text-gray-900'
-                  }`}
+                  className={`rounded-md px-3 py-2 text-xs font-bold transition ${plaza === value
+                    ? 'bg-gray-900 text-white shadow-2xs'
+                    : 'text-gray-600 hover:bg-white hover:text-gray-900'
+                    }`}
                 >
                   {label}
                 </button>
@@ -861,9 +861,8 @@ export default function DashboardSoportes() {
                         <button
                           type="button"
                           onClick={() => toggleAvailability(item)}
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold ${
-                            disp === 'disponible' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                          }`}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold ${disp === 'disponible' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                            }`}
                         >
                           <span className={`w-2 h-2 rounded-full ${disp === 'disponible' ? 'bg-emerald-600' : 'bg-amber-600'}`} />
                           {disp === 'disponible' ? 'Disponible' : 'Reservado'}
