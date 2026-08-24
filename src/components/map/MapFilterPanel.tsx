@@ -1,6 +1,6 @@
 import { Plaza, TipoSoporte, Disponibilidad } from '../../types';
 import { cn } from '../../lib/utils';
-import { MapPin, MonitorPlay, PanelTop, AlignLeft, Search, X, CheckCircle2, Lock } from 'lucide-react';
+import { MapPin, MonitorPlay, PanelTop, AlignLeft, Search, X, CheckCircle2, Lock, SlidersHorizontal } from 'lucide-react';
 import { ReactNode } from 'react';
 import { Input } from '../ui/Input';
 import { buttonStyles } from '../ui/Button';
@@ -36,122 +36,83 @@ export function MapFilterPanel({
   const { selectedCount } = useSelection();
 
   return (
-    <div className="p-6 flex flex-col h-full bg-white">
-    
-      {/* Search */}
+    <div className="flex h-full flex-col bg-white p-5 sm:p-6">
+      <div className="mb-6 flex items-center gap-2">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-950 text-white">
+          <SlidersHorizontal className="h-4 w-4" />
+        </div>
+        <div>
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-emerald-700">Explorador comercial</p>
+          <h2 className="text-sm font-black tracking-tight text-gray-950">Filtrar inventario</h2>
+        </div>
+      </div>
+
       <div className="relative mb-6">
-        <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
         <Input
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          placeholder="Buscar por nombre, ubicación o tipo..."
+          placeholder="Buscar soporte o ubicación..."
           aria-label="Buscar soportes"
-          className="pl-10 pr-9"
+          className="h-11 rounded-2xl border-gray-200 bg-gray-50 pl-10 pr-9 text-xs font-medium focus:bg-white"
         />
         {searchText && (
           <button
             onClick={() => setSearchText('')}
             aria-label="Limpiar búsqueda"
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-black rounded-full hover:bg-gray-100"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-gray-400 transition hover:bg-gray-200 hover:text-black"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="h-3.5 w-3.5" />
           </button>
         )}
       </div>
 
-      <div className="space-y-8 overflow-y-auto">
-        {/* Plaza Filter */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400">Plaza</h3>
-          <div className="flex flex-col gap-2">
-            <FilterButton
-              active={selectedPlaza === 'todos'}
-              onClick={() => setSelectedPlaza('todos')}
-              label="Todas las Plazas"
-              icon={<MapPin className="w-4 h-4" />}
-            />
-            <FilterButton
-              active={selectedPlaza === 'mendoza'}
-              onClick={() => setSelectedPlaza('mendoza')}
-              label="Mendoza"
-            />
-            <FilterButton
-              active={selectedPlaza === 'buenos-aires'}
-              onClick={() => setSelectedPlaza('buenos-aires')}
-              label="Buenos Aires"
-            />
-          </div>
-        </div>
+      <div className="space-y-7 overflow-y-auto pr-1">
+        <FilterGroup title="Plaza">
+          <FilterButton active={selectedPlaza === 'todos'} onClick={() => setSelectedPlaza('todos')} label="Todas las Plazas" icon={<MapPin className="h-4 w-4" />} />
+          <FilterButton active={selectedPlaza === 'mendoza'} onClick={() => setSelectedPlaza('mendoza')} label="Mendoza" />
+          <FilterButton active={selectedPlaza === 'buenos-aires'} onClick={() => setSelectedPlaza('buenos-aires')} label="Buenos Aires" />
+        </FilterGroup>
 
-        {/* Tipo de Soporte Filter */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400">Tipo de Soporte</h3>
-          <div className="flex flex-col gap-2">
-            <FilterButton
-              active={selectedTipo === 'todos'}
-              onClick={() => setSelectedTipo('todos')}
-              label="Todos los Soportes"
-              icon={<AlignLeft className="w-4 h-4" />}
-            />
-            <FilterButton
-              active={selectedTipo === 'tradicional'}
-              onClick={() => setSelectedTipo('tradicional')}
-              label="Tradicionales"
-              icon={<PanelTop className="w-4 h-4" />}
-            />
-            <FilterButton
-              active={selectedTipo === 'led'}
-              onClick={() => setSelectedTipo('led')}
-              label="Pantallas LED"
-              icon={<MonitorPlay className="w-4 h-4" />}
-            />
-            <FilterButton
-              active={selectedTipo === 'led_movil'}
-              onClick={() => setSelectedTipo('led_movil')}
-              label="LED Móvil"
-              icon={<MonitorPlay className="w-4 h-4" />}
-            />
-          </div>
-        </div>
+        <FilterGroup title="Tipo de soporte">
+          <FilterButton active={selectedTipo === 'todos'} onClick={() => setSelectedTipo('todos')} label="Todos los soportes" icon={<AlignLeft className="h-4 w-4" />} />
+          <FilterButton active={selectedTipo === 'tradicional'} onClick={() => setSelectedTipo('tradicional')} label="Tradicionales" icon={<PanelTop className="h-4 w-4" />} />
+          <FilterButton active={selectedTipo === 'led'} onClick={() => setSelectedTipo('led')} label="Pantallas LED" icon={<MonitorPlay className="h-4 w-4" />} />
+          <FilterButton active={selectedTipo === 'led_movil'} onClick={() => setSelectedTipo('led_movil')} label="LED Móvil" icon={<MonitorPlay className="h-4 w-4" />} />
+        </FilterGroup>
 
-        {/* Disponibilidad Filter */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400">Disponibilidad</h3>
-          <div className="flex flex-col gap-2">
-            <FilterButton
-              active={selectedDisponibilidad === 'todos'}
-              onClick={() => setSelectedDisponibilidad('todos')}
-              label="Todos"
-            />
-            <FilterButton
-              active={selectedDisponibilidad === 'disponible'}
-              onClick={() => setSelectedDisponibilidad('disponible')}
-              label="Disponibles"
-              icon={<CheckCircle2 className="w-4 h-4" />}
-            />
-            <FilterButton
-              active={selectedDisponibilidad === 'reservado'}
-              onClick={() => setSelectedDisponibilidad('reservado')}
-              label="Reservados"
-              icon={<Lock className="w-4 h-4" />}
-            />
-          </div>
-        </div>
+        <FilterGroup title="Disponibilidad">
+          <FilterButton active={selectedDisponibilidad === 'todos'} onClick={() => setSelectedDisponibilidad('todos')} label="Todos" />
+          <FilterButton active={selectedDisponibilidad === 'disponible'} onClick={() => setSelectedDisponibilidad('disponible')} label="Disponibles" icon={<CheckCircle2 className="h-4 w-4" />} />
+          <FilterButton active={selectedDisponibilidad === 'reservado'} onClick={() => setSelectedDisponibilidad('reservado')} label="Reservados" icon={<Lock className="h-4 w-4" />} />
+        </FilterGroup>
       </div>
 
-      <div className="mt-auto pt-8 space-y-3">
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 flex items-center justify-between">
-          <span className="text-sm text-gray-600 font-medium">Resultados</span>
-          <span className="bg-black text-white px-2.5 py-0.5 rounded-full text-xs font-bold">{resultsCount}</span>
+      <div className="mt-auto space-y-3 border-t border-gray-100 pt-5">
+        <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3">
+          <div>
+            <span className="block text-[9px] font-extrabold uppercase tracking-[0.14em] text-gray-400">Inventario visible</span>
+            <span className="text-xs font-bold text-gray-700">Resultados encontrados</span>
+          </div>
+          <span className="rounded-xl bg-gray-950 px-3 py-1.5 text-xs font-black text-white">{resultsCount}</span>
         </div>
 
         <button
           onClick={onOpenMediakit}
-          className={buttonStyles({ className: 'w-full', variant: selectedCount > 0 ? 'default' : 'outline' })}
+          className={buttonStyles({ className: 'w-full rounded-2xl py-3.5', variant: selectedCount > 0 ? 'default' : 'outline' })}
         >
           {selectedCount > 0 ? `Solicitar Media Kit (${selectedCount})` : 'Solicitar Media Kit'}
         </button>
       </div>
+    </div>
+  );
+}
+
+function FilterGroup({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="space-y-2.5">
+      <h3 className="px-1 text-[9px] font-extrabold uppercase tracking-[0.16em] text-gray-400">{title}</h3>
+      <div className="space-y-1">{children}</div>
     </div>
   );
 }
@@ -161,14 +122,14 @@ function FilterButton({ active, onClick, label, icon }: { active: boolean, onCli
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all w-full text-left",
+        'group flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-left text-xs font-bold transition-all',
         active
-          ? "bg-black text-white shadow-sm"
-          : "bg-white text-gray-600 hover:bg-gray-100 border border-transparent hover:border-gray-200"
+          ? 'bg-gray-950 text-white shadow-md shadow-gray-950/10'
+          : 'border border-transparent bg-white text-gray-600 hover:border-gray-200 hover:bg-gray-50 hover:text-gray-950'
       )}
     >
-      {icon && <span className={cn("shrink-0", active ? "text-white" : "text-gray-400")}>{icon}</span>}
-      {!icon && <span className="w-4"></span>}
+      {icon && <span className={cn('shrink-0', active ? 'text-emerald-400' : 'text-gray-400 group-hover:text-gray-700')}>{icon}</span>}
+      {!icon && <span className="w-4 shrink-0" />}
       {label}
     </button>
   );
