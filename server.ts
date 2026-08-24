@@ -27,7 +27,6 @@ import {
 
 export async function createApp() {
   const app = express();
-  const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json());
 
@@ -172,7 +171,7 @@ export async function createApp() {
       console.error(`Error deleting support ${req.params.id}:`, err);
       const msg = err.message || '';
       const status = msg.includes('no encontrado') ? 404 : 500;
-      res.status(status).json({ status: 'error', message: msg || 'Error al desactivar el soporte.' });
+      res.status(status).json({ status, json: true });
     }
   });
 
