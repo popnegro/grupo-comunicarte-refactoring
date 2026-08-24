@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogIn, AlertCircle } from 'lucide-react';
 import { buttonStyles } from '../../components/ui/Button';
+import { apiFetch } from '../../lib/api';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ export default function Login() {
     setError(null);
 
     try {
-      const res = await fetch('/api/admin/login', {
+      const res = await apiFetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -73,7 +74,7 @@ export default function Login() {
                 placeholder="admin"
               />
             </div>
-            
+
             <div>
               <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 Contraseña
@@ -103,7 +104,7 @@ export default function Login() {
             </button>
           </form>
         </div>
-        
+
         <p className="mt-8 text-center text-xs font-medium text-muted-foreground">
           &copy; {new Date().getFullYear()} Grupo Comunicarte.
         </p>

@@ -10,6 +10,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
 import { Badge } from '../../components/ui/Badge';
+import { apiFetch } from '../../lib/api';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -41,8 +42,8 @@ export default function Dashboard() {
       try {
         const headers = { Authorization: `Bearer ${token}` };
         const [statsRes, reqsRes] = await Promise.all([
-          fetch('/api/admin/stats', { headers }),
-          fetch('/api/admin/requests', { headers }),
+          apiFetch('/api/admin/stats', { headers }),
+          apiFetch('/api/admin/requests', { headers }),
         ]);
 
         if (statsRes.status === 401 || reqsRes.status === 401) {

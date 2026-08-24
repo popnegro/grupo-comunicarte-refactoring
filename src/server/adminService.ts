@@ -27,11 +27,11 @@ import { eq } from 'drizzle-orm';
 
 const ADMIN_USER = process.env.ADMIN_USER;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-const ADMIN_SECRET = process.env.ADMIN_SECRET;
+const ADMIN_SECRET = process.env.JWT_SECRET || process.env.ADMIN_SECRET;
 
 if (!ADMIN_USER || !ADMIN_PASSWORD || !ADMIN_SECRET) {
   throw new Error(
-    'FATAL: ADMIN_USER, ADMIN_PASSWORD and ADMIN_SECRET environment variables are required.'
+    'FATAL: ADMIN_USER, ADMIN_PASSWORD and JWT_SECRET (or legacy ADMIN_SECRET) environment variables are required.'
   );
 }
 
