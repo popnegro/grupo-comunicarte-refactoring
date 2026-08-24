@@ -470,7 +470,7 @@ export default function DashboardSoportes() {
       const payload = mapCorePayload(editor);
       const url = editorMode === 'create' ? '/api/admin/supports' : `/api/admin/supports/${editor.canonical_id}`;
       const method = editorMode === 'create' ? 'POST' : 'PATCH';
-      const res = await fetch(url, {
+      const res = await apiFetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
@@ -498,7 +498,7 @@ export default function DashboardSoportes() {
   async function toggleActive(item: any) {
     try {
       const next = item.active === false;
-      const res = await fetch(`/api/admin/supports/${item.canonical_id}`, {
+      const res = await apiFetch(`/api/admin/supports/${item.canonical_id}`, {
         method: next ? 'PATCH' : 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -517,7 +517,7 @@ export default function DashboardSoportes() {
 
   async function duplicateSupport(item: any) {
     try {
-      const detailRes = await fetch(`/api/admin/supports/${item.canonical_id}`, {
+      const detailRes = await apiFetch(`/api/admin/supports/${item.canonical_id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const detailJson = await detailRes.json();
@@ -557,7 +557,7 @@ export default function DashboardSoportes() {
           : {}),
       };
 
-      const res = await fetch('/api/admin/supports', {
+      const res = await apiFetch('/api/admin/supports', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -582,7 +582,7 @@ export default function DashboardSoportes() {
   async function toggleAvailability(item: any) {
     try {
       const next = item.disponibilidad === 'disponible' ? 'reservado' : 'disponible';
-      const res = await fetch(`/api/admin/supports/${item.canonical_id}`, {
+      const res = await apiFetch(`/api/admin/supports/${item.canonical_id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -601,7 +601,7 @@ export default function DashboardSoportes() {
 
   async function deleteMedia(mediaId: number, canonicalId: string) {
     try {
-      const res = await fetch(`/api/admin/supports/${canonicalId}/media/${mediaId}`, {
+      const res = await apiFetch(`/api/admin/supports/${canonicalId}/media/${mediaId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -628,7 +628,7 @@ export default function DashboardSoportes() {
       };
       const url = draft.editingId ? `/api/admin/supports/${canonicalId}/media/${draft.editingId}` : `/api/admin/supports/${canonicalId}/media`;
       const method = draft.editingId ? 'PATCH' : 'POST';
-      const res = await fetch(url, {
+      const res = await apiFetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
