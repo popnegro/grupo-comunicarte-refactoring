@@ -5,7 +5,8 @@
       "includeFiles": "dist/server.cjs"
     }
   },
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/[...path].ts" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
