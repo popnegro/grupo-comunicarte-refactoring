@@ -28,6 +28,33 @@ import {
 export async function createApp() {
   const app = express();
 
+  // CORS for the production frontend and local development. Keep the API
+  // explicit rather than using a wildcard so credentialed/authenticated
+  // requests cannot be opened to arbitrary origins.
+  const allowedOrigins = (process.env.CORS_ORIGINS || 'https://grupocomunicarte.vercel.app,http://localhost:5173')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin && allowedOrigins.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Vary', 'Origin');
+      res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    }
+
+    if (req.method === 'OPTIONS') {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return res.sendStatus(204);
+      }
+      return res.sendStatus(403);
+    }
+
+    next();
+  });
+
   app.use(express.json());
 
   // Initialize Database & Idempotent Seed
@@ -180,7 +207,7 @@ export async function createApp() {
       const media = await getSupportMediaByAdmin(req.params.id);
       res.status(200).json({ status: 'success', data: media });
     } catch (err: any) {
-      console.error(`Error fetching support media ${req.params.id}:`, err);
+      console.error(`Error fetching admin support media ${req.params.id}:`, err);
       res.status(500).json({ status: 'error', message: 'Error al obtener media.' });
     }
   });
@@ -228,7 +255,7 @@ export async function createApp() {
       const pricing = await getSupportPricingByAdmin(req.params.id);
       res.status(200).json({ status: 'success', data: pricing });
     } catch (err: any) {
-      console.error(`Error fetching support pricing ${req.params.id}:`, err);
+      console.error(`Error fetching admin support pricing ${req.params.id}:`, err);
       res.status(500).json({ status: 'error', message: 'Error al obtener pricing.' });
     }
   });
@@ -241,7 +268,7 @@ export async function createApp() {
       console.error(`Error updating support pricing ${req.params.id}:`, err);
       const msg = err.message || '';
       const status = msg.includes('negativo') || msg.includes('inválido') ? 400 : 500;
-      res.status(status).json({ status: 'error', message: msg || 'Error al actualizar pricing.' });
+      res.status(status).json({ status: 'error', message: msg || 'Error al actualizar el pricing.' });
     }
   });
 
@@ -250,7 +277,7 @@ export async function createApp() {
       const route = await getSupportRouteByAdmin(req.params.id);
       res.status(200).json({ status: 'success', data: route });
     } catch (err: any) {
-      console.error(`Error fetching support route ${req.params.id}:`, err);
+      console.error(`Error fetching admin support route ${req.params.id}:`, err);
       res.status(500).json({ status: 'error', message: 'Error al obtener la ruta.' });
     }
   });
@@ -260,7 +287,7 @@ export async function createApp() {
       const route = await patchSupportRouteByAdmin(req.params.id, req.body || {});
       res.status(200).json({ status: 'success', data: route });
     } catch (err: any) {
-      console.error(`Error updating support route ${req.params.id}:`, err);
+      console.error(`Error updating admin support route ${req.params.id}:`, err);
       const msg = err.message || '';
       const status = msg.includes('inválido') ? 400 : 500;
       res.status(status).json({ status: 'error', message: msg || 'Error al actualizar la ruta.' });
