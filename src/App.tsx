@@ -15,6 +15,8 @@ import Inventario from './pages/Inventario';
 import Soportes from './pages/Soportes';
 import Nosotros from './pages/Nosotros';
 import Soluciones from './pages/Soluciones';
+import Contacto from './pages/Contacto';
+import Seleccion from './pages/Seleccion';
 
 // Auth & Dashboard
 import Login from './pages/auth/Login';
@@ -33,6 +35,8 @@ function PublicRoutes() {
           <Route path="/nosotros" element={<PageTransition><Nosotros /></PageTransition>} />
           <Route path="/soluciones" element={<PageTransition><Soluciones /></PageTransition>} />
           <Route path="/inventario" element={<PageTransition><Inventario /></PageTransition>} />
+          <Route path="/contacto" element={<PageTransition><Contacto /></PageTransition>} />
+          <Route path="/seleccion" element={<PageTransition><Seleccion /></PageTransition>} />
         </Routes>
       </AnimatePresence>
     </Layout>

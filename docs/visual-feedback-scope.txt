@@ -1,0 +1,5 @@
+Visual feedback implementation is being developed on feat/visual-feedback-implementation.
+
+Current scope: contextual navbar CTA, persistent selection viewer, standard contact page, light global background, dark interior heroes, footer contact continuity.
+
+Cards and Dashboard remain gated on real inventory consolidation.
