@@ -2,14 +2,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button, buttonStyles } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { ArrowRight, MapPin, MonitorPlay, MoveRight } from 'lucide-react';
-import { fixedLocations, mobileRoutes } from '../data/inventory';
 import { InventoryItem, getDisponibilidad } from '../types';
 import { cn } from '../lib/utils';
+import { useInventory } from '../hooks/useInventory';
 
 export default function Home() {
   const navigate = useNavigate();
-  const allItems: InventoryItem[] = [...fixedLocations, ...mobileRoutes];
-  const featuredItems = allItems.filter(item => item.isFeatured || (item as any).IsFeatured).slice(0, 9);
+  const { items: inventoryItems, loading: inventoryLoading } = useInventory();
+  const allItems: InventoryItem[] = inventoryItems;
+  const featuredItems = allItems.filter(item => item.isFeatured).slice(0, 9);
 
   return (
     <div className="flex flex-col w-full bg-white">
@@ -68,21 +69,25 @@ export default function Home() {
         </div>
       </section>
 
-      {featuredItems.length > 0 && (
+      {(inventoryLoading || featuredItems.length > 0) && (
         <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
           <div className="mb-12 flex flex-col md:flex-row md:justify-between md:items-end gap-5">
             <div><p className="text-eyebrow mb-3">Selección premium</p><h2 className="text-section-title text-3xl md:text-4xl mb-3">Soportes destacados</h2><p className="text-gray-500 text-base">Ubicaciones con alto potencial de impacto visual.</p></div>
             <Link to="/inventario" className="hidden md:flex items-center text-sm font-bold uppercase tracking-wider gap-2 hover:gap-3 transition-all">Ver inventario completo <MoveRight className="w-4 h-4" /></Link>
           </div>
-          <div className="flex overflow-x-auto pb-8 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 snap-x snap-mandatory scrollbar-hide gap-5" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-            {featuredItems.map(item => {
-              const isReservado = getDisponibilidad(item) === 'reservado';
-              return <div key={item.canonical_id} className="w-[84vw] sm:w-[44vw] md:w-[31vw] lg:w-[30%] flex-shrink-0 snap-start group bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
-                {item.imageUrls?.length ? <div className="w-full h-52 bg-gray-100 overflow-hidden relative"><img src={item.imageUrls[0]} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" /><div className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" /></div> : <div className="w-full h-52 bg-gray-50 flex items-center justify-center border-b border-gray-100"><MapPin className="w-8 h-8 text-gray-300" /></div>}
-                <div className="p-6 flex flex-col flex-grow"><div className="flex items-center gap-2 mb-4"><Badge variant={item.tipo_soporte === 'tradicional' ? 'neutral' : item.tipo_soporte === 'led' ? 'red' : 'dark'} className="uppercase text-[10px]">{item.tipo_soporte.replace('_', ' ')}</Badge><Badge variant={isReservado ? 'outline' : 'green'} className="uppercase text-[10px]">{isReservado ? 'Reservado' : 'Disponible'}</Badge></div><h3 className="text-xl font-bold mb-2 line-clamp-1">{item.name}</h3><p className="text-sm text-gray-500 mb-5 line-clamp-2 leading-relaxed">{'address' in item ? item.address : item.description}</p>{isReservado && item.availableFrom && <p className="mt-auto mb-4 text-xs text-gray-500 font-medium">Disponible desde <span className="text-gray-900">{item.availableFrom}</span></p>}<Button onClick={() => navigate(`/inventario?plaza=${item.ciudad}&tipo=${item.tipo_soporte}&soporte=${item.canonical_id}`)} variant="outline" className={cn('w-full rounded-xl', (!isReservado || !item.availableFrom) ? 'mt-auto' : '')}>{isReservado ? 'Consultar disponibilidad' : 'Ver detalle'}</Button></div>
-              </div>;
-            })}
-          </div>
+          {inventoryLoading ? (
+            <div className="py-16 text-center text-gray-500">Cargando soportes destacados…</div>
+          ) : (
+            <div className="flex overflow-x-auto pb-8 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 snap-x snap-mandatory scrollbar-hide gap-5" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              {featuredItems.map(item => {
+                const isReservado = getDisponibilidad(item) === 'reservado';
+                return <div key={item.canonical_id} className="w-[84vw] sm:w-[44vw] md:w-[31vw] lg:w-[30%] flex-shrink-0 snap-start group bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                  {item.imageUrls?.length ? <div className="w-full h-52 bg-gray-100 overflow-hidden relative"><img src={item.imageUrls[0]} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" /><div className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" /></div> : <div className="w-full h-52 bg-gray-50 flex items-center justify-center border-b border-gray-100"><MapPin className="w-8 h-8 text-gray-300" /></div>}
+                  <div className="p-6 flex flex-col flex-grow"><div className="flex items-center gap-2 mb-4"><Badge variant={item.tipo_soporte === 'tradicional' ? 'neutral' : item.tipo_soporte === 'led' ? 'red' : 'dark'} className="uppercase text-[10px]">{item.tipo_soporte.replace('_', ' ')}</Badge><Badge variant={isReservado ? 'outline' : 'green'} className="uppercase text-[10px]">{isReservado ? 'Reservado' : 'Disponible'}</Badge></div><h3 className="text-xl font-bold mb-2 line-clamp-1">{item.name}</h3><p className="text-sm text-gray-500 mb-5 line-clamp-2 leading-relaxed">{'address' in item ? item.address : item.description}</p>{isReservado && item.availableFrom && <p className="mt-auto mb-4 text-xs text-gray-500 font-medium">Disponible desde <span className="text-gray-900">{item.availableFrom}</span></p>}<Button onClick={() => navigate(`/inventario?plaza=${item.ciudad}&tipo=${item.tipo_soporte}&soporte=${item.canonical_id}`)} variant="outline" className={cn('w-full rounded-xl', (!isReservado || !item.availableFrom) ? 'mt-auto' : '')}>{isReservado ? 'Consultar disponibilidad' : 'Ver detalle'}</Button></div>
+                </div>;
+              })}
+            </div>
+          )}
           <Link to="/inventario" className="mt-6 md:hidden flex justify-center items-center text-sm font-bold uppercase tracking-wider gap-2">Ver inventario completo <MoveRight className="w-4 h-4" /></Link>
         </section>
       )}
