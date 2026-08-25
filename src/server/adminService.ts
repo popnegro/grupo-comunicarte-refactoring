@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { mediakitRequests } from '../db/schema';
+import { mediakitRequests, supports } from '../db/schema';
 import { getAllMediakitRequestsFromDB } from './mediakitService';
 import {
   createSupportMediaRecord,
@@ -23,11 +23,12 @@ import {
 } from './supportModel';
 import { getAllSupportsFromDB, getSupportByIdFromDB } from './supportsService';
 import { db } from '../db';
-import { eq } from 'drizzle-orm';
+import { and, count, eq } from 'drizzle-orm';
 
 const ADMIN_USER = process.env.ADMIN_USER;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const ADMIN_SECRET = process.env.JWT_SECRET || process.env.ADMIN_SECRET;
+const MAX_FEATURED_SUPPORTS = 9;
 
 if (!ADMIN_USER || !ADMIN_PASSWORD || !ADMIN_SECRET) {
   throw new Error(
@@ -123,11 +124,35 @@ export async function getAdminSupportById(canonicalId: string) {
   return support;
 }
 
+async function assertFeaturedCapacity(canonicalId: string | null, data: SupportWritePayload) {
+  const current = canonicalId
+    ? await getSupportByIdFromDB(canonicalId, { includeInactive: true })
+    : null;
+
+  const nextFeatured = data.isFeatured === undefined ? current?.isFeatured === true : data.isFeatured === true;
+  const nextActive = data.active === undefined ? current?.active !== false : data.active !== false;
+
+  if (!nextFeatured || !nextActive) return;
+
+  const currentlyFeatured = current?.isFeatured === true && current.active !== false;
+  if (currentlyFeatured) return;
+
+  const [result] = await db
+    .select({ total: count() })
+    .from(supports)
+    .where(and(eq(supports.active, true), eq(supports.isFeatured, true)));
+
+  if (Number(result?.total ?? 0) >= MAX_FEATURED_SUPPORTS) {
+    throw new Error(`inválido: máximo ${MAX_FEATURED_SUPPORTS} soportes destacados activos permitidos.`);
+  }
+}
+
 export async function createAdminSupport(data: SupportWritePayload & { canonical_id?: string }) {
   const family = resolveFamily(data, data.tipo_soporte);
   validateFamily(family);
   if (data.disponibilidad !== undefined) validateAvailability(data.disponibilidad);
   validateSupportPayload({ ...data, family });
+  await assertFeaturedCapacity(null, data);
 
   if (data.canonical_id?.trim()) {
     const canonicalId = data.canonical_id.trim();
@@ -144,6 +169,7 @@ export async function createAdminSupport(data: SupportWritePayload & { canonical
 }
 
 export async function updateSupportByAdmin(canonicalId: string, data: SupportWritePayload) {
+  await assertFeaturedCapacity(canonicalId, data);
   return patchSupportRecord(canonicalId, data);
 }
 
