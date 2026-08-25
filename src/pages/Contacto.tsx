@@ -20,11 +20,11 @@ export default function Contacto() {
             <h2 className="mt-5 text-lg font-semibold">Email</h2>
             <p className="mt-2 text-sm text-gray-500">ventas@grupocomunicarte.com</p>
           </a>
-          <a href="https://wa.me/5492610000000" className="rounded-2xl border border-gray-200 bg-white p-7 hover:border-gray-300 hover:shadow-sm transition-all">
+          <div className="rounded-2xl border border-gray-200 bg-white p-7">
             <MessageCircle className="h-6 w-6" aria-hidden="true" />
             <h2 className="mt-5 text-lg font-semibold">WhatsApp</h2>
-            <p className="mt-2 text-sm text-gray-500">Hablá con nuestro equipo comercial.</p>
-          </a>
+            <p className="mt-2 text-sm text-gray-500">Canal comercial próximamente disponible.</p>
+          </div>
           <div className="rounded-2xl border border-gray-200 bg-white p-7">
             <MapPin className="h-6 w-6" aria-hidden="true" />
             <h2 className="mt-5 text-lg font-semibold">Mendoza</h2>
