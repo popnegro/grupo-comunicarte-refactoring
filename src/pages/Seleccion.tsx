@@ -20,10 +20,7 @@ export default function Seleccion() {
     return () => { cancelled = true; };
   }, []);
 
-  const selectedItems = useMemo(
-    () => items.filter(item => selectedIds.has(item.canonical_id)),
-    [items, selectedIds]
-  );
+  const selectedItems = useMemo(() => items.filter(item => selectedIds.has(item.canonical_id)), [items, selectedIds]);
 
   return (
     <section className="flex-1 bg-[#F9F9F9]">
@@ -54,11 +51,11 @@ export default function Seleccion() {
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {selectedItems.map(item => (
                 <article key={item.canonical_id} className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
-                  {item.image_url && <img src={item.image_url} alt={item.name} className="aspect-[16/9] w-full object-cover" />}
+                  {item.imageUrls?.[0] && <img src={item.imageUrls[0]} alt={item.name} className="aspect-[16/9] w-full object-cover" />}
                   <div className="p-6">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">{item.tipo || 'Soporte'}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">{item.tipo_soporte.replace('_', ' ')}</p>
                     <h2 className="mt-2 text-xl font-semibold">{item.name}</h2>
-                    <p className="mt-2 text-sm text-gray-500">{item.address || item.ciudad || 'Ubicación disponible en el inventario'}</p>
+                    <p className="mt-2 text-sm text-gray-500">{'address' in item ? item.address : item.ciudad}</p>
                     <button type="button" onClick={() => removeSelected(item.canonical_id, item.name)} className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-gray-950">
                       <Trash2 className="h-4 w-4" /> Quitar
                     </button>
