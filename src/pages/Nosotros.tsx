@@ -1,5 +1,7 @@
 import { Target, TrendingUp, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { buttonStyles } from '../components/ui/Button';
+import { InteriorHero } from '../components/layout/InteriorHero';
 
 export default function Nosotros() {
   const pillars = [
@@ -22,24 +24,11 @@ export default function Nosotros() {
 
   return (
     <div className="flex flex-col w-full bg-white">
-      <section className="relative overflow-hidden border-b border-gray-200 bg-gray-950 px-4 py-24 sm:px-6 lg:px-8 md:py-32">
-        <div className="absolute inset-0 opacity-20 bg-[url('/brand/pattern-light.webp')] bg-repeat" />
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-950/90 to-gray-950/50" />
-        <div className="relative max-w-7xl mx-auto z-10">
-          <div className="max-w-4xl">
-            <span className="inline-flex items-center gap-2 text-red-400 font-bold tracking-[0.16em] uppercase text-xs mb-6">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-              Acerca de nosotros
-            </span>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-[-0.035em] leading-[1.02] mb-8">
-              Conectamos marcas con audiencias en movimiento.
-            </h1>
-            <p className="text-lg md:text-xl text-white/70 font-medium leading-relaxed max-w-3xl">
-              Grupo Comunicarte desarrolla soluciones de publicidad exterior OOH y digital DOOH en las plazas más competitivas de Mendoza y Buenos Aires.
-            </p>
-          </div>
-        </div>
-      </section>
+      <InteriorHero
+        eyebrow="Acerca de nosotros"
+        title="Conectamos marcas con audiencias en movimiento."
+        description="Grupo Comunicarte desarrolla soluciones de publicidad exterior OOH y digital DOOH en las plazas más competitivas de Mendoza y Buenos Aires."
+      />
 
       <section className="py-16 bg-[#F9F9F9] border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -83,14 +72,12 @@ export default function Nosotros() {
         </div>
       </section>
 
-      <section className="bg-red-600 py-24 px-4 sm:px-6 lg:px-8 text-center text-white">
+      <section className="bg-white py-24 px-4 sm:px-6 lg:px-8 border-t border-gray-200 text-center">
         <div className="max-w-3xl mx-auto">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/70 mb-4">Hablemos de tu próxima campaña</p>
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">Llevá tu marca al siguiente nivel</h2>
-          <p className="text-lg text-white/80 mb-10 leading-relaxed">Nuestro equipo comercial está listo para asesorarte y diseñar la cobertura ideal para tus objetivos.</p>
-          <a href="mailto:ventas@grupocomunicarte.com" className={buttonStyles({ variant: 'outline', size: 'lg', className: 'rounded-full bg-white text-gray-950 border-white hover:bg-gray-100 hover:text-gray-950' })}>
-            Contactar Ventas
-          </a>
+          <p className="text-eyebrow mb-4">El próximo paso</p>
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">Hablemos de tu próxima campaña</h2>
+          <p className="text-gray-500 text-lg mb-10 leading-relaxed">Nuestro equipo comercial está listo para asesorarte y diseñar la cobertura ideal para tus objetivos.</p>
+          <Link to="/contacto" className={buttonStyles({ size: 'lg', className: 'rounded-full px-7' })}>Contactar Ventas</Link>
         </div>
       </section>
     </div>
