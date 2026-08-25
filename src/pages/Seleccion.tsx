@@ -14,7 +14,14 @@ export default function Seleccion() {
     let cancelled = false;
     fetch('/api/supports')
       .then(response => response.ok ? response.json() : Promise.reject(new Error('No se pudo cargar el inventario')))
-      .then((data: InventoryItem[]) => { if (!cancelled) setItems(data); })
+      .then((json: { status?: string; data?: InventoryItem[]; message?: string }) => {
+        if (cancelled) return;
+        if (json.status === 'success' && Array.isArray(json.data)) {
+          setItems(json.data);
+          return;
+        }
+        throw new Error(json.message || 'Respuesta inválida del servidor');
+      })
       .catch(() => { if (!cancelled) setItems([]); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
