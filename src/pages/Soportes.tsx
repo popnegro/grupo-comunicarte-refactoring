@@ -1,6 +1,7 @@
 import { ArrowRight, MapPin, MonitorPlay, Truck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { buttonStyles } from '../components/ui/Button';
+import { InteriorHero } from '../components/layout/InteriorHero';
 
 export default function Soportes() {
   const soportes = [
@@ -45,20 +46,11 @@ export default function Soportes() {
 
   return (
     <div className="flex flex-col w-full bg-white">
-      <section className="relative overflow-hidden bg-[#F9F9F9] border-b border-gray-200 px-4 py-24 sm:px-6 lg:px-8 md:py-28">
-        <div className="absolute inset-0 bg-[url('/brand/pattern-light.webp')] bg-repeat opacity-25" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/80 to-[#F9F9F9]" />
-        <div className="relative max-w-7xl mx-auto z-10">
-          <span className="inline-flex items-center gap-2 text-red-600 font-bold tracking-[0.16em] uppercase text-xs mb-6">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
-            Ecosistema de medios
-          </span>
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-950 tracking-[-0.035em] mb-6">Nuestros soportes</h1>
-          <p className="text-lg md:text-xl text-gray-600 max-w-3xl leading-relaxed">
-            Combinamos la presencia ineludible del formato tradicional con la versatilidad de la era digital para maximizar el alcance de tu marca.
-          </p>
-        </div>
-      </section>
+      <InteriorHero
+        eyebrow="Ecosistema de medios"
+        title="Nuestros soportes"
+        description="Combinamos la presencia ineludible del formato tradicional con la versatilidad de la era digital para maximizar el alcance de tu marca."
+      />
 
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto space-y-5">
