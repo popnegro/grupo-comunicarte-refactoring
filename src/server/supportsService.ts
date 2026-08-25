@@ -1,12 +1,24 @@
 import { getSupportCatalog, getSupportDetail } from './supportModel';
 import { InventoryItem } from '../types';
 
+/**
+ * Public inventory DTO boundary.
+ * Pricing is intentionally removed from all public catalog/detail responses.
+ * Administrative pricing remains available through protected /api/admin/* pricing endpoints.
+ */
+function sanitizePublicSupport(item: InventoryItem): InventoryItem {
+  const { pricing: _pricing, ...publicItem } = item as InventoryItem & { pricing?: unknown };
+  return publicItem as InventoryItem;
+}
+
 export async function getAllSupportsFromDB(options?: { includeInactive?: boolean }): Promise<InventoryItem[]> {
-  return getSupportCatalog(options);
+  const supports = await getSupportCatalog(options);
+  return supports.map(sanitizePublicSupport);
 }
 
 export async function getSupportByIdFromDB(canonicalId: string, options?: { includeInactive?: boolean }): Promise<InventoryItem | null> {
-  return getSupportDetail(canonicalId, options);
+  const support = await getSupportDetail(canonicalId, options);
+  return support ? sanitizePublicSupport(support) : null;
 }
 
 export async function validateSupportsForRequest(selectedIds: string[]): Promise<{
@@ -46,7 +58,7 @@ export async function validateSupportsForRequest(selectedIds: string[]): Promise
     if (item.disponibilidad !== 'disponible') {
       return {
         valid: false,
-        statusCode: 409, // Conflict / not available
+        statusCode: 409,
         message: `El soporte '${item.name}' no está disponible (estado: ${item.disponibilidad}) y no puede incluirse en el Media Kit.`,
       };
     }
