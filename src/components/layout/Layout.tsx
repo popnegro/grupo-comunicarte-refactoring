@@ -1,12 +1,14 @@
 import { ReactNode, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ShoppingBag } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { buttonStyles } from '../ui/Button';
+import { useSelection } from '../../context/SelectionContext';
 
 export function Layout({ children }: { children: ReactNode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { selectedCount } = useSelection();
 
   const navLinks = [
     { name: 'Inicio', path: '/' },
@@ -17,6 +19,10 @@ export function Layout({ children }: { children: ReactNode }) {
   ];
 
   const isActive = (path: string) => location.pathname === path;
+  const ctaPath = selectedCount > 0 ? '/seleccion' : '/contacto';
+  const ctaLabel = selectedCount > 0 ? 'Selección' : 'Contacto';
+
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   return (
     <div className="min-h-screen flex flex-col w-full overflow-x-hidden bg-[#F9F9F9]">
@@ -44,12 +50,18 @@ export function Layout({ children }: { children: ReactNode }) {
                 </Link>
               ))}
               <div className="h-6 w-px bg-gray-200 mx-3" aria-hidden="true" />
-              <a
-                href="mailto:ventas@grupocomunicarte.com"
-                className={buttonStyles({ size: 'sm', className: 'rounded-full px-5' })}
+              <Link
+                to={ctaPath}
+                className={buttonStyles({ size: 'sm', className: 'rounded-full px-5 inline-flex items-center gap-2' })}
               >
-                Contacto
-              </a>
+                {selectedCount > 0 && <ShoppingBag className="h-4 w-4" aria-hidden="true" />}
+                <span>{ctaLabel}</span>
+                {selectedCount > 0 && (
+                  <span className="min-w-5 h-5 px-1 rounded-full bg-white/20 text-xs font-bold inline-flex items-center justify-center" aria-label={`${selectedCount} soportes seleccionados`}>
+                    {selectedCount}
+                  </span>
+                )}
+              </Link>
             </nav>
 
             <button
@@ -70,7 +82,7 @@ export function Layout({ children }: { children: ReactNode }) {
                 <Link
                   key={link.path}
                   to={link.path}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={closeMobileMenu}
                   className={cn(
                     'flex items-center justify-between px-4 py-3 text-base font-semibold rounded-xl transition-colors',
                     isActive(link.path)
@@ -83,13 +95,15 @@ export function Layout({ children }: { children: ReactNode }) {
                 </Link>
               ))}
               <div className="pt-3 mt-2 border-t border-gray-100">
-                <a
-                  href="mailto:ventas@grupocomunicarte.com"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={buttonStyles({ className: 'w-full rounded-xl' })}
+                <Link
+                  to={ctaPath}
+                  onClick={closeMobileMenu}
+                  className={buttonStyles({ className: 'w-full rounded-xl inline-flex items-center justify-center gap-2' })}
                 >
-                  Hablar con el equipo
-                </a>
+                  {selectedCount > 0 && <ShoppingBag className="h-4 w-4" aria-hidden="true" />}
+                  <span>{selectedCount > 0 ? 'Ver selección' : 'Contacto'}</span>
+                  {selectedCount > 0 && <span className="min-w-5 h-5 px-1 rounded-full bg-white/20 text-xs font-bold inline-flex items-center justify-center">{selectedCount}</span>}
+                </Link>
               </div>
             </div>
           </div>
@@ -103,21 +117,15 @@ export function Layout({ children }: { children: ReactNode }) {
           <div className="flex flex-col md:flex-row justify-between gap-10">
             <div className="max-w-sm">
               <img src="/brand/brand-dark.webp" alt="Grupo Comunicarte" className="w-[190px] brightness-0 invert mb-5" />
-              <p className="text-sm text-gray-400 leading-relaxed">
-                Soluciones de publicidad exterior OOH y DOOH para conectar marcas con audiencias en movimiento.
-              </p>
+              <p className="text-sm text-gray-400 leading-relaxed">Soluciones de publicidad exterior OOH y DOOH para conectar marcas con audiencias en movimiento.</p>
               <p className="text-xs text-gray-500 mt-5">Mendoza • Buenos Aires</p>
             </div>
 
             <nav className="flex flex-wrap gap-x-8 gap-y-3 content-start" aria-label="Navegación del pie de página">
               {navLinks.map((link) => (
-                <Link key={link.path} to={link.path} className="text-sm font-medium text-gray-400 hover:text-white transition-colors">
-                  {link.name}
-                </Link>
+                <Link key={link.path} to={link.path} className="text-sm font-medium text-gray-400 hover:text-white transition-colors">{link.name}</Link>
               ))}
-              <a href="mailto:ventas@grupocomunicarte.com" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">
-                Contacto
-              </a>
+              <Link to="/contacto" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Contacto</Link>
             </nav>
           </div>
 
