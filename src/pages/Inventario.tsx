@@ -173,7 +173,6 @@ export default function Inventario() {
               searchText={searchText}
               setSearchText={setSearchText}
               resultsCount={filteredLocations.length + filteredRoutes.length}
-              onOpenMediakit={handleOpenMediakit}
             />
           </div>
         </div>
