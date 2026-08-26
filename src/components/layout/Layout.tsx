@@ -19,8 +19,7 @@ export function Layout({ children }: { children: ReactNode }) {
   ];
 
   const isActive = (path: string) => location.pathname === path;
-  const ctaPath = selectedCount > 0 ? '/contacto?origen=mediakit' : '/contacto';
-  const ctaLabel = selectedCount > 0 ? 'Media Kit' : 'Contacto';
+  const ctaPath = '/contacto?origen=mediakit';
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
@@ -42,7 +41,7 @@ export function Layout({ children }: { children: ReactNode }) {
               <div className="h-6 w-px bg-gray-200 mx-3" aria-hidden="true" />
               <Link to={ctaPath} className={buttonStyles({ size: 'sm', className: 'rounded-full px-5 inline-flex items-center gap-2' })}>
                 {selectedCount > 0 && <ShoppingBag className="h-4 w-4" aria-hidden="true" />}
-                <span>{ctaLabel}</span>
+                <span>{selectedCount > 0 ? 'Media Kit' : 'Media Kit'}</span>
                 {selectedCount > 0 && <span className="min-w-5 h-5 px-1 rounded-full bg-white/20 text-xs font-bold inline-flex items-center justify-center" aria-label={`${selectedCount} soportes seleccionados`}>{selectedCount}</span>}
               </Link>
             </nav>
@@ -65,7 +64,7 @@ export function Layout({ children }: { children: ReactNode }) {
               <div className="pt-3 mt-2 border-t border-gray-100">
                 <Link to={ctaPath} onClick={closeMobileMenu} className={buttonStyles({ className: 'w-full rounded-xl inline-flex items-center justify-center gap-2' })}>
                   {selectedCount > 0 && <ShoppingBag className="h-4 w-4" aria-hidden="true" />}
-                  <span>{selectedCount > 0 ? 'Ver Media Kit' : 'Contacto'}</span>
+                  <span>Media Kit</span>
                   {selectedCount > 0 && <span className="min-w-5 h-5 px-1 rounded-full bg-white/20 text-xs font-bold inline-flex items-center justify-center">{selectedCount}</span>}
                 </Link>
               </div>
