@@ -161,7 +161,7 @@ export default function InventoryMap({
             </button>
           </div>
 
-          <div className="px-5 pt-5 pb-5 md:p-6 overflow-y-auto">
+          <div className="px-5 pt-5 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] md:p-6 overflow-y-auto">
             <LocationDetail
               item={selectedItem}
               onOpenMediakit={() => {
@@ -195,7 +195,7 @@ export default function InventoryMap({
                 <button
                   type="button"
                   onClick={onResetToPlaza}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-semibold px-3.5 py-2 rounded-xl transition-colors active:scale-95"
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-semibold px-3.5 py-2 rounded-xl transition-colors shadow-sm active:scale-95"
                 >
                   Ver todos en {selectedPlaza === 'mendoza' ? 'Mendoza' : 'Buenos Aires'}
                 </button>
