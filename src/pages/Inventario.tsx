@@ -194,6 +194,7 @@ export default function Inventario() {
         <StickySelectionBar
           onOpenMediakit={handleOpenMediakit}
           currentPlaza={selectedPlaza}
+          inventoryItems={allItems}
         />
 
         {isMediakitOpen && (
