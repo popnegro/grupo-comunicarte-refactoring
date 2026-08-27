@@ -40,7 +40,7 @@ export function StickySelectionBar({ onOpenMediakit, currentPlaza }: StickySelec
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 80, opacity: 0 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed bottom-0 sm:bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-[1100] w-full sm:w-[calc(100%-1.5rem)] max-w-lg md:max-w-xl pb-[env(safe-area-inset-bottom,0px)]"
+          className="fixed bottom-0 sm:bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-[1100] w-full max-w-lg md:max-w-xl pb-[env(safe-area-inset-bottom,0px)]"
           role="region"
           aria-label="Barra de selección de soportes"
         >
