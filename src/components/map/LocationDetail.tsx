@@ -5,7 +5,7 @@ import { cn } from '../../lib/utils';
 import { MediaCarousel } from './MediaCarousel';
 import { DetailTabs } from './DetailTabs';
 import { ContactSlide } from './ContactSlide';
-import { Button, buttonStyles } from '../ui/Button';
+import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { useSelection } from '../../context/SelectionContext';
 import { useState } from 'react';
@@ -15,9 +15,9 @@ interface LocationDetailProps {
   onOpenMediakit: () => void;
 }
 
-export function LocationDetail({ item, onOpenMediakit }: LocationDetailProps) {
+export function LocationDetail({ item }: LocationDetailProps) {
   const [view, setView] = useState<'detail' | 'contact'>('detail');
-  const { isSelected, toggleSelect, selectedCount } = useSelection();
+  const { isSelected, toggleSelect } = useSelection();
 
   const isRoute = isMobileRoute(item);
   const hasImages = item.imageUrls && item.imageUrls.length > 0;
@@ -166,25 +166,13 @@ export function LocationDetail({ item, onOpenMediakit }: LocationDetailProps) {
         )}
       </AnimatePresence>
 
-      <div className="mt-6 pt-6 border-t border-gray-100">
-        {isReservado ? (
-          view === 'detail' && (
-            <Button className="w-full" onClick={() => setView('contact')}>
-              Consultar disponibilidad
-            </Button>
-          )
-        ) : (
-          view === 'detail' && (
-            <button
-              type="button"
-              onClick={onOpenMediakit}
-              className={buttonStyles({ className: 'w-full' })}
-            >
-              {selectedCount > 0 ? `Solicitar Media Kit (${selectedCount})` : 'Solicitar Media Kit'}
-            </button>
-          )
-        )}
-      </div>
+      {isReservado && view === 'detail' && (
+        <div className="mt-6 pt-6 border-t border-gray-100">
+          <Button className="w-full" onClick={() => setView('contact')}>
+            Consultar disponibilidad
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
