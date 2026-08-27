@@ -1,0 +1,58 @@
+name: P0 upload UI patch
+
+on:
+  push:
+    branches:
+      - p0/multimedia
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ !startsWith(github.event.head_commit.message, 'P0: add real image upload UI') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Patch DashboardSoportes upload UI
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('src/pages/dashboard/DashboardSoportes.tsx')
+          text = path.read_text()
+
+          old_import = "import { CheckCircle2, Edit3, ExternalLink, Plus, RefreshCw, Save, Search, Trash2, X } from 'lucide-react';"
+          new_import = "import { CheckCircle2, Edit3, ExternalLink, Plus, RefreshCw, Save, Search, Trash2, Upload, X } from 'lucide-react';"
+          if old_import not in text:
+              raise SystemExit('Expected lucide import not found')
+          text = text.replace(old_import, new_import, 1)
+
+          old_state = "  const [saving, setSaving] = useState(false);\n"
+          new_state = old_state + "  const [uploadingMedia, setUploadingMedia] = useState(false);\n"
+          if old_state not in text:
+              raise SystemExit('Expected saving state not found')
+          text = text.replace(old_state, new_state, 1)
+
+          marker = "  function startEditMedia(media: SupportMediaItem) {\n"
+          upload_fn = '''  async function uploadImage(file: File) {\n    if (!editor?.canonical_id) {\n      showToast('Guardá primero el soporte antes de subir una imagen.', 'error');\n      return;\n    }\n\n    const allowed = ['image/jpeg', 'image/png', 'image/webp'];\n    if (!allowed.includes(file.type)) {\n      showToast('Formato no permitido. Usá JPG, PNG o WebP.', 'error');\n      return;\n    }\n    if (file.size > 10 * 1024 * 1024) {\n      showToast('La imagen supera el límite de 10 MB.', 'error');\n      return;\n    }\n\n    setUploadingMedia(true);\n    try {\n      const formData = new FormData();\n      formData.append('file', file);\n      const res = await apiFetch(`/api/admin/supports/${editor.canonical_id}/media/upload`, {\n        method: 'POST',\n        headers: { Authorization: `Bearer ${token}` },\n        body: formData,\n      });\n      const json = await res.json();\n      if (!res.ok || json.status !== 'success') {\n        throw new Error(json.message || 'No se pudo subir la imagen.');\n      }\n      await refreshSupportDetail(editor.canonical_id);\n      showToast('Imagen subida correctamente a Storage.');\n    } catch (err: any) {\n      showToast(err.message || 'Error al subir la imagen.', 'error');\n    } finally {\n      setUploadingMedia(false);\n    }\n  }\n\n'''
+          if marker not in text:
+              raise SystemExit('Expected media edit marker not found')
+          text = text.replace(marker, upload_fn + marker, 1)
+
+          old_media = '''                        <div className="grid gap-3 sm:grid-cols-2">\n                          <div>\n                            <Label>Tipo</Label>\n'''
+          new_media = '''                        <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-4 space-y-3">\n                          <div>\n                            <Label>Subir imagen real</Label>\n                            <p className="mt-1 text-[11px] text-gray-500">JPG, PNG o WebP · máximo 10 MB · se almacena en Cloudflare R2.</p>\n                          </div>\n                          <label className={`inline-flex w-fit items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition ${editor.canonical_id && !uploadingMedia ? 'cursor-pointer bg-gray-900 text-white hover:bg-gray-800' : 'cursor-not-allowed bg-gray-200 text-gray-500'}`}>\n                            <Upload className="w-4 h-4" />\n                            {uploadingMedia ? 'Subiendo…' : 'Seleccionar imagen'}\n                            <input\n                              type="file"\n                              accept="image/jpeg,image/png,image/webp"\n                              className="sr-only"\n                              disabled={!editor.canonical_id || uploadingMedia}\n                              onChange={(event) => {\n                                const file = event.target.files?.[0];\n                                event.currentTarget.value = '';\n                                if (file) void uploadImage(file);\n                              }}\n                            />\n                          </label>\n                        </div>\n\n                        <div className="grid gap-3 sm:grid-cols-2">\n                          <div>\n                            <Label>Tipo</Label>\n'''
+          if old_media not in text:
+              raise SystemExit('Expected media grid marker not found')
+          text = text.replace(old_media, new_media, 1)
+
+          path.write_text(text)
+          PY
+
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/pages/dashboard/DashboardSoportes.tsx
+          git commit -m "P0: add real image upload UI"
+          git push
