@@ -1,0 +1,45 @@
+name: P0 bootstrap fix
+on:
+  push:
+    branches:
+      - demo/client-preview
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: demo/client-preview
+      - name: Apply Neon HTTP transport fix
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/db/index.ts')
+          s = p.read_text()
+          old = "import { Pool } from 'pg';"
+          new = "import { Pool, neonConfig } from 'pg';"
+          if old not in s:
+              raise SystemExit('Expected pg import not found')
+          if 'neonConfig.poolQueryViaFetch = true;' not in s:
+              s = s.replace(old, new, 1)
+              marker = "const connectionString = process.env.DATABASE_URL;"
+              if marker not in s:
+                  raise SystemExit('Expected connection marker not found')
+              s = s.replace(marker, "// Vercel serverless bootstrap must not depend on a persistent WebSocket.\nneonConfig.poolQueryViaFetch = true;\n\n" + marker, 1)
+              p.write_text(s)
+          else:
+              print('Fix already present')
+          PY
+      - name: Commit fix and remove temporary workflow
+        run: |
+          rm -f .github/workflows/p0-bootstrap-fix.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/db/index.ts .github/workflows/p0-bootstrap-fix.yml
+          git diff --cached --check
+          git commit -m "fix(api): route Neon pool queries over HTTP" || exit 0
+          git push origin HEAD:demo/client-preview
