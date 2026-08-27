@@ -1,0 +1,41 @@
+name: P0 bootstrap retry fix
+on:
+  push:
+    branches:
+      - demo/client-preview
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: demo/client-preview
+      - name: Apply minimal transient Neon bootstrap hardening
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/db/index.ts')
+          s = p.read_text()
+          s = s.replace("import { Pool, neonConfig } from 'pg';", "import { Pool } from 'pg';", 1)
+          s = s.replace("// Vercel serverless bootstrap must not depend on a persistent WebSocket.\nneonConfig.poolQueryViaFetch = true;\n\n", "", 1)
+          marker = "export async function initDatabase() {\n  try {"
+          replacement = """const BOOTSTRAP_RETRIES = 3;\nconst BOOTSTRAP_RETRY_DELAY_MS = 500;\n\nfunction isTransientBootstrapError(err: unknown) {\n  if (!err || typeof err !== 'object') return false;\n  const error = err as { name?: string; message?: string; code?: string; type?: string };\n  const message = String(error.message ?? '').toLowerCase();\n  return error.name === 'ErrorEvent' || error.type === 'error' || /connection|websocket|socket|timeout|econnreset|enotfound|etimedout/.test(message) || ['ECONNRESET', 'ETIMEDOUT', 'ECONNREFUSED', 'ENOTFOUND'].includes(String(error.code ?? ''));\n}\n\nfunction sleep(ms: number) {\n  return new Promise((resolve) => setTimeout(resolve, ms));\n}\n\nexport async function initDatabase() {\n  for (let attempt = 1; attempt <= BOOTSTRAP_RETRIES; attempt += 1) {\n    try {\n      await initializeDatabaseOnce();\n      return;\n    } catch (err) {\n      if (attempt === BOOTSTRAP_RETRIES || !isTransientBootstrapError(err)) {\n        throw err;\n      }\n      console.warn(`Transient database bootstrap failure; retrying (${attempt}/${BOOTSTRAP_RETRIES - 1})`);\n      await sleep(BOOTSTRAP_RETRY_DELAY_MS * attempt);\n    }\n  }\n}\n\nasync function initializeDatabaseOnce() {\n  try {"""
+          if marker not in s:
+              raise SystemExit('Expected initDatabase marker not found')
+          s = s.replace(marker, replacement, 1)
+          p.write_text(s)
+          PY
+          git diff -- src/db/index.ts
+      - name: Commit fix and remove temporary workflow
+        run: |
+          rm -f .github/workflows/p0-bootstrap-retry-fix.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/db/index.ts .github/workflows/p0-bootstrap-retry-fix.yml
+          git diff --cached --check
+          git commit -m "fix(api): retry transient Neon bootstrap failures"
+          git push origin HEAD:demo/client-preview
