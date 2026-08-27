@@ -5,6 +5,7 @@ import { createServer as createViteServer } from 'vite';
 import { initDatabase, pool } from './src/db';
 import { getAllSupportsFromDB, getSupportByIdFromDB } from './src/server/supportsService';
 import { handleMediakitRequest, getAllMediakitRequestsFromDB } from './src/server/mediakitService';
+import { handleImageUpload, MAX_IMAGE_UPLOAD_BYTES } from './src/server/multimediaUpload';
 import {
   authenticateAdmin,
   verifyAdminToken,
@@ -46,18 +47,14 @@ export async function createApp() {
     }
 
     if (req.method === 'OPTIONS') {
-      if (!origin || allowedOrigins.includes(origin)) {
-        return res.sendStatus(204);
-      }
+      if (!origin || allowedOrigins.includes(origin)) return res.sendStatus(204);
       return res.sendStatus(403);
     }
-
     next();
   });
 
   app.use(express.json());
 
-  // Initialize Database & Idempotent Seed
   try {
     await initDatabase();
   } catch (err) {
@@ -65,7 +62,6 @@ export async function createApp() {
     throw err;
   }
 
-  // API health check with DB connectivity check (P1-5)
   app.get('/api/health', async (_req, res) => {
     try {
       await pool.query('SELECT 1');
@@ -75,7 +71,6 @@ export async function createApp() {
     }
   });
 
-  // Supports API routes (Phase 3)
   app.get('/api/supports', async (_req, res) => {
     try {
       const supports = await getAllSupportsFromDB();
@@ -88,10 +83,9 @@ export async function createApp() {
 
   app.get('/api/supports/:id', async (req, res) => {
     try {
-      const { id } = req.params;
-      const support = await getSupportByIdFromDB(id);
+      const support = await getSupportByIdFromDB(req.params.id);
       if (!support) {
-        return res.status(404).json({ status: 'error', message: `Soporte con ID '${id}' no encontrado.` });
+        return res.status(404).json({ status: 'error', message: `Soporte con ID '${req.params.id}' no encontrado.` });
       }
       res.status(200).json({ status: 'success', data: support });
     } catch (err: any) {
@@ -100,7 +94,6 @@ export async function createApp() {
     }
   });
 
-  // MediaKit API routes (Phase 8, 10)
   app.post('/api/mediakit/request', async (req, res) => {
     try {
       const result = await handleMediakitRequest(req.body);
@@ -111,20 +104,13 @@ export async function createApp() {
     }
   });
 
-  // NOTE: GET /api/mediakit/requests is strictly removed from public exposure (P0-2).
-  // Only accessible via protected admin endpoint /api/admin/requests.
-
-  // ==================== ADMIN API ROUTES (FASE 2) ====================
   app.post('/api/admin/login', (req, res) => {
     const { username, password } = req.body || {};
     const result = authenticateAdmin(username, password);
-    if (!result.success) {
-      return res.status(401).json({ status: 'error', message: result.message });
-    }
+    if (!result.success) return res.status(401).json({ status: 'error', message: result.message });
     res.status(200).json({ status: 'success', token: result.token, message: 'Autenticación exitosa' });
   });
 
-  // Admin Auth Middleware for /api/admin/* (except login)
   const requireAdmin = (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const authHeader = req.headers.authorization;
     if (!verifyAdminToken(authHeader)) {
@@ -160,8 +146,7 @@ export async function createApp() {
     } catch (err: any) {
       console.error(`Error fetching admin support ${req.params.id}:`, err);
       const msg = err.message || '';
-      const status = msg.includes('no encontrado') ? 404 : 500;
-      res.status(status).json({ status: 'error', message: msg || 'Error al obtener el soporte.' });
+      res.status(msg.includes('no encontrado') ? 404 : 500).json({ status: 'error', message: msg || 'Error al obtener el soporte.' });
     }
   });
 
@@ -179,8 +164,7 @@ export async function createApp() {
 
   app.patch('/api/admin/supports/:id', requireAdmin, async (req, res) => {
     try {
-      const { id } = req.params;
-      const updated = await updateSupportByAdmin(id, req.body);
+      const updated = await updateSupportByAdmin(req.params.id, req.body);
       res.status(200).json({ status: 'success', data: updated, message: 'Soporte actualizado exitosamente.' });
     } catch (err: any) {
       console.error(`Error updating support ${req.params.id}:`, err);
@@ -197,8 +181,7 @@ export async function createApp() {
     } catch (err: any) {
       console.error(`Error deleting support ${req.params.id}:`, err);
       const msg = err.message || '';
-      const status = msg.includes('no encontrado') ? 404 : 500;
-      res.status(status).json({ status: 'error', message: msg || 'Error al desactivar el soporte.' });
+      res.status(msg.includes('no encontrado') ? 404 : 500).json({ status: 'error', message: msg || 'Error al desactivar el soporte.' });
     }
   });
 
@@ -212,6 +195,14 @@ export async function createApp() {
     }
   });
 
+  // Real image upload: raw multipart parsing is limited and occurs only after admin authorization.
+  app.post(
+    '/api/admin/supports/:id/media/upload',
+    requireAdmin,
+    express.raw({ type: /^multipart\/form-data(?:;.*)?$/i, limit: `${MAX_IMAGE_UPLOAD_BYTES + 4096}b` }),
+    handleImageUpload,
+  );
+
   app.post('/api/admin/supports/:id/media', requireAdmin, async (req, res) => {
     try {
       const created = await addSupportMediaByAdmin(req.params.id, req.body || {});
@@ -219,8 +210,7 @@ export async function createApp() {
     } catch (err: any) {
       console.error(`Error creating support media ${req.params.id}:`, err);
       const msg = err.message || '';
-      const status = msg.includes('inválido') ? 400 : 500;
-      res.status(status).json({ status: 'error', message: msg || 'Error al crear media.' });
+      res.status(msg.includes('inválido') ? 400 : 500).json({ status: 'error', message: msg || 'Error al crear media.' });
     }
   });
 
@@ -245,8 +235,7 @@ export async function createApp() {
     } catch (err: any) {
       console.error(`Error deleting support media ${req.params.id}/${req.params.mediaId}:`, err);
       const msg = err.message || '';
-      const status = msg.includes('no encontrada') ? 404 : 500;
-      res.status(status).json({ status: 'error', message: msg || 'Error al eliminar media.' });
+      res.status(msg.includes('no encontrada') ? 404 : 500).json({ status: 'error', message: msg || 'Error al eliminar media.' });
     }
   });
 
@@ -267,8 +256,7 @@ export async function createApp() {
     } catch (err: any) {
       console.error(`Error updating support pricing ${req.params.id}:`, err);
       const msg = err.message || '';
-      const status = msg.includes('negativo') || msg.includes('inválido') ? 400 : 500;
-      res.status(status).json({ status: 'error', message: msg || 'Error al actualizar el pricing.' });
+      res.status(msg.includes('negativo') || msg.includes('inválido') ? 400 : 500).json({ status: 'error', message: msg || 'Error al actualizar el pricing.' });
     }
   });
 
@@ -289,8 +277,7 @@ export async function createApp() {
     } catch (err: any) {
       console.error(`Error updating admin support route ${req.params.id}:`, err);
       const msg = err.message || '';
-      const status = msg.includes('inválido') ? 400 : 500;
-      res.status(status).json({ status: 'error', message: msg || 'Error al actualizar la ruta.' });
+      res.status(msg.includes('inválido') ? 400 : 500).json({ status: 'error', message: msg || 'Error al actualizar la ruta.' });
     }
   });
 
@@ -318,19 +305,13 @@ export async function createApp() {
     }
   });
 
-  // Vite middleware for development / static serving for production
   if (process.env.NODE_ENV !== 'production') {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
+    const vite = await createViteServer({ server: { middlewareMode: true }, appType: 'spa' });
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*', (_req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
+    app.get('*', (_req, res) => res.sendFile(path.join(distPath, 'index.html')));
   }
 
   return app;
@@ -340,9 +321,7 @@ if (!process.env.VERCEL) {
   createApp()
     .then((app) => {
       const PORT = Number(process.env.PORT) || 3000;
-      app.listen(PORT, '0.0.0.0', () => {
-        console.log(`Server running on http://0.0.0.0:${PORT}`);
-      });
+      app.listen(PORT, '0.0.0.0', () => console.log(`Server running on http://0.0.0.0:${PORT}`));
     })
     .catch((err) => {
       console.error('Failed to start server:', err);
