@@ -161,7 +161,7 @@ export default function InventoryMap({
             </button>
           </div>
 
-          <div className="px-5 pt-5 pb-0 md:p-6 overflow-y-auto">
+          <div className="px-5 pt-5 pb-5 md:p-6 overflow-y-auto">
             <LocationDetail
               item={selectedItem}
               onOpenMediakit={() => {
