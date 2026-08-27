@@ -148,10 +148,8 @@ export default function InventoryMap({
         <MapUpdater locations={locations} routes={routes} />
       </MapContainer>
 
-      {/* Mobile/Desktop Detail Panel Overlay */}
       {selectedItem && (
         <div className="absolute bottom-0 left-0 right-0 md:bottom-auto md:top-4 md:left-auto md:right-4 md:w-[400px] bg-white rounded-t-3xl md:rounded-2xl shadow-2xl md:shadow-xl z-[1000] md:border border-gray-100 overflow-hidden flex flex-col max-h-[75vh] md:max-h-[85vh] transition-transform">
-
           <div className="p-4 bg-white md:bg-gray-50 flex justify-between items-center border-b border-gray-100 shrink-0">
             <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Detalle de Soporte</span>
             <button
@@ -163,7 +161,7 @@ export default function InventoryMap({
             </button>
           </div>
 
-          <div className="p-5 md:p-6 overflow-y-auto">
+          <div className="px-5 pt-5 pb-0 md:p-6 overflow-y-auto">
             <LocationDetail
               item={selectedItem}
               onOpenMediakit={() => {
@@ -175,7 +173,6 @@ export default function InventoryMap({
         </div>
       )}
 
-      {/* Contextual Empty State for Filters (H-01) - Non-blocking floating banner */}
       {validLocations.length === 0 && routes.length === 0 && (
         <div className="absolute top-4 sm:top-6 left-1/2 -translate-x-1/2 z-[500] w-[calc(100%-2rem)] max-w-md pointer-events-auto">
           <div className="bg-white/95 backdrop-blur-md p-4 sm:p-5 rounded-2xl shadow-xl border border-gray-200 text-center">
