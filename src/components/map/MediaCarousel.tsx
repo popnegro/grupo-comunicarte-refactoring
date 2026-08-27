@@ -83,7 +83,7 @@ export function MediaCarousel({ urls, altPrefix }: MediaCarouselProps) {
 
   return (
     <>
-      <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden mb-6 border border-gray-100 bg-gray-50 shrink-0 shadow-sm group">
+      <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden mb-6 border border-gray-100 bg-gray-50 shrink-0 shadow-sm group">
         
         {/* Media Container (Click to expand) */}
         <div 
