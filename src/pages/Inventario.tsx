@@ -200,7 +200,6 @@ export default function Inventario() {
           <MediakitPanel
             selectedItems={selectedItems}
             onClose={() => setIsMediakitOpen(false)}
-            onGoToInventory={() => setIsMediakitOpen(false)}
           />
         )}
       </div>

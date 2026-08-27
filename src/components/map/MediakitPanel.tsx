@@ -6,10 +6,9 @@ import { useSelection } from '../../context/SelectionContext';
 interface MediakitPanelProps {
   selectedItems: InventoryItem[];
   onClose: () => void;
-  onGoToInventory: () => void;
 }
 
-export function MediakitPanel({ selectedItems, onClose, onGoToInventory }: MediakitPanelProps) {
+export function MediakitPanel({ selectedItems, onClose }: MediakitPanelProps) {
   const { removeSelected } = useSelection();
 
   return (
