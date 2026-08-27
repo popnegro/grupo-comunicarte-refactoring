@@ -1,7 +1,8 @@
 import { BarChart3, ExternalLink, LogOut, FileText, MonitorSmartphone, Layers, MapPin, Bell, ChevronRight } from 'lucide-react';
-import { NavLink, useNavigate, Link } from 'react-router-dom';
+import { NavLink, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useState, useEffect, ReactNode } from 'react';
 import { getStoredLeads, subscribeToLeads } from '../../lib/dashboard-store';
+import { DashboardMediaUploader } from './DashboardMediaUploader';
 
 interface DashboardShellProps {
   children: ReactNode;
@@ -9,6 +10,7 @@ interface DashboardShellProps {
 
 export function DashboardShell({ children }: DashboardShellProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [newLeadsCount, setNewLeadsCount] = useState(0);
 
   useEffect(() => {
@@ -163,7 +165,8 @@ export function DashboardShell({ children }: DashboardShellProps) {
           </div>
         </aside>
 
-        <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
+        <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8 space-y-5">
+          {location.pathname === '/dashboard/soportes' && <DashboardMediaUploader />}
           {children}
         </main>
       </div>
