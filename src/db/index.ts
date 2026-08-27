@@ -1,8 +1,11 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { Pool } from 'pg';
+import { Pool, neonConfig } from 'pg';
 import * as schema from './schema';
 import { fixedLocations, mobileRoutes } from '../data/inventory';
 import { eq } from 'drizzle-orm';
+
+// Vercel serverless bootstrap must not depend on a persistent WebSocket.
+neonConfig.poolQueryViaFetch = true;
 
 const connectionString = process.env.DATABASE_URL;
 
