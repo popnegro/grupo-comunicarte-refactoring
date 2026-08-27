@@ -40,11 +40,11 @@ export function StickySelectionBar({ onOpenMediakit, currentPlaza }: StickySelec
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 80, opacity: 0 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed bottom-3 sm:bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-[1100] w-[calc(100%-1rem)] sm:w-[calc(100%-1.5rem)] max-w-lg md:max-w-xl pb-[env(safe-area-inset-bottom,0px)]"
+          className="fixed bottom-0 sm:bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-[1100] w-full sm:w-[calc(100%-1.5rem)] max-w-lg md:max-w-xl pb-[env(safe-area-inset-bottom,0px)]"
           role="region"
           aria-label="Barra de selección de soportes"
         >
-          <div className="bg-gray-900 text-white rounded-2xl p-2 sm:px-4 sm:py-3 shadow-2xl border border-gray-800 flex items-center justify-between gap-2 sm:gap-3 backdrop-blur-md">
+          <div className="bg-gray-900 text-white rounded-t-2xl sm:rounded-2xl p-2 sm:px-4 sm:py-3 shadow-2xl border border-gray-800 flex items-center justify-between gap-2 sm:gap-3 backdrop-blur-md">
             {/* Left Info */}
             <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
               <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
@@ -99,4 +99,3 @@ export function StickySelectionBar({ onOpenMediakit, currentPlaza }: StickySelec
     </AnimatePresence>
   );
 }
-
