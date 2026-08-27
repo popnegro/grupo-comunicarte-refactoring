@@ -3,7 +3,6 @@ import { useSearchParams } from 'react-router-dom';
 import InventoryMap from '../components/map/InventoryMap';
 import { MediakitPanel } from '../components/map/MediakitPanel';
 import { StickySelectionBar } from '../components/map/StickySelectionBar';
-import { SelectionToast } from '../components/map/SelectionToast';
 import { useInventory } from '../hooks/useInventory';
 import { Plaza, TipoSoporte, Disponibilidad, InventoryItem } from '../types';
 import { MapFilterPanel } from '../components/map/MapFilterPanel';
@@ -193,8 +192,6 @@ export default function Inventario() {
           onOpenMediakit={handleOpenMediakit}
           currentPlaza={selectedPlaza}
         />
-
-        <SelectionToast />
 
         {isMediakitOpen && (
           <MediakitPanel
