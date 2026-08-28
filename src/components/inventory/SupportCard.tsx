@@ -12,10 +12,13 @@ interface SupportCardProps {
 
 export function SupportCard({ item, variant = 'catalog', onRemove }: SupportCardProps) {
   const navigate = useNavigate();
-  const isReserved = getDisponibilidad(item) === 'reservado';
+  const disponibilidad = getDisponibilidad(item);
+  const isReserved = disponibilidad === 'reservado';
   const image = item.imageUrls?.[0];
   const address = 'address' in item ? item.address : item.ciudad;
   const typeLabel = item.tipo_soporte.replace('_', ' ');
+
+  if (disponibilidad === 'inactivo') return null;
 
   if (variant === 'selectable') {
     return (
@@ -44,7 +47,7 @@ export function SupportCard({ item, variant = 'catalog', onRemove }: SupportCard
         <p className="text-sm text-gray-600 mb-5 line-clamp-2 leading-relaxed">{address || item.description}</p>
         {isReserved && item.availableFrom && <p className="mt-auto mb-4 text-xs text-gray-600 font-medium">Disponible desde <span className="text-gray-950">{item.availableFrom}</span></p>}
         <Button type="button" onClick={() => navigate(`/inventario?plaza=${item.ciudad}&tipo=${item.tipo_soporte}&soporte=${item.canonical_id}`)} variant="outline" className="w-full rounded-xl min-h-11 mt-auto">
-          {isReserved ? 'Consultar disponibilidad' : 'Ver detalle'} <ArrowRight className="w-4 h-4" />
+          {isReserved ? 'Consultar disponibilidad' : 'Ver soporte'} <ArrowRight className="w-4 h-4" />
         </Button>
       </div>
     </article>

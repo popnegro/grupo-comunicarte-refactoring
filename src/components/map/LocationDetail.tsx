@@ -18,8 +18,13 @@ export function LocationDetail({ item }: LocationDetailProps) {
   const isRoute = isMobileRoute(item);
   const hasImages = item.imageUrls && item.imageUrls.length > 0;
   const disponibilidad = getDisponibilidad(item);
-  const isReservado = disponibilidad === 'reservado';
+  const isAvailable = disponibilidad === 'disponible';
+  const isReserved = disponibilidad === 'reservado';
   const selected = isSelected(item.canonical_id);
+
+  // Inactives are filtered from the public inventory by useInventory.
+  // If one is passed directly, avoid presenting it as an actionable commercial product.
+  if (disponibilidad === 'inactivo') return null;
 
   const tabs = [
     { id: 'info', label: 'Información', content: <p className="text-sm text-gray-600 leading-relaxed">{item.description || 'Sin información adicional.'}</p> },
@@ -47,17 +52,17 @@ export function LocationDetail({ item }: LocationDetailProps) {
               </div>
               <div>
                 <h2 className="text-xl font-bold leading-tight mb-1">{item.name}</h2>
-                <div className="flex flex-wrap items-center gap-2"><Badge variant="neutral" className="uppercase tracking-wider">{item.ciudad.replace('-', ' ')}</Badge><Badge variant={item.tipo_soporte === 'tradicional' ? 'neutral' : item.tipo_soporte === 'led' ? 'red' : 'dark'} className="uppercase tracking-wider">{item.tipo_soporte.replace('_', ' ')}</Badge><Badge variant={isReservado ? 'outline' : 'green'} className="uppercase tracking-wider">{isReservado ? 'Reservado' : 'Disponible'}</Badge></div>
-                {isReservado && <div className="mt-3 p-3 bg-gray-50 rounded-xl border border-gray-200 text-xs text-gray-700 leading-relaxed"><p className="font-semibold text-gray-900 mb-0.5">Soporte actualmente ocupado</p><p>Puedes incluirlo en tu Media Kit para consultar fecha de liberación o alternativas en la misma zona.</p></div>}
-                {isReservado && item.availableFrom && <p className="mt-2 text-xs text-gray-500 font-medium">Fecha estimada de liberación: <span className="text-gray-900 font-semibold">{item.availableFrom}</span></p>}
+                <div className="flex flex-wrap items-center gap-2"><Badge variant="neutral" className="uppercase tracking-wider">{item.ciudad.replace('-', ' ')}</Badge><Badge variant={item.tipo_soporte === 'tradicional' ? 'neutral' : item.tipo_soporte === 'led' ? 'red' : 'dark'} className="uppercase tracking-wider">{item.tipo_soporte.replace('_', ' ')}</Badge><Badge variant={isReserved ? 'outline' : 'green'} className="uppercase tracking-wider">{isReserved ? 'Reservado' : 'Disponible'}</Badge></div>
+                {isReserved && <div className="mt-3 p-3 bg-gray-50 rounded-xl border border-gray-200 text-xs text-gray-700 leading-relaxed"><p className="font-semibold text-gray-900 mb-0.5">Soporte actualmente ocupado</p><p>Puedes consultar la fecha de liberación o alternativas en la misma zona.</p></div>}
+                {isReserved && item.availableFrom && <p className="mt-2 text-xs text-gray-500 font-medium">Fecha estimada de liberación: <span className="text-gray-900 font-semibold">{item.availableFrom}</span></p>}
               </div>
             </div>
             <DetailTabs tabs={tabs} />
-            {!isReservado && <button type="button" onClick={() => toggleSelect(item)} aria-pressed={selected} className={cn("mt-5 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors", selected ? "bg-black text-white border-black" : "bg-white text-gray-700 border-gray-200 hover:border-black")}>{selected ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}{selected ? 'Soporte seleccionado' : 'Agregar a mi selección'}</button>}
+            {isAvailable && <button type="button" onClick={() => toggleSelect(item)} aria-pressed={selected} className={cn("mt-5 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors", selected ? "bg-black text-white border-black" : "bg-white text-gray-700 border-gray-200 hover:border-black")}>{selected ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}{selected ? 'Soporte seleccionado' : 'Seleccionar soporte'}</button>}
           </motion.div>
         )}
       </AnimatePresence>
-      {isReservado && view === 'detail' && <div className="mt-6 pt-6 border-t border-gray-100"><Button className="w-full" onClick={() => setView('contact')}>Consultar disponibilidad</Button></div>}
+      {isReserved && view === 'detail' && <div className="mt-6 pt-6 border-t border-gray-100"><Button className="w-full" onClick={() => setView('contact')}>Consultar disponibilidad</Button></div>}
     </div>
   );
 }
