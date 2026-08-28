@@ -27,6 +27,14 @@ function databaseHost(): string | null {
   }
 }
 
+// Vercel's automatic body parsing must remain disabled so the Express
+// multipart upload route can consume the raw request stream itself.
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 const appPromise = import('../dist/server.cjs').then(({ createApp }) => createApp());
 
 export default async function handler(req: any, res: any) {
