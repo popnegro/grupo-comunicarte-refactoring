@@ -59,8 +59,16 @@ function formatShortDate(value?: string) {
 function getReservationLabel(item: InventoryItem) {
   const from = item.reservedFrom || item.technical?.metadata?.reserved_from;
   const until = item.reservedUntil || item.technical?.metadata?.reserved_until;
-  if (!from || !until) return null;
-  return `Reservado desde ${formatShortDate(String(from))} a ${formatShortDate(String(until))}`;
+  if (from && until) return `Reservado desde ${formatShortDate(String(from))} a ${formatShortDate(String(until))}`;
+
+  // PMV compatibility: the current API exposes only availableFrom. During the manual
+  // reservation phase we encode the explicit From/Until range as ISO dates separated by |.
+  const legacyPeriod = item.availableFrom?.split('|');
+  if (legacyPeriod?.length === 2 && legacyPeriod[0] && legacyPeriod[1]) {
+    return `Reservado desde ${formatShortDate(legacyPeriod[0])} a ${formatShortDate(legacyPeriod[1])}`;
+  }
+
+  return null;
 }
 
 export function SupportCard({ item, variant = 'catalog', onRemove }: SupportCardProps) {
