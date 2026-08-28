@@ -31,6 +31,11 @@ export function DashboardShell({ children }: DashboardShellProps) {
         : 'text-gray-600 hover:bg-gray-100 hover:text-gray-950'
     }`;
 
+  const handleLogout = () => {
+    localStorage.removeItem('admin_token');
+    navigate('/login');
+  };
+
   return (
     <div className="min-h-screen bg-[#f5f6f3] text-gray-900 flex flex-col font-sans selection:bg-gray-950 selection:text-white">
       <header className="sticky top-0 z-40 border-b border-black/10 bg-white/90 backdrop-blur-xl">
@@ -79,11 +84,12 @@ export function DashboardShell({ children }: DashboardShellProps) {
 
             <button
               type="button"
-              onClick={() => navigate('/')}
+              onClick={handleLogout}
               className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-bold text-gray-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700"
-              title="Salir al sitio público"
+              title="Cerrar sesión"
+              aria-label="Cerrar sesión"
             >
-              <LogOut className="h-3.5 w-3.5" />
+              <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
               <span className="hidden sm:inline">Salir</span>
             </button>
           </div>
