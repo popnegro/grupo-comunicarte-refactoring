@@ -12,6 +12,34 @@ import { useState } from 'react';
 
 interface LocationDetailProps { item: InventoryItem; onOpenMediakit: () => void; }
 
+function getKeyAttributes(item: InventoryItem): string[] {
+  const technical = item.technical;
+  const attributes: string[] = [];
+
+  if (isMobileRoute(item)) {
+    const route = item as MobileRoute;
+    if (technical?.spot_duration_seconds) attributes.push(`${technical.spot_duration_seconds}s por spot`);
+    else if (route.duration) attributes.push(route.duration);
+    if (technical?.route_duration_hours) attributes.push(`${technical.route_duration_hours}h de recorrido`);
+    else if (route.schedule) attributes.push(route.schedule);
+    return attributes.filter(Boolean).slice(0, 2);
+  }
+
+  if (technical?.measures) attributes.push(technical.measures);
+  if (item.tipo_soporte === 'led') {
+    if (technical?.resolution) attributes.push(technical.resolution);
+    if (technical?.daily_frequency && attributes.length < 2) attributes.push(technical.daily_frequency);
+  } else if (item.tipo_soporte === 'tradicional') {
+    if (technical?.summary) attributes.push(technical.summary);
+    else if (item.family) attributes.push(item.family.replace('_', ' '));
+  }
+  if (attributes.length < 2 && item.characteristics) {
+    const fallback = item.characteristics.split(/[•\n,;]+/).map((value) => value.trim()).filter(Boolean);
+    attributes.push(...fallback);
+  }
+  return attributes.filter(Boolean).slice(0, 2);
+}
+
 export function LocationDetail({ item }: LocationDetailProps) {
   const [view, setView] = useState<'detail' | 'contact'>('detail');
   const { isSelected, toggleSelect } = useSelection();
@@ -21,9 +49,8 @@ export function LocationDetail({ item }: LocationDetailProps) {
   const isAvailable = disponibilidad === 'disponible';
   const isReserved = disponibilidad === 'reservado';
   const selected = isSelected(item.canonical_id);
+  const keyAttributes = getKeyAttributes(item);
 
-  // Inactives are filtered from the public inventory by useInventory.
-  // If one is passed directly, avoid presenting it as an actionable commercial product.
   if (disponibilidad === 'inactivo') return null;
 
   const tabs = [
@@ -53,6 +80,13 @@ export function LocationDetail({ item }: LocationDetailProps) {
               <div>
                 <h2 className="text-xl font-bold leading-tight mb-1">{item.name}</h2>
                 <div className="flex flex-wrap items-center gap-2"><Badge variant="neutral" className="uppercase tracking-wider">{item.ciudad.replace('-', ' ')}</Badge><Badge variant={item.tipo_soporte === 'tradicional' ? 'neutral' : item.tipo_soporte === 'led' ? 'red' : 'dark'} className="uppercase tracking-wider">{item.tipo_soporte.replace('_', ' ')}</Badge><Badge variant={isReserved ? 'outline' : 'green'} className="uppercase tracking-wider">{isReserved ? 'Reservado' : 'Disponible'}</Badge></div>
+                {keyAttributes.length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-2" aria-label="Atributos principales">
+                    {keyAttributes.map((attribute) => (
+                      <span key={attribute} className="rounded-lg bg-gray-50 border border-gray-200 px-2.5 py-1.5 text-xs font-semibold text-gray-800">{attribute}</span>
+                    ))}
+                  </div>
+                )}
                 {isReserved && <div className="mt-3 p-3 bg-gray-50 rounded-xl border border-gray-200 text-xs text-gray-700 leading-relaxed"><p className="font-semibold text-gray-900 mb-0.5">Soporte actualmente ocupado</p><p>Puedes consultar la fecha de liberación o alternativas en la misma zona.</p></div>}
                 {isReserved && item.availableFrom && <p className="mt-2 text-xs text-gray-500 font-medium">Fecha estimada de liberación: <span className="text-gray-900 font-semibold">{item.availableFrom}</span></p>}
               </div>
