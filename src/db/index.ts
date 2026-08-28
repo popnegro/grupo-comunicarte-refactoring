@@ -20,7 +20,36 @@ export const db = drizzle(pool, { schema });
 /**
  * Initializes database tables if they do not exist and runs idempotent seeding.
  */
+const BOOTSTRAP_RETRIES = 3;
+const BOOTSTRAP_RETRY_DELAY_MS = 500;
+
+function isTransientBootstrapError(err: unknown) {
+  if (!err || typeof err !== 'object') return false;
+  const error = err as { name?: string; message?: string; code?: string; type?: string };
+  const message = String(error.message ?? '').toLowerCase();
+  return error.name === 'ErrorEvent' || error.type === 'error' || /connection|websocket|socket|timeout|econnreset|enotfound|etimedout/.test(message) || ['ECONNRESET', 'ETIMEDOUT', 'ECONNREFUSED', 'ENOTFOUND'].includes(String(error.code ?? ''));
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function initDatabase() {
+  for (let attempt = 1; attempt <= BOOTSTRAP_RETRIES; attempt += 1) {
+    try {
+      await initializeDatabaseOnce();
+      return;
+    } catch (err) {
+      if (attempt === BOOTSTRAP_RETRIES || !isTransientBootstrapError(err)) {
+        throw err;
+      }
+      console.warn(`Transient database bootstrap failure; retrying (${attempt}/${BOOTSTRAP_RETRIES - 1})`);
+      await sleep(BOOTSTRAP_RETRY_DELAY_MS * attempt);
+    }
+  }
+}
+
+async function initializeDatabaseOnce() {
   try {
     // 1. Create tables if not exist and ensure columns exist
     await pool.query(`

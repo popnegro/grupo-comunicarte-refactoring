@@ -3,7 +3,6 @@ import { cn } from '../../lib/utils';
 import { MapPin, MonitorPlay, PanelTop, AlignLeft, Search, X, CheckCircle2, Lock, SlidersHorizontal } from 'lucide-react';
 import { ReactNode } from 'react';
 import { Input } from '../ui/Input';
-import { buttonStyles } from '../ui/Button';
 import { useSelection } from '../../context/SelectionContext';
 
 type DisponibilidadFilter = Disponibilidad | 'todos';
@@ -18,7 +17,6 @@ interface MapFilterPanelProps {
   searchText: string;
   setSearchText: (s: string) => void;
   resultsCount: number;
-  onOpenMediakit: () => void;
 }
 
 export function MapFilterPanel({
@@ -31,23 +29,22 @@ export function MapFilterPanel({
   searchText,
   setSearchText,
   resultsCount,
-  onOpenMediakit
 }: MapFilterPanelProps) {
   const { selectedCount } = useSelection();
 
   return (
     <div className="flex h-full flex-col bg-white p-5 sm:p-6">
-      <div className="mb-6 flex items-center gap-2">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-950 text-white">
-          <SlidersHorizontal className="h-4 w-4" />
+      <div className="mb-5 flex items-center gap-2">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-950 text-white">
+          <SlidersHorizontal className="h-3.5 w-3.5" />
         </div>
         <div>
-          <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-emerald-700">Explorador comercial</p>
-          <h2 className="text-sm font-black tracking-tight text-gray-950">Filtrar inventario</h2>
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-emerald-700">Inventario</p>
+          <h2 className="text-sm font-black tracking-tight text-gray-950">Filtros</h2>
         </div>
       </div>
 
-      <div className="relative mb-6">
+      <div className="relative mb-5">
         <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
         <Input
           value={searchText}
@@ -67,7 +64,7 @@ export function MapFilterPanel({
         )}
       </div>
 
-      <div className="space-y-7 overflow-y-auto pr-1">
+      <div className="space-y-6 overflow-y-auto pr-1">
         <FilterGroup title="Plaza">
           <FilterButton active={selectedPlaza === 'todos'} onClick={() => setSelectedPlaza('todos')} label="Todas las Plazas" icon={<MapPin className="h-4 w-4" />} />
           <FilterButton active={selectedPlaza === 'mendoza'} onClick={() => setSelectedPlaza('mendoza')} label="Mendoza" />
@@ -88,21 +85,13 @@ export function MapFilterPanel({
         </FilterGroup>
       </div>
 
-      <div className="mt-auto space-y-3 border-t border-gray-100 pt-5">
-        <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3">
-          <div>
-            <span className="block text-[9px] font-extrabold uppercase tracking-[0.14em] text-gray-400">Inventario visible</span>
-            <span className="text-xs font-bold text-gray-700">Resultados encontrados</span>
-          </div>
-          <span className="rounded-xl bg-gray-950 px-3 py-1.5 text-xs font-black text-white">{resultsCount}</span>
+      <div className="mt-auto border-t border-gray-100 pt-4">
+        <div className="flex items-center justify-between px-1">
+          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-gray-400">
+            {selectedCount > 0 ? `${selectedCount} seleccionados` : 'Resultados'}
+          </span>
+          <span className="text-sm font-black text-gray-950">{resultsCount}</span>
         </div>
-
-        <button
-          onClick={onOpenMediakit}
-          className={buttonStyles({ className: 'w-full rounded-2xl py-3.5', variant: selectedCount > 0 ? 'default' : 'outline' })}
-        >
-          {selectedCount > 0 ? `Solicitar Media Kit (${selectedCount})` : 'Solicitar Media Kit'}
-        </button>
       </div>
     </div>
   );
@@ -110,7 +99,7 @@ export function MapFilterPanel({
 
 function FilterGroup({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2">
       <h3 className="px-1 text-[9px] font-extrabold uppercase tracking-[0.16em] text-gray-400">{title}</h3>
       <div className="space-y-1">{children}</div>
     </div>
@@ -124,7 +113,7 @@ function FilterButton({ active, onClick, label, icon }: { active: boolean, onCli
       className={cn(
         'group flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-left text-xs font-bold transition-all',
         active
-          ? 'bg-gray-950 text-white shadow-md shadow-gray-950/10'
+          ? 'bg-gray-950 text-white'
           : 'border border-transparent bg-white text-gray-600 hover:border-gray-200 hover:bg-gray-50 hover:text-gray-950'
       )}
     >

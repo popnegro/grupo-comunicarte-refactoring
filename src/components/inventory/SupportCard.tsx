@@ -33,7 +33,7 @@ export function SupportCard({ item, variant = 'catalog', onRemove }: SupportCard
 
   return (
     <article className={`group bg-white border border-gray-200 overflow-hidden flex flex-col ${variant === 'showcase' ? 'rounded-3xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300' : 'rounded-2xl'}`}>
-      {image ? <div className="w-full aspect-[16/10] bg-gray-100 overflow-hidden relative"><img src={image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" /><div className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" /></div> : <div className="w-full aspect-[16/10] bg-gray-50 flex items-center justify-center border-b border-gray-100"><MapPin className="w-8 h-8 text-gray-300" /></div>}
+      {image ? <div className="w-full aspect-[16/9] bg-gray-100 overflow-hidden relative"><img src={image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" /><div className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" /></div> : <div className="w-full aspect-[16/9] bg-gray-50 flex items-center justify-center border-b border-gray-100"><MapPin className="w-8 h-8 text-gray-300" /></div>}
       <div className="p-6 flex flex-col flex-grow">
         <div className="flex items-center gap-2 mb-4 flex-wrap">
           <Badge variant={item.tipo_soporte === 'tradicional' ? 'neutral' : item.tipo_soporte === 'led' ? 'red' : 'dark'} className="uppercase text-[10px]">{typeLabel}</Badge>
