@@ -2,12 +2,49 @@ import { ArrowRight, MapPin, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
-import { InventoryItem, getDisponibilidad } from '../../types';
+import { InventoryItem, MobileRoute, getDisponibilidad, isMobileRoute } from '../../types';
 
 interface SupportCardProps {
   item: InventoryItem;
   variant?: 'showcase' | 'catalog' | 'selectable';
   onRemove?: (item: InventoryItem) => void;
+}
+
+function getCardAttributes(item: InventoryItem): string[] {
+  const technical = item.technical;
+  const attributes: string[] = [];
+
+  if (isMobileRoute(item)) {
+    const route = item as MobileRoute;
+    if (technical?.spot_duration_seconds) {
+      attributes.push(`${technical.spot_duration_seconds}s por spot`);
+    } else if (route.duration) {
+      attributes.push(route.duration);
+    }
+    if (technical?.route_duration_hours) {
+      attributes.push(`${technical.route_duration_hours}h de recorrido`);
+    } else if (route.schedule) {
+      attributes.push(route.schedule);
+    }
+    return attributes.filter(Boolean).slice(0, 2);
+  }
+
+  if (technical?.measures) attributes.push(technical.measures);
+
+  if (item.tipo_soporte === 'led') {
+    if (technical?.resolution) attributes.push(technical.resolution);
+    if (technical?.daily_frequency && attributes.length < 2) attributes.push(technical.daily_frequency);
+  } else if (item.tipo_soporte === 'tradicional') {
+    if (technical?.summary) attributes.push(technical.summary);
+    else if (item.family) attributes.push(item.family.replace('_', ' '));
+  }
+
+  if (attributes.length < 2 && item.characteristics) {
+    const fallback = item.characteristics.split(/[•\n,;]+/).map((value) => value.trim()).filter(Boolean);
+    attributes.push(...fallback);
+  }
+
+  return attributes.filter(Boolean).slice(0, 2);
 }
 
 export function SupportCard({ item, variant = 'catalog', onRemove }: SupportCardProps) {
@@ -17,6 +54,7 @@ export function SupportCard({ item, variant = 'catalog', onRemove }: SupportCard
   const image = item.imageUrls?.[0];
   const address = 'address' in item ? item.address : item.ciudad;
   const typeLabel = item.tipo_soporte.replace('_', ' ');
+  const cardAttributes = getCardAttributes(item);
 
   if (disponibilidad === 'inactivo') return null;
 
@@ -41,12 +79,20 @@ export function SupportCard({ item, variant = 'catalog', onRemove }: SupportCard
         <div className="flex items-center gap-2 mb-4 flex-wrap">
           <Badge variant={item.tipo_soporte === 'tradicional' ? 'neutral' : item.tipo_soporte === 'led' ? 'red' : 'dark'} className="uppercase text-[10px]">{typeLabel}</Badge>
           <Badge variant={isReserved ? 'outline' : 'green'} className="uppercase text-[10px]">{isReserved ? 'Reservado' : 'Disponible'}</Badge>
-          {item.isFeatured && <Badge variant="dark" className="uppercase text-[10px]">Destacado</Badge>}
         </div>
-        <h3 className="text-xl font-bold mb-2 line-clamp-2">{item.name}</h3>
-        <p className="text-sm text-gray-600 mb-5 line-clamp-2 leading-relaxed">{address || item.description}</p>
-        {isReserved && item.availableFrom && <p className="mt-auto mb-4 text-xs text-gray-600 font-medium">Disponible desde <span className="text-gray-950">{item.availableFrom}</span></p>}
-        <Button type="button" onClick={() => navigate(`/inventario?plaza=${item.ciudad}&tipo=${item.tipo_soporte}&soporte=${item.canonical_id}`)} variant="outline" className="w-full rounded-xl min-h-11 mt-auto">
+        <h3 className="text-xl font-bold mb-2">{item.name}</h3>
+        <p className="text-sm text-gray-600 leading-relaxed">{address || item.description}</p>
+        {cardAttributes.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2" aria-label="Atributos principales">
+            {cardAttributes.map((attribute) => (
+              <span key={attribute} className="rounded-lg bg-gray-50 border border-gray-200 px-2.5 py-1.5 text-xs font-semibold text-gray-800">
+                {attribute}
+              </span>
+            ))}
+          </div>
+        )}
+        {isReserved && item.availableFrom && <p className="mt-4 text-xs text-gray-600 font-medium">Disponible desde <span className="text-gray-950">{item.availableFrom}</span></p>}
+        <Button type="button" onClick={() => navigate(`/inventario?plaza=${item.ciudad}&tipo=${item.tipo_soporte}&soporte=${item.canonical_id}`)} variant="outline" className="w-full rounded-xl min-h-11 mt-6">
           {isReserved ? 'Consultar disponibilidad' : 'Ver soporte'} <ArrowRight className="w-4 h-4" />
         </Button>
       </div>
