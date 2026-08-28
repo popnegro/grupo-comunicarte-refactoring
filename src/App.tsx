@@ -20,6 +20,7 @@ import Contacto from './pages/Contacto';
 // Auth & Dashboard
 import Login from './pages/auth/Login';
 import Dashboard from './pages/dashboard/Dashboard';
+import DashboardSoportes from './pages/dashboard/DashboardSoportes';
 import DashboardSupportList from './pages/dashboard/DashboardSupportList';
 import DashboardSupportEditor from './pages/dashboard/DashboardSupportEditor';
 import DashboardMediaKitWorkflow from './pages/dashboard/DashboardMediaKitWorkflow';
@@ -52,7 +53,7 @@ export default function App() {
           <Route path="/dashboard/soportes" element={<DashboardSupportList />} />
           <Route path="/dashboard/soportes/new" element={<DashboardSupportEditor mode="create" />} />
           <Route path="/dashboard/soportes/:canonicalId/edit" element={<DashboardSupportEditor mode="edit" />} />
-          <Route path="/dashboard/soportes/legacy" element={<div className="hidden"><DashboardSupportList /></div>} />
+          <Route path="/dashboard/soportes/advanced" element={<DashboardSoportes />} />
           <Route path="/dashboard/solicitudes" element={<DashboardMediaKitWorkflow />} />
           <Route path="/dashboard/mediakits" element={<DashboardMediaKitWorkflow />} />
           <Route path="*" element={<PublicRoutes />} />
