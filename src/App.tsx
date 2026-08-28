@@ -17,7 +17,7 @@ import Login from './pages/auth/Login';
 import Dashboard from './pages/dashboard/Dashboard';
 import DashboardSoportes from './pages/dashboard/DashboardSoportes';
 import DashboardSupportList from './pages/dashboard/DashboardSupportList';
-import DashboardSupportThemedEditor from './pages/dashboard/DashboardSupportThemedEditor';
+import DashboardSupportThemedEditorV2 from './pages/dashboard/DashboardSupportThemedEditorV2';
 import DashboardSupportPreview from './pages/dashboard/DashboardSupportPreview';
 import DashboardSupportReservation from './pages/dashboard/DashboardSupportReservation';
 import DashboardMediaKitWorkflow from './pages/dashboard/DashboardMediaKitWorkflow';
@@ -48,8 +48,8 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/soportes" element={<DashboardSupportList />} />
-          <Route path="/dashboard/soportes/new" element={<DashboardSupportThemedEditor mode="create" />} />
-          <Route path="/dashboard/soportes/:canonicalId/edit" element={<DashboardSupportThemedEditor mode="edit" />} />
+          <Route path="/dashboard/soportes/new" element={<DashboardSupportThemedEditorV2 mode="create" />} />
+          <Route path="/dashboard/soportes/:canonicalId/edit" element={<DashboardSupportThemedEditorV2 mode="edit" />} />
           <Route path="/dashboard/soportes/:canonicalId/preview" element={<DashboardSupportPreview />} />
           <Route path="/dashboard/soportes/:canonicalId/reservation" element={<DashboardSupportReservation />} />
           <Route path="/dashboard/soportes/advanced" element={<DashboardSoportes />} />
