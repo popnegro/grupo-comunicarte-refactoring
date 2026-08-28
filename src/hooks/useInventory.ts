@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { InventoryItem } from '../types';
+import { InventoryItem, getDisponibilidad } from '../types';
 
 export function useInventory() {
   const [items, setItems] = useState<InventoryItem[]>([]);
@@ -16,7 +16,10 @@ export function useInventory() {
       }
       const json = await res.json();
       if (json.status === 'success' && Array.isArray(json.data)) {
-        setItems(json.data);
+        const publicItems = json.data.filter(
+          (item: InventoryItem) => getDisponibilidad(item) !== 'inactivo',
+        );
+        setItems(publicItems);
       } else {
         throw new Error(json.message || 'Respuesta inválida del servidor');
       }
