@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Archive, CheckCircle2, Edit3, ExternalLink, MoreHorizontal, Plus, RefreshCw, Search } from 'lucide-react';
+import { Archive, Copy, Edit3, ExternalLink, Plus, RefreshCw, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
 import { Input } from '../../components/ui/Input';
@@ -79,14 +79,34 @@ export default function DashboardSupportList() {
     notify('Soporte archivado.'); load();
   };
 
+  const duplicate = async (item: Support) => {
+    const token = localStorage.getItem('admin_token');
+    try {
+      const detailRes = await apiFetch(`/api/admin/supports/${encodeURIComponent(item.canonical_id)}`, { headers: { Authorization: `Bearer ${token}` } });
+      const detailJson = await detailRes.json();
+      if (!detailRes.ok || detailJson.status !== 'success') throw new Error(detailJson.message || 'No se pudo cargar el soporte.');
+      const source = detailJson.data;
+      const payload = {
+        name: `${source.name || 'Soporte'} - Copia`, ciudad: source.ciudad, family: source.family, tipo_soporte: source.tipo_soporte,
+        active: true, disponibilidad: 'disponible', availableFrom: null, isFeatured: false, lat: source.lat ?? null, lng: source.lng ?? null,
+        address: source.address || '', description: source.description || '', characteristics: source.characteristics || '', mapa_url: source.mapa_url || '', imageUrls: Array.isArray(source.imageUrls) ? source.imageUrls : [],
+        technical: source.technical || {}, pricing: source.pricing || {},
+        ...(source.family === 'led_mobile' ? { route: { ...(source.route || {}), routePath: Array.isArray(source.routePath) ? source.routePath : [], waypoints: Array.isArray(source.waypoints) ? source.waypoints : [] } } : {}),
+      };
+      const res = await apiFetch('/api/admin/supports', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) });
+      const json = await res.json();
+      if (!res.ok || json.status !== 'success') throw new Error(json.message || 'No se pudo duplicar el soporte.');
+      notify('Soporte duplicado correctamente.'); load();
+    } catch (e) { notify(e instanceof Error ? e.message : 'No se pudo duplicar el soporte.'); }
+  };
+
   return <DashboardShell>
     <div className="mx-auto max-w-7xl space-y-6 pb-10">
       {message && <div role="status" className="fixed right-6 top-20 z-50 rounded-xl bg-gray-900 px-4 py-2.5 text-xs font-bold text-white shadow-lg">{message}</div>}
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div><div className="text-eyebrow text-emerald-700">INVENTARIO</div><h1 className="mt-2 text-page-title text-gray-900">Gestión de Soportes</h1><p className="mt-1 max-w-2xl text-sm text-gray-500">Catálogo administrativo de soportes. Listá, filtrá y abrí cada soporte como un producto.</p></div>
-        <div className="flex gap-2"><button onClick={() => load()} className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-bold text-gray-700"><RefreshCw className="h-4 w-4"/>Actualizar</button><button onClick={() => navigate('/dashboard/soportes/new')} className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-4 py-2.5 text-xs font-bold text-white"><Plus className="h-4 w-4"/>Nuevo soporte</button></div>
+        <div className="flex gap-2"><button onClick={load} className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-bold text-gray-700"><RefreshCw className="h-4 w-4"/>Actualizar</button><button onClick={() => navigate('/dashboard/soportes/new')} className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-4 py-2.5 text-xs font-bold text-white"><Plus className="h-4 w-4"/>Nuevo soporte</button></div>
       </header>
-
       <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-2xs">
         <div className="grid gap-3 md:grid-cols-[2fr_1fr_1fr_1fr_1fr]">
           <div className="relative"><Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"/><Input value={query} onChange={(e)=>setQuery(e.target.value)} className="pl-10" placeholder="Buscar nombre, código o dirección…"/></div>
@@ -97,17 +117,13 @@ export default function DashboardSupportList() {
         </div>
         <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3 text-xs text-gray-500"><span><strong className="text-gray-900">{visible.length}</strong> soportes</span>{(query || plaza !== 'todas' || type !== 'todos' || availability !== 'todos' || active !== 'todos') && <button onClick={()=>{setQuery('');setPlaza('todas');setType('todos');setAvailability('todos');setActive('todos')}} className="font-bold text-emerald-700 hover:underline">Limpiar filtros</button>}</div>
       </section>
-
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xs">
-        <div className="overflow-x-auto"><table className="w-full text-left text-xs"><thead className="border-b border-gray-200 bg-gray-50 text-[11px] uppercase tracking-wider text-gray-500"><tr><th className="px-4 py-3.5">Soporte / Código</th><th className="px-4 py-3.5">Plaza / Formato</th><th className="px-4 py-3.5">Disponibilidad</th><th className="px-4 py-3.5 text-right">Acciones</th></tr></thead>
-          <tbody className="divide-y divide-gray-100">{loading ? <tr><td colSpan={4} className="px-4 py-14 text-center text-gray-400">Cargando soportes…</td></tr> : visible.map(item => <tr key={item.canonical_id} className={item.active === false ? 'bg-gray-50' : 'hover:bg-gray-50/70'}>
-            <td className="px-4 py-3.5"><div className="font-bold text-gray-900">{item.name}</div><div className="font-mono text-[11px] text-gray-400">{item.canonical_id}</div></td>
-            <td className="px-4 py-3.5"><div className="font-semibold text-gray-700">{item.ciudad === 'mendoza' ? 'Mendoza' : 'Buenos Aires'}</div><div className="text-[11px] capitalize text-gray-500">{item.tipo_soporte?.replace('_',' ')}</div></td>
-            <td className="px-4 py-3.5"><button onClick={()=>toggleAvailability(item)} className={`${chip} ${item.disponibilidad === 'disponible' ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'}`}>{item.disponibilidad === 'disponible' ? 'Disponible' : 'Reservado'}</button>{item.active === false && <span className="ml-2 text-[10px] font-bold text-gray-400">Archivado</span>}</td>
-            <td className="px-4 py-3.5 text-right"><div className="inline-flex items-center gap-2"><button onClick={()=>navigate(`/dashboard/soportes/${encodeURIComponent(item.canonical_id)}/edit`)} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-[11px] font-bold text-gray-700"><Edit3 className="h-3.5 w-3.5"/>Editar</button><button onClick={()=>archive(item)} aria-label={`Archivar ${item.name}`} className="rounded-lg border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50"><Archive className="h-3.5 w-3.5"/></button><button onClick={()=>navigate('/inventario')} aria-label="Ver inventario público" className="rounded-lg border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50"><ExternalLink className="h-3.5 w-3.5"/></button><button aria-label="Más acciones" className="rounded-lg border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50"><MoreHorizontal className="h-3.5 w-3.5"/></button></div></td>
-          </tr>)}{!loading && visible.length===0 && <tr><td colSpan={4} className="px-4 py-14 text-center text-gray-400">No se encontraron soportes con estos filtros.</td></tr>}</tbody>
-        </table></div>
-      </section>
+      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xs"><div className="overflow-x-auto"><table className="w-full text-left text-xs"><thead className="border-b border-gray-200 bg-gray-50 text-[11px] uppercase tracking-wider text-gray-500"><tr><th className="px-4 py-3.5">Soporte / Código</th><th className="px-4 py-3.5">Plaza / Formato</th><th className="px-4 py-3.5">Disponibilidad</th><th className="px-4 py-3.5 text-right">Acciones</th></tr></thead>
+        <tbody className="divide-y divide-gray-100">{loading ? <tr><td colSpan={4} className="px-4 py-14 text-center text-gray-400">Cargando soportes…</td></tr> : visible.map(item => <tr key={item.canonical_id} className={item.active === false ? 'bg-gray-50' : 'hover:bg-gray-50/70'}>
+          <td className="px-4 py-3.5"><div className="font-bold text-gray-900">{item.name}</div><div className="font-mono text-[11px] text-gray-400">{item.canonical_id}</div></td><td className="px-4 py-3.5"><div className="font-semibold text-gray-700">{item.ciudad === 'mendoza' ? 'Mendoza' : 'Buenos Aires'}</div><div className="text-[11px] capitalize text-gray-500">{item.tipo_soporte?.replace('_',' ')}</div></td>
+          <td className="px-4 py-3.5"><button onClick={()=>toggleAvailability(item)} className={`${chip} ${item.disponibilidad === 'disponible' ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'}`}>{item.disponibilidad === 'disponible' ? 'Disponible' : 'Reservado'}</button>{item.active === false && <span className="ml-2 text-[10px] font-bold text-gray-400">Archivado</span>}</td>
+          <td className="px-4 py-3.5 text-right"><div className="inline-flex items-center gap-2"><button onClick={()=>navigate(`/dashboard/soportes/${encodeURIComponent(item.canonical_id)}/edit`)} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-[11px] font-bold text-gray-700"><Edit3 className="h-3.5 w-3.5"/>Editar</button><button onClick={()=>duplicate(item)} aria-label={`Duplicar ${item.name}`} className="rounded-lg border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50"><Copy className="h-3.5 w-3.5"/></button><button onClick={()=>archive(item)} aria-label={`Archivar ${item.name}`} className="rounded-lg border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50"><Archive className="h-3.5 w-3.5"/></button><button onClick={()=>navigate('/inventario')} aria-label="Ver inventario público" className="rounded-lg border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50"><ExternalLink className="h-3.5 w-3.5"/></button></div></td>
+        </tr>)}{!loading && visible.length===0 && <tr><td colSpan={4} className="px-4 py-14 text-center text-gray-400">No se encontraron soportes con estos filtros.</td></tr>}</tbody></table></div></section>
+      <div className="text-right"><button onClick={()=>navigate('/dashboard/soportes/advanced')} className="text-[11px] font-bold text-gray-400 hover:text-gray-700">Herramientas avanzadas</button></div>
     </div>
   </DashboardShell>;
 }
