@@ -19,6 +19,7 @@ import DashboardSoportes from './pages/dashboard/DashboardSoportes';
 import DashboardSupportList from './pages/dashboard/DashboardSupportList';
 import DashboardSupportThemedEditor from './pages/dashboard/DashboardSupportThemedEditor';
 import DashboardSupportPreview from './pages/dashboard/DashboardSupportPreview';
+import DashboardSupportReservation from './pages/dashboard/DashboardSupportReservation';
 import DashboardMediaKitWorkflow from './pages/dashboard/DashboardMediaKitWorkflow';
 
 function PublicRoutes() {
@@ -50,6 +51,7 @@ export default function App() {
           <Route path="/dashboard/soportes/new" element={<DashboardSupportThemedEditor mode="create" />} />
           <Route path="/dashboard/soportes/:canonicalId/edit" element={<DashboardSupportThemedEditor mode="edit" />} />
           <Route path="/dashboard/soportes/:canonicalId/preview" element={<DashboardSupportPreview />} />
+          <Route path="/dashboard/soportes/:canonicalId/reservation" element={<DashboardSupportReservation />} />
           <Route path="/dashboard/soportes/advanced" element={<DashboardSoportes />} />
           <Route path="/dashboard/solicitudes" element={<DashboardMediaKitWorkflow />} />
           <Route path="/dashboard/mediakits" element={<DashboardMediaKitWorkflow />} />

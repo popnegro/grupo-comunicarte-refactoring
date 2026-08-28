@@ -42,6 +42,7 @@ export interface SupportTechnicalData {
   route_duration_hours?: number | null;
   operation_days?: string;
   video_mode?: string;
+  metadata?: Record<string, unknown>;
 }
 
 export interface SupportRouteData {
@@ -76,6 +77,8 @@ export interface LocationRecord {
   imageUrls?: string[];
   disponibilidad?: Disponibilidad;
   availableFrom?: string;
+  reservedFrom?: string;
+  reservedUntil?: string;
   isFeatured?: boolean;
   pricing?: SupportPricing | null;
   media?: SupportMediaItem[];
@@ -94,10 +97,12 @@ export interface MobileRoute {
   schedule: string;
   duration: string;
   waypoints: { name: string; lat: number | null; lng: number | null }[];
-  routePath: [number, number][]; // coordinates for Polyline
+  routePath: [number, number][];
   imageUrls?: string[];
   disponibilidad?: Disponibilidad;
   availableFrom?: string;
+  reservedFrom?: string;
+  reservedUntil?: string;
   isFeatured?: boolean;
   pricing?: SupportPricing | null;
   media?: SupportMediaItem[];
