@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Polyline, useMap, CircleMarker, Toolti
 import L from 'leaflet';
 import { LocationRecord, MobileRoute, InventoryItem, Plaza, getDisponibilidad } from '../../types';
 import { LocationDetail } from './LocationDetail';
-import { X } from 'lucide-react';
+import { X, SearchX } from 'lucide-react';
 import { getIcon } from '../../lib/map-icons';
 import { useSelection } from '../../context/SelectionContext';
 
@@ -14,7 +14,6 @@ interface InventoryMapProps {
   initialSelectedId?: string | null;
   selectedPlaza?: Plaza | 'todos';
   onResetFilters?: () => void;
-  onResetToPlaza?: () => void;
 }
 
 function MapUpdater({ locations, routes }: { locations: LocationRecord[], routes: MobileRoute[] }) {
@@ -30,7 +29,7 @@ function MapUpdater({ locations, routes }: { locations: LocationRecord[], routes
   return null;
 }
 
-export default function InventoryMap({ locations, routes, onOpenMediakit, initialSelectedId, selectedPlaza, onResetFilters, onResetToPlaza }: InventoryMapProps) {
+export default function InventoryMap({ locations, routes, onOpenMediakit, initialSelectedId, selectedPlaza, onResetFilters }: InventoryMapProps) {
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   useEffect(() => {
     if (initialSelectedId && !selectedItem) {
@@ -66,7 +65,7 @@ export default function InventoryMap({ locations, routes, onOpenMediakit, initia
         <div className="absolute bottom-0 left-0 right-0 md:bottom-auto md:top-4 md:left-auto md:right-4 md:w-[400px] bg-white rounded-t-3xl md:rounded-2xl shadow-2xl md:shadow-xl z-[1000] md:border border-gray-100 overflow-hidden flex flex-col max-h-[75vh] md:max-h-[85vh] transition-transform">
           <div className="p-4 bg-white md:bg-gray-50 flex justify-between items-center border-b border-gray-100 shrink-0">
             <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Detalle de Soporte</span>
-            <button onClick={handleCloseDetail} className="p-1.5 bg-gray-50 md:bg-white rounded-full text-gray-500 hover:text-black hover:bg-gray-100 transition-colors shadow-sm" aria-label="Cerrar"><X className="w-4 h-4" /></button>
+            <button type="button" onClick={handleCloseDetail} className="p-1.5 bg-gray-50 md:bg-white rounded-full text-gray-500 hover:text-black hover:bg-gray-100 transition-colors shadow-sm" aria-label="Cerrar detalle"><X className="w-4 h-4" /></button>
           </div>
           <div className="px-0 pt-5 pb-0 md:p-6 overflow-y-auto">
             <LocationDetail item={selectedItem} onOpenMediakit={() => { setSelectedItem(null); onOpenMediakit(); }} />
@@ -75,13 +74,16 @@ export default function InventoryMap({ locations, routes, onOpenMediakit, initia
       )}
 
       {validLocations.length === 0 && routes.length === 0 && (
-        <div className="absolute top-4 sm:top-6 left-1/2 -translate-x-1/2 z-[500] w-[calc(100%-2rem)] max-w-md pointer-events-auto">
-          <div className="bg-white/95 backdrop-blur-md p-4 sm:p-5 rounded-2xl shadow-xl border border-gray-200 text-center">
-            <p className="text-sm font-semibold text-gray-900 mb-3">{selectedPlaza === 'todos' || !selectedPlaza ? 'No encontramos soportes con los filtros seleccionados.' : `No encontramos soportes con los filtros seleccionados en ${selectedPlaza === 'mendoza' ? 'Mendoza' : 'Buenos Aires'}.`}</p>
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              {onResetFilters && <button type="button" onClick={onResetFilters} className="bg-black text-white hover:bg-gray-800 text-xs font-bold px-3.5 py-2 rounded-xl transition-colors shadow-sm active:scale-95">Restablecer filtros</button>}
-              {selectedPlaza && selectedPlaza !== 'todos' && onResetToPlaza && <button type="button" onClick={onResetToPlaza} className="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-semibold px-3.5 py-2 rounded-xl transition-colors shadow-sm active:scale-95">Ver todos en {selectedPlaza === 'mendoza' ? 'Mendoza' : 'Buenos Aires'}</button>}
+        <div className="absolute inset-0 z-[500] flex items-center justify-center p-4 pointer-events-none">
+          <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white/95 p-5 text-center shadow-xl backdrop-blur-md pointer-events-auto">
+            <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-600">
+              <SearchX className="h-5 w-5" aria-hidden="true" />
             </div>
+            <p className="text-sm font-semibold text-gray-900">{selectedPlaza === 'todos' || !selectedPlaza ? 'No encontramos soportes con estos criterios.' : `No encontramos soportes con estos criterios en ${selectedPlaza === 'mendoza' ? 'Mendoza' : 'Buenos Aires'}.`}</p>
+            <p className="mt-1.5 text-xs leading-relaxed text-gray-500">Probá limpiando los filtros para volver a explorar el inventario.</p>
+            {onResetFilters && (
+              <button type="button" onClick={onResetFilters} className="mt-4 min-h-11 w-full rounded-xl bg-black px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-gray-800 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2">Limpiar filtros</button>
+            )}
           </div>
         </div>
       )}
