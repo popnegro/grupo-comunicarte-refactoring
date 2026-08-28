@@ -69,7 +69,7 @@ export default function Soportes() {
                   <h2 className="text-3xl md:text-4xl font-bold tracking-tight">{soporte.name}</h2>
                   <p className={`text-base md:text-lg leading-relaxed max-w-xl ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{soporte.description}</p>
                   <Link to={soporte.link} className={buttonStyles({ variant: isDark ? 'default' : 'outline', className: 'rounded-full' })}>
-                    Ver inventario disponible <ArrowRight className="w-4 h-4" />
+                    Explorar inventario <ArrowRight className="w-4 h-4" />
                   </Link>
                 </div>
 
