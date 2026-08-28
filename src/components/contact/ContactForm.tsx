@@ -1,9 +1,10 @@
 import { FormEvent, useState } from 'react';
-import { CheckCircle2, Loader2 } from 'lucide-react';
+import { CheckCircle2, Download, Loader2 } from 'lucide-react';
 import { useSelection } from '../../context/SelectionContext';
 import { Input, Textarea, Label } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { recordNewLead } from '../../lib/dashboard-store';
+import { downloadMediaKitPdf, MediaKitLead, MediaKitSupport } from '../../lib/mediaKitPdf';
 
 export function ContactForm({ isMediaKit = false }: { isMediaKit?: boolean }) {
   const { selectedIds, selectedCount, clearSelection } = useSelection();
@@ -15,6 +16,9 @@ export function ContactForm({ isMediaKit = false }: { isMediaKit?: boolean }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [requestId, setRequestId] = useState('');
+  const [submittedLead, setSubmittedLead] = useState<MediaKitLead | null>(null);
+  const [submittedSupports, setSubmittedSupports] = useState<MediaKitSupport[]>([]);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -22,8 +26,17 @@ export function ContactForm({ isMediaKit = false }: { isMediaKit?: boolean }) {
     setError('');
     setSuccess('');
 
-    if (name.trim().length < 2 || !/^\S+@\S+\.\S+$/.test(email.trim())) {
+    const normalizedName = name.trim();
+    const normalizedEmail = email.trim();
+    const selectedSupportIds = Array.from(selectedIds);
+
+    if (normalizedName.length < 2 || !/^\S+@\S+\.\S+$/.test(normalizedEmail)) {
       setError('Completá tu nombre y un email válido.');
+      return;
+    }
+
+    if (isMediaKit && selectedSupportIds.length === 0) {
+      setError('Seleccioná al menos un soporte antes de solicitar el Media Kit.');
       return;
     }
 
@@ -34,13 +47,13 @@ export function ContactForm({ isMediaKit = false }: { isMediaKit?: boolean }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           lead: {
-            name: name.trim(),
+            name: normalizedName,
             company: company.trim(),
-            email: email.trim(),
+            email: normalizedEmail,
             phone: phone.trim(),
             message: message.trim(),
           },
-          selectedIds: Array.from(selectedIds),
+          selectedIds: selectedSupportIds,
         }),
       });
       const data = await response.json().catch(() => null);
@@ -48,18 +61,59 @@ export function ContactForm({ isMediaKit = false }: { isMediaKit?: boolean }) {
         throw new Error(data?.message || 'No pudimos enviar tu solicitud. Intentá nuevamente.');
       }
 
-      const requestId = data?.requestId || `REQ-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-      recordNewLead({
-        requestId,
-        clientName: name.trim(),
+      const newRequestId = data?.requestId || `REQ-${new Date().getFullYear()}-${Date.now().toString().slice(-8)}`;
+      const leadPayload: MediaKitLead = {
+        name: normalizedName,
+        email: normalizedEmail,
         company: company.trim(),
-        email: email.trim(),
+        phone: phone.trim(),
+      };
+
+      let supportPayload: MediaKitSupport[] = selectedSupportIds.map((id) => ({
+        canonical_id: id,
+        name: id,
+        ciudad: 'Mendoza / Buenos Aires',
+        tipo_soporte: 'Soporte publicitario',
+      }));
+
+      if (isMediaKit && selectedSupportIds.length > 0) {
+        try {
+          const supportsResponse = await fetch('/api/supports');
+          const supportsData = await supportsResponse.json().catch(() => null);
+          if (supportsResponse.ok && supportsData?.status === 'success') {
+            const selected = new Set(selectedSupportIds);
+            supportPayload = (supportsData.data || [])
+              .filter((support: MediaKitSupport) => selected.has(support.canonical_id))
+              .map((support: MediaKitSupport) => ({
+                canonical_id: support.canonical_id,
+                name: support.name,
+                ciudad: support.ciudad,
+                tipo_soporte: support.tipo_soporte,
+                address: support.address,
+                description: support.description,
+                characteristics: support.characteristics,
+              }));
+          }
+        } catch {
+          // Keep the IDs as a safe fallback; the request is already persisted.
+        }
+      }
+
+      recordNewLead({
+        requestId: newRequestId,
+        clientName: normalizedName,
+        company: company.trim(),
+        email: normalizedEmail,
         phone: phone.trim(),
         message: message.trim(),
-        supportIds: Array.from(selectedIds),
-        supportNames: [],
-        plazas: [],
+        supportIds: selectedSupportIds,
+        supportNames: supportPayload.map((support) => support.name),
+        plazas: supportPayload.map((support) => support.ciudad),
       });
+
+      setRequestId(newRequestId);
+      setSubmittedLead(leadPayload);
+      setSubmittedSupports(supportPayload);
       setSuccess(isMediaKit ? 'Solicitud de Media Kit recibida.' : 'Recibimos tu consulta.');
       if (isMediaKit) clearSelection();
     } catch (err) {
@@ -75,6 +129,23 @@ export function ContactForm({ isMediaKit = false }: { isMediaKit?: boolean }) {
         <CheckCircle2 className="h-7 w-7 text-emerald-600" aria-hidden="true" />
         <h2 className="mt-4 text-xl font-semibold text-gray-950">Listo</h2>
         <p className="mt-2 text-sm text-gray-600">{success}</p>
+        {isMediaKit && submittedLead && (
+          <div className="mt-5 rounded-xl border border-emerald-100 bg-white/80 p-4">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-gray-400">Solicitud</p>
+            <p className="mt-1 font-mono text-sm font-semibold text-gray-900">{requestId}</p>
+            <p className="mt-2 text-sm text-gray-600">
+              {submittedSupports.length} {submittedSupports.length === 1 ? 'soporte incorporado' : 'soportes incorporados'} al documento.
+            </p>
+            <Button
+              type="button"
+              onClick={() => downloadMediaKitPdf(submittedLead, submittedSupports, requestId)}
+              className="mt-4 w-full sm:w-auto"
+            >
+              <Download className="h-4 w-4" />
+              Descargar Media Kit PDF
+            </Button>
+          </div>
+        )}
       </div>
     );
   }
