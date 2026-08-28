@@ -21,6 +21,8 @@ import Contacto from './pages/Contacto';
 import Login from './pages/auth/Login';
 import Dashboard from './pages/dashboard/Dashboard';
 import DashboardSoportes from './pages/dashboard/DashboardSoportes';
+import DashboardSupportList from './pages/dashboard/DashboardSupportList';
+import DashboardSupportEditor from './pages/dashboard/DashboardSupportEditor';
 import DashboardMediaKitWorkflow from './pages/dashboard/DashboardMediaKitWorkflow';
 
 function PublicRoutes() {
@@ -48,7 +50,10 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/soportes" element={<DashboardSoportes />} />
+          <Route path="/dashboard/soportes" element={<DashboardSupportList />} />
+          <Route path="/dashboard/soportes/new" element={<DashboardSupportEditor mode="create" />} />
+          <Route path="/dashboard/soportes/:canonicalId/edit" element={<DashboardSupportEditor mode="edit" />} />
+          <Route path="/dashboard/soportes/advanced" element={<DashboardSoportes />} />
           <Route path="/dashboard/solicitudes" element={<DashboardMediaKitWorkflow />} />
           <Route path="/dashboard/mediakits" element={<DashboardMediaKitWorkflow />} />
           <Route path="*" element={<PublicRoutes />} />
