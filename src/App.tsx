@@ -21,7 +21,7 @@ import Contacto from './pages/Contacto';
 import Login from './pages/auth/Login';
 import Dashboard from './pages/dashboard/Dashboard';
 import DashboardSoportes from './pages/dashboard/DashboardSoportes';
-import DashboardMediaKits from './pages/dashboard/DashboardMediaKits';
+import DashboardMediaKitWorkflow from './pages/dashboard/DashboardMediaKitWorkflow';
 
 function PublicRoutes() {
   const location = useLocation();
@@ -49,8 +49,8 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/soportes" element={<DashboardSoportes />} />
-          <Route path="/dashboard/solicitudes" element={<DashboardMediaKits />} />
-          <Route path="/dashboard/mediakits" element={<DashboardMediaKits />} />
+          <Route path="/dashboard/solicitudes" element={<DashboardMediaKitWorkflow />} />
+          <Route path="/dashboard/mediakits" element={<DashboardMediaKitWorkflow />} />
           <Route path="*" element={<PublicRoutes />} />
         </Routes>
       </Router>
