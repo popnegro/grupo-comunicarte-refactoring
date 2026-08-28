@@ -47,6 +47,22 @@ function getCardAttributes(item: InventoryItem): string[] {
   return attributes.filter(Boolean).slice(0, 2);
 }
 
+function formatShortDate(value?: string) {
+  if (!value) return '';
+  const match = value.match(/^(?:\d{4}-)?(\d{2})[-\/](\d{2})/);
+  if (match) return `${match[2]}/${match[1]}`;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return `${String(parsed.getDate()).padStart(2, '0')}/${String(parsed.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function getReservationLabel(item: InventoryItem) {
+  const from = item.reservedFrom || item.technical?.metadata?.reserved_from;
+  const until = item.reservedUntil || item.technical?.metadata?.reserved_until;
+  if (!from || !until) return null;
+  return `Reservado desde ${formatShortDate(String(from))} a ${formatShortDate(String(until))}`;
+}
+
 export function SupportCard({ item, variant = 'catalog', onRemove }: SupportCardProps) {
   const navigate = useNavigate();
   const disponibilidad = getDisponibilidad(item);
@@ -55,6 +71,7 @@ export function SupportCard({ item, variant = 'catalog', onRemove }: SupportCard
   const address = 'address' in item ? item.address : item.ciudad;
   const typeLabel = item.tipo_soporte.replace('_', ' ');
   const cardAttributes = getCardAttributes(item);
+  const reservationLabel = isReserved ? getReservationLabel(item) : null;
 
   if (disponibilidad === 'inactivo') return null;
 
@@ -91,7 +108,7 @@ export function SupportCard({ item, variant = 'catalog', onRemove }: SupportCard
             ))}
           </div>
         )}
-        {isReserved && item.availableFrom && <p className="mt-4 text-xs text-gray-600 font-medium">Disponible desde <span className="text-gray-950">{item.availableFrom}</span></p>}
+        {reservationLabel && <p className="mt-4 text-xs font-semibold text-gray-700">{reservationLabel}</p>}
         <Button type="button" onClick={() => navigate(`/inventario?plaza=${item.ciudad}&tipo=${item.tipo_soporte}&soporte=${item.canonical_id}`)} variant="outline" className="w-full rounded-xl min-h-11 mt-6">
           {isReserved ? 'Consultar disponibilidad' : 'Ver soporte'} <ArrowRight className="w-4 h-4" />
         </Button>
