@@ -129,7 +129,7 @@ export default function Dashboard() {
               <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
               <span>
                 <strong className="text-gray-900 font-semibold">{stats.available}</strong> disponibles (
-                {Math.round((stats.available / stats.total) * 100)}%)
+                {stats.total > 0 ? Math.round((stats.available / stats.total) * 100) : 0}%)
               </span>
             </div>
           </div>
@@ -167,7 +167,7 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-gray-900 tracking-tight">{requests.length}</span>
+              <span className="text-3xl font-extrabold text-gray-900 tracking-tight">{stats.totalRequests}</span>
               <span className="text-xs text-gray-500 font-medium">totales</span>
             </div>
             <div className="mt-2 text-xs text-gray-500 flex items-center gap-1.5">
@@ -340,100 +340,50 @@ export default function Dashboard() {
                 to="/dashboard/mediakits"
                 className="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-gray-50 hover:bg-gray-100 text-xs font-bold text-gray-800 transition-colors"
               >
-                <span>Revisar solicitudes de clientes</span>
+                <span>Revisar solicitudes de Media Kit</span>
                 <ArrowUpRight className="w-3.5 h-3.5 text-gray-400" />
-              </Link>
-              <Link
-                to="/inventario"
-                className="flex items-center justify-between p-3 rounded-xl border border-emerald-100 bg-emerald-50/50 hover:bg-emerald-50 text-xs font-bold text-emerald-800 transition-colors"
-              >
-                <span>Abrir mapa público en vivo</span>
-                <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
               </Link>
             </div>
           </div>
         </div>
 
-        {/* Bottom Section: Recent Media Kit Requests */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
-          <div className="p-5 sm:px-6 border-b border-gray-100 flex items-center justify-between">
+        {/* Recent Requests */}
+        <section className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
+          <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
             <div>
-              <h2 className="text-card-title text-gray-900">Últimas Solicitudes de Media Kit</h2>
-              <p className="text-xs text-gray-500 mt-0.5">
-                Contactos recibidos a través del explorador de inventario.
-              </p>
+              <h2 className="text-card-title text-gray-900">Solicitudes Recientes</h2>
+              <p className="text-xs text-gray-500 mt-0.5">Últimas solicitudes de Media Kit recibidas.</p>
             </div>
             <Link
               to="/dashboard/mediakits"
               className="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1"
             >
-              <span>Ver todas ({requests.length})</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
+              Ver todas <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
-          <div className="divide-y divide-gray-100">
-            {recentRequests.map((req: any) => (
-              <div
-                key={req.id}
-                className="p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-gray-50/80 transition-colors"
-              >
-                <div className="space-y-1 min-w-0">
-                  <div className="flex items-center gap-2.5 flex-wrap">
-                    <span className="font-mono text-[11px] font-bold text-gray-400">
-                      {req.requestId}
-                    </span>
-                    <span className="font-bold text-sm text-gray-900">{req.requesterName}</span>
-                    {req.requesterCompany && (
-                      <span className="text-xs text-gray-500 font-medium">({req.requesterCompany})</span>
-                    )}
-                    <LeadStatusBadge status={req.status} />
+          {recentRequests.length === 0 ? (
+            <div className="p-10 text-center text-sm text-gray-500">No hay solicitudes recientes.</div>
+          ) : (
+            <div className="divide-y divide-gray-100">
+              {recentRequests.map((request) => (
+                <div key={request.id} className="px-6 py-4 flex items-center justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-bold text-gray-900 truncate">{request.requesterName}</span>
+                      {request.status && <Badge variant="status" status={request.status} />}
+                    </div>
+                    <p className="text-xs text-gray-500 truncate">{request.requesterCompany || 'Particular'}</p>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span>Solicitud de Media Kit</span>
+                  <div className="shrink-0 text-right text-xs text-gray-400">
+                    {new Date(request.createdAt).toLocaleDateString('es-AR')}
                   </div>
                 </div>
-
-                <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
-                  <span className="text-[11px] text-gray-400">
-                    {req.createdAt ? new Date(req.createdAt).toLocaleDateString('es-AR', {
-                      day: '2-digit',
-                      month: 'short',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    }) : ''}
-                  </span>
-                  <Link
-                    to="/dashboard/mediakits"
-                    className="px-3 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-100 text-xs font-bold text-gray-800 transition-colors shadow-2xs"
-                  >
-                    Detalle
-                  </Link>
-                </div>
-              </div>
-            ))}
-
-            {requests.length === 0 && (
-              <div className="p-8 text-center text-sm text-gray-500">
-                No hay solicitudes registradas todavía.
-              </div>
-            )}
-          </div>
-        </div>
+              ))}
+            </div>
+          )}
+        </section>
       </div>
     </DashboardShell>
   );
-}
-
-function LeadStatusBadge({ status }: { status: string }) {
-  if (status === 'nuevo' || status === 'pending') {
-    return <Badge variant="success">Nuevo</Badge>;
-  }
-  if (status === 'enviado' || status === 'quoted') {
-    return <Badge variant="info">Cotizado</Badge>;
-  }
-  if (status === 'contactado') {
-    return <Badge variant="warning">Contactado</Badge>;
-  }
-  return <Badge variant="neutral">Cerrado</Badge>;
 }
