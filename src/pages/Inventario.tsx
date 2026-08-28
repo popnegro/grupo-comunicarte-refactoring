@@ -32,7 +32,7 @@ export default function Inventario() {
 
   const handleOpenMediakit = useCallback(() => {
     if (selectedCount === 0) {
-      showToast('Selecciona al menos un soporte en el mapa para armar tu propuesta.', undefined, 2800);
+      showToast('Selecciona al menos un soporte para armar tu propuesta.', undefined, 2800);
       return;
     }
     setIsMediakitOpen(true);
@@ -41,12 +41,6 @@ export default function Inventario() {
 
   const handleResetFilters = useCallback(() => {
     setSelectedPlaza('todos');
-    setSelectedTipo('todos');
-    setSelectedDisponibilidad('todos');
-    setSearchText('');
-  }, []);
-
-  const handleResetToPlaza = useCallback(() => {
     setSelectedTipo('todos');
     setSelectedDisponibilidad('todos');
     setSearchText('');
@@ -102,10 +96,10 @@ export default function Inventario() {
 
   if (loading) {
     return (
-      <div className="flex h-[calc(100vh-80px)] items-center justify-center bg-gray-50">
+      <div className="flex h-[calc(100vh-80px)] items-center justify-center bg-gray-50" role="status" aria-live="polite">
         <div className="text-center flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 animate-spin text-black" />
-          <p className="text-sm font-semibold text-gray-600">Cargando inventario comercial desde base de datos...</p>
+          <Loader2 className="w-10 h-10 animate-spin text-black" aria-hidden="true" />
+          <p className="text-sm font-semibold text-gray-600">Cargando inventario comercial...</p>
         </div>
       </div>
     );
@@ -113,16 +107,16 @@ export default function Inventario() {
 
   if (error) {
     return (
-      <div className="flex h-[calc(100vh-80px)] items-center justify-center bg-gray-50 px-4">
+      <div className="flex h-[calc(100vh-80px)] items-center justify-center bg-gray-50 px-4" role="alert">
         <div className="bg-white p-8 rounded-2xl shadow-lg border border-red-100 max-w-md w-full text-center">
           <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="w-6 h-6" />
+            <AlertCircle className="w-6 h-6" aria-hidden="true" />
           </div>
-          <h2 className="text-lg font-bold text-gray-900 mb-2">Error de conexión con la Base de Datos</h2>
-          <p className="text-sm text-gray-600 mb-6">{error}</p>
-          <Button onClick={refetch} className="w-full flex items-center justify-center gap-2">
-            <RefreshCw className="w-4 h-4" />
-            Reintentar conexión
+          <h2 className="text-lg font-bold text-gray-900 mb-2">No pudimos cargar el inventario</h2>
+          <p className="text-sm text-gray-600 mb-6">Estamos teniendo problemas para mostrar los soportes. Probá nuevamente.</p>
+          <Button onClick={refetch} className="w-full flex items-center justify-center gap-2" aria-label="Reintentar cargar el inventario">
+            <RefreshCw className="w-4 h-4" aria-hidden="true" />
+            Reintentar
           </Button>
         </div>
       </div>
@@ -138,12 +132,14 @@ export default function Inventario() {
     )}>
       <div className="md:hidden absolute top-4 left-4 z-[500]">
         <button
+          type="button"
           onClick={() => setIsMobileFiltersOpen(true)}
           className="bg-white text-black px-4 py-2.5 rounded-full font-bold shadow-lg border border-gray-100 flex items-center gap-2 text-sm active:scale-95 transition-transform"
+          aria-label={hasActiveFilters ? 'Abrir filtros, hay filtros activos' : 'Abrir filtros'}
         >
-          <SlidersHorizontal className="w-4 h-4" />
+          <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
           Filtros
-          {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-emerald-500 absolute top-0 right-0 m-2" />}
+          {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-emerald-500 absolute top-0 right-0 m-2" aria-hidden="true" />}
         </button>
       </div>
 
@@ -152,15 +148,20 @@ export default function Inventario() {
           'absolute md:relative inset-0 md:inset-auto z-[2000] md:z-10 bg-black/40 md:bg-transparent transition-opacity duration-300 md:opacity-100 md:block',
           isMobileFiltersOpen ? 'opacity-100 block' : 'opacity-0 hidden'
         )}
+        role={isMobileFiltersOpen ? 'dialog' : undefined}
+        aria-modal={isMobileFiltersOpen ? true : undefined}
+        aria-label={isMobileFiltersOpen ? 'Filtros de inventario' : undefined}
       >
         <div className="absolute md:relative inset-y-0 left-0 w-[85%] max-w-sm md:w-80 h-full bg-white flex flex-col shadow-2xl md:shadow-none border-r border-gray-200">
           <div className="md:hidden p-4 flex justify-between items-center border-b border-gray-100">
             <span className="font-bold text-lg">Filtros</span>
             <button
+              type="button"
               onClick={() => setIsMobileFiltersOpen(false)}
               className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+              aria-label="Cerrar filtros"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5" aria-hidden="true" />
             </button>
           </div>
 
@@ -188,7 +189,6 @@ export default function Inventario() {
           initialSelectedId={searchParams.get('soporte')}
           selectedPlaza={selectedPlaza}
           onResetFilters={handleResetFilters}
-          onResetToPlaza={selectedPlaza !== 'todos' ? handleResetToPlaza : undefined}
         />
 
         <StickySelectionBar
