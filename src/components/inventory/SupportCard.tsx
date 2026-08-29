@@ -42,7 +42,7 @@ function cardAttributes(item: InventoryItem): string[] {
   }
 
   if (item.tipo_soporte === 'tradicional') {
-    return [technical?.summary, technical?.measures, technical?.carAs, technical?.impresion]
+    return [technical?.summary, technical?.measures, technical?.caras ? `${technical.caras} caras` : '', technical?.impresion]
       .filter(Boolean).slice(0, 4) as string[];
   }
 
@@ -74,7 +74,8 @@ export function SupportCard({ item, variant = 'catalog', onRemove }: SupportCard
   const safeIndex = slides.length ? Math.min(slide, slides.length - 1) : 0;
   const active = slides[safeIndex];
   const attributes = cardAttributes(item);
-  const statusLabel = reserved ? `Reservado ${reservationPeriod(item)}`.trim() : 'Disponible';
+  const period = reservationPeriod(item);
+  const statusLabel = reserved ? `Reservado${period ? ` ${period}` : ''}` : 'Disponible';
 
   const renderMedia = () => {
     if (!active) return <div className="flex h-full w-full items-center justify-center bg-gray-50"><MapPin className="h-8 w-8 text-gray-300" /></div>;
@@ -85,19 +86,7 @@ export function SupportCard({ item, variant = 'catalog', onRemove }: SupportCard
   const mediaControls = slides.length > 1 && <><button type="button" aria-label="Anterior" onClick={() => setSlide((safeIndex - 1 + slides.length) % slides.length)} className="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white"><ArrowLeft className="h-4 w-4" /></button><button type="button" aria-label="Siguiente" onClick={() => setSlide((safeIndex + 1) % slides.length)} className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white"><ArrowRight className="h-4 w-4" /></button><div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">{slides.map((_, index) => <button key={index} type="button" aria-label={`Ir al recurso ${index + 1}`} onClick={() => setSlide(index)} className={`h-1.5 rounded-full transition-all ${index === safeIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/60'}`} />)}</div></>;
 
   if (availability === 'inactivo') return null;
+  if (variant === 'selectable') return <article className="overflow-hidden rounded-2xl border border-gray-200 bg-white"><div className="relative aspect-[16/9] w-full overflow-hidden bg-gray-100">{renderMedia()}{mediaControls}</div><div className="p-6"><p className="text-xs font-semibold uppercase tracking-wider text-gray-600">{item.tipo_soporte.replace('_', ' ')}</p><h2 className="mt-2 text-xl font-semibold">{item.name}</h2><p className="mt-2 text-sm text-gray-600">{'address' in item ? item.address : item.ciudad}</p>{onRemove && <button type="button" onClick={() => onRemove(item)} className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-950"><Trash2 className="h-4 w-4" /> Quitar</button>}</div></article>;
 
-  if (variant === 'selectable') {
-    return <article className="overflow-hidden rounded-2xl border border-gray-200 bg-white"><div className="relative aspect-[16/9] w-full overflow-hidden bg-gray-100">{renderMedia()}{mediaControls}</div><div className="p-6"><p className="text-xs font-semibold uppercase tracking-wider text-gray-600">{item.tipo_soporte.replace('_', ' ')}</p><h2 className="mt-2 text-xl font-semibold">{item.name}</h2><p className="mt-2 text-sm text-gray-600">{'address' in item ? item.address : item.ciudad}</p>{onRemove && <button type="button" onClick={() => onRemove(item)} className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-950"><Trash2 className="h-4 w-4" /> Quitar</button>}</div></article>;
-  }
-
-  return <article className={`group flex flex-col overflow-hidden border border-gray-200 bg-white ${variant === 'showcase' ? 'rounded-3xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl' : 'rounded-2xl'}`}>
-    <div className="relative aspect-[16/9] w-full overflow-hidden bg-gray-100">{renderMedia()}{variant === 'showcase' && <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" />}{mediaControls}</div>
-    <div className="flex flex-grow flex-col p-6">
-      <div className="mb-4 flex flex-wrap items-center gap-2"><Badge variant={item.tipo_soporte === 'tradicional' ? 'neutral' : item.tipo_soporte === 'led' ? 'red' : 'dark'} className="uppercase text-[10px]">{item.tipo_soporte.replace('_', ' ')}</Badge><Badge variant={reserved ? 'outline' : 'green'} className="uppercase text-[10px]">{statusLabel}</Badge></div>
-      <h3 className="mb-2 text-xl font-bold">{item.name}</h3>
-      <p className="text-sm leading-relaxed text-gray-600">{'address' in item ? item.address : item.ciudad}</p>
-      {attributes.length > 0 && <div className="mt-4 flex flex-wrap gap-2" aria-label="Atributos principales">{attributes.map((attribute) => <span key={attribute} className="rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-xs font-semibold text-gray-800">{attribute}</span>)}</div>}
-      <Button type="button" onClick={() => navigate(`/inventario?plaza=${item.ciudad}&tipo=${item.tipo_soporte}&soporte=${item.canonical_id}`)} variant="outline" className="mt-6 min-h-11 w-full rounded-xl">{reserved ? 'Consultar disponibilidad' : 'Ver soporte'} <ArrowRight className="h-4 w-4" /></Button>
-    </div>
-  </article>;
+  return <article className={`group flex flex-col overflow-hidden border border-gray-200 bg-white ${variant === 'showcase' ? 'rounded-3xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl' : 'rounded-2xl'}`}><div className="relative aspect-[16/9] w-full overflow-hidden bg-gray-100">{renderMedia()}{variant === 'showcase' && <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" />}{mediaControls}</div><div className="flex flex-grow flex-col p-6"><div className="mb-4 flex flex-wrap items-center gap-2"><Badge variant={item.tipo_soporte === 'tradicional' ? 'neutral' : item.tipo_soporte === 'led' ? 'red' : 'dark'} className="uppercase text-[10px]">{item.tipo_soporte.replace('_', ' ')}</Badge><Badge variant={reserved ? 'outline' : 'green'} className="uppercase text-[10px]">{statusLabel}</Badge></div><h3 className="mb-2 text-xl font-bold">{item.name}</h3><p className="text-sm leading-relaxed text-gray-600">{'address' in item ? item.address : item.ciudad}</p>{attributes.length > 0 && <div className="mt-4 flex flex-wrap gap-2" aria-label="Atributos principales">{attributes.map((attribute) => <span key={attribute} className="rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-xs font-semibold text-gray-800">{attribute}</span>)}</div>}<Button type="button" onClick={() => navigate(`/inventario?plaza=${item.ciudad}&tipo=${item.tipo_soporte}&soporte=${item.canonical_id}`)} variant="outline" className="mt-6 min-h-11 w-full rounded-xl">{reserved ? 'Consultar disponibilidad' : 'Ver soporte'} <ArrowRight className="h-4 w-4" /></Button></div></article>;
 }
