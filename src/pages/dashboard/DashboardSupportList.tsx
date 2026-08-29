@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
 import { Input } from '../../components/ui/Input';
 import { apiFetch } from '../../lib/api';
+import { calculateSupportTotal, formatSupportCurrency } from '../../lib/supportPricing';
 
 type Support = {
   canonical_id: string;
@@ -13,6 +14,7 @@ type Support = {
   disponibilidad: string;
   active?: boolean;
   address?: string;
+  pricing?: { exhibition_price?: number | string | null; installation_price?: number | string | null; printing_price?: number | string | null; currency?: string | null } | null;
 };
 
 const chip = 'rounded-full px-2.5 py-1 text-[11px] font-bold';
@@ -117,12 +119,13 @@ export default function DashboardSupportList() {
         </div>
         <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3 text-xs text-gray-500"><span><strong className="text-gray-900">{visible.length}</strong> soportes</span>{(query || plaza !== 'todas' || type !== 'todos' || availability !== 'todos' || active !== 'todos') && <button onClick={()=>{setQuery('');setPlaza('todas');setType('todos');setAvailability('todos');setActive('todos')}} className="font-bold text-emerald-700 hover:underline">Limpiar filtros</button>}</div>
       </section>
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xs"><div className="overflow-x-auto"><table className="w-full text-left text-xs"><thead className="border-b border-gray-200 bg-gray-50 text-[11px] uppercase tracking-wider text-gray-500"><tr><th className="px-4 py-3.5">Soporte / Código</th><th className="px-4 py-3.5">Plaza / Formato</th><th className="px-4 py-3.5">Disponibilidad</th><th className="px-4 py-3.5 text-right">Acciones</th></tr></thead>
-        <tbody className="divide-y divide-gray-100">{loading ? <tr><td colSpan={4} className="px-4 py-14 text-center text-gray-400">Cargando soportes…</td></tr> : visible.map(item => <tr key={item.canonical_id} className={item.active === false ? 'bg-gray-50' : 'hover:bg-gray-50/70'}>
+      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xs"><div className="overflow-x-auto"><table className="w-full text-left text-xs"><thead className="border-b border-gray-200 bg-gray-50 text-[11px] uppercase tracking-wider text-gray-500"><tr><th className="px-4 py-3.5">Soporte / Código</th><th className="px-4 py-3.5">Plaza / Formato</th><th className="px-4 py-3.5">Disponibilidad</th><th className="px-4 py-3.5">Total soporte</th><th className="px-4 py-3.5 text-right">Acciones</th></tr></thead>
+        <tbody className="divide-y divide-gray-100">{loading ? <tr><td colSpan={5} className="px-4 py-14 text-center text-gray-400">Cargando soportes…</td></tr> : visible.map(item => <tr key={item.canonical_id} className={item.active === false ? 'bg-gray-50' : 'hover:bg-gray-50/70'}>
           <td className="px-4 py-3.5"><div className="font-bold text-gray-900">{item.name}</div><div className="font-mono text-[11px] text-gray-400">{item.canonical_id}</div></td><td className="px-4 py-3.5"><div className="font-semibold text-gray-700">{item.ciudad === 'mendoza' ? 'Mendoza' : 'Buenos Aires'}</div><div className="text-[11px] capitalize text-gray-500">{item.tipo_soporte?.replace('_',' ')}</div></td>
           <td className="px-4 py-3.5"><button onClick={()=>toggleAvailability(item)} className={`${chip} ${item.disponibilidad === 'disponible' ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'}`}>{item.disponibilidad === 'disponible' ? 'Disponible' : 'Reservado'}</button>{item.active === false && <span className="ml-2 text-[10px] font-bold text-gray-400">Archivado</span>}</td>
+          <td className="px-4 py-3.5"><div className="font-extrabold text-gray-900">{formatSupportCurrency(calculateSupportTotal(item.pricing), item.pricing?.currency || 'ARS')}</div><div className="text-[10px] text-gray-400">Exhibición + Instalación + Impresión</div></td>
           <td className="px-4 py-3.5 text-right"><div className="inline-flex items-center gap-2"><button onClick={()=>navigate(`/dashboard/soportes/${encodeURIComponent(item.canonical_id)}/edit`)} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-[11px] font-bold text-gray-700"><Edit3 className="h-3.5 w-3.5"/>Editar</button><button onClick={()=>navigate(`/dashboard/soportes/${encodeURIComponent(item.canonical_id)}/reservation`)} aria-label={`Definir período de reserva para ${item.name}`} title="Período de reserva" className="rounded-lg border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50"><CalendarDays className="h-3.5 w-3.5" /></button><button onClick={()=>navigate(`/dashboard/soportes/${encodeURIComponent(item.canonical_id)}/preview`)} aria-label={`Previsualizar ${item.name}`} className="rounded-lg border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50"><Eye className="h-3.5 w-3.5"/></button><button onClick={()=>duplicate(item)} aria-label={`Duplicar ${item.name}`} className="rounded-lg border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50"><Copy className="h-3.5 w-3.5"/></button><button onClick={()=>archive(item)} aria-label={`Archivar ${item.name}`} className="rounded-lg border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50"><Archive className="h-3.5 w-3.5"/></button><button onClick={()=>navigate('/inventario')} aria-label="Ver inventario público" className="rounded-lg border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50"><ExternalLink className="h-3.5 w-3.5"/></button></div></td>
-        </tr>)}{!loading && visible.length===0 && <tr><td colSpan={4} className="px-4 py-14 text-center text-gray-400">No se encontraron soportes con estos filtros.</td></tr>}</tbody></table></div></section>
+        </tr>)}{!loading && visible.length===0 && <tr><td colSpan={5} className="px-4 py-14 text-center text-gray-400">No se encontraron soportes con estos filtros.</td></tr>}</tbody></table></div></section>
       <div className="text-right"><button onClick={()=>navigate('/dashboard/soportes/advanced')} className="text-[11px] font-bold text-gray-400 hover:text-gray-700">Herramientas avanzadas</button></div>
     </div>
   </DashboardShell>;
