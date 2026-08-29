@@ -36,6 +36,9 @@ export interface SupportTechnicalData {
   daily_frequency?: string;
   requirements?: string;
   summary?: string;
+  format?: string;
+  caras?: number | null;
+  impresion?: string;
   spot_duration_seconds?: number | null;
   minimum_daily_outings?: number | null;
   max_advertisers?: number | null;
