@@ -40,9 +40,31 @@ const adminUser = ADMIN_USER;
 const adminPassword = ADMIN_PASSWORD;
 const adminSecret = ADMIN_SECRET;
 
+function canonicalizeEditorMedia(data: SupportWritePayload): SupportWritePayload {
+  if (data.media !== undefined || !Array.isArray(data.imageUrls)) return data;
+
+  const urls = data.imageUrls.map((url) => String(url).trim()).filter(Boolean).slice(0, 3);
+  if (urls.length === 0) return { ...data, media: [] };
+
+  const coverType = (data.technical as any)?.metadata?.cover_media_type === 'video' ? 'video' : 'image';
+  return {
+    ...data,
+    media: urls.map((url, index) => ({
+      media_type: index === 0 ? coverType : 'image',
+      url,
+      sort_order: index,
+      active: true,
+      metadata: {
+        source: 'support-editor',
+        role: index === 0 ? 'cover' : 'gallery',
+      },
+    })),
+  };
+}
+
 export function authenticateAdmin(username: string, password: string): { success: boolean; token?: string; message?: string } {
   if (username === adminUser && password === adminPassword) {
-    const expiresAt = Date.now() + 8 * 3600 * 1000; // 8 hours expiration
+    const expiresAt = Date.now() + 8 * 3600 * 1000;
     const payload = `${username}:${expiresAt}`;
     const signature = crypto.createHmac('sha256', adminSecret).update(payload).digest('hex');
     const token = Buffer.from(`${payload}:${signature}`).toString('base64');
@@ -60,7 +82,7 @@ export function verifyAdminToken(authHeader?: string): boolean {
     const [username, expiresAtStr, signature] = decoded.split(':');
     if (!username || !expiresAtStr || !signature) return false;
     const expiresAt = Number(expiresAtStr);
-    if (Date.now() > expiresAt) return false; // Token expired
+    if (Date.now() > expiresAt) return false;
 
     const payload = `${username}:${expiresAt}`;
     const expectedSignature = crypto.createHmac('sha256', adminSecret).update(payload).digest('hex');
@@ -148,29 +170,31 @@ async function assertFeaturedCapacity(canonicalId: string | null, data: SupportW
 }
 
 export async function createAdminSupport(data: SupportWritePayload & { canonical_id?: string }) {
-  const family = resolveFamily(data, data.tipo_soporte);
+  const canonicalData = canonicalizeEditorMedia(data);
+  const family = resolveFamily(canonicalData, canonicalData.tipo_soporte);
   validateFamily(family);
-  if (data.disponibilidad !== undefined) validateAvailability(data.disponibilidad);
-  validateSupportPayload({ ...data, family });
-  await assertFeaturedCapacity(null, data);
+  if (canonicalData.disponibilidad !== undefined) validateAvailability(canonicalData.disponibilidad);
+  validateSupportPayload({ ...canonicalData, family });
+  await assertFeaturedCapacity(null, canonicalData);
 
-  if (data.canonical_id?.trim()) {
-    const canonicalId = data.canonical_id.trim();
+  if (canonicalData.canonical_id?.trim()) {
+    const canonicalId = canonicalData.canonical_id.trim();
     const existing = await getSupportByIdFromDB(canonicalId, { includeInactive: true });
     if (existing) {
       throw new Error(`canonical_id duplicado: ${canonicalId}`);
     }
-    return upsertSupportRecord(canonicalId, { ...data, family });
+    return upsertSupportRecord(canonicalId, { ...canonicalData, family });
   }
 
-  const baseCandidate = generateCanonicalId(data.name || '', data.ciudad || 'mendoza', family);
+  const baseCandidate = generateCanonicalId(canonicalData.name || '', canonicalData.ciudad || 'mendoza', family);
   const canonicalId = await ensureUniqueCanonicalId(baseCandidate);
-  return upsertSupportRecord(canonicalId, { ...data, family });
+  return upsertSupportRecord(canonicalId, { ...canonicalData, family });
 }
 
 export async function updateSupportByAdmin(canonicalId: string, data: SupportWritePayload) {
-  await assertFeaturedCapacity(canonicalId, data);
-  return patchSupportRecord(canonicalId, data);
+  const canonicalData = canonicalizeEditorMedia(data);
+  await assertFeaturedCapacity(canonicalId, canonicalData);
+  return patchSupportRecord(canonicalId, canonicalData);
 }
 
 export async function deactivateSupportByAdmin(canonicalId: string) {
