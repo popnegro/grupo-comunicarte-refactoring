@@ -45,7 +45,7 @@ export default function Soportes() {
         description="Combinamos la presencia ineludible del formato tradicional con la versatilidad de la era digital para maximizar el alcance de tu marca."
       />
 
-      <section className="pt-16 pb-24 px-4 sm:px-6 lg:px-8 bg-white md:pb-32">
+      <section className="px-4 py-24 sm:px-6 lg:px-8 bg-white md:py-32">
         <div className="mx-auto max-w-7xl space-y-6">
           {soportes.map((soporte, index) => {
             const Icon = soporte.icon;
@@ -89,7 +89,7 @@ export default function Soportes() {
         </div>
       </section>
 
-      <section className="border-t border-gray-200 bg-white px-4 py-24 text-center sm:px-6 lg:px-8">
+      <section className="border-t border-gray-200 bg-white px-4 py-24 text-center sm:px-6 lg:px-8 md:py-32">
         <div className="mx-auto max-w-3xl">
           <p className="text-eyebrow mb-4">El próximo paso</p>
           <h2 className="text-3xl font-bold tracking-tight text-gray-950 md:text-5xl">Descubrí nuestras soluciones de comunicación</h2>
