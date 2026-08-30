@@ -1,6 +1,7 @@
 import { ArrowRight, MapPin, MonitorPlay, Truck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { buttonStyles } from '../components/ui/Button';
+import { InteriorHero } from '../components/layout/InteriorHero';
 
 export default function Soportes() {
   const soportes = [
@@ -38,18 +39,13 @@ export default function Soportes() {
 
   return (
     <div className="flex flex-col w-full bg-white">
-      <section className="relative overflow-hidden bg-white px-4 pb-20 pt-24 sm:px-6 lg:px-8 md:pb-28 md:pt-32">
-        <div className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[min(760px,90vw)] -translate-x-1/2 rounded-full bg-emerald-200/30 blur-3xl" aria-hidden="true" />
-        <div className="relative mx-auto max-w-7xl">
-          <div className="max-w-3xl">
-            <p className="text-eyebrow mb-4">Ecosistema de medios</p>
-            <h1 className="text-5xl font-bold tracking-[-0.04em] text-gray-950 sm:text-6xl md:text-7xl">Nuestros soportes</h1>
-            <p className="mt-6 max-w-2xl text-base leading-relaxed text-gray-600 md:text-lg">Combinamos la presencia ineludible del formato tradicional con la versatilidad de la era digital para maximizar el alcance de tu marca.</p>
-          </div>
-        </div>
-      </section>
+      <InteriorHero
+        eyebrow="Ecosistema de medios"
+        title="Nuestros soportes"
+        description="Combinamos la presencia ineludible del formato tradicional con la versatilidad de la era digital para maximizar el alcance de tu marca."
+      />
 
-      <section className="px-4 pb-24 sm:px-6 lg:px-8 md:pb-32">
+      <section className="pt-16 pb-24 px-4 sm:px-6 lg:px-8 bg-white md:pb-32">
         <div className="mx-auto max-w-7xl space-y-6">
           {soportes.map((soporte, index) => {
             const Icon = soporte.icon;
@@ -95,10 +91,10 @@ export default function Soportes() {
 
       <section className="border-t border-gray-200 bg-white px-4 py-24 text-center sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl">
-          <p className="text-eyebrow mb-4">El próximo punto de contacto</p>
-          <h2 className="text-3xl font-bold tracking-tight text-gray-950 md:text-5xl">Encontrá el soporte adecuado para tu marca</h2>
-          <p className="mx-auto mb-9 mt-5 max-w-2xl leading-relaxed text-gray-500">Explorá nuestra cobertura y descubrí dónde tu próxima campaña puede generar mayor impacto.</p>
-          <Link to="/soportes" className={buttonStyles({ size: 'lg', className: 'inline-flex rounded-full px-7' })}>Ver soportes <ArrowRight className="h-5 w-5" /></Link>
+          <p className="text-eyebrow mb-4">El próximo paso</p>
+          <h2 className="text-3xl font-bold tracking-tight text-gray-950 md:text-5xl">Descubrí nuestras soluciones de comunicación</h2>
+          <p className="mx-auto mb-9 mt-5 max-w-2xl leading-relaxed text-gray-500">Conocé las soluciones que podemos desarrollar para acompañar los objetivos de tu marca.</p>
+          <Link to="/soluciones" className={buttonStyles({ size: 'lg', className: 'inline-flex rounded-full px-7' })}>Ver soluciones <ArrowRight className="h-5 w-5" /></Link>
         </div>
       </section>
     </div>
