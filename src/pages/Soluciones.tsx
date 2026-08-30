@@ -16,7 +16,7 @@ export default function Soluciones() {
         eyebrow="Nuestros servicios"
         title="Soluciones para ganar presencia."
         description="Combinamos medios OOH, tecnología DOOH y circuitos móviles para conectar tu marca con la audiencia correcta."
-        align="center"
+        align="left"
       />
 
       <section className="px-4 py-24 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full md:py-32">
