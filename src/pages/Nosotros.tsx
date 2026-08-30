@@ -49,7 +49,7 @@ export default function Nosotros() {
         </div>
       </section>
 
-      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full md:py-32">
         <div className="max-w-2xl mb-14">
           <p className="text-eyebrow mb-3">Cómo trabajamos</p>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-950 tracking-tight mb-4">Nuestros pilares</h2>
@@ -72,7 +72,7 @@ export default function Nosotros() {
         </div>
       </section>
 
-      <section className="bg-white py-24 px-4 sm:px-6 lg:px-8 border-t border-gray-200 text-center">
+      <section className="bg-white py-24 px-4 sm:px-6 lg:px-8 border-t border-gray-200 text-center md:py-32">
         <div className="max-w-3xl mx-auto">
           <p className="text-eyebrow mb-4">El próximo paso</p>
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">Hablemos de tu próxima campaña</h2>
