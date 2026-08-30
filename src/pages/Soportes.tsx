@@ -12,7 +12,7 @@ export default function Soportes() {
       description: 'Cobertura masiva con ubicaciones estratégicas de alto tránsito en Mendoza y Buenos Aires.',
       features: ['Cartelería espectacular y gigantografías', 'Séxtuples y mobiliario urbano', 'Puntos de ingreso a la ciudad y rutas principales', 'Iluminación Frontlight para impacto nocturno'],
       link: '/inventario?tipo=tradicional',
-      image: '/images/home.webp'
+      image: '/images/mza-trad-01.jpg'
     },
     {
       id: 'led',
@@ -22,7 +22,7 @@ export default function Soportes() {
       description: 'Soportes digitales de alta resolución en puntos neurálgicos de concentración comercial.',
       features: ['Tecnología LED P4 y P6 de alta definición', 'Formatos dinámicos y rotativos', 'Contenidos flexibles y actualización en tiempo real', 'Ubicaciones premium en nudos viales y centros comerciales'],
       link: '/inventario?tipo=led',
-      image: '/images/led-movil-feature.webp'
+      image: '/images/mza-led-01.jpg'
     },
     {
       id: 'led_movil',
