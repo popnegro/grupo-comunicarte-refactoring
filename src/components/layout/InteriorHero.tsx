@@ -14,7 +14,7 @@ export function InteriorHero({ eyebrow, title, description, align = 'left' }: In
       <div className="absolute inset-0 bg-gradient-to-br from-black via-[#111111] to-[#252525]" aria-hidden="true" />
       <div className={`relative z-10 max-w-7xl mx-auto ${align === 'center' ? 'text-center' : ''}`}>
         <div className={align === 'center' ? 'max-w-4xl mx-auto' : 'max-w-4xl'}>
-          <span className="inline-flex items-center gap-2 text-red-400 font-bold tracking-[0.18em] uppercase text-[11px] mb-6">
+          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 mb-7 rounded-full bg-white/10 border border-white/20 backdrop-blur-md text-white text-[11px] font-bold tracking-[0.18em] uppercase">
             <span className="w-1.5 h-1.5 rounded-full bg-red-500" aria-hidden="true" />
             {eyebrow}
           </span>
