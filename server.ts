@@ -5,6 +5,7 @@ import { createServer as createViteServer } from 'vite';
 import { initDatabase, pool } from './src/db';
 import { getAllSupportsFromDB, getSupportByIdFromDB } from './src/server/supportsService';
 import { handleMediakitRequest, getAllMediakitRequestsFromDB } from './src/server/mediakitService';
+import { handleMediaUpload } from './src/server/multimediaUpload';
 import {
   authenticateAdmin,
   verifyAdminToken,
@@ -132,6 +133,16 @@ export async function createApp() {
     }
     next();
   };
+
+  // Physical media upload: multipart/form-data -> R2 -> support_media.
+  // Keep this route ahead of the JSON media CRUD route and use a route-scoped
+  // raw parser so the existing JSON API remains unchanged.
+  app.post(
+    '/api/admin/supports/:id/media/upload',
+    requireAdmin,
+    express.raw({ type: 'multipart/form-data', limit: '10mb' }),
+    handleMediaUpload,
+  );
 
   app.get('/api/admin/stats', requireAdmin, async (_req, res) => {
     try {
