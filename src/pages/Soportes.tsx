@@ -13,9 +13,7 @@ export default function Soportes() {
       description: 'Cobertura masiva con ubicaciones estratégicas de alto tránsito en Mendoza y Buenos Aires.',
       features: ['Cartelería espectacular y gigantografías', 'Séxtuples y mobiliario urbano', 'Puntos de ingreso a la ciudad y rutas principales', 'Iluminación Frontlight para impacto nocturno'],
       link: '/inventario?tipo=tradicional',
-      bgColor: 'bg-gray-50',
-      iconColor: 'text-gray-950',
-      iconBg: 'bg-white'
+      image: '/images/mza-trad-01.jpg'
     },
     {
       id: 'led',
@@ -25,9 +23,7 @@ export default function Soportes() {
       description: 'Soportes digitales de alta resolución en puntos neurálgicos de concentración comercial.',
       features: ['Tecnología LED P4 y P6 de alta definición', 'Formatos dinámicos y rotativos', 'Contenidos flexibles y actualización en tiempo real', 'Ubicaciones premium en nudos viales y centros comerciales'],
       link: '/inventario?tipo=led',
-      bgColor: 'bg-red-50',
-      iconColor: 'text-red-600',
-      iconBg: 'bg-white'
+      image: '/images/mza-led-01.jpg'
     },
     {
       id: 'led_movil',
@@ -37,10 +33,7 @@ export default function Soportes() {
       description: 'Impacto en movimiento. Llevamos tu mensaje directamente a donde está tu audiencia.',
       features: ['Pantallas LED laterales de 4x2m', 'Rutas estratégicas programables', 'Activaciones de marca y eventos', 'Alta visibilidad a nivel peatonal y vehicular'],
       link: '/inventario?tipo=led_movil',
-      bgColor: 'bg-gray-950',
-      textColor: 'text-white',
-      iconColor: 'text-white',
-      iconBg: 'bg-white/10'
+      image: '/images/led-movil-feature.webp'
     }
   ];
 
@@ -52,41 +45,56 @@ export default function Soportes() {
         description="Combinamos la presencia ineludible del formato tradicional con la versatilidad de la era digital para maximizar el alcance de tu marca."
       />
 
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto space-y-5">
-          {soportes.map((soporte) => {
+      <section className="px-4 py-24 sm:px-6 lg:px-8 bg-white md:py-32">
+        <div className="mx-auto max-w-7xl space-y-6">
+          {soportes.map((soporte, index) => {
             const Icon = soporte.icon;
-            const isDark = soporte.id === 'led_movil';
             return (
-              <article key={soporte.id} className={`group rounded-[2rem] p-7 md:p-12 flex flex-col md:flex-row gap-10 md:gap-16 items-start border ${isDark ? 'border-gray-900' : 'border-gray-200'} ${soporte.bgColor} ${soporte.textColor || 'text-gray-950'} transition-all duration-300 hover:shadow-xl`}>
-                <div className="flex-1 space-y-6">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${soporte.iconBg} ${soporte.iconColor} shadow-sm border ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
-                      <Icon className="w-7 h-7" />
-                    </div>
-                    <span className={`text-[10px] font-bold uppercase tracking-[0.16em] ${isDark ? 'text-gray-400 border-white/10' : 'text-gray-500 border-gray-200'} border rounded-full px-2.5 py-1`}>{soporte.eyebrow}</span>
+              <article key={soporte.id} className="group overflow-hidden rounded-[2rem] border border-gray-200 bg-white transition-all duration-300 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-2xl">
+                <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
+                  <div className="relative min-h-[300px] overflow-hidden bg-gray-100 lg:min-h-[430px]">
+                    <img src={soporte.image} alt={soporte.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent" />
+                    <div className="absolute left-6 top-6 rounded-full border border-white/20 bg-black/35 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white backdrop-blur-md">0{index + 1} · {soporte.eyebrow}</div>
                   </div>
-                  <h2 className="text-3xl md:text-4xl font-bold tracking-tight">{soporte.name}</h2>
-                  <p className={`text-base md:text-lg leading-relaxed max-w-xl ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{soporte.description}</p>
-                  <Link to={soporte.link} className={buttonStyles({ variant: isDark ? 'default' : 'outline', className: 'rounded-full' })}>
-                    Explorar inventario <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
 
-                <div className={`flex-1 w-full rounded-2xl p-7 md:p-8 ${isDark ? 'bg-white/[0.05] border-white/10' : 'bg-white border-gray-200'} border`}>
-                  <h3 className={`font-bold mb-6 uppercase tracking-[0.14em] text-[11px] ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Características principales</h3>
-                  <ul className="space-y-4">
-                    {soporte.features.map((feature, fIdx) => (
-                      <li key={fIdx} className="flex items-start gap-3">
-                        <span className="mt-2 w-1.5 h-1.5 rounded-full shrink-0 bg-red-500" aria-hidden="true" />
-                        <span className={`leading-relaxed ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="flex flex-col justify-between p-7 md:p-10 lg:p-12">
+                    <div>
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-950 text-white shadow-sm">
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <span className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-400">Soporte</span>
+                      </div>
+                      <h2 className="mt-10 text-3xl font-bold tracking-[-0.03em] text-gray-950 md:text-4xl">{soporte.name}</h2>
+                      <p className="mt-4 max-w-xl text-base leading-relaxed text-gray-600 md:text-lg">{soporte.description}</p>
+
+                      <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                        {soporte.features.map((feature, featureIndex) => (
+                          <div key={featureIndex} className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm leading-relaxed text-gray-700 transition-colors group-hover:bg-white">
+                            {feature}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <Link to={soporte.link} className={buttonStyles({ className: 'mt-9 w-full justify-center rounded-full sm:w-fit' })}>
+                      Explorar inventario <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
                 </div>
               </article>
             );
           })}
+        </div>
+      </section>
+
+      <section className="border-t border-gray-200 bg-white px-4 py-24 text-center sm:px-6 lg:px-8 md:py-32">
+        <div className="mx-auto max-w-3xl">
+          <p className="text-eyebrow mb-4">El próximo paso</p>
+          <h2 className="text-3xl font-bold tracking-tight text-gray-950 md:text-5xl">Descubrí nuestras soluciones de comunicación</h2>
+          <p className="mx-auto mb-9 mt-5 max-w-2xl leading-relaxed text-gray-500">Conocé las soluciones que podemos desarrollar para acompañar los objetivos de tu marca.</p>
+          <Link to="/soluciones" className={buttonStyles({ size: 'lg', className: 'inline-flex rounded-full px-7' })}>Ver soluciones <ArrowRight className="h-5 w-5" /></Link>
         </div>
       </section>
     </div>
