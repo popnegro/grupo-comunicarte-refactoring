@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { X, ArrowRight, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { InventoryItem, isMobileRoute } from '../../types';
@@ -10,45 +11,40 @@ interface MediakitPanelProps {
 
 export function MediakitPanel({ selectedItems, onClose }: MediakitPanelProps) {
   const { removeSelected } = useSelection();
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    closeButtonRef.current?.focus();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   return (
     <>
       <div className="fixed inset-0 bg-black/40 z-[1400]" onClick={onClose} aria-hidden="true" />
       <aside className="fixed md:absolute bottom-0 md:bottom-auto md:top-4 right-0 left-0 md:left-auto md:right-4 w-full md:w-[420px] max-h-[88vh] bg-white rounded-t-3xl md:rounded-2xl shadow-2xl z-[1500] overflow-hidden" role="dialog" aria-modal="true" aria-labelledby="mediakit-panel-title">
         <header className="flex items-center justify-between gap-4 p-5 border-b border-gray-100">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gray-400">Cierre de selección</p>
-            <h2 id="mediakit-panel-title" className="mt-1 text-xl font-semibold text-gray-950">Tu Media Kit</h2>
-          </div>
-          <button type="button" onClick={onClose} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200" aria-label="Cerrar Media Kit"><X className="h-5 w-5" /></button>
+          <div><p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gray-400">Cierre de selección</p><h2 id="mediakit-panel-title" className="mt-1 text-xl font-semibold text-gray-950">Tu Media Kit</h2></div>
+          <button ref={closeButtonRef} type="button" onClick={onClose} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2" aria-label="Cerrar Media Kit"><X className="h-5 w-5" aria-hidden="true" /></button>
         </header>
-
         <div className="p-5 overflow-y-auto max-h-[calc(88vh-150px)]">
-          <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
-            <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-gray-950 px-2 text-white">{selectedItems.length}</span>
-            {selectedItems.length === 1 ? 'soporte seleccionado' : 'soportes seleccionados'}
-          </div>
-
+          <div className="flex items-center gap-2 text-sm font-semibold text-gray-800" aria-live="polite"><span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-gray-950 px-2 text-white">{selectedItems.length}</span>{selectedItems.length === 1 ? 'soporte seleccionado' : 'soportes seleccionados'}</div>
           <div className="mt-4 space-y-2">
             {selectedItems.map((item) => (
               <div key={item.canonical_id} className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 px-3 py-3">
                 <Check className="h-4 w-4 text-emerald-600 shrink-0" aria-hidden="true" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-gray-900 truncate">{item.name}</p>
-                  <p className="text-xs text-gray-500 truncate">{isMobileRoute(item) ? 'Soporte móvil' : item.tipo_soporte}</p>
-                </div>
-                <button type="button" onClick={() => removeSelected(item.canonical_id)} className="text-xs font-semibold text-gray-500 hover:text-gray-950 shrink-0" aria-label={`Quitar ${item.name}`}>Quitar</button>
+                <div className="min-w-0 flex-1"><p className="text-sm font-semibold text-gray-900 truncate">{item.name}</p><p className="text-xs text-gray-500 truncate">{isMobileRoute(item) ? 'Soporte móvil' : item.tipo_soporte}</p></div>
+                <button type="button" onClick={() => removeSelected(item.canonical_id)} className="min-h-11 px-2 text-xs font-semibold text-gray-500 hover:text-gray-950 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 rounded-lg" aria-label={`Quitar ${item.name}`}>Quitar</button>
               </div>
             ))}
           </div>
-
           <p className="mt-5 text-sm leading-relaxed text-gray-500">Podés seguir agregando soportes desde el inventario. La selección se conserva.</p>
-
           <div className="mt-6 grid gap-2 sm:grid-cols-2">
-            <Link to="/contacto?origen=mediakit" onClick={onClose} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-black px-5 text-sm font-bold text-white hover:bg-gray-800">
-              Solicitar Media Kit <ArrowRight className="h-4 w-4" />
-            </Link>
-            <button type="button" onClick={onClose} className="h-11 rounded-xl border border-gray-200 px-5 text-sm font-semibold text-gray-900 hover:bg-gray-50">Seguir seleccionando</button>
+            <Link to="/contacto?origen=mediakit" onClick={onClose} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-black px-5 text-sm font-bold text-white hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2">Solicitar Media Kit <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>
+            <button type="button" onClick={onClose} className="h-11 rounded-xl border border-gray-200 px-5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2">Seguir seleccionando</button>
           </div>
         </div>
       </aside>
