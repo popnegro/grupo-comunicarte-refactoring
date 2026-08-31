@@ -37,7 +37,7 @@ export default function InventoryMap({ locations, routes, onOpenMediakit, initia
       if (found) setSelectedItem(found);
     }
   }, [initialSelectedId, locations, routes]);
-  const { isSelected } = useSelection();
+  const { isSelected, selectedCount } = useSelection();
   const handleSelect = (item: InventoryItem) => setSelectedItem(item);
   const handleCloseDetail = () => setSelectedItem(null);
   const validLocations = locations.filter(loc => loc.lat !== null && loc.lng !== null);
@@ -67,7 +67,7 @@ export default function InventoryMap({ locations, routes, onOpenMediakit, initia
             <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Detalle de Soporte</span>
             <button type="button" onClick={handleCloseDetail} className="p-1.5 bg-gray-50 md:bg-white rounded-full text-gray-500 hover:text-black hover:bg-gray-100 transition-colors shadow-sm" aria-label="Cerrar detalle"><X className="w-4 h-4" /></button>
           </div>
-          <div className="px-0 pt-5 pb-0 md:p-6 overflow-y-auto">
+          <div className={`px-0 pt-5 overflow-y-auto ${selectedCount > 0 ? 'pb-[calc(5rem+env(safe-area-inset-bottom,0px))]' : 'pb-0'} md:p-6`}>
             <LocationDetail item={selectedItem} onOpenMediakit={() => { setSelectedItem(null); onOpenMediakit(); }} />
           </div>
         </div>
