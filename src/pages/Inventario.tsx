@@ -126,10 +126,7 @@ export default function Inventario() {
   const hasActiveFilters = selectedPlaza !== 'todos' || selectedTipo !== 'todos' || selectedDisponibilidad !== 'todos' || Boolean(searchText);
 
   return (
-    <div className={cn(
-      'flex h-[calc(100vh-80px)] relative overflow-hidden',
-      selectedCount > 0 && 'pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-0'
-    )}>
+    <div className="flex h-[calc(100vh-80px)] relative overflow-hidden">
       <div className="md:hidden absolute top-4 left-4 z-[500]">
         <button
           type="button"
