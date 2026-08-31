@@ -1,0 +1,65 @@
+name: Process Inventory PDFs
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "docs/inventario/source/*.pdf"
+
+permissions:
+  contents: write
+
+jobs:
+  process-inventory:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install pdftotext
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
+
+      - name: Extract PDF text
+        run: |
+          mkdir -p docs/inventario/processed
+
+          for pdf in docs/inventario/source/*.pdf; do
+            filename="$(basename "$pdf" .pdf)"
+            pdftotext -layout "$pdf" \
+              "docs/inventario/processed/${filename}.txt"
+          done
+
+      - name: Generate inventory index
+        run: |
+          {
+            echo "# Inventario procesado"
+            echo
+            echo "Fuente: docs/inventario/source/"
+            echo
+            for file in docs/inventario/processed/*.txt; do
+              echo "## $(basename "$file" .txt)"
+              echo
+              echo '```text'
+              cat "$file"
+              echo '```'
+              echo
+            done
+          } > docs/inventario/processed/INVENTARIO_MAESTRO.md
+
+      - name: Commit processed inventory
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add docs/inventario/processed/
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "docs: process inventory PDFs"
+          git push
