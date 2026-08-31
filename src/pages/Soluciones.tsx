@@ -16,10 +16,10 @@ export default function Soluciones() {
         eyebrow="Nuestros servicios"
         title="Soluciones para ganar presencia."
         description="Combinamos medios OOH, tecnología DOOH y circuitos móviles para conectar tu marca con la audiencia correcta."
-        align="center"
+        align="left"
       />
 
-      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+      <section className="px-4 py-24 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full md:py-32">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-12">
           <div>
             <p className="text-eyebrow mb-3">Elegí tu formato</p>
@@ -51,7 +51,7 @@ export default function Soluciones() {
         </div>
       </section>
 
-      <section className="border-t border-gray-200 bg-white py-20 px-4 sm:px-6 lg:px-8">
+      <section className="border-t border-gray-200 bg-white py-20 px-4 sm:px-6 lg:px-8 md:py-24">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-8 rounded-3xl border border-gray-200 bg-[#F9F9F9] p-8 md:p-10">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-red-600 mb-3">Planificá con contexto</p>

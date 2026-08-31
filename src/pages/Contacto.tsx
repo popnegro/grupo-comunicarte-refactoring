@@ -2,6 +2,7 @@ import { Mail, MapPin } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { buttonStyles } from '../components/ui/Button';
 import { ContactForm } from '../components/contact/ContactForm';
+import { InteriorHero } from '../components/layout/InteriorHero';
 
 export default function Contacto() {
   const [searchParams] = useSearchParams();
@@ -9,15 +10,13 @@ export default function Contacto() {
 
   return (
     <section className="flex-1 bg-[#F9F9F9]">
-      <div className="bg-gray-950 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-400">{isMediaKit ? 'Media Kit' : 'Contacto'}</p>
-          <h1 className="mt-4 max-w-4xl text-4xl md:text-6xl font-semibold tracking-tight">{isMediaKit ? 'Tu selección, lista para avanzar.' : 'Hablemos de tu próxima campaña.'}</h1>
-          <p className="mt-6 max-w-2xl text-lg md:text-xl text-gray-300 leading-relaxed">{isMediaKit ? 'Completá tus datos y recibí la propuesta consolidada de los soportes que seleccionaste.' : 'Contanos qué necesitás comunicar y te ayudamos a encontrar la solución OOH o DOOH adecuada.'}</p>
-        </div>
-      </div>
+      <InteriorHero
+        eyebrow={isMediaKit ? 'Media Kit' : 'Contacto'}
+        title={isMediaKit ? 'Tu selección, lista para avanzar.' : 'Hablemos de tu próxima campaña.'}
+        description={isMediaKit ? 'Completá tus datos y recibí la propuesta consolidada de los soportes que seleccionaste.' : 'Contanos qué necesitás comunicar y te ayudamos a encontrar la solución OOH o DOOH adecuada.'}
+      />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] items-start">
           <ContactForm isMediaKit={isMediaKit} />
           <aside className="space-y-4">
