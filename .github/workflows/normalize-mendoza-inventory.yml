@@ -6,6 +6,7 @@ on:
     paths:
       - 'scripts/normalize-mendoza-inventory.py'
       - 'docs/inventario/processed/soportes-mendoza.txt'
+      - 'docs/inventario/processed/.normalize-trigger'
 
 permissions:
   contents: write
@@ -20,9 +21,11 @@ jobs:
       - name: Normalize Mendoza records
         run: python3 scripts/normalize-mendoza-inventory.py
 
-      - name: Validate TypeScript source syntax
+      - name: Validate generated source
         run: |
-          node --check src/data/inventory.ts 2>/dev/null || true
+          npm ci
+          npx tsc --noEmit
+          npm run build
 
       - name: Commit normalization
         run: |
