@@ -75,7 +75,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
       <main className="flex-grow flex flex-col">{children}</main>
 
-      <footer className="bg-gray-950 text-white border-t border-gray-900 mt-auto">
+      <footer id="site-footer" className="bg-gray-950 text-white border-t border-gray-900 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row justify-between gap-6">
             <div className="max-w-sm">

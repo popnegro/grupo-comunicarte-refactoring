@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useSelection } from '../../context/SelectionContext';
 import { ArrowRight, Layers, Trash2 } from 'lucide-react';
@@ -12,9 +12,28 @@ interface StickySelectionBarProps {
 
 export function StickySelectionBar({ onOpenMediakit, currentPlaza, inventoryItems }: StickySelectionBarProps) {
   const { selectedCount, clearSelection, getSelectedItems } = useSelection();
+  const [isFooterVisible, setIsFooterVisible] = useState(false);
   const selectedItems = useMemo(() => getSelectedItems(inventoryItems), [getSelectedItems, inventoryItems, selectedCount]);
   const mzaCount = selectedItems.filter((i) => i.ciudad === 'mendoza').length;
   const bueCount = selectedItems.filter((i) => i.ciudad === 'buenos-aires').length;
+
+  useEffect(() => {
+    if (selectedCount === 0) {
+      setIsFooterVisible(false);
+      return;
+    }
+
+    const footer = document.getElementById('site-footer');
+    if (!footer) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsFooterVisible(entry.isIntersecting),
+      { threshold: 0.01 }
+    );
+
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, [selectedCount]);
 
   let plazaHint = '';
   if (mzaCount > 0 && bueCount > 0) plazaHint = `Mendoza (${mzaCount}) + Bs. As. (${bueCount})`;
@@ -23,7 +42,7 @@ export function StickySelectionBar({ onOpenMediakit, currentPlaza, inventoryItem
 
   return (
     <AnimatePresence>
-      {selectedCount > 0 && (
+      {selectedCount > 0 && !isFooterVisible && (
         <motion.div key="sticky-selection-bar" initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 80, opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} className="pointer-events-none fixed inset-x-0 bottom-0 sm:bottom-4 md:bottom-6 z-[900] flex justify-center px-2 sm:px-4 pb-[env(safe-area-inset-bottom,0px)]" role="region" aria-label="Barra de selección de soportes">
           <div className="pointer-events-auto w-full max-w-lg md:max-w-xl bg-gray-900 text-white rounded-t-2xl sm:rounded-2xl p-2 sm:px-4 sm:py-3 shadow-2xl border border-gray-800 flex items-center justify-between gap-2 sm:gap-3 backdrop-blur-md">
             <div className="flex items-center gap-2 sm:gap-2.5 min-w-0" aria-live="polite">

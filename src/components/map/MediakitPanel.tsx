@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, ArrowRight, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { InventoryItem, isMobileRoute } from '../../types';
@@ -22,16 +23,31 @@ export function MediakitPanel({ selectedItems, onClose }: MediakitPanelProps) {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  return (
-    <>
-      <div className="fixed inset-0 bg-black/40 z-[1400]" onClick={onClose} aria-hidden="true" />
-      <aside className="fixed md:absolute bottom-0 md:bottom-auto md:top-4 right-0 left-0 md:left-auto md:right-4 w-full md:w-[420px] max-h-[88vh] bg-white rounded-t-3xl md:rounded-2xl shadow-2xl z-[1500] overflow-hidden" role="dialog" aria-modal="true" aria-labelledby="mediakit-panel-title">
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[3000]" role="presentation">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden="true" />
+      <aside
+        className="fixed bottom-0 right-0 left-0 md:top-4 md:bottom-auto md:left-auto md:right-4 w-full md:w-[420px] max-h-[88vh] bg-white rounded-t-3xl md:rounded-2xl shadow-2xl overflow-hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="mediakit-panel-title"
+      >
         <header className="flex items-center justify-between gap-4 p-5 border-b border-gray-100">
-          <div><p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gray-400">Cierre de selección</p><h2 id="mediakit-panel-title" className="mt-1 text-xl font-semibold text-gray-950">Tu Media Kit</h2></div>
-          <button ref={closeButtonRef} type="button" onClick={onClose} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2" aria-label="Cerrar Media Kit"><X className="h-5 w-5" aria-hidden="true" /></button>
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gray-400">Cierre de selección</p>
+            <h2 id="mediakit-panel-title" className="mt-1 text-xl font-semibold text-gray-950">Tu Media Kit</h2>
+          </div>
+          <button ref={closeButtonRef} type="button" onClick={onClose} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2" aria-label="Cerrar Media Kit">
+            <X className="h-5 w-5" aria-hidden="true" />
+          </button>
         </header>
         <div className="p-5 overflow-y-auto max-h-[calc(88vh-150px)]">
-          <div className="flex items-center gap-2 text-sm font-semibold text-gray-800" aria-live="polite"><span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-gray-950 px-2 text-white">{selectedItems.length}</span>{selectedItems.length === 1 ? 'soporte seleccionado' : 'soportes seleccionados'}</div>
+          <div className="flex items-center gap-2 text-sm font-semibold text-gray-800" aria-live="polite">
+            <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-gray-950 px-2 text-white">{selectedItems.length}</span>
+            {selectedItems.length === 1 ? 'soporte seleccionado' : 'soportes seleccionados'}
+          </div>
           <div className="mt-4 space-y-2">
             {selectedItems.map((item) => (
               <div key={item.canonical_id} className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 px-3 py-3">
@@ -48,6 +64,7 @@ export function MediakitPanel({ selectedItems, onClose }: MediakitPanelProps) {
           </div>
         </div>
       </aside>
-    </>
+    </div>,
+    document.body
   );
 }

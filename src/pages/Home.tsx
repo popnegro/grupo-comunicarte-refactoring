@@ -54,14 +54,20 @@ export default function Home() {
         <Link to="/inventario" className="mt-6 md:hidden flex justify-center items-center text-sm font-bold uppercase tracking-wider gap-2">Ver inventario completo <MoveRight className="w-4 h-4" /></Link>
       </section>}
 
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gray-950 text-white">
-        <div className="max-w-7xl mx-auto bg-white/[0.04] border border-white/10 rounded-[2rem] p-8 md:p-14 flex flex-col md:flex-row items-center justify-between gap-12 overflow-hidden relative">
-          <div className="relative z-10 max-w-xl"><div className="inline-flex items-center gap-2 px-3 py-1.5 mb-6 rounded-full bg-white/10 border border-white/10"><MonitorPlay className="w-4 h-4" /><span className="text-[11px] font-bold tracking-[0.16em] uppercase">Innovación dinámica</span></div><h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 leading-[1.05]">Tu mensaje también puede moverse.</h2><div className="space-y-3 mb-9 text-gray-300 text-sm md:text-base"><p className="font-semibold text-white">LED Móvil Mendoza</p><p>Lunes a Viernes · 09:00–20:00</p><p>Duración del recorrido: 4 horas</p></div><Button onClick={() => navigate('/inventario?tipo=led_movil')} variant="secondary" className="bg-white text-black hover:bg-gray-100 rounded-full px-6">Ver recorrido <ArrowRight className="w-4 h-4" /></Button></div>
-          <div className="w-full md:w-[420px] aspect-[4/3] rounded-3xl border border-white/10 overflow-hidden bg-black/20 shrink-0"><img src="/images/led-movil-feature.webp" alt="Camión LED Móvil de Grupo Comunicarte" className="w-full h-full object-cover" /></div>
+      <section className="relative overflow-hidden bg-gray-950 px-4 py-24 text-white sm:px-6 lg:px-8">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-emerald-400/10 blur-3xl" aria-hidden="true" />
+        <div className="relative mx-auto grid max-w-7xl items-center gap-10 rounded-[2rem] border border-white/10 bg-white/[0.04] p-7 md:grid-cols-[1fr_0.8fr] md:p-12">
+          <div className="max-w-xl">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5"><MonitorPlay className="h-4 w-4" /><span className="text-[11px] font-bold tracking-[0.16em] uppercase">Innovación dinámica</span></div>
+            <h2 className="mb-6 text-3xl font-bold leading-[1.05] tracking-tight md:text-5xl">Tu mensaje también puede moverse.</h2>
+            <div className="mb-9 space-y-3 text-sm text-gray-300 md:text-base"><p className="font-semibold text-white">LED Móvil Mendoza</p><p>Lunes a Viernes · 09:00–20:00</p><p>Duración del recorrido: 4 horas</p></div>
+            <Button onClick={() => navigate('/inventario?tipo=led_movil')} variant="secondary" className="rounded-full bg-white px-6 text-black hover:bg-gray-100">Ver recorrido <ArrowRight className="h-4 w-4" /></Button>
+          </div>
+          <div className="w-full overflow-hidden rounded-[2rem] border border-white/10 bg-black/20 shadow-2xl aspect-[4/3] md:aspect-[5/4]"><img src="/images/led-movil-feature.webp" alt="Camión LED Móvil de Grupo Comunicarte" className="h-full w-full object-cover transition-transform duration-700 hover:scale-[1.02]" /></div>
         </div>
       </section>
 
-      <section className="py-24 px-4 sm:px-6 lg:px-8 text-center bg-white border-t border-gray-200"><div className="max-w-3xl mx-auto"><p className="text-eyebrow mb-4">El próximo punto de contacto</p><h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-5">Encontrá el soporte adecuado para tu marca</h2><p className="text-gray-500 mb-9 max-w-2xl mx-auto leading-relaxed">Explorá nuestra cobertura y descubrí dónde tu próxima campaña puede generar mayor impacto.</p><Link to="/inventario" className={buttonStyles({ size: 'lg', className: 'text-base rounded-full px-7 inline-flex' })}>Explorar mapa</Link></div></section>
+      <section className="border-t border-gray-200 bg-white px-4 py-24 text-center sm:px-6 lg:px-8"><div className="mx-auto max-w-3xl"><p className="text-eyebrow mb-4">Soportes</p><h2 className="mb-5 text-3xl font-bold tracking-tight md:text-5xl">Encontrá el soporte adecuado para tu marca</h2><p className="mx-auto mb-9 max-w-2xl leading-relaxed text-gray-500">Explorá nuestra cobertura y descubrí dónde tu próxima campaña puede generar mayor impacto.</p><Link to="/soportes" className={buttonStyles({ size: 'lg', className: 'inline-flex rounded-full px-7' })}>Explorar soportes <ArrowRight className="h-5 w-5" /></Link></div></section>
     </div>
   );
 }
