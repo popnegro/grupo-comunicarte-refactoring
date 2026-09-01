@@ -161,19 +161,19 @@ export default function Inventario() {
   return (
     <div className="flex h-[calc(100vh-80px)] relative overflow-hidden">
       {/* Controles flotantes superiores en Mobile */}
-      <div className="md:hidden absolute top-4 left-4 right-4 z-[500] flex items-center justify-between pointer-events-none">
+      <div className="md:hidden absolute top-3.5 left-3.5 right-3.5 z-[500] flex items-center justify-between pointer-events-none gap-2">
         <button
           type="button"
           onClick={() => setIsMobileFiltersOpen(true)}
-          className="pointer-events-auto bg-white text-black px-4 py-2 rounded-full font-bold shadow-lg border border-gray-100 flex items-center gap-2 text-xs active:scale-95 transition-transform"
+          className="pointer-events-auto bg-white/95 backdrop-blur-md text-gray-950 px-3.5 py-2 rounded-2xl font-bold shadow-sm border border-gray-200/90 flex items-center gap-2 text-xs active:scale-95 transition-all min-h-[38px]"
           aria-label={hasActiveFilters ? 'Abrir filtros, hay filtros activos' : 'Abrir filtros'}
         >
-          <SlidersHorizontal className="w-3.5 h-3.5" aria-hidden="true" />
+          <SlidersHorizontal className="w-3.5 h-3.5 text-gray-600" aria-hidden="true" />
           <span>Filtros</span>
-          {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true" />}
+          {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-200" aria-hidden="true" />}
         </button>
 
-        <div className="pointer-events-auto">
+        <div className="pointer-events-auto shrink-0">
           <ViewModeToggle viewMode={viewMode} onViewModeChange={handleViewModeChange} />
         </div>
       </div>

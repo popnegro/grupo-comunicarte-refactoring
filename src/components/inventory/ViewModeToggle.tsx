@@ -17,10 +17,10 @@ export const ViewModeToggle: React.FC<ViewModeToggleProps> = ({
 }) => {
   return (
     <div
-      role="group"
+      role="radiogroup"
       aria-label="Modo de visualización del inventario"
       className={cn(
-        'inline-flex items-center p-1 bg-white border border-gray-200 rounded-2xl shadow-sm select-none',
+        'inline-flex items-center p-1 bg-white/95 backdrop-blur-md border border-gray-200/90 rounded-2xl shadow-sm select-none',
         className
       )}
     >
@@ -30,13 +30,13 @@ export const ViewModeToggle: React.FC<ViewModeToggleProps> = ({
         aria-checked={viewMode === 'mapa'}
         onClick={() => onViewModeChange('mapa')}
         className={cn(
-          'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all',
+          'flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition-all min-h-[36px] sm:min-h-[38px] active:scale-[0.98]',
           viewMode === 'mapa'
-            ? 'bg-gray-950 text-white shadow-2xs'
-            : 'text-gray-600 hover:text-gray-950 hover:bg-gray-50'
+            ? 'bg-gray-950 text-white shadow-sm'
+            : 'text-gray-600 hover:text-gray-950 hover:bg-gray-100/70'
         )}
       >
-        <Map className="w-3.5 h-3.5" aria-hidden="true" />
+        <Map className={cn('w-3.5 h-3.5', viewMode === 'mapa' ? 'text-emerald-400' : 'text-gray-500')} aria-hidden="true" />
         <span>Mapa</span>
       </button>
 
@@ -46,13 +46,13 @@ export const ViewModeToggle: React.FC<ViewModeToggleProps> = ({
         aria-checked={viewMode === 'catalogo'}
         onClick={() => onViewModeChange('catalogo')}
         className={cn(
-          'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all',
+          'flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition-all min-h-[36px] sm:min-h-[38px] active:scale-[0.98]',
           viewMode === 'catalogo'
-            ? 'bg-gray-950 text-white shadow-2xs'
-            : 'text-gray-600 hover:text-gray-950 hover:bg-gray-50'
+            ? 'bg-gray-950 text-white shadow-sm'
+            : 'text-gray-600 hover:text-gray-950 hover:bg-gray-100/70'
         )}
       >
-        <LayoutGrid className="w-3.5 h-3.5" aria-hidden="true" />
+        <LayoutGrid className={cn('w-3.5 h-3.5', viewMode === 'catalogo' ? 'text-emerald-400' : 'text-gray-500')} aria-hidden="true" />
         <span>Catálogo</span>
       </button>
     </div>

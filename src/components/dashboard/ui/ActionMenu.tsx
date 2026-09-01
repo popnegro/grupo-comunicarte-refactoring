@@ -23,6 +23,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
   className = '',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpwards, setOpenUpwards] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -53,8 +54,21 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      setOpenUpwards(spaceBelow < 220);
+    }
     setIsOpen((prev) => !prev);
   };
+
+  const positionClasses = openUpwards
+    ? align === 'right'
+      ? 'bottom-full mb-1 right-0 origin-bottom-right'
+      : 'bottom-full mb-1 left-0 origin-bottom-left'
+    : align === 'right'
+    ? 'top-full mt-1 right-0 origin-top-right'
+    : 'top-full mt-1 left-0 origin-top-left';
 
   return (
     <div className={`relative inline-block text-left ${className}`} ref={menuRef}>
@@ -65,7 +79,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
         aria-haspopup="true"
         aria-expanded={isOpen}
         aria-label={triggerLabel}
-        className="inline-flex items-center justify-center p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-colors"
+        className="inline-flex items-center justify-center p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-colors min-h-[32px] min-w-[32px]"
       >
         <MoreHorizontal className="w-4 h-4" />
       </button>
@@ -74,9 +88,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
         <div
           role="menu"
           aria-orientation="vertical"
-          className={`absolute z-30 mt-1 w-44 rounded-xl bg-white shadow-xl ring-1 ring-black/10 divide-y divide-gray-100 py-1 focus:outline-none animate-in fade-in zoom-in-95 duration-100 ${
-            align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'
-          }`}
+          className={`absolute z-40 w-44 rounded-xl bg-white shadow-xl ring-1 ring-black/10 divide-y divide-gray-100 py-1 focus:outline-none animate-in fade-in zoom-in-95 duration-100 ${positionClasses}`}
         >
           {items.map((item, index) => {
             const Icon = item.icon;

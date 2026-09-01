@@ -1,5 +1,14 @@
 import React from 'react';
-import { CheckCircle2, Clock, AlertCircle, EyeOff, Sparkles } from 'lucide-react';
+import {
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  EyeOff,
+  Sparkles,
+  Send,
+  MessageSquare,
+  Check,
+} from 'lucide-react';
 
 export type StatusType =
   | 'disponible'
@@ -7,6 +16,11 @@ export type StatusType =
   | 'REQUEST'
   | 'IN PROGRESS'
   | 'DONE'
+  | 'nuevo'
+  | 'contactado'
+  | 'enviado'
+  | 'quoted'
+  | 'cerrado'
   | 'active'
   | 'archived'
   | 'draft'
@@ -37,24 +51,48 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'DISPONIBLE':
     case 'DONE':
     case 'ACTIVE':
-      colorClasses = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    case 'ACTIVO':
+      colorClasses = 'bg-emerald-50 text-emerald-800 border-emerald-200/90';
       IconComponent = CheckCircle2;
-      if (!label) displayLabel = normalizedStatus === 'DONE' ? 'Completado' : 'Disponible';
+      if (!label) {
+        displayLabel = normalizedStatus === 'DONE' ? 'Completado' : 'Disponible';
+      }
       break;
 
     case 'RESERVADO':
     case 'IN PROGRESS':
     case 'PENDING':
-      colorClasses = 'bg-amber-50 text-amber-700 border-amber-200';
+      colorClasses = 'bg-amber-50 text-amber-800 border-amber-200/90';
       IconComponent = Clock;
-      if (!label) displayLabel = normalizedStatus === 'IN PROGRESS' ? 'En proceso' : 'Reservado';
+      if (!label) {
+        displayLabel = normalizedStatus === 'IN PROGRESS' ? 'En proceso' : 'Reservado';
+      }
       break;
 
     case 'REQUEST':
     case 'NUEVO':
-      colorClasses = 'bg-blue-50 text-blue-700 border-blue-200';
+      colorClasses = 'bg-blue-50 text-blue-800 border-blue-200/90';
       IconComponent = Sparkles;
-      if (!label) displayLabel = 'Nueva Solicitud';
+      if (!label) displayLabel = 'Nuevo';
+      break;
+
+    case 'CONTACTADO':
+      colorClasses = 'bg-amber-50 text-amber-800 border-amber-200/90';
+      IconComponent = MessageSquare;
+      if (!label) displayLabel = 'Contactado';
+      break;
+
+    case 'ENVIADO':
+    case 'QUOTED':
+      colorClasses = 'bg-indigo-50 text-indigo-800 border-indigo-200/90';
+      IconComponent = Send;
+      if (!label) displayLabel = 'Cotizado';
+      break;
+
+    case 'CERRADO':
+      colorClasses = 'bg-slate-100 text-slate-700 border-slate-200';
+      IconComponent = Check;
+      if (!label) displayLabel = 'Cerrado';
       break;
 
     case 'ARCHIVED':
@@ -78,15 +116,18 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
       break;
   }
 
-  const sizeClasses = size === 'sm'
-    ? 'text-xs px-2 py-0.5 gap-1 font-medium'
-    : 'text-xs px-2.5 py-1 gap-1.5 font-semibold';
+  const sizeClasses =
+    size === 'sm'
+      ? 'text-[11px] px-2 py-0.5 gap-1 font-semibold'
+      : 'text-xs px-2.5 py-1 gap-1.5 font-bold';
 
   return (
     <span
-      className={`inline-flex items-center rounded-full border tracking-wide whitespace-nowrap transition-colors select-none ${sizeClasses} ${colorClasses} ${className}`}
+      className={`inline-flex items-center rounded-full border tracking-normal whitespace-nowrap transition-colors select-none ${sizeClasses} ${colorClasses} ${className}`}
     >
-      {showIcon && IconComponent && <IconComponent className={size === 'sm' ? 'w-3 h-3' : 'w-3.5 h-3.5'} />}
+      {showIcon && IconComponent && (
+        <IconComponent className={size === 'sm' ? 'w-3 h-3 shrink-0' : 'w-3.5 h-3.5 shrink-0'} />
+      )}
       <span>{displayLabel}</span>
     </span>
   );

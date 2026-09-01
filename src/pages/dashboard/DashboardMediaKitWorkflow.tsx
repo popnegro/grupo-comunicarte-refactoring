@@ -262,12 +262,12 @@ export default function DashboardMediaKitWorkflow() {
 
   return (
     <DashboardShell>
-      <div className="mx-auto max-w-7xl space-y-6 pb-12">
+      <div className="mx-auto max-w-6xl space-y-6 pb-12">
         {toast && (
           <div
             role="status"
             aria-live="polite"
-            className="fixed right-6 top-20 z-50 rounded-xl bg-gray-950 px-4 py-3 text-xs font-semibold text-white shadow-xl border border-white/10 animate-in fade-in"
+            className="fixed right-6 top-20 z-[4500] rounded-xl bg-gray-950 px-4 py-3 text-xs font-semibold text-white shadow-xl border border-white/10 animate-in fade-in"
           >
             {toast}
           </div>
@@ -276,10 +276,13 @@ export default function DashboardMediaKitWorkflow() {
         {/* Page Header */}
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-800">
-              Gestión Comercial
-            </span>
-            <h1 className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-950">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Gestión Comercial
+              </span>
+            </div>
+            <h1 className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-950">
               Solicitudes de Media Kit
             </h1>
             <p className="mt-1 text-xs sm:text-sm text-gray-500">
@@ -290,79 +293,108 @@ export default function DashboardMediaKitWorkflow() {
           <button
             type="button"
             onClick={() => load().catch(() => notify('No pudimos actualizar la bandeja.'))}
-            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-xs font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 hover:text-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-900"
+            aria-label="Actualizar bandeja de solicitudes"
+            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-bold text-gray-800 shadow-2xs transition hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 active:scale-95 min-h-[40px]"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isFetchingLeads ? 'animate-spin' : ''}`} />
             <span>Actualizar bandeja</span>
           </button>
         </header>
 
-        {/* KPI Metrics / Filter Cards */}
+        {/* KPI Metrics / Filter Tabs (Frente 3) */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {/* Todas */}
           <button
             type="button"
             onClick={() => setFilter('all')}
-            className={`rounded-2xl border p-4 text-left transition-all ${
+            className={`group rounded-2xl border p-4 sm:p-5 text-left transition-all duration-200 active:scale-98 ${
               filter === 'all'
-                ? 'border-gray-900 bg-gray-950 text-white shadow-md'
-                : 'border-gray-200 bg-white text-gray-800 hover:border-gray-300'
+                ? 'border-gray-950 bg-gray-950 text-white shadow-sm'
+                : 'border-gray-200/90 bg-white text-gray-800 hover:border-gray-300 hover:shadow-2xs'
             }`}
           >
-            <span className="text-xs font-bold uppercase tracking-wider opacity-70">Todas</span>
-            <span className="mt-1 block text-2xl font-extrabold">{counts.all}</span>
+            <span
+              className={`text-[11px] font-extrabold uppercase tracking-wider ${
+                filter === 'all' ? 'text-gray-300' : 'text-gray-500'
+              }`}
+            >
+              Todas
+            </span>
+            <span className="mt-1 block text-2xl sm:text-3xl font-extrabold tracking-tight">{counts.all}</span>
           </button>
 
+          {/* REQUEST (Nuevas) */}
           <button
             type="button"
             onClick={() => setFilter('request')}
-            className={`rounded-2xl border p-4 text-left transition-all ${
+            className={`group rounded-2xl border p-4 sm:p-5 text-left transition-all duration-200 active:scale-98 ${
               filter === 'request'
-                ? 'border-blue-700 bg-blue-700 text-white shadow-md'
-                : 'border-blue-100 bg-blue-50/50 text-blue-900 hover:border-blue-200'
+                ? 'border-blue-700 bg-blue-700 text-white shadow-sm'
+                : 'border-blue-100 bg-blue-50/40 text-blue-950 hover:border-blue-200 hover:bg-blue-50/80 hover:shadow-2xs'
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider opacity-80">Nuevas</span>
+              <span
+                className={`text-[11px] font-extrabold uppercase tracking-wider ${
+                  filter === 'request' ? 'text-blue-100' : 'text-blue-800'
+                }`}
+              >
+                Nuevas (Request)
+              </span>
               <Sparkles className="w-3.5 h-3.5 opacity-80" />
             </div>
-            <span className="mt-1 block text-2xl font-extrabold">{counts.request}</span>
+            <span className="mt-1 block text-2xl sm:text-3xl font-extrabold tracking-tight">{counts.request}</span>
           </button>
 
+          {/* IN PROGRESS */}
           <button
             type="button"
             onClick={() => setFilter('in_progress')}
-            className={`rounded-2xl border p-4 text-left transition-all ${
+            className={`group rounded-2xl border p-4 sm:p-5 text-left transition-all duration-200 active:scale-98 ${
               filter === 'in_progress'
-                ? 'border-amber-600 bg-amber-600 text-white shadow-md'
-                : 'border-amber-100 bg-amber-50/50 text-amber-900 hover:border-amber-200'
+                ? 'border-amber-600 bg-amber-600 text-white shadow-sm'
+                : 'border-amber-100 bg-amber-50/40 text-amber-950 hover:border-amber-200 hover:bg-amber-50/80 hover:shadow-2xs'
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider opacity-80">En Proceso</span>
+              <span
+                className={`text-[11px] font-extrabold uppercase tracking-wider ${
+                  filter === 'in_progress' ? 'text-amber-100' : 'text-amber-800'
+                }`}
+              >
+                En Proceso
+              </span>
               <Clock className="w-3.5 h-3.5 opacity-80" />
             </div>
-            <span className="mt-1 block text-2xl font-extrabold">{counts.in_progress}</span>
+            <span className="mt-1 block text-2xl sm:text-3xl font-extrabold tracking-tight">{counts.in_progress}</span>
           </button>
 
+          {/* DONE */}
           <button
             type="button"
             onClick={() => setFilter('done')}
-            className={`rounded-2xl border p-4 text-left transition-all ${
+            className={`group rounded-2xl border p-4 sm:p-5 text-left transition-all duration-200 active:scale-98 ${
               filter === 'done'
-                ? 'border-emerald-700 bg-emerald-700 text-white shadow-md'
-                : 'border-emerald-100 bg-emerald-50/50 text-emerald-900 hover:border-emerald-200'
+                ? 'border-emerald-700 bg-emerald-700 text-white shadow-sm'
+                : 'border-emerald-100 bg-emerald-50/40 text-emerald-950 hover:border-emerald-200 hover:bg-emerald-50/80 hover:shadow-2xs'
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider opacity-80">Completadas</span>
+              <span
+                className={`text-[11px] font-extrabold uppercase tracking-wider ${
+                  filter === 'done' ? 'text-emerald-100' : 'text-emerald-800'
+                }`}
+              >
+                Completadas
+              </span>
               <CheckCircle2 className="w-3.5 h-3.5 opacity-80" />
             </div>
-            <span className="mt-1 block text-2xl font-extrabold">{counts.done}</span>
+            <span className="mt-1 block text-2xl sm:text-3xl font-extrabold tracking-tight">{counts.done}</span>
           </button>
         </div>
 
-        {/* Search and Action Bar */}
-        <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm space-y-3">
+        {/* Search & Action Bar */}
+        <section className="rounded-2xl border border-gray-200/90 bg-white p-4 shadow-2xs space-y-3">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
@@ -387,7 +419,7 @@ export default function DashboardMediaKitWorkflow() {
                   setSearchQuery('');
                   setFilter('all');
                 }}
-                className="inline-flex items-center gap-1.5 font-bold text-red-600 hover:text-red-700 hover:underline"
+                className="inline-flex items-center gap-1.5 font-bold text-red-600 hover:text-red-700 hover:underline transition-colors"
               >
                 <FilterX className="w-3.5 h-3.5" />
                 <span>Limpiar búsqueda y filtros</span>
@@ -397,7 +429,7 @@ export default function DashboardMediaKitWorkflow() {
         </section>
 
         {/* Table List View */}
-        <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <section className="overflow-hidden rounded-2xl border border-gray-200/90 bg-white shadow-2xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="border-b border-gray-200 bg-gray-50/80 text-[11px] font-bold uppercase tracking-wider text-gray-600 select-none">
@@ -416,16 +448,16 @@ export default function DashboardMediaKitWorkflow() {
                     <td colSpan={5} className="px-4 py-16 text-center text-gray-500">
                       <div className="flex flex-col items-center justify-center gap-2">
                         <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-                        <span className="font-medium">Cargando solicitudes comerciales...</span>
+                        <span className="font-semibold text-xs text-gray-600">Cargando solicitudes comerciales...</span>
                       </div>
                     </td>
                   </tr>
                 ) : visible.length > 0 ? (
                   visible.map((x) => (
-                    <tr key={x.id} className="hover:bg-gray-50/60 transition-colors">
+                    <tr key={x.id} className="hover:bg-gray-50/70 transition-colors">
                       <td className="px-4 py-3.5">
-                        <div className="font-mono text-xs font-bold text-gray-900">{x.requestId}</div>
-                        <div className="text-xs text-gray-400 mt-0.5">
+                        <div className="font-mono text-xs font-bold text-gray-950">{x.requestId}</div>
+                        <div className="text-[11px] text-gray-400 mt-0.5">
                           {new Date(x.createdAt).toLocaleDateString('es-AR', {
                             day: '2-digit',
                             month: 'short',
@@ -437,9 +469,9 @@ export default function DashboardMediaKitWorkflow() {
                       </td>
 
                       <td className="px-4 py-3.5">
-                        <div className="font-bold text-gray-950 text-sm">{x.clientName}</div>
+                        <div className="font-bold text-gray-950 text-sm leading-snug">{x.clientName}</div>
                         <div className="text-xs text-gray-600 font-medium">{x.company}</div>
-                        <div className="text-xs text-gray-400 mt-0.5">{x.email}</div>
+                        <div className="text-[11px] text-gray-400 mt-0.5">{x.email}</div>
                       </td>
 
                       <td className="max-w-sm px-4 py-3.5">
@@ -447,13 +479,13 @@ export default function DashboardMediaKitWorkflow() {
                           {x.supportNames.slice(0, 3).map((n: string) => (
                             <span
                               key={n}
-                              className="rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-700"
+                              className="rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-700 border border-gray-200/60"
                             >
                               {n}
                             </span>
                           ))}
                           {x.supportNames.length > 3 && (
-                            <span className="rounded-md bg-gray-200/70 px-2 py-0.5 text-[11px] font-bold text-gray-600">
+                            <span className="rounded-md bg-gray-200/80 px-2 py-0.5 text-[11px] font-bold text-gray-700">
                               +{x.supportNames.length - 3} más
                             </span>
                           )}
@@ -468,7 +500,7 @@ export default function DashboardMediaKitWorkflow() {
                         <button
                           type="button"
                           onClick={() => open(x)}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-gray-800 shadow-2xs hover:bg-gray-50 hover:text-gray-950 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900"
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-bold text-gray-800 shadow-2xs hover:bg-gray-50 hover:text-gray-950 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900 active:scale-95 min-h-[36px]"
                         >
                           <Eye className="h-3.5 w-3.5" />
                           <span>Gestionar</span>
@@ -502,7 +534,7 @@ export default function DashboardMediaKitWorkflow() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-request-title"
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+            className="fixed inset-0 z-[4000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
             onClick={() => !busy && setSelected(null)}
           >
             <div
@@ -512,10 +544,10 @@ export default function DashboardMediaKitWorkflow() {
               {/* Modal Header */}
               <div className="flex items-start justify-between border-b border-gray-100 pb-5">
                 <div>
-                  <span className="font-mono text-xs font-bold text-gray-400">
+                  <span className="font-mono text-xs font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
                     Solicitud #{selected.requestId}
                   </span>
-                  <h2 id="modal-request-title" className="mt-1 text-2xl font-bold text-gray-950">
+                  <h2 id="modal-request-title" className="mt-1.5 text-2xl font-bold text-gray-950">
                     {selected.clientName}
                   </h2>
                   <p className="mt-0.5 text-xs text-gray-500">
@@ -578,7 +610,7 @@ export default function DashboardMediaKitWorkflow() {
 
               {/* Soportes List & Pricing Autofill */}
               <div className="mt-6 space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <h3 className="text-sm font-bold text-gray-950">
                     Soportes incluidos y tarifas para el Media Kit
                   </h3>
@@ -587,9 +619,9 @@ export default function DashboardMediaKitWorkflow() {
                     <button
                       type="button"
                       onClick={applyBaseCatalogPrices}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg border border-emerald-200 transition-colors"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-200 transition-colors"
                     >
-                      <Calculator className="w-3.5 h-3.5" />
+                      <Calculator className="w-3.5 h-3.5 text-emerald-700" />
                       <span>Aplicar tarifas base de catálogo</span>
                     </button>
                   )}

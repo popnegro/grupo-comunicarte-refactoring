@@ -257,9 +257,9 @@ export default function DashboardSupportList() {
       return <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 opacity-60 group-hover:opacity-100" />;
     }
     return sortOrder === 'asc' ? (
-      <ArrowUp className="w-3.5 h-3.5 text-gray-900 font-bold" />
+      <ArrowUp className="w-3.5 h-3.5 text-gray-950 font-bold" />
     ) : (
-      <ArrowDown className="w-3.5 h-3.5 text-gray-900 font-bold" />
+      <ArrowDown className="w-3.5 h-3.5 text-gray-950 font-bold" />
     );
   };
 
@@ -304,12 +304,12 @@ export default function DashboardSupportList() {
 
   return (
     <DashboardShell>
-      <div className="mx-auto max-w-7xl space-y-6 pb-12">
+      <div className="mx-auto max-w-6xl space-y-6 pb-12">
         {message && (
           <div
             role="status"
             aria-live="polite"
-            className="fixed right-6 top-20 z-50 rounded-xl bg-gray-950 px-4 py-3 text-xs font-semibold text-white shadow-xl border border-white/10 animate-in fade-in"
+            className="fixed right-6 top-20 z-[4500] rounded-xl bg-gray-950 px-4 py-3 text-xs font-semibold text-white shadow-xl border border-white/10 animate-in fade-in"
           >
             {message}
           </div>
@@ -318,10 +318,13 @@ export default function DashboardSupportList() {
         {/* Header */}
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-800">
-              Inventario OOH & DOOH
-            </span>
-            <h1 className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-950">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Inventario OOH & DOOH
+              </span>
+            </div>
+            <h1 className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-950">
               Gestión de Soportes
             </h1>
             <p className="mt-1 text-xs sm:text-sm text-gray-500">
@@ -334,7 +337,7 @@ export default function DashboardSupportList() {
               type="button"
               onClick={load}
               aria-label="Actualizar listado de soportes"
-              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-xs font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 hover:text-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-bold text-gray-800 shadow-2xs transition hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 active:scale-95 min-h-[40px]"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
               <span>Actualizar</span>
@@ -342,7 +345,7 @@ export default function DashboardSupportList() {
             <button
               type="button"
               onClick={() => navigate('/dashboard/soportes/new')}
-              className="inline-flex items-center gap-2 rounded-xl bg-gray-950 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="inline-flex items-center gap-2 rounded-xl bg-gray-950 px-4 py-2.5 text-xs font-bold text-white shadow-2xs transition hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 active:scale-95 min-h-[40px]"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>Nuevo soporte</span>
@@ -351,7 +354,7 @@ export default function DashboardSupportList() {
         </header>
 
         {/* Filter Bar */}
-        <section className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm space-y-4">
+        <section className="rounded-2xl border border-gray-200/90 bg-white p-4 sm:p-5 shadow-2xs space-y-4">
           <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr]">
             <div className="relative">
               <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -368,7 +371,7 @@ export default function DashboardSupportList() {
               value={plaza}
               onChange={(e) => setPlaza(e.target.value)}
               aria-label="Filtrar por plaza"
-              className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-xs sm:text-sm font-medium text-gray-700 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+              className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-xs sm:text-sm font-semibold text-gray-700 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
             >
               <option value="todas">Todas las plazas</option>
               <option value="mendoza">Mendoza</option>
@@ -379,7 +382,7 @@ export default function DashboardSupportList() {
               value={type}
               onChange={(e) => setType(e.target.value)}
               aria-label="Filtrar por formato"
-              className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-xs sm:text-sm font-medium text-gray-700 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+              className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-xs sm:text-sm font-semibold text-gray-700 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
             >
               <option value="todos">Todos los formatos</option>
               <option value="tradicional">Tradicional</option>
@@ -391,7 +394,7 @@ export default function DashboardSupportList() {
               value={availability}
               onChange={(e) => setAvailability(e.target.value)}
               aria-label="Filtrar por disponibilidad"
-              className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-xs sm:text-sm font-medium text-gray-700 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+              className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-xs sm:text-sm font-semibold text-gray-700 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
             >
               <option value="todos">Disponibilidad</option>
               <option value="disponible">Disponible</option>
@@ -402,7 +405,7 @@ export default function DashboardSupportList() {
               value={active}
               onChange={(e) => setActive(e.target.value)}
               aria-label="Filtrar por estado activo"
-              className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-xs sm:text-sm font-medium text-gray-700 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+              className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-xs sm:text-sm font-semibold text-gray-700 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
             >
               <option value="todos">Estado</option>
               <option value="activos">Solo activos</option>
@@ -432,7 +435,7 @@ export default function DashboardSupportList() {
         </section>
 
         {/* Desktop Table View */}
-        <section className="hidden md:block overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <section className="hidden md:block overflow-hidden rounded-2xl border border-gray-200/90 bg-white shadow-2xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="border-b border-gray-200 bg-gray-50/80 text-[11px] font-bold uppercase tracking-wider text-gray-600 select-none">
@@ -487,7 +490,7 @@ export default function DashboardSupportList() {
                     <td colSpan={5} className="px-4 py-16 text-center text-gray-500">
                       <div className="flex flex-col items-center justify-center gap-2">
                         <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-                        <span className="font-medium">Cargando inventario...</span>
+                        <span className="font-semibold text-xs text-gray-600">Cargando inventario...</span>
                       </div>
                     </td>
                   </tr>
@@ -500,19 +503,19 @@ export default function DashboardSupportList() {
                       <tr
                         key={item.canonical_id}
                         className={`transition-colors ${
-                          item.active === false ? 'bg-gray-50/70 opacity-70' : 'hover:bg-gray-50/60'
+                          item.active === false ? 'bg-gray-50/70 opacity-70' : 'hover:bg-gray-50/70'
                         }`}
                       >
                         <td className="px-4 py-3.5">
                           <div className="font-bold text-gray-950 text-sm leading-snug">{item.name}</div>
-                          <div className="font-mono text-xs text-gray-400 mt-0.5">{item.canonical_id}</div>
+                          <div className="font-mono text-[11px] text-gray-400 mt-0.5">{item.canonical_id}</div>
                         </td>
 
                         <td className="px-4 py-3.5">
-                          <div className="font-semibold text-gray-800 text-xs">
+                          <div className="font-bold text-gray-800 text-xs">
                             {item.ciudad === 'mendoza' ? 'Mendoza' : 'Buenos Aires'}
                           </div>
-                          <div className="text-xs text-gray-500 capitalize mt-0.5">
+                          <div className="text-[11px] text-gray-500 capitalize mt-0.5">
                             {item.tipo_soporte?.replace('_', ' ')}
                           </div>
                         </td>
@@ -544,7 +547,9 @@ export default function DashboardSupportList() {
                           <div className="font-extrabold text-gray-950 text-sm">
                             {formatSupportCurrency(total, item.pricing?.currency || 'ARS')}
                           </div>
-                          <div className="text-[10px] text-gray-400">Exhibición + Instalación + Impresión</div>
+                          <div className="text-[10px] text-gray-400 font-medium">
+                            Exhibición + Instalación + Impresión
+                          </div>
                         </td>
 
                         <td className="px-4 py-3.5 text-right">
@@ -554,7 +559,7 @@ export default function DashboardSupportList() {
                               onClick={() =>
                                 navigate(`/dashboard/soportes/${encodeURIComponent(item.canonical_id)}/edit`)
                               }
-                              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-800 shadow-2xs hover:bg-gray-50 hover:text-gray-950 transition-colors"
+                              className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-bold text-gray-800 shadow-2xs hover:bg-gray-50 hover:border-gray-300 transition-colors active:scale-95 min-h-[36px]"
                             >
                               <Edit3 className="h-3.5 w-3.5" />
                               <span>Editar</span>
@@ -580,7 +585,7 @@ export default function DashboardSupportList() {
                             <button
                               type="button"
                               onClick={clearFilters}
-                              className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-bold text-gray-800 hover:bg-gray-50 shadow-sm"
+                              className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-bold text-gray-800 hover:bg-gray-50 shadow-2xs"
                             >
                               Limpiar todos los filtros
                             </button>
@@ -595,7 +600,7 @@ export default function DashboardSupportList() {
                             <button
                               type="button"
                               onClick={() => navigate('/dashboard/soportes/new')}
-                              className="rounded-xl bg-gray-950 px-4 py-2 text-xs font-bold text-white shadow-sm"
+                              className="rounded-xl bg-gray-950 px-4 py-2 text-xs font-bold text-white shadow-2xs"
                             >
                               Crear primer soporte
                             </button>
@@ -613,9 +618,9 @@ export default function DashboardSupportList() {
         {/* Mobile Adaptable Card View */}
         <section className="md:hidden space-y-3.5">
           {loading ? (
-            <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm">
+            <div className="rounded-2xl border border-gray-200/90 bg-white p-8 text-center text-gray-500 shadow-2xs">
               <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto mb-2" />
-              <span className="text-xs font-medium">Cargando soportes...</span>
+              <span className="text-xs font-semibold">Cargando soportes...</span>
             </div>
           ) : visible.length > 0 ? (
             visible.map((item) => {
@@ -625,29 +630,33 @@ export default function DashboardSupportList() {
               return (
                 <div
                   key={item.canonical_id}
-                  className={`rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition-colors ${
+                  className={`rounded-2xl border border-gray-200/90 bg-white p-4 shadow-2xs transition-colors ${
                     item.active === false ? 'opacity-70 bg-gray-50' : ''
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3 mb-2.5">
                     <div>
                       <h3 className="text-sm font-bold text-gray-950 leading-snug">{item.name}</h3>
-                      <p className="font-mono text-xs text-gray-400 mt-0.5">{item.canonical_id}</p>
+                      <p className="font-mono text-[11px] text-gray-400 mt-0.5">{item.canonical_id}</p>
                     </div>
 
                     <ActionMenu items={getActionMenuItems(item)} />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 py-2 border-y border-gray-100 text-xs">
+                  <div className="grid grid-cols-2 gap-2 py-2.5 border-y border-gray-100 text-xs">
                     <div>
-                      <span className="text-gray-400 block text-[10px] uppercase font-semibold">Plaza / Formato</span>
-                      <span className="font-medium text-gray-800">
+                      <span className="text-gray-400 block text-[10px] uppercase font-bold tracking-wider">
+                        Plaza / Formato
+                      </span>
+                      <span className="font-semibold text-gray-800">
                         {item.ciudad === 'mendoza' ? 'Mendoza' : 'Buenos Aires'} · {item.tipo_soporte?.replace('_', ' ')}
                       </span>
                     </div>
 
                     <div>
-                      <span className="text-gray-400 block text-[10px] uppercase font-semibold">Tarifa Total</span>
+                      <span className="text-gray-400 block text-[10px] uppercase font-bold tracking-wider">
+                        Tarifa Total
+                      </span>
                       <span className="font-extrabold text-gray-950">
                         {formatSupportCurrency(total, item.pricing?.currency || 'ARS')}
                       </span>
@@ -673,7 +682,7 @@ export default function DashboardSupportList() {
                       onClick={() =>
                         navigate(`/dashboard/soportes/${encodeURIComponent(item.canonical_id)}/edit`)
                       }
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-800 shadow-2xs hover:bg-gray-50"
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-bold text-gray-800 shadow-2xs hover:bg-gray-50 active:scale-95 min-h-[36px]"
                     >
                       <Edit3 className="h-3.5 w-3.5" />
                       <span>Editar</span>
@@ -683,9 +692,9 @@ export default function DashboardSupportList() {
               );
             })
           ) : (
-            <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm">
+            <div className="rounded-2xl border border-gray-200/90 bg-white p-8 text-center text-gray-500 shadow-2xs">
               <FilterX className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm font-bold text-gray-900">No se encontraron soportes</p>
+              <p className="text-sm font-bold text-gray-950">No se encontraron soportes</p>
               {hasActiveFilters && (
                 <button
                   type="button"

@@ -146,10 +146,10 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
 
   return (
     <article
-      className={`group flex flex-col overflow-hidden border border-gray-200 bg-white transition-all ${
+      className={`group flex flex-col overflow-hidden border border-gray-200/90 bg-white transition-all duration-200 ${
         variant === 'showcase'
-          ? 'rounded-3xl shadow-sm hover:-translate-y-1 hover:shadow-xl'
-          : 'rounded-2xl shadow-2xs hover:border-gray-300'
+          ? 'rounded-3xl shadow-sm hover:-translate-y-1 hover:shadow-xl hover:border-gray-300'
+          : 'rounded-2xl shadow-xs hover:border-gray-300 hover:shadow-md'
       }`}
     >
       <div className="relative aspect-[16/9] w-full overflow-hidden bg-gray-100">
@@ -162,7 +162,7 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <Badge
             variant={item.tipo_soporte === 'tradicional' ? 'neutral' : item.tipo_soporte === 'led' ? 'red' : 'dark'}
-            className="uppercase text-[10px] font-bold"
+            className="uppercase text-[10px] font-extrabold tracking-wider"
           >
             {item.tipo_soporte.replace('_', ' ')}
           </Badge>
@@ -174,7 +174,7 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
           />
         </div>
 
-        <h3 className="mb-1 text-lg font-bold text-gray-950 leading-snug">{item.name}</h3>
+        <h3 className="mb-1 text-lg font-bold text-gray-950 leading-snug group-hover:text-black transition-colors">{item.name}</h3>
         <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
           {'address' in item ? item.address : item.ciudad === 'mendoza' ? 'Mendoza' : 'Buenos Aires'}
         </p>
@@ -182,7 +182,7 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
         {attributes.length > 0 && (
           <div className="mt-3.5 flex flex-wrap gap-1.5" aria-label="Atributos principales">
             {attributes.map((attribute) => (
-              <span key={attribute} className="rounded-lg border border-gray-200 bg-gray-50/80 px-2.5 py-1 text-[11px] font-semibold text-gray-700">
+              <span key={attribute} className="rounded-lg border border-gray-200/80 bg-gray-50/90 px-2.5 py-1 text-[11px] font-semibold text-gray-700">
                 {attribute}
               </span>
             ))}
@@ -197,20 +197,20 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
                   type="button"
                   onClick={() => toggleSelect(item)}
                   aria-pressed={selected}
-                  className={`flex-1 flex items-center justify-center gap-1.5 h-11 px-4 rounded-xl text-xs font-bold transition-all shadow-2xs ${
+                  className={`flex-1 flex items-center justify-center gap-2 min-h-[44px] h-11 px-4 rounded-xl text-xs font-bold transition-all active:scale-[0.98] ${
                     selected
-                      ? 'bg-gray-950 text-white hover:bg-gray-800'
-                      : 'border border-gray-300 bg-white text-gray-900 hover:border-gray-950 hover:bg-gray-50'
+                      ? 'bg-gray-950 text-white hover:bg-gray-800 shadow-sm'
+                      : 'border border-gray-300 bg-white text-gray-900 hover:border-gray-950 hover:bg-gray-50/80 shadow-2xs'
                   }`}
                 >
-                  {selected ? <Check className="h-4 w-4 text-emerald-400" /> : <Plus className="h-4 w-4" />}
+                  {selected ? <Check className="h-4 w-4 text-emerald-400 shrink-0" /> : <Plus className="h-4 w-4 text-gray-500 shrink-0" />}
                   <span>{selected ? 'Soporte seleccionado' : 'Añadir al Media Kit'}</span>
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={() => navigate(`/contacto?soporte=${item.canonical_id}`)}
-                  className="flex-1 flex items-center justify-center gap-1.5 h-11 px-4 rounded-xl text-xs font-bold border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-1.5 min-h-[44px] h-11 px-4 rounded-xl text-xs font-bold border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100/80 transition-colors active:scale-[0.98]"
                 >
                   <span>Consultar disponibilidad</span>
                 </button>
@@ -219,7 +219,7 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
               <button
                 type="button"
                 onClick={navigateToMap}
-                className="h-11 px-3 rounded-xl border border-gray-200 bg-white text-gray-700 hover:text-gray-950 hover:bg-gray-50 flex items-center justify-center gap-1.5 text-xs font-semibold transition"
+                className="min-h-[44px] h-11 px-3.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:text-gray-950 hover:bg-gray-50 hover:border-gray-300 flex items-center justify-center gap-1.5 text-xs font-bold transition active:scale-[0.98]"
                 title="Ver ubicación en el mapa"
                 aria-label={`Ver ${item.name} en el mapa`}
               >
@@ -232,7 +232,7 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
               type="button"
               onClick={navigateToMap}
               variant="outline"
-              className="min-h-11 w-full rounded-xl text-xs font-bold justify-between"
+              className="min-h-[44px] h-11 w-full rounded-xl text-xs font-bold justify-between hover:bg-gray-50"
             >
               <span>{reserved ? 'Consultar disponibilidad' : 'Ver soporte en mapa'}</span>
               <ArrowRight className="h-4 w-4" />
