@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { and, eq, inArray } from 'drizzle-orm';
-import { db } from '../db';
+import { db, isDatabaseConfigured } from '../db/index.ts';
+import { fixedLocations, mobileRoutes } from '../data/inventory.ts';
 import {
   supportFaces,
   supportLocations,
@@ -9,7 +10,7 @@ import {
   supports,
   supportRoutes,
   supportTechnical,
-} from '../db/schema';
+} from '../db/schema.ts';
 import {
   Disponibilidad,
   InventoryItem,
@@ -24,7 +25,7 @@ import {
   SupportRouteData,
   SupportTechnicalData,
   TipoSoporte,
-} from '../types';
+} from '../types.ts';
 
 export const ALLOWED_FAMILIES: SupportFamily[] = ['traditional', 'medium_format', 'led', 'led_mobile'];
 export const ALLOWED_MEDIA_TYPES: SupportMediaType[] = ['image', 'video', 'document'];
@@ -393,25 +394,52 @@ function rowToInventoryItem(
 }
 
 export async function getSupportCatalog(options?: { includeInactive?: boolean }): Promise<InventoryItem[]> {
-  const rows = await db.select().from(supports);
-  const filtered = rows.filter((row) => {
-    const isComplete = Boolean(row.canonicalId && row.name && row.ciudad && row.tipoSoporte);
-    const isActive = options?.includeInactive ? true : row.active !== false;
-    return isComplete && isActive;
-  });
-  const canonicalIds = filtered.map((row) => row.canonicalId);
-  const related = await loadRelatedRecords(canonicalIds);
-  return filtered.map((row) => rowToInventoryItem(row, related));
+  if (!isDatabaseConfigured) {
+    const all = [...fixedLocations, ...mobileRoutes];
+    return options?.includeInactive ? all : all.filter((item) => item.disponibilidad !== 'inactivo');
+  }
+  try {
+    const rows = await db.select().from(supports);
+    const filtered = rows.filter((row) => {
+      const isComplete = Boolean(row.canonicalId && row.name && row.ciudad && row.tipoSoporte);
+      const isActive = options?.includeInactive ? true : row.active !== false;
+      return isComplete && isActive;
+    });
+    const canonicalIds = filtered.map((row) => row.canonicalId);
+    const related = await loadRelatedRecords(canonicalIds);
+    return filtered.map((row) => rowToInventoryItem(row, related));
+  } catch (err) {
+    console.warn('Falling back to static inventory due to database query error:', err);
+    const all = [...fixedLocations, ...mobileRoutes];
+    return options?.includeInactive ? all : all.filter((item) => item.disponibilidad !== 'inactivo');
+  }
 }
 
 export async function getSupportDetail(canonicalId: string, options?: { includeInactive?: boolean }): Promise<InventoryItem | null> {
-  const rows = await db.select().from(supports).where(eq(supports.canonicalId, canonicalId));
-  if (rows.length === 0) return null;
-  const row = rows[0];
-  if (!(row.canonicalId && row.name && row.ciudad && row.tipoSoporte)) return null;
-  if (!options?.includeInactive && row.active === false) return null;
-  const related = await loadRelatedRecords([canonicalId]);
-  return rowToInventoryItem(row, related);
+  if (!isDatabaseConfigured) {
+    const all = [...fixedLocations, ...mobileRoutes];
+    const match = all.find((item) => item.canonical_id === canonicalId);
+    if (!match) return null;
+    if (!options?.includeInactive && match.disponibilidad === 'inactivo') return null;
+    return match;
+  }
+  try {
+    const rows = await db.select().from(supports).where(eq(supports.canonicalId, canonicalId));
+    if (rows.length === 0) {
+      const all = [...fixedLocations, ...mobileRoutes];
+      return all.find((item) => item.canonical_id === canonicalId) || null;
+    }
+    const row = rows[0];
+    if (!(row.canonicalId && row.name && row.ciudad && row.tipoSoporte)) return null;
+    if (!options?.includeInactive && row.active === false) return null;
+    const related = await loadRelatedRecords([canonicalId]);
+    return rowToInventoryItem(row, related);
+  } catch (err) {
+    console.warn('Falling back to static support lookup due to database query error:', err);
+    const all = [...fixedLocations, ...mobileRoutes];
+    const match = all.find((item) => item.canonical_id === canonicalId);
+    return match || null;
+  }
 }
 
 export function generateCanonicalId(name: string, ciudad: Plaza, family: SupportFamily) {

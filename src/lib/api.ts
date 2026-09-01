@@ -8,13 +8,6 @@ export function apiUrl(path: string): string {
     throw new Error(`API path inválido: ${path}`);
   }
 
-  // Production is served by the same Vercel deployment as the API. Keep API
-  // calls same-origin so login/admin requests do not depend on cross-origin
-  // CORS configuration or stale Render URLs from VITE_API_URL.
-  if (import.meta.env.PROD) {
-    return path;
-  }
-
   return `${API_URL}${path}`;
 }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import InventoryMap from '../components/map/InventoryMap';
 import { MediakitPanel } from '../components/map/MediakitPanel';
@@ -6,6 +6,8 @@ import { StickySelectionBar } from '../components/map/StickySelectionBar';
 import { useInventory } from '../hooks/useInventory';
 import { Plaza, TipoSoporte, Disponibilidad, InventoryItem } from '../types';
 import { MapFilterPanel } from '../components/map/MapFilterPanel';
+import { ViewModeToggle, ViewMode } from '../components/inventory/ViewModeToggle';
+import { SupportCardGrid } from '../components/inventory/SupportCardGrid';
 import { SlidersHorizontal, X, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useSelection } from '../context/SelectionContext';
@@ -20,10 +22,13 @@ export default function Inventario() {
   const plazaParam = searchParams.get('plaza') as Plaza | 'todos' | null;
   const tipoParam = searchParams.get('tipo') as TipoSoporte | 'todos' | null;
   const dispParam = searchParams.get('disponibilidad') as DisponibilidadFilter | null;
+  const vistaParam = searchParams.get('vista') as ViewMode | null;
 
   const [selectedPlaza, setSelectedPlaza] = useState<Plaza | 'todos'>(plazaParam || 'todos');
   const [selectedTipo, setSelectedTipo] = useState<TipoSoporte | 'todos'>(tipoParam || 'todos');
   const [selectedDisponibilidad, setSelectedDisponibilidad] = useState<DisponibilidadFilter>(dispParam || 'todos');
+  const [viewMode, setViewMode] = useState<ViewMode>(vistaParam === 'catalogo' ? 'catalogo' : 'mapa');
+  const [selectedSoporteId, setSelectedSoporteId] = useState<string | null>(searchParams.get('soporte'));
   const [searchText, setSearchText] = useState('');
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [isMediakitOpen, setIsMediakitOpen] = useState(false);
@@ -46,23 +51,43 @@ export default function Inventario() {
     setSearchText('');
   }, []);
 
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
+  }, []);
+
+  const handleSelectOnMap = useCallback((item: InventoryItem) => {
+    setSelectedSoporteId(item.canonical_id);
+    setViewMode('mapa');
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('soporte', item.canonical_id);
+      next.set('vista', 'mapa');
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
+
   useEffect(() => {
     const params = new URLSearchParams();
     if (selectedPlaza !== 'todos') params.set('plaza', selectedPlaza);
     if (selectedTipo !== 'todos') params.set('tipo', selectedTipo);
     if (selectedDisponibilidad !== 'todos') params.set('disponibilidad', selectedDisponibilidad);
+    if (viewMode !== 'mapa') params.set('vista', viewMode);
+    if (selectedSoporteId && viewMode === 'mapa') params.set('soporte', selectedSoporteId);
     setSearchParams(params, { replace: true });
-  }, [selectedPlaza, selectedTipo, selectedDisponibilidad, setSearchParams]);
+  }, [selectedPlaza, selectedTipo, selectedDisponibilidad, viewMode, selectedSoporteId, setSearchParams]);
 
   useEffect(() => {
     if (plazaParam && plazaParam !== selectedPlaza) setSelectedPlaza(plazaParam);
     if (tipoParam && tipoParam !== selectedTipo) setSelectedTipo(tipoParam);
     if (dispParam && dispParam !== selectedDisponibilidad) setSelectedDisponibilidad(dispParam);
-  }, [plazaParam, tipoParam, dispParam]);
+    if (vistaParam && (vistaParam === 'mapa' || vistaParam === 'catalogo') && vistaParam !== viewMode) {
+      setViewMode(vistaParam);
+    }
+  }, [plazaParam, tipoParam, dispParam, vistaParam]);
 
   const query = searchText.trim().toLowerCase();
 
-  const matchesSearch = (item: InventoryItem) => {
+  const matchesSearch = useCallback((item: InventoryItem) => {
     if (!query) return true;
     const haystack = [
       item.name,
@@ -72,25 +97,33 @@ export default function Inventario() {
       'address' in item ? item.address : '',
     ].join(' ').toLowerCase();
     return haystack.includes(query);
-  };
+  }, [query]);
 
-  const matchesDisponibilidad = (item: InventoryItem) => {
+  const matchesDisponibilidad = useCallback((item: InventoryItem) => {
     if (selectedDisponibilidad === 'todos') return true;
     const disponibilidad = item.disponibilidad ?? 'disponible';
     return disponibilidad === selectedDisponibilidad;
-  };
+  }, [selectedDisponibilidad]);
 
-  const filteredLocations = fixedLocations.filter((loc) => {
-    const matchPlaza = selectedPlaza === 'todos' || loc.ciudad === selectedPlaza;
-    const matchTipo = selectedTipo === 'todos' || loc.tipo_soporte === selectedTipo;
-    return matchPlaza && matchTipo && matchesDisponibilidad(loc) && matchesSearch(loc);
-  });
+  const filteredLocations = useMemo(() => {
+    return fixedLocations.filter((loc) => {
+      const matchPlaza = selectedPlaza === 'todos' || loc.ciudad === selectedPlaza;
+      const matchTipo = selectedTipo === 'todos' || loc.tipo_soporte === selectedTipo;
+      return matchPlaza && matchTipo && matchesDisponibilidad(loc) && matchesSearch(loc);
+    });
+  }, [fixedLocations, selectedPlaza, selectedTipo, matchesDisponibilidad, matchesSearch]);
 
-  const filteredRoutes = mobileRoutes.filter((route) => {
-    const matchPlaza = selectedPlaza === 'todos' || route.ciudad === selectedPlaza;
-    const matchTipo = selectedTipo === 'todos' || route.tipo_soporte === selectedTipo;
-    return matchPlaza && matchTipo && matchesDisponibilidad(route) && matchesSearch(route);
-  });
+  const filteredRoutes = useMemo(() => {
+    return mobileRoutes.filter((route) => {
+      const matchPlaza = selectedPlaza === 'todos' || route.ciudad === selectedPlaza;
+      const matchTipo = selectedTipo === 'todos' || route.tipo_soporte === selectedTipo;
+      return matchPlaza && matchTipo && matchesDisponibilidad(route) && matchesSearch(route);
+    });
+  }, [mobileRoutes, selectedPlaza, selectedTipo, matchesDisponibilidad, matchesSearch]);
+
+  const allFilteredItems = useMemo(() => {
+    return [...filteredLocations, ...filteredRoutes];
+  }, [filteredLocations, filteredRoutes]);
 
   const selectedItems = getSelectedItems(allItems);
 
@@ -127,19 +160,25 @@ export default function Inventario() {
 
   return (
     <div className="flex h-[calc(100vh-80px)] relative overflow-hidden">
-      <div className="md:hidden absolute top-4 left-4 z-[500]">
+      {/* Controles flotantes superiores en Mobile */}
+      <div className="md:hidden absolute top-4 left-4 right-4 z-[500] flex items-center justify-between pointer-events-none">
         <button
           type="button"
           onClick={() => setIsMobileFiltersOpen(true)}
-          className="bg-white text-black px-4 py-2.5 rounded-full font-bold shadow-lg border border-gray-100 flex items-center gap-2 text-sm active:scale-95 transition-transform"
+          className="pointer-events-auto bg-white text-black px-4 py-2 rounded-full font-bold shadow-lg border border-gray-100 flex items-center gap-2 text-xs active:scale-95 transition-transform"
           aria-label={hasActiveFilters ? 'Abrir filtros, hay filtros activos' : 'Abrir filtros'}
         >
-          <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
-          Filtros
-          {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-emerald-500 absolute top-0 right-0 m-2" aria-hidden="true" />}
+          <SlidersHorizontal className="w-3.5 h-3.5" aria-hidden="true" />
+          <span>Filtros</span>
+          {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true" />}
         </button>
+
+        <div className="pointer-events-auto">
+          <ViewModeToggle viewMode={viewMode} onViewModeChange={handleViewModeChange} />
+        </div>
       </div>
 
+      {/* Drawer / Sidebar de Filtros */}
       <div
         className={cn(
           'absolute md:relative inset-0 md:inset-auto z-[2000] md:z-10 bg-black/40 md:bg-transparent transition-opacity duration-300 md:opacity-100 md:block',
@@ -151,14 +190,14 @@ export default function Inventario() {
       >
         <div className="absolute md:relative inset-y-0 left-0 w-[85%] max-w-sm md:w-80 h-full bg-white flex flex-col shadow-2xl md:shadow-none border-r border-gray-200">
           <div className="md:hidden p-4 flex justify-between items-center border-b border-gray-100">
-            <span className="font-bold text-lg">Filtros</span>
+            <span className="font-bold text-base">Filtros</span>
             <button
               type="button"
               onClick={() => setIsMobileFiltersOpen(false)}
               className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
               aria-label="Cerrar filtros"
             >
-              <X className="w-5 h-5" aria-hidden="true" />
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
 
@@ -172,21 +211,35 @@ export default function Inventario() {
               setSelectedDisponibilidad={setSelectedDisponibilidad}
               searchText={searchText}
               setSearchText={setSearchText}
-              resultsCount={filteredLocations.length + filteredRoutes.length}
+              resultsCount={allFilteredItems.length}
             />
           </div>
         </div>
       </div>
 
-      <div className="flex-grow h-full relative z-0">
-        <InventoryMap
-          locations={filteredLocations}
-          routes={filteredRoutes}
-          onOpenMediakit={handleOpenMediakit}
-          initialSelectedId={searchParams.get('soporte')}
-          selectedPlaza={selectedPlaza}
-          onResetFilters={handleResetFilters}
-        />
+      {/* Área Principal de Contenido (Mapa ↔ Catálogo) */}
+      <div className="flex-grow h-full relative z-0 flex flex-col">
+        {/* Barra superior en Desktop con selector de vista */}
+        <div className="hidden md:flex absolute top-4 right-6 z-[500] items-center gap-3">
+          <ViewModeToggle viewMode={viewMode} onViewModeChange={handleViewModeChange} />
+        </div>
+
+        {viewMode === 'mapa' ? (
+          <InventoryMap
+            locations={filteredLocations}
+            routes={filteredRoutes}
+            onOpenMediakit={handleOpenMediakit}
+            initialSelectedId={selectedSoporteId || searchParams.get('soporte')}
+            selectedPlaza={selectedPlaza}
+            onResetFilters={handleResetFilters}
+          />
+        ) : (
+          <SupportCardGrid
+            items={allFilteredItems}
+            onSelectOnMap={handleSelectOnMap}
+            onResetFilters={handleResetFilters}
+          />
+        )}
 
         <StickySelectionBar
           onOpenMediakit={handleOpenMediakit}

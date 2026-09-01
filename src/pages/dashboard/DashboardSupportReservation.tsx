@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, CalendarDays, Loader2, Save } from 'lucide-react';
+import { ArrowLeft, CalendarDays, Loader2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
 import { apiFetch } from '../../lib/api';

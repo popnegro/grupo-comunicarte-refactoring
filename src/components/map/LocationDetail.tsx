@@ -7,6 +7,7 @@ import { DetailTabs } from './DetailTabs';
 import { ContactSlide } from './ContactSlide';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
+import { StatusBadge } from '../dashboard/ui/StatusBadge';
 import { useSelection } from '../../context/SelectionContext';
 import { useState } from 'react';
 
@@ -79,24 +80,53 @@ export function LocationDetail({ item }: LocationDetailProps) {
               </div>
               <div>
                 <h2 className="text-xl font-bold leading-tight mb-1">{item.name}</h2>
-                <div className="flex flex-wrap items-center gap-2"><Badge variant="neutral" className="uppercase tracking-wider">{item.ciudad.replace('-', ' ')}</Badge><Badge variant={item.tipo_soporte === 'tradicional' ? 'neutral' : item.tipo_soporte === 'led' ? 'red' : 'dark'} className="uppercase tracking-wider">{item.tipo_soporte.replace('_', ' ')}</Badge><Badge variant={isReserved ? 'outline' : 'green'} className="uppercase tracking-wider">{isReserved ? 'Reservado' : 'Disponible'}</Badge></div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="neutral" className="uppercase tracking-wider text-[10px]">
+                    {item.ciudad.replace('-', ' ')}
+                  </Badge>
+                  <Badge variant={item.tipo_soporte === 'tradicional' ? 'neutral' : item.tipo_soporte === 'led' ? 'red' : 'dark'} className="uppercase tracking-wider text-[10px]">
+                    {item.tipo_soporte.replace('_', ' ')}
+                  </Badge>
+                  <StatusBadge status={disponibilidad} label={isReserved ? 'Reservado' : 'Disponible'} size="sm" />
+                </div>
                 {keyAttributes.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-2" aria-label="Atributos principales">
+                  <div className="mt-3.5 flex flex-wrap gap-1.5" aria-label="Atributos principales">
                     {keyAttributes.map((attribute) => (
-                      <span key={attribute} className="rounded-lg bg-gray-50 border border-gray-200 px-2.5 py-1.5 text-xs font-semibold text-gray-800">{attribute}</span>
+                      <span key={attribute} className="rounded-lg bg-gray-50 border border-gray-200 px-2.5 py-1 text-xs font-semibold text-gray-800">{attribute}</span>
                     ))}
                   </div>
                 )}
-                {isReserved && <div className="mt-3 p-3 bg-gray-50 rounded-xl border border-gray-200 text-xs text-gray-700 leading-relaxed"><p className="font-semibold text-gray-900 mb-0.5">Soporte actualmente ocupado</p><p>Puedes consultar la fecha de liberación o alternativas en la misma zona.</p></div>}
+                {isReserved && <div className="mt-3 p-3 bg-amber-50/70 rounded-xl border border-amber-200 text-xs text-amber-900 leading-relaxed"><p className="font-semibold text-amber-950 mb-0.5">Soporte actualmente ocupado</p><p>Puedes consultar la fecha de liberación o alternativas en la misma zona.</p></div>}
                 {isReserved && item.availableFrom && <p className="mt-2 text-xs text-gray-500 font-medium">Fecha estimada de liberación: <span className="text-gray-900 font-semibold">{item.availableFrom}</span></p>}
               </div>
             </div>
             <DetailTabs tabs={tabs} />
-            {isAvailable && <button type="button" onClick={() => toggleSelect(item)} aria-pressed={selected} className={cn("mt-5 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors", selected ? "bg-black text-white border-black" : "bg-white text-gray-700 border-gray-200 hover:border-black")}>{selected ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}{selected ? 'Soporte seleccionado' : 'Seleccionar soporte'}</button>}
+            {isAvailable && (
+              <button
+                type="button"
+                onClick={() => toggleSelect(item)}
+                aria-pressed={selected}
+                className={cn(
+                  "mt-5 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs font-bold transition-all shadow-2xs",
+                  selected
+                    ? "bg-gray-950 text-white border border-gray-950 hover:bg-gray-800"
+                    : "bg-white text-gray-800 border border-gray-300 hover:border-gray-950 hover:bg-gray-50"
+                )}
+              >
+                {selected ? <Check className="w-4 h-4 text-emerald-400" /> : <Plus className="w-4 h-4" />}
+                <span>{selected ? 'Soporte seleccionado' : 'Añadir al Media Kit'}</span>
+              </button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
-      {isReserved && view === 'detail' && <div className="mt-6 pt-6 border-t border-gray-100"><Button className="w-full" onClick={() => setView('contact')}>Consultar disponibilidad</Button></div>}
+      {isReserved && view === 'detail' && (
+        <div className="mt-6 pt-6 border-t border-gray-100">
+          <Button className="w-full h-11 text-xs font-bold rounded-xl" onClick={() => setView('contact')}>
+            Consultar disponibilidad
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

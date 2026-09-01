@@ -76,20 +76,33 @@ export function Layout({ children }: { children: ReactNode }) {
       <main className="flex-grow flex flex-col">{children}</main>
 
       <footer id="site-footer" className="bg-gray-950 text-white border-t border-gray-900 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col md:flex-row justify-between gap-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+          <div className="flex flex-col md:flex-row justify-between items-start gap-10">
             <div className="max-w-sm">
               <img src="/brand/brand-dark.webp" alt="Grupo Comunicarte" className="w-[190px] brightness-0 invert mb-4" />
-              <p className="text-sm text-gray-400 leading-relaxed">Soluciones de publicidad exterior OOH y DOOH para conectar marcas con audiencias en movimiento.</p>
-              <p className="text-xs text-gray-500 mt-3">Mendoza • Buenos Aires</p>
+              <p className="text-sm text-gray-400 leading-relaxed">
+                Soluciones de publicidad exterior OOH y digital DOOH para conectar marcas con audiencias en movimiento en puntos neurálgicos.
+              </p>
+              <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-wider text-gray-500 mt-4">
+                <span>Mendoza</span>
+                <span>•</span>
+                <span>Buenos Aires</span>
+              </div>
             </div>
-            <nav className="flex flex-wrap gap-x-8 gap-y-2 content-start" aria-label="Navegación del pie de página">
-              {navLinks.map((link) => <Link key={link.path} to={link.path} className="text-sm font-medium text-gray-400 hover:text-white transition-colors">{link.name}</Link>)}
-              <Link to="/contacto" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Contacto</Link>
+            <nav className="flex flex-wrap gap-x-8 gap-y-3 content-start" aria-label="Navegación del pie de página">
+              {navLinks.map((link) => (
+                <Link key={link.path} to={link.path} className="text-sm font-medium text-gray-400 hover:text-white transition-colors">
+                  {link.name}
+                </Link>
+              ))}
+              <Link to="/contacto" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">
+                Contacto
+              </Link>
             </nav>
           </div>
-          <div className="mt-6 pt-4 border-t border-white/10 flex flex-col sm:flex-row justify-between gap-2 text-xs text-gray-500">
-            <span>Grupo Comunicarte</span><span>Publicidad que se ve. Resultados que se miden.</span>
+          <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-500">
+            <span>© {new Date().getFullYear()} Grupo Comunicarte. Todos los derechos reservados.</span>
+            <span>Publicidad que se ve. Resultados que se miden.</span>
           </div>
         </div>
       </footer>
