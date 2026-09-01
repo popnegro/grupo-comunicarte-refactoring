@@ -1,0 +1,42 @@
+name: Normalize Mendoza Inventory
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/normalize-mendoza-inventory.py'
+      - 'docs/inventario/processed/soportes-mendoza.txt'
+      - 'docs/inventario/processed/.normalize-trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Normalize Mendoza records
+        run: python3 scripts/normalize-mendoza-inventory.py
+
+      - name: Validate generated source
+        run: |
+          python3 -m py_compile scripts/normalize-mendoza-inventory.py
+          grep -q "mza-trad-01" src/data/inventory.ts
+          grep -q "mza-trad-15" src/data/inventory.ts
+          grep -q "mza-led-01" src/data/inventory.ts
+          grep -q "mza-led-02" src/data/inventory.ts
+
+      - name: Commit normalization
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/data/inventory.ts
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'feat(inventory): normalize Mendoza inventory from source PDFs'
+          git push
