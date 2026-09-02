@@ -10,8 +10,8 @@ export default function Soportes() {
       name: 'Vía Pública Tradicional',
       eyebrow: 'OOH · Cobertura',
       icon: MapPin,
-      description: 'Presencia masiva y permanente en accesos estratégicos. Ideal para campañas de branding que buscan recordación constante 24/7.',
-      features: ['Gigantografías en rutas y accesos principales', 'Impacto continuo de alta recordación', 'Soportes iluminados de gran escala', 'Cobertura urbana en Mendoza y Buenos Aires'],
+      description: 'Cobertura masiva con ubicaciones estratégicas de alto tránsito en Mendoza y Buenos Aires.',
+      features: ['Cartelería espectacular y gigantografías', 'Séxtuples y mobiliario urbano', 'Puntos de ingreso a la ciudad y rutas principales', 'Iluminación Frontlight para impacto nocturno'],
       link: '/inventario?tipo=tradicional',
       image: '/images/soportes-tradicionales-mendoza.webp'
     },
@@ -20,8 +20,8 @@ export default function Soportes() {
       name: 'Pantallas LED (DOOH)',
       eyebrow: 'DOOH · Dinámico',
       icon: MonitorPlay,
-      description: 'Flexibilidad y dinamismo para adaptar tu mensaje al instante. Perfecto para promociones temporales, ofertas rotativas y lanzamientos inmediatos.',
-      features: ['Contenido dinámico en alta definición', 'Actualización de pauta en tiempo real', 'Ubicaciones en los nudos viales más transitados', 'Flexibilidad de formatos y segmentación temporal'],
+      description: 'Soportes digitales de alta resolución en puntos neurálgicos de concentración comercial.',
+      features: ['Tecnología LED P4 y P6 de alta definición', 'Formatos dinámicos y rotativos', 'Contenidos flexibles y actualización en tiempo real', 'Ubicaciones premium en nudos viales y centros comerciales'],
       link: '/inventario?tipo=led',
       image: '/images/pantallas-led-mendoza.webp'
     },
@@ -30,8 +30,8 @@ export default function Soportes() {
       name: 'Camión LED Móvil',
       eyebrow: 'DOOH · En movimiento',
       icon: Truck,
-      description: 'Publicidad itinerante que acerca tu marca directo a la gente. Diseñado para eventos masivos, activaciones locales y recorridos de alto impacto.',
-      features: ['Recorridos programados y personalizados', 'Pantallas LED gigantes a nivel de calle', 'Ideal para activaciones de marca y eventos', 'Alcance directo al consumidor en vía pública'],
+      description: 'Impacto en movimiento. Llevamos tu mensaje directamente a donde está tu audiencia.',
+      features: ['Pantallas LED laterales de 4x2m', 'Rutas estratégicas programables', 'Activaciones de marca y eventos', 'Alta visibilidad a nivel peatonal y vehicular'],
       link: '/inventario?tipo=led_movil',
       image: '/images/led-movil-mendoza.webp'
     }
@@ -96,10 +96,10 @@ export default function Soportes() {
             <Sparkles className="w-3.5 h-3.5 text-red-600" /> Planificá tu pauta hoy
           </div>
           <h2 className="mb-5 text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-gray-950">
-            Potenciá la comunicación de tu negocio
+            Encontrá el soporte adecuado para tu marca
           </h2>
           <p className="mx-auto mb-10 max-w-2xl leading-relaxed text-gray-600 text-base sm:text-lg">
-            Visualizá nuestras ubicaciones en tiempo real desde el mapa interactivo y seleccioná los formatos ideales para conectar con tus clientes.
+            Explorá nuestra cobertura interactiva, seleccioná los espacios que te interesan y solicitá tu propuesta comercial en minutos.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link

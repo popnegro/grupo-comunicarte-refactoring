@@ -20,7 +20,6 @@ import { useNavigate } from 'react-router-dom';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
 import { ActionMenu, ActionMenuItem } from '../../components/dashboard/ui/ActionMenu';
 import { ConfirmDialog } from '../../components/dashboard/ui/ConfirmDialog';
-import { ReservationModal } from '../../components/dashboard/ui/ReservationModal';
 import { StatusBadge } from '../../components/dashboard/ui/StatusBadge';
 import { Input } from '../../components/ui/Input';
 import { apiFetch } from '../../lib/api';
@@ -61,7 +60,7 @@ export default function DashboardSupportList() {
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
 
   // Interactive feedback
-  const [supportForReservation, setSupportForReservation] = useState<Support | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const [supportToArchive, setSupportToArchive] = useState<Support | null>(null);
   const [isArchiving, setIsArchiving] = useState(false);
 
@@ -146,6 +145,32 @@ export default function DashboardSupportList() {
       return sortOrder === 'asc' ? comparison : -comparison;
     });
   }, [supports, query, plaza, type, availability, active, sortField, sortOrder]);
+
+  const toggleAvailability = async (item: Support) => {
+    if (togglingId === item.canonical_id) return;
+    const token = localStorage.getItem('admin_token');
+    const next = item.disponibilidad === 'disponible' ? 'reservado' : 'disponible';
+    setTogglingId(item.canonical_id);
+
+    try {
+      const res = await apiFetch(`/api/admin/supports/${encodeURIComponent(item.canonical_id)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ disponibilidad: next }),
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok || json?.status !== 'success') {
+        notify(json?.message || 'No se pudo cambiar la disponibilidad.');
+        return;
+      }
+      notify(`Soporte marcado como: ${next === 'disponible' ? 'Disponible' : 'Reservado'}.`);
+      load();
+    } catch (err: any) {
+      notify(err.message || 'Error al actualizar disponibilidad.');
+    } finally {
+      setTogglingId(null);
+    }
+  };
 
   const handleConfirmArchive = async () => {
     if (!supportToArchive) return;
@@ -242,7 +267,7 @@ export default function DashboardSupportList() {
     {
       label: 'Definir Reserva',
       icon: CalendarDays,
-      onClick: () => setSupportForReservation(item),
+      onClick: () => navigate(`/dashboard/soportes/${encodeURIComponent(item.canonical_id)}/reservation`),
     },
     {
       label: 'Previsualizar',
@@ -279,7 +304,7 @@ export default function DashboardSupportList() {
 
   return (
     <DashboardShell>
-      <div className="mx-auto max-w-7xl space-y-6 pb-12">
+      <div className="mx-auto max-w-6xl space-y-6 pb-12">
         {message && (
           <div
             role="status"
@@ -294,7 +319,7 @@ export default function DashboardSupportList() {
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 Inventario OOH & DOOH
               </span>
@@ -312,7 +337,7 @@ export default function DashboardSupportList() {
               type="button"
               onClick={load}
               aria-label="Actualizar listado de soportes"
-              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-bold text-gray-800 shadow-2xs transition hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 active:scale-95 min-h-[44px] sm:min-h-[40px]"
+              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-bold text-gray-800 shadow-2xs transition hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 active:scale-95 min-h-[40px]"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
               <span>Actualizar</span>
@@ -320,7 +345,7 @@ export default function DashboardSupportList() {
             <button
               type="button"
               onClick={() => navigate('/dashboard/soportes/new')}
-              className="inline-flex items-center gap-2 rounded-xl bg-gray-950 px-4 py-2.5 text-xs font-bold text-white shadow-2xs transition hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 active:scale-95 min-h-[44px] sm:min-h-[40px]"
+              className="inline-flex items-center gap-2 rounded-xl bg-gray-950 px-4 py-2.5 text-xs font-bold text-white shadow-2xs transition hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 active:scale-95 min-h-[40px]"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>Nuevo soporte</span>
@@ -336,7 +361,7 @@ export default function DashboardSupportList() {
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="pl-10 h-10 text-sm rounded-xl border-gray-200 focus-visible:ring-gray-900/10 focus-visible:border-gray-900"
+                className="pl-10 h-10 text-xs sm:text-sm rounded-xl border-gray-200"
                 placeholder="Buscar por nombre, código o dirección..."
                 aria-label="Buscar soportes"
               />
@@ -346,7 +371,7 @@ export default function DashboardSupportList() {
               value={plaza}
               onChange={(e) => setPlaza(e.target.value)}
               aria-label="Filtrar por plaza"
-              className="h-10 rounded-xl border border-gray-200 bg-white px-3.5 text-sm font-semibold text-gray-700 focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+              className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-xs sm:text-sm font-semibold text-gray-700 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
             >
               <option value="todas">Todas las plazas</option>
               <option value="mendoza">Mendoza</option>
@@ -357,7 +382,7 @@ export default function DashboardSupportList() {
               value={type}
               onChange={(e) => setType(e.target.value)}
               aria-label="Filtrar por formato"
-              className="h-10 rounded-xl border border-gray-200 bg-white px-3.5 text-sm font-semibold text-gray-700 focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+              className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-xs sm:text-sm font-semibold text-gray-700 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
             >
               <option value="todos">Todos los formatos</option>
               <option value="tradicional">Tradicional</option>
@@ -369,7 +394,7 @@ export default function DashboardSupportList() {
               value={availability}
               onChange={(e) => setAvailability(e.target.value)}
               aria-label="Filtrar por disponibilidad"
-              className="h-10 rounded-xl border border-gray-200 bg-white px-3.5 text-sm font-semibold text-gray-700 focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+              className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-xs sm:text-sm font-semibold text-gray-700 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
             >
               <option value="todos">Disponibilidad</option>
               <option value="disponible">Disponible</option>
@@ -380,7 +405,7 @@ export default function DashboardSupportList() {
               value={active}
               onChange={(e) => setActive(e.target.value)}
               aria-label="Filtrar por estado activo"
-              className="h-10 rounded-xl border border-gray-200 bg-white px-3.5 text-sm font-semibold text-gray-700 focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+              className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-xs sm:text-sm font-semibold text-gray-700 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
             >
               <option value="todos">Estado</option>
               <option value="activos">Solo activos</option>
@@ -400,7 +425,7 @@ export default function DashboardSupportList() {
               <button
                 type="button"
                 onClick={clearFilters}
-                className="inline-flex items-center gap-1.5 font-bold text-red-600 hover:text-red-700 hover:underline transition-colors min-h-[44px] sm:min-h-0"
+                className="inline-flex items-center gap-1.5 font-bold text-red-600 hover:text-red-700 hover:underline transition-colors"
               >
                 <FilterX className="w-3.5 h-3.5" />
                 <span>Limpiar filtros</span>
@@ -413,7 +438,7 @@ export default function DashboardSupportList() {
         <section className="hidden md:block overflow-hidden rounded-2xl border border-gray-200/90 bg-white shadow-2xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="border-b border-gray-200 bg-gray-50/80 text-xs font-bold uppercase tracking-wider text-gray-600 select-none">
+              <thead className="border-b border-gray-200 bg-gray-50/80 text-[11px] font-bold uppercase tracking-wider text-gray-600 select-none">
                 <tr>
                   <th className="px-4 py-3.5">
                     <button
@@ -471,6 +496,7 @@ export default function DashboardSupportList() {
                   </tr>
                 ) : visible.length > 0 ? (
                   visible.map((item) => {
+                    const isToggling = togglingId === item.canonical_id;
                     const total = calculateSupportTotal(item.pricing);
 
                     return (
@@ -482,26 +508,35 @@ export default function DashboardSupportList() {
                       >
                         <td className="px-4 py-3.5">
                           <div className="font-bold text-gray-950 text-sm leading-snug">{item.name}</div>
-                          <div className="font-mono text-xs text-gray-500 mt-0.5">{item.canonical_id}</div>
+                          <div className="font-mono text-[11px] text-gray-400 mt-0.5">{item.canonical_id}</div>
                         </td>
 
                         <td className="px-4 py-3.5">
                           <div className="font-bold text-gray-800 text-xs">
                             {item.ciudad === 'mendoza' ? 'Mendoza' : 'Buenos Aires'}
                           </div>
-                          <div className="text-xs text-gray-500 capitalize mt-0.5">
+                          <div className="text-[11px] text-gray-500 capitalize mt-0.5">
                             {item.tipo_soporte?.replace('_', ' ')}
                           </div>
                         </td>
 
                         <td className="px-4 py-3.5">
                           <div className="flex items-center gap-2">
-                            <StatusBadge
-                              status={item.disponibilidad}
-                              size="sm"
-                            />
+                            <button
+                              type="button"
+                              disabled={isToggling}
+                              onClick={() => toggleAvailability(item)}
+                              title="Haga clic para alternar disponibilidad"
+                              className="focus:outline-none focus:ring-2 focus:ring-gray-900 rounded-full transition-transform active:scale-95"
+                            >
+                              <StatusBadge
+                                status={item.disponibilidad}
+                                label={isToggling ? 'Actualizando...' : undefined}
+                                size="sm"
+                              />
+                            </button>
                             {item.active === false && (
-                              <span className="text-xs font-bold uppercase text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                              <span className="text-[10px] font-bold uppercase text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
                                 Archivado
                               </span>
                             )}
@@ -512,7 +547,7 @@ export default function DashboardSupportList() {
                           <div className="font-extrabold text-gray-950 text-sm">
                             {formatSupportCurrency(total, item.pricing?.currency || 'ARS')}
                           </div>
-                          <div className="text-xs text-gray-500 font-medium">
+                          <div className="text-[10px] text-gray-400 font-medium">
                             Exhibición + Instalación + Impresión
                           </div>
                         </td>
@@ -589,6 +624,7 @@ export default function DashboardSupportList() {
             </div>
           ) : visible.length > 0 ? (
             visible.map((item) => {
+              const isToggling = togglingId === item.canonical_id;
               const total = calculateSupportTotal(item.pricing);
 
               return (
@@ -601,7 +637,7 @@ export default function DashboardSupportList() {
                   <div className="flex items-start justify-between gap-3 mb-2.5">
                     <div>
                       <h3 className="text-sm font-bold text-gray-950 leading-snug">{item.name}</h3>
-                      <p className="font-mono text-xs text-gray-500 mt-0.5">{item.canonical_id}</p>
+                      <p className="font-mono text-[11px] text-gray-400 mt-0.5">{item.canonical_id}</p>
                     </div>
 
                     <ActionMenu items={getActionMenuItems(item)} />
@@ -609,7 +645,7 @@ export default function DashboardSupportList() {
 
                   <div className="grid grid-cols-2 gap-2 py-2.5 border-y border-gray-100 text-xs">
                     <div>
-                      <span className="text-gray-500 block text-xs uppercase font-bold tracking-wider">
+                      <span className="text-gray-400 block text-[10px] uppercase font-bold tracking-wider">
                         Plaza / Formato
                       </span>
                       <span className="font-semibold text-gray-800">
@@ -618,7 +654,7 @@ export default function DashboardSupportList() {
                     </div>
 
                     <div>
-                      <span className="text-gray-500 block text-xs uppercase font-bold tracking-wider">
+                      <span className="text-gray-400 block text-[10px] uppercase font-bold tracking-wider">
                         Tarifa Total
                       </span>
                       <span className="font-extrabold text-gray-950">
@@ -628,17 +664,25 @@ export default function DashboardSupportList() {
                   </div>
 
                   <div className="mt-3 flex items-center justify-between gap-3">
-                    <StatusBadge
-                      status={item.disponibilidad}
-                      size="sm"
-                    />
+                    <button
+                      type="button"
+                      disabled={isToggling}
+                      onClick={() => toggleAvailability(item)}
+                      className="focus:outline-none"
+                    >
+                      <StatusBadge
+                        status={item.disponibilidad}
+                        label={isToggling ? 'Actualizando...' : undefined}
+                        size="sm"
+                      />
+                    </button>
 
                     <button
                       type="button"
                       onClick={() =>
                         navigate(`/dashboard/soportes/${encodeURIComponent(item.canonical_id)}/edit`)
                       }
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-bold text-gray-800 shadow-2xs hover:bg-gray-50 active:scale-95 min-h-[44px]"
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-bold text-gray-800 shadow-2xs hover:bg-gray-50 active:scale-95 min-h-[36px]"
                     >
                       <Edit3 className="h-3.5 w-3.5" />
                       <span>Editar</span>
@@ -655,7 +699,7 @@ export default function DashboardSupportList() {
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="mt-3 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-bold text-gray-800 min-h-[44px]"
+                  className="mt-3 rounded-xl border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-bold text-gray-800"
                 >
                   Limpiar filtros
                 </button>
@@ -664,18 +708,16 @@ export default function DashboardSupportList() {
           )}
         </section>
 
-
-
-        {/* Contextual Reservation Modal */}
-        <ReservationModal
-          isOpen={!!supportForReservation}
-          support={supportForReservation}
-          onClose={() => setSupportForReservation(null)}
-          onSuccess={(_id, _disp) => {
-            notify('Período de reserva actualizado.');
-            load();
-          }}
-        />
+        {/* Advanced Tool Link */}
+        <div className="text-right pt-2">
+          <button
+            type="button"
+            onClick={() => navigate('/dashboard/soportes/advanced')}
+            className="text-xs font-semibold text-gray-400 hover:text-gray-700 transition-colors"
+          >
+            Herramientas avanzadas del catálogo →
+          </button>
+        </div>
 
         {/* Accessible Confirm Dialog for Archiving */}
         <ConfirmDialog

@@ -716,69 +716,21 @@ async function syncSupportFaces(canonicalId: string, payload: SupportWritePayloa
 
 async function syncSupportMedia(canonicalId: string, payload: SupportWritePayload) {
   if (!payload.media) return;
-  const existing = await db.select().from(supportMedia).where(eq(supportMedia.supportCanonicalId, canonicalId));
-
-  const incomingUrls = new Set(payload.media.map(m => m.url));
-
-  // 1. Delete rows from database that are no longer present in incomingUrls
-  for (const row of existing) {
-    if (!incomingUrls.has(row.url)) {
-      await db.delete(supportMedia).where(eq(supportMedia.id, row.id));
-
-      const storageKey = (row.metadata as any)?.storage_key;
-      if (storageKey) {
-        try {
-          const isR2Configured = process.env.R2_ACCOUNT_ID && process.env.R2_BUCKET_NAME && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_PUBLIC_URL;
-          if (isR2Configured) {
-            const { getStorageAdapter } = await import('./r2StorageAdapter.ts');
-            await getStorageAdapter().delete(storageKey);
-          }
-        } catch (cleanupError) {
-          console.error('R2 deletion of orphaned media failed:', cleanupError);
-        }
-      }
-    }
-  }
-
-  // 2. Insert or update the incoming media
+  await db.delete(supportMedia).where(eq(supportMedia.supportCanonicalId, canonicalId));
   for (const [index, media] of payload.media.entries()) {
     validateMediaType(media.media_type);
-    const existingRow = existing.find(row => row.url === media.url);
-
-    if (existingRow) {
-      // Merge metadata, prioritizing existing R2 metadata
-      const mergedMetadata = {
-        ...(media.metadata || {}),
-        ...(existingRow.metadata || {}),
-      };
-
-      await db
-        .update(supportMedia)
-        .set({
-          mediaType: media.media_type,
-          title: media.title || existingRow.title,
-          alt: media.alt || existingRow.alt,
-          mimeType: media.mime_type || existingRow.mimeType,
-          sortOrder: media.sort_order ?? index,
-          metadata: mergedMetadata,
-          active: media.active ?? existingRow.active,
-          updatedAt: new Date(),
-        })
-        .where(eq(supportMedia.id, existingRow.id));
-    } else {
-      await db.insert(supportMedia).values({
-        supportCanonicalId: canonicalId,
-        mediaType: media.media_type,
-        url: media.url,
-        title: media.title || null,
-        alt: media.alt || null,
-        mimeType: media.mime_type || null,
-        sortOrder: media.sort_order ?? index,
-        metadata: media.metadata || null,
-        active: media.active ?? true,
-        updatedAt: new Date(),
-      });
-    }
+    await db.insert(supportMedia).values({
+      supportCanonicalId: canonicalId,
+      mediaType: media.media_type,
+      url: media.url,
+      title: media.title || null,
+      alt: media.alt || null,
+      mimeType: media.mime_type || null,
+      sortOrder: media.sort_order ?? index,
+      metadata: media.metadata || null,
+      active: media.active ?? true,
+      updatedAt: new Date(),
+    });
   }
 }
 

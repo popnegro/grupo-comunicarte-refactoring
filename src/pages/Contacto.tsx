@@ -11,8 +11,8 @@ export default function Contacto() {
     <section className="flex-1 flex-col bg-[#F9F9F9]">
       <InteriorHero
         eyebrow={isMediaKit ? 'Media Kit' : 'Contacto'}
-        title="Solicitá tu propuesta personalizada"
-        description="Completá tus datos y te enviamos la cotización de los soportes seleccionados."
+        title={isMediaKit ? 'Tu selección, lista para avanzar.' : 'Hablemos de tu próxima campaña.'}
+        description={isMediaKit ? 'Completá tus datos y recibí la propuesta consolidada de los soportes que seleccionaste.' : 'Contanos qué necesitás comunicar y te ayudamos a encontrar la solución OOH o DOOH adecuada.'}
         align="center"
       />
 

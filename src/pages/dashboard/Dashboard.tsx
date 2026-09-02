@@ -77,12 +77,12 @@ export default function Dashboard() {
 
   return (
     <DashboardShell>
-      <div className="space-y-8 max-w-7xl mx-auto pb-10">
+      <div className="space-y-8 max-w-6xl mx-auto pb-10">
         {/* 1. Header Title & Context */}
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 Centro de Operaciones
               </span>
@@ -98,14 +98,14 @@ export default function Dashboard() {
           <div className="flex items-center gap-2.5 shrink-0">
             <Link
               to="/dashboard/soportes"
-              className="px-4 py-2.5 bg-gray-950 text-white hover:bg-gray-800 rounded-xl text-xs font-bold transition-all shadow-2xs flex items-center gap-2 active:scale-95 min-h-[44px] sm:min-h-[40px]"
+              className="px-4 py-2.5 bg-gray-950 text-white hover:bg-gray-800 rounded-xl text-xs font-bold transition-all shadow-2xs flex items-center gap-2 active:scale-95 min-h-[40px]"
             >
               <MonitorSmartphone className="w-4 h-4 text-emerald-400" />
               <span>Ver Soportes</span>
             </Link>
             <Link
-              to="/dashboard/solicitudes"
-              className="px-4 py-2.5 bg-white text-gray-800 border border-gray-200 hover:border-gray-300 hover:bg-gray-50 rounded-xl text-xs font-bold transition-all shadow-2xs flex items-center gap-2 active:scale-95 min-h-[44px] sm:min-h-[40px]"
+              to="/dashboard/mediakits"
+              className="px-4 py-2.5 bg-white text-gray-800 border border-gray-200 hover:border-gray-300 hover:bg-gray-50 rounded-xl text-xs font-bold transition-all shadow-2xs flex items-center gap-2 active:scale-95 min-h-[40px]"
             >
               <FileText className="w-4 h-4 text-gray-500" />
               <span>Ver Solicitudes</span>
@@ -216,7 +216,7 @@ export default function Dashboard() {
             iconColorClass="text-blue-700"
             iconBgClass="bg-blue-50 border border-blue-100"
             statusBadge={
-              <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-blue-700">
+              <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-blue-700">
                 Activas
               </span>
             }
@@ -347,7 +347,7 @@ export default function Dashboard() {
             <div>
               <div className="flex items-center gap-2 text-emerald-800 mb-1.5">
                 <Sparkles className="w-4 h-4 text-emerald-600" />
-                <span className="text-[11px] font-extrabold uppercase tracking-wider">Acciones Rápidas</span>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider">Acciones Rápidas</span>
               </div>
               <h3 className="text-base font-bold text-gray-950">Operaciones Habituales</h3>
               <p className="text-xs text-gray-500 mt-1">
@@ -358,21 +358,21 @@ export default function Dashboard() {
             <div className="space-y-2">
               <Link
                 to="/dashboard/soportes"
-                className="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-gray-50/80 hover:bg-gray-100 text-xs font-bold text-gray-800 transition-colors active:scale-[0.98] min-h-[44px]"
+                className="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-gray-50/80 hover:bg-gray-100 text-xs font-bold text-gray-800 transition-colors active:scale-[0.98]"
               >
                 <span>Controlar disponibilidad de soportes</span>
                 <ArrowUpRight className="w-4 h-4 text-gray-400" />
               </Link>
               <Link
-                to="/dashboard/solicitudes"
-                className="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-gray-50/80 hover:bg-gray-100 text-xs font-bold text-gray-800 transition-colors active:scale-[0.98] min-h-[44px]"
+                to="/dashboard/mediakits"
+                className="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-gray-50/80 hover:bg-gray-100 text-xs font-bold text-gray-800 transition-colors active:scale-[0.98]"
               >
                 <span>Revisar solicitudes de clientes</span>
                 <ArrowUpRight className="w-4 h-4 text-gray-400" />
               </Link>
               <Link
                 to="/inventario"
-                className="flex items-center justify-between p-3 rounded-xl border border-emerald-200/80 bg-emerald-50/60 hover:bg-emerald-100/60 text-xs font-bold text-emerald-900 transition-colors active:scale-[0.98] min-h-[44px]"
+                className="flex items-center justify-between p-3 rounded-xl border border-emerald-200/80 bg-emerald-50/60 hover:bg-emerald-100/60 text-xs font-bold text-emerald-900 transition-colors active:scale-[0.98]"
               >
                 <div className="flex items-center gap-2">
                   <Layers className="w-3.5 h-3.5 text-emerald-700" />
@@ -388,13 +388,13 @@ export default function Dashboard() {
         <div className="bg-white rounded-2xl border border-gray-200/90 shadow-2xs overflow-hidden">
           <div className="p-5 sm:px-6 border-b border-gray-100 flex items-center justify-between">
             <div>
-              <h2 className="text-base font-bold text-gray-950">Últimas Solicitudes</h2>
+              <h2 className="text-base font-bold text-gray-950">Últimas Solicitudes de Media Kit</h2>
               <p className="text-xs text-gray-500 mt-0.5">
                 Contactos recibidos a través del explorador de inventario.
               </p>
             </div>
             <Link
-              to="/dashboard/solicitudes"
+              to="/dashboard/mediakits"
               className="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 transition-colors"
             >
               <span>Ver todas ({requests.length})</span>
@@ -436,7 +436,7 @@ export default function Dashboard() {
                       : ''}
                   </span>
                   <Link
-                    to="/dashboard/solicitudes"
+                    to="/dashboard/mediakits"
                     className="px-3.5 py-1.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-100 text-xs font-bold text-gray-800 transition-colors shadow-2xs min-h-[36px] flex items-center justify-center active:scale-95"
                   >
                     Detalle

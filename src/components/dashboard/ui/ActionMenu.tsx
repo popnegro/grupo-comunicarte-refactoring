@@ -79,7 +79,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
         aria-haspopup="true"
         aria-expanded={isOpen}
         aria-label={triggerLabel}
-        className="inline-flex items-center justify-center p-2 sm:p-1.5 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-colors min-h-[44px] min-w-[44px] sm:min-h-[34px] sm:min-w-[34px]"
+        className="inline-flex items-center justify-center p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-colors min-h-[32px] min-w-[32px]"
       >
         <MoreHorizontal className="w-4 h-4" />
       </button>
@@ -113,7 +113,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
                   setIsOpen(false);
                   item.onClick();
                 }}
-                className={`w-full flex items-center gap-2.5 px-3.5 py-3 sm:py-2 text-xs font-medium text-left transition-colors disabled:opacity-40 disabled:cursor-not-allowed min-h-[44px] sm:min-h-[36px] ${itemColorClasses}`}
+                className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-left transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${itemColorClasses}`}
               >
                 {Icon && <Icon className="w-3.5 h-3.5 shrink-0" />}
                 <span>{item.label}</span>
