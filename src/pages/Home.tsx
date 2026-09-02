@@ -1,15 +1,31 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { buttonStyles } from '../components/ui/Button';
-import { ArrowRight, MapPin, MoveRight, Sparkles, Target, Zap, ShieldCheck } from 'lucide-react';
+import { ArrowRight, MapPin, MoveRight, Sparkles, Target, Zap, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import { InventoryItem } from '../types';
 import { useInventory } from '../hooks/useInventory';
 import { SupportCard } from '../components/inventory/SupportCard';
+import { useRef } from 'react';
 
 export default function Home() {
   const navigate = useNavigate();
   const { items: inventoryItems, loading: inventoryLoading } = useInventory();
   const allItems: InventoryItem[] = inventoryItems;
   const featuredItems = allItems.filter(item => item.isFeatured).slice(0, 9);
+  // Referencia para controlar el carrusel de forma nativa
+  const carouselRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (carouselRef.current) {
+      const { scrollLeft, clientWidth } = carouselRef.current;
+      // Calcula un desplazamiento relativo al tamaño de pantalla actual
+      const scrollAmount = clientWidth * 0.35;
+
+      carouselRef.current.scrollTo({
+        left: direction === 'left' ? scrollLeft - scrollAmount : scrollLeft + scrollAmount,
+        behavior: 'smooth',
+      });
+    }
+  };
 
   return (
     <div className="flex flex-col w-full bg-white">
@@ -153,22 +169,44 @@ export default function Home() {
                 <h2 className="text-section-title text-3xl sm:text-4xl font-extrabold text-gray-950 mb-3">Soportes destacados</h2>
                 <p className="text-gray-600 text-base">Ubicaciones con alto potencial de impacto visual y métricas de circulación.</p>
               </div>
-              <Link
-                to="/inventario"
-                className="hidden md:inline-flex items-center text-sm font-bold uppercase tracking-wider gap-2 text-gray-900 hover:text-red-600 hover:gap-3 transition-all"
-              >
-                Ver inventario completo <MoveRight className="w-4 h-4" />
-              </Link>
+
+              {/* Contenedor de acciones unificado en Escritorio con flechas */}
+              <div className="hidden md:flex items-center gap-6">
+
+
+                {!inventoryLoading && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => scroll('left')}
+                      className="p-2.5 rounded-full border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-950 transition-colors shadow-sm"
+                      aria-label="Anterior soporte"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => scroll('right')}
+                      className="p-2.5 rounded-full border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-950 transition-colors shadow-sm"
+                      aria-label="Siguiente soporte"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             {inventoryLoading ? (
-              <div className="py-20 text-center text-gray-500 font-medium animate-pulse">
+              <div role="status" aria-live="polite" className="py-20 text-center text-gray-500 font-medium animate-pulse">
                 Cargando soportes destacados…
               </div>
             ) : (
-              <div className="flex overflow-x-auto pb-8 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 snap-x snap-mandatory scrollbar-hide gap-6">
+              /* Se asigna carouselRef y se optimiza el ancho con calc() */
+              <div
+                ref={carouselRef}
+                className="flex overflow-x-auto pb-8 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 snap-x snap-mandatory scrollbar-hide gap-6"
+              >
                 {featuredItems.map((item) => (
-                  <div key={item.canonical_id} className="w-[85vw] sm:w-[46vw] md:w-[32vw] lg:w-[31%] flex-shrink-0 snap-start">
+                  <div key={item.canonical_id} className="w-[85vw] sm:w-[46vw] md:w-[32vw] lg:w-[calc((100%-48px)/3)] flex-shrink-0 snap-start">
                     <SupportCard item={item} variant="showcase" />
                   </div>
                 ))}
@@ -187,8 +225,6 @@ export default function Home() {
         )
       }
 
-
-      {/* Value Pillars Section */}
       <section className="bg-[#F9F9F9] py-24 sm:py-28 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -276,6 +312,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-    </div >
+    </div>
   );
 }
