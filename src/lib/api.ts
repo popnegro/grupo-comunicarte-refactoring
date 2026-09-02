@@ -8,6 +8,13 @@ export function apiUrl(path: string): string {
     throw new Error(`API path inválido: ${path}`);
   }
 
+  // Production is served by the same deployment as the API. Keep admin/public
+  // API calls same-origin in production; VITE_API_URL remains available for
+  // local development and external API environments.
+  if (import.meta.env.PROD) {
+    return path;
+  }
+
   return `${API_URL}${path}`;
 }
 
