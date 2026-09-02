@@ -6,6 +6,7 @@ import { eq } from 'drizzle-orm';
 
 const connectionString = process.env.DATABASE_URL;
 export const isDatabaseConfigured = Boolean(connectionString && connectionString.trim().length > 0);
+const isVercelRuntime = process.env.VERCEL === '1' || process.env.VERCEL === 'true';
 
 const pool = new Pool(
   isDatabaseConfigured
@@ -21,7 +22,9 @@ const pool = new Pool(
 export const db = drizzle(pool, { schema });
 
 /**
- * Initializes database tables if they do not exist and runs idempotent seeding.
+ * Database bootstrap is intentionally disabled inside Vercel serverless
+ * requests. Schema/seed work is deployment/startup responsibility for the
+ * persistent Render runtime, never a request/cold-start dependency.
  */
 const BOOTSTRAP_RETRIES = 3;
 const BOOTSTRAP_RETRY_DELAY_MS = 500;
@@ -38,6 +41,10 @@ function sleep(ms: number) {
 }
 
 export async function initDatabase() {
+  if (isVercelRuntime) {
+    console.info('Database bootstrap skipped in Vercel runtime; schema/seed must be managed outside serverless requests.');
+    return;
+  }
   if (!isDatabaseConfigured) {
     console.info('DATABASE_URL is not configured. Running server with in-memory static inventory.');
     return;
