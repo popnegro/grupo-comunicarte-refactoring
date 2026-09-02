@@ -212,6 +212,8 @@ export default function Inventario() {
               searchText={searchText}
               setSearchText={setSearchText}
               resultsCount={allFilteredItems.length}
+              viewMode={viewMode}
+              onViewModeChange={handleViewModeChange}
             />
           </div>
         </div>
@@ -219,11 +221,6 @@ export default function Inventario() {
 
       {/* Área Principal de Contenido (Mapa ↔ Catálogo) */}
       <div className="flex-grow h-full relative z-0 flex flex-col">
-        {/* Barra superior en Desktop con selector de vista */}
-        <div className="hidden md:flex absolute top-4 right-6 z-[500] items-center gap-3">
-          <ViewModeToggle viewMode={viewMode} onViewModeChange={handleViewModeChange} />
-        </div>
-
         {viewMode === 'mapa' ? (
           <InventoryMap
             locations={filteredLocations}
