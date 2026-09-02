@@ -52,18 +52,18 @@ export function AnimatedCounter({
 export default function Nosotros() {
   const pillars = [
     {
-      title: 'Ubicaciones Estratégicas',
-      description: 'Cada espacio es seleccionado rigurosamente por su volumen de tránsito vehicular y peatonal, garantizando una alta tasa de contacto visual con tu audiencia.',
+      title: 'Alcance Estratégico',
+      description: 'Seleccionamos cada locación mediante análisis de tráfico y visibilidad, garantizando que tu mensaje impacte a la audiencia correcta en el momento justo.',
       icon: Target
     },
     {
-      title: 'Digitalización DOOH',
-      description: 'Modernizamos la vía pública con pantallas dinámicas de alta definición para ofrecer contenidos dinámicos, adaptables y con óptimo contraste diurno y nocturno.',
+      title: 'Innovación DOOH',
+      description: 'Lideramos la transición hacia soportes digitales en la vía pública, ofreciendo flexibilidad de contenidos y calidad visual inigualable.',
       icon: TrendingUp
     },
     {
-      title: 'Asesoramiento Profesional',
-      description: 'Acompañamos a marcas, agencias y pymes en el diseño de su mix de medios, optimizando la distribución de la pauta para maximizar el retorno de inversión.',
+      title: 'Compromiso B2B',
+      description: 'Entendemos los objetivos de tu negocio y brindamos asesoramiento personalizado para maximizar el rendimiento de tus campañas.',
       icon: Users
     }
   ];
@@ -73,7 +73,7 @@ export default function Nosotros() {
       <InteriorHero
         eyebrow="Acerca de nosotros"
         title="Conectamos marcas con audiencias en movimiento."
-        description="Especialistas en comunicación exterior y pantallas digitales. Conectamos anunciantes con las ubicaciones más transitadas de Mendoza y Buenos Aires mediante una gestión ágil y transparente."
+        description="Grupo Comunicarte desarrolla soluciones de publicidad exterior OOH y digital DOOH en las plazas más competitivas de Mendoza y Buenos Aires."
         align="center"
       />
 
@@ -81,7 +81,7 @@ export default function Nosotros() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-gray-200 rounded-3xl overflow-hidden bg-white">
 
-            {/* Primer Contador: Anima hasta 30 con prefijo "+" */}
+            {/* Primer Contador: Anima hasta 2 con sufijo "+" */}
             <div className="p-8 md:p-10 text-center md:text-left border-b md:border-b-0 md:border-r border-gray-200">
               <AnimatedCounter
                 prefix="+"
@@ -89,23 +89,27 @@ export default function Nosotros() {
                 className="text-5xl font-black tracking-tight text-red-600"
               />
               <span className="block mt-2 text-gray-500 font-bold uppercase tracking-[0.14em] text-xs">
-                Soportes activos en Mendoza y Buenos Aires
+                Soportes publicitarios
               </span>
             </div>
 
-            {/* Segundo Contador: Cobertura en puntos de alto flujo */}
+            {/* Segundo Contador: Anima hasta 100 con sufijo "%" */}
             <div className="p-8 md:p-10 text-center md:text-left border-b md:border-b-0 md:border-r border-gray-200">
-              <span className="text-5xl font-black tracking-tight text-red-600">Puntos Clave</span>
+              <AnimatedCounter
+                end={100}
+                suffix="%"
+                className="text-5xl font-black tracking-tight text-red-600"
+              />
               <span className="block mt-2 text-gray-500 font-bold uppercase tracking-[0.14em] text-xs">
-                Ubicaciones de máxima visibilidad urbana
+                Visibilidad garantizada
               </span>
             </div>
 
-            {/* Tercer Bloque: Presencia en Mendoza y Buenos Aires */}
+            {/* Tercer Bloque: Texto estático */}
             <div className="p-8 md:p-10 text-center md:text-left">
               <span className="text-5xl font-black tracking-tight text-red-600">2</span>
               <span className="block mt-2 text-gray-500 font-bold uppercase tracking-[0.14em] text-xs">
-                Plazas estratégicas nacionales
+                Plazas estratégicas
               </span>
             </div>
 
@@ -143,10 +147,10 @@ export default function Nosotros() {
             <Sparkles className="w-3.5 h-3.5 text-red-600" /> Planificá tu pauta hoy
           </div>
           <h2 className="mb-5 text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-gray-950">
-            Trabajemos juntos en tu próximo impacto
+            Encontrá el soporte adecuado para tu marca
           </h2>
           <p className="mx-auto mb-10 max-w-2xl leading-relaxed text-gray-600 text-base sm:text-lg">
-            Descubrí la cobertura publicitaria que mejor se adapta a la zona de influencia de tu negocio y solicitá un presupuesto a medida.
+            Explorá nuestra cobertura interactiva, seleccioná los espacios que te interesan y solicitá tu propuesta comercial en minutos.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link

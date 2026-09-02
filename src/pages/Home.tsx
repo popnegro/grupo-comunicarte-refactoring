@@ -49,32 +49,32 @@ export default function Home() {
             </div>
 
             <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5rem] font-extrabold tracking-[-0.04em] text-white max-w-4xl leading-[0.96] mb-8">
-              Sé visible donde se toman decisiones de compra.
+              Tu marca en los lugares correctos
             </h1>
 
             <p className="text-lg sm:text-xl text-white/85 max-w-2xl mb-11 leading-relaxed font-normal">
-              Tu marca en los lugares estratégicos donde se mueve tu cliente en Mendoza y Buenos Aires.
+              Circuito estratégico de cartelería tradicional, pantallas LED de alta definición y móviles en Mendoza y Buenos Aires para generar máxima presencia, alcance y recordación.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
               <Link
-                to="/inventario"
+                to="/contacto"
                 className={buttonStyles({
                   size: 'lg',
                   className: 'text-base font-semibold rounded-full px-8 bg-white text-gray-950 hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all'
                 })}
               >
-                Ver disponibilidad ahora <ArrowRight className="w-5 h-5 ml-1" />
+                Hablar con el equipo <ArrowRight className="w-5 h-5 ml-1" />
               </Link>
               <Link
-                to="/contacto"
+                to="/inventario"
                 className={buttonStyles({
                   variant: 'outline',
                   size: 'lg',
                   className: 'text-base font-semibold rounded-full px-8 border-white/35 text-white hover:bg-white/15 hover:text-white bg-white/5 backdrop-blur-sm transition-all'
                 })}
               >
-                Solicitar propuesta personalizada
+                Explorar inventario
               </Link>
             </div>
           </div>
@@ -228,7 +228,7 @@ export default function Home() {
       <section className="bg-[#F9F9F9] py-24 sm:py-28 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <p className="text-eyebrow mb-3">POR QUÉ NOS ELIGEN</p>
+            <p className="text-eyebrow mb-3">Diferenciales</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-950 tracking-tight mb-4">
               Grupo Comunicarte
             </h2>
@@ -243,9 +243,9 @@ export default function Home() {
                 <div className="w-12 h-12 rounded-2xl bg-gray-950 text-white flex items-center justify-center mb-6">
                   <Target className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-950 mb-3">Ubicaciones verificadas</h3>
+                <h3 className="text-xl font-bold text-gray-950 mb-3">Ubicaciones Estratégicas</h3>
                 <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
-                  Puntos estratégicos de máxima visibilidad en los accesos y avenidas más transitadas.
+                  Espacios seleccionados minuciosamente en nudos viales y accesos de alta densidad para asegurar máxima visibilidad y frecuencia.
                 </p>
               </div>
             </div>
@@ -255,9 +255,9 @@ export default function Home() {
                 <div className="w-12 h-12 rounded-2xl bg-gray-950 text-white flex items-center justify-center mb-6">
                   <Zap className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-950 mb-3">Tecnología y pauta digital</h3>
+                <h3 className="text-xl font-bold text-gray-950 mb-3">Tecnología DOOH de Vanguardia</h3>
                 <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
-                  Actualización ágil de contenido en pantallas LED de alta definición para campañas dinámicas.
+                  Pantallas LED de alta resolución con gestión de contenidos dinámica, rotación programada y óptima visualización diurna y nocturna.
                 </p>
               </div>
             </div>
@@ -267,9 +267,9 @@ export default function Home() {
                 <div className="w-12 h-12 rounded-2xl bg-gray-950 text-white flex items-center justify-center mb-6">
                   <ShieldCheck className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-950 mb-3">Flexibilidad para tu pauta</h3>
+                <h3 className="text-xl font-bold text-gray-950 mb-3">Atención B2B y Media Kits</h3>
                 <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
-                  Formatos tradicionales, pantallas digitales y unidades móviles adaptados a tu presupuesto.
+                  Generá presupuestos y Media Kits consolidados con fichas técnicas, mapas interactivos y cotizaciones directas para tu agencia o marca.
                 </p>
               </div>
             </div>
@@ -284,20 +284,20 @@ export default function Home() {
             <Sparkles className="w-3.5 h-3.5 text-red-600" /> Elegí el formato para tu pauta
           </div>
           <h2 className="mb-5 text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-gray-950">
-            Hacé que tu marca se destaque en la vía pública
+            Encontrá el soporte adecuado para tu pauta
           </h2>
           <p className="mx-auto mb-10 max-w-2xl leading-relaxed text-gray-600 text-base sm:text-lg">
-            Explorá nuestro inventario interactivo, elegí las ubicaciones clave para tu campaña y recibí una cotización adaptada a tus objetivos de comunicación.
+            Explorá nuestra cobertura interactiva, seleccioná los espacios que te interesan y solicitá tu propuesta comercial en minutos.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link
-              to="/inventario"
+              to="/soporte"
               className={buttonStyles({
                 size: 'lg',
                 className: 'inline-flex rounded-full px-8 font-semibold shadow-md'
               })}
             >
-              Ver disponibilidad ahora <ArrowRight className="h-5 w-5 ml-1" />
+              Ver soportes <ArrowRight className="h-5 w-5 ml-1" />
             </Link>
             <Link
               to="/contacto"
@@ -307,7 +307,7 @@ export default function Home() {
                 className: 'inline-flex rounded-full px-8 font-semibold'
               })}
             >
-              Solicitar propuesta personalizada
+              Hablar con Ventas
             </Link>
           </div>
         </div>

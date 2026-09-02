@@ -252,16 +252,6 @@ export default function DashboardMediaKitWorkflow() {
       return Number.isFinite(v) && v > 0;
     });
 
-  const approvedCount = supports.filter((s) => {
-    const v = Number(approvedPrices[s.canonical_id] || 0);
-    return Number.isFinite(v) && v > 0;
-  }).length;
-
-  const totalApprovedQuote = supports.reduce(
-    (sum, s) => sum + (Number(approvedPrices[s.canonical_id]) || 0),
-    0
-  );
-
   const exportSupports: ExportSupport[] = supports.map(
     (s) =>
       ({
@@ -272,7 +262,7 @@ export default function DashboardMediaKitWorkflow() {
 
   return (
     <DashboardShell>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 pb-12">
+      <div className="mx-auto max-w-6xl space-y-6 pb-12">
         {toast && (
           <div
             role="status"
@@ -287,7 +277,7 @@ export default function DashboardMediaKitWorkflow() {
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 Gestión Comercial
               </span>
@@ -324,7 +314,7 @@ export default function DashboardMediaKitWorkflow() {
             }`}
           >
             <span
-              className={`text-xs font-bold uppercase tracking-wider ${
+              className={`text-[11px] font-extrabold uppercase tracking-wider ${
                 filter === 'all' ? 'text-gray-300' : 'text-gray-500'
               }`}
             >
@@ -345,7 +335,7 @@ export default function DashboardMediaKitWorkflow() {
           >
             <div className="flex items-center justify-between">
               <span
-                className={`text-xs font-bold uppercase tracking-wider ${
+                className={`text-[11px] font-extrabold uppercase tracking-wider ${
                   filter === 'request' ? 'text-blue-100' : 'text-blue-800'
                 }`}
               >
@@ -368,7 +358,7 @@ export default function DashboardMediaKitWorkflow() {
           >
             <div className="flex items-center justify-between">
               <span
-                className={`text-xs font-bold uppercase tracking-wider ${
+                className={`text-[11px] font-extrabold uppercase tracking-wider ${
                   filter === 'in_progress' ? 'text-amber-100' : 'text-amber-800'
                 }`}
               >
@@ -391,7 +381,7 @@ export default function DashboardMediaKitWorkflow() {
           >
             <div className="flex items-center justify-between">
               <span
-                className={`text-xs font-bold uppercase tracking-wider ${
+                className={`text-[11px] font-extrabold uppercase tracking-wider ${
                   filter === 'done' ? 'text-emerald-100' : 'text-emerald-800'
                 }`}
               >
@@ -442,7 +432,7 @@ export default function DashboardMediaKitWorkflow() {
         <section className="overflow-hidden rounded-2xl border border-gray-200/90 bg-white shadow-2xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="border-b border-gray-200 bg-gray-50/80 text-xs font-bold uppercase tracking-wider text-gray-600 select-none">
+              <thead className="border-b border-gray-200 bg-gray-50/80 text-[11px] font-bold uppercase tracking-wider text-gray-600 select-none">
                 <tr>
                   <th className="px-4 py-3.5">Solicitud / Fecha</th>
                   <th className="px-4 py-3.5">Cliente / Empresa</th>
@@ -467,7 +457,7 @@ export default function DashboardMediaKitWorkflow() {
                     <tr key={x.id} className="hover:bg-gray-50/70 transition-colors">
                       <td className="px-4 py-3.5">
                         <div className="font-mono text-xs font-bold text-gray-950">{x.requestId}</div>
-                        <div className="text-xs text-gray-500 mt-0.5">
+                        <div className="text-[11px] text-gray-400 mt-0.5">
                           {new Date(x.createdAt).toLocaleDateString('es-AR', {
                             day: '2-digit',
                             month: 'short',
@@ -481,7 +471,7 @@ export default function DashboardMediaKitWorkflow() {
                       <td className="px-4 py-3.5">
                         <div className="font-bold text-gray-950 text-sm leading-snug">{x.clientName}</div>
                         <div className="text-xs text-gray-600 font-medium">{x.company}</div>
-                        <div className="text-xs text-gray-500 mt-0.5">{x.email}</div>
+                        <div className="text-[11px] text-gray-400 mt-0.5">{x.email}</div>
                       </td>
 
                       <td className="max-w-sm px-4 py-3.5">
@@ -489,13 +479,13 @@ export default function DashboardMediaKitWorkflow() {
                           {x.supportNames.slice(0, 3).map((n: string) => (
                             <span
                               key={n}
-                              className="rounded-md bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-700 border border-gray-200/60"
+                              className="rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-700 border border-gray-200/60"
                             >
                               {n}
                             </span>
                           ))}
                           {x.supportNames.length > 3 && (
-                            <span className="rounded-md bg-gray-200/80 px-2 py-0.5 text-xs font-bold text-gray-700">
+                            <span className="rounded-md bg-gray-200/80 px-2 py-0.5 text-[11px] font-bold text-gray-700">
                               +{x.supportNames.length - 3} más
                             </span>
                           )}
@@ -548,23 +538,20 @@ export default function DashboardMediaKitWorkflow() {
             onClick={() => !busy && setSelected(null)}
           >
             <div
-              className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-gray-100 animate-in zoom-in-95 duration-200"
+              className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-gray-100 animate-in zoom-in-95 duration-200"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Modal Header */}
               <div className="flex items-start justify-between border-b border-gray-100 pb-5">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-lg border border-gray-200">
-                      Solicitud #{selected.requestId}
-                    </span>
-                    <StatusBadge status={selected.status} label={labels[selected.status]} size="sm" />
-                  </div>
-                  <h2 id="modal-request-title" className="mt-2 text-2xl font-extrabold text-gray-950">
+                  <span className="font-mono text-xs font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
+                    Solicitud #{selected.requestId}
+                  </span>
+                  <h2 id="modal-request-title" className="mt-1.5 text-2xl font-bold text-gray-950">
                     {selected.clientName}
                   </h2>
                   <p className="mt-0.5 text-xs text-gray-500">
-                    {selected.company} {selected.email ? `· ${selected.email}` : ''} {selected.phone ? `· Tel: ${selected.phone}` : ''}
+                    {selected.company} · {selected.email} {selected.phone ? `· Tel: ${selected.phone}` : ''}
                   </p>
                 </div>
 
@@ -578,296 +565,233 @@ export default function DashboardMediaKitWorkflow() {
                 </button>
               </div>
 
-              {/* 2-Column Responsive Grid on Desktop / Linear on Mobile */}
-              <div className="mt-6 grid gap-6 lg:grid-cols-12 items-start">
-                {/* Left Column (lg:col-span-5) - Lead Context & Status */}
-                <div className="space-y-4 lg:col-span-5">
-                  {/* Lead Contact Info Card */}
-                  <div className="rounded-2xl border border-gray-200/90 bg-gray-50/60 p-4 sm:p-5 space-y-3.5">
-                    <div className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">
-                      Datos del Solicitante
-                    </div>
-
-                    <div className="space-y-2.5 text-xs">
-                      <div>
-                        <span className="text-gray-400 block text-[10px] uppercase font-bold">Cliente</span>
-                        <span className="font-bold text-gray-950 text-sm">{selected.clientName}</span>
-                      </div>
-
-                      <div>
-                        <span className="text-gray-400 block text-[10px] uppercase font-bold">Empresa</span>
-                        <span className="font-semibold text-gray-800">{selected.company || '—'}</span>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <span className="text-gray-400 block text-[10px] uppercase font-bold">Email</span>
-                          <span className="font-medium text-gray-700 break-all">{selected.email || '—'}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-400 block text-[10px] uppercase font-bold">Teléfono</span>
-                          <span className="font-medium text-gray-700">{selected.phone || 'No especificado'}</span>
-                        </div>
-                      </div>
-
-                      <div className="pt-2 border-t border-gray-200/60">
-                        <span className="text-gray-400 block text-[10px] uppercase font-bold">Fecha de Solicitud</span>
-                        <span className="font-medium text-gray-600">
-                          {new Date(selected.createdAt).toLocaleDateString('es-AR', {
-                            day: '2-digit',
-                            month: 'long',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </span>
-                      </div>
-                    </div>
+              {/* Status Grid */}
+              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="rounded-xl bg-gray-50 p-3.5 border border-gray-100">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Estado</span>
+                  <div className="mt-1">
+                    <StatusBadge status={selected.status} label={labels[selected.status]} size="sm" />
                   </div>
-
-                  {/* Workflow Status Indicators Card */}
-                  <div className="rounded-2xl border border-gray-200/90 bg-white p-4 sm:p-5 space-y-3 shadow-2xs">
-                    <div className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">
-                      Resumen de Gestión
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2.5">
-                      <div className="rounded-xl bg-gray-50 p-3 border border-gray-100">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Soportes</span>
-                        <div className="mt-1 font-extrabold text-xs text-gray-900">{selected.supportIds.length} seleccionados</div>
-                      </div>
-
-                      <div
-                        className={`rounded-xl p-3 border ${
-                          approvalsReady
-                            ? 'bg-emerald-50 border-emerald-200 text-emerald-950'
-                            : 'bg-amber-50 border-amber-200 text-amber-950'
-                        }`}
-                      >
-                        <span className="text-[10px] font-bold uppercase tracking-wider opacity-75">Cotización</span>
-                        <div className="mt-1 font-extrabold text-xs">
-                          {approvalsReady ? '✓ Todos definidos' : `${approvedCount}/${supports.length} cotizados`}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Client Message (if any) */}
-                  {selected.message && (
-                    <div className="rounded-2xl bg-slate-50 border border-slate-200/80 p-4 sm:p-5 text-xs leading-relaxed text-slate-700">
-                      <strong className="block text-[11px] font-bold text-slate-900 mb-1.5 uppercase tracking-wider">
-                        Consulta / Nota del cliente:
-                      </strong>
-                      <p className="italic text-slate-800 font-normal">"{selected.message}"</p>
-                    </div>
-                  )}
                 </div>
 
-                {/* Right Column (lg:col-span-7) - Supports, Pricing & Commercial Actions */}
-                <div className="space-y-5 lg:col-span-7">
-                  {/* Supports List & Pricing Section */}
-                  <div className="space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <h3 className="text-sm font-bold text-gray-950">
-                        Soportes y Tarifas para el Media Kit
-                      </h3>
+                <div className="rounded-xl bg-gray-50 p-3.5 border border-gray-100">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Teléfono</span>
+                  <div className="mt-1 font-bold text-xs text-gray-900">{selected.phone || 'No especificado'}</div>
+                </div>
 
-                      {supports.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={applyBaseCatalogPrices}
-                          className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-200 transition-colors"
-                        >
-                          <Calculator className="w-3.5 h-3.5 text-emerald-700" />
-                          <span>Aplicar tarifas base de catálogo</span>
-                        </button>
-                      )}
-                    </div>
+                <div className="rounded-xl bg-gray-50 p-3.5 border border-gray-100">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Soportes</span>
+                  <div className="mt-1 font-bold text-xs text-gray-900">{selected.supportIds.length} ubicaciones</div>
+                </div>
 
-                    {loading ? (
-                      <div className="flex items-center justify-center gap-2 py-8 text-xs text-gray-500">
-                        <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
-                        <span>Cargando datos del inventario...</span>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {supports.map((s) => {
-                          const base = calculateSupportTotal(s.pricing);
-                          const approved = approvedPrices[s.canonical_id] || '';
-                          const isApproved = approved && Number(approved) > 0;
-
-                          return (
-                            <div
-                              key={s.canonical_id}
-                              className="rounded-2xl border border-gray-200/90 p-4 bg-white shadow-2xs space-y-3"
-                            >
-                              <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-                                <div>
-                                  <div className="font-bold text-sm text-gray-950">{s.name}</div>
-                                  <div className="text-xs text-gray-500 mt-0.5">
-                                    {s.ciudad === 'mendoza' ? 'Mendoza' : 'Buenos Aires'} · {s.tipo_soporte}
-                                    {s.address ? ` · ${s.address}` : ''}
-                                  </div>
-                                </div>
-
-                                <div className="text-left sm:text-right shrink-0">
-                                  <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
-                                    Tarifa lista
-                                  </span>
-                                  <div className="font-extrabold text-xs text-gray-900 mt-0.5">
-                                    {formatSupportCurrency(base, s.pricing?.currency || 'ARS')}
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="grid gap-2.5 sm:grid-cols-[1fr_auto] sm:items-end pt-2 border-t border-gray-100">
-                                <div>
-                                  <label className="block text-xs font-bold text-gray-700 mb-1">
-                                    Precio cotizado en Media Kit (IVA inc.)
-                                  </label>
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    value={approved}
-                                    onChange={(e) =>
-                                      setApprovedPrices((prev) => ({ ...prev, [s.canonical_id]: e.target.value }))
-                                    }
-                                    className="h-10 w-full rounded-xl border border-gray-200 bg-white px-3.5 text-xs sm:text-sm font-bold text-gray-900 outline-none transition focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
-                                    placeholder={`Ej: ${base > 0 ? base : '150000'}`}
-                                  />
-                                </div>
-
-                                <div
-                                  className={`h-10 flex items-center justify-center rounded-xl px-3 text-xs font-bold select-none ${
-                                    isApproved
-                                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                                      : 'bg-gray-100 text-gray-500 border border-gray-200'
-                                  }`}
-                                >
-                                  {isApproved ? '✓ DEFINIDO' : '⏳ PENDIENTE'}
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Resumen Económico / Total Acumulado */}
-                  {supports.length > 0 && (
-                    <div className="rounded-2xl border border-gray-200/90 bg-gray-50/80 p-4 flex items-center justify-between">
-                      <div>
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400 block">
-                          Total Cotizado (IVA incluido)
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {approvedCount} de {supports.length} soportes con precio
-                        </span>
-                      </div>
-                      <div className="text-right font-extrabold text-lg sm:text-xl text-gray-950">
-                        {formatSupportCurrency(totalApprovedQuote, 'ARS')}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Workflow Actions Section */}
-                  <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 sm:p-5 space-y-3">
-                    <div className="text-xs font-bold uppercase tracking-wider text-emerald-950">
-                      Acciones del Workflow Comercial
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2.5">
-                      {selected.status === 'request' && (
-                        <button
-                          type="button"
-                          disabled={busy}
-                          onClick={() => changeStatus(selected, 'in_progress')}
-                          className="rounded-xl bg-amber-600 hover:bg-amber-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm disabled:opacity-50 transition-colors"
-                        >
-                          {busy ? 'Actualizando...' : 'Pasar a IN PROGRESS (En Cotización)'}
-                        </button>
-                      )}
-
-                      {selected.status === 'in_progress' && (
-                        <button
-                          type="button"
-                          disabled={busy}
-                          onClick={() => changeStatus(selected, 'done')}
-                          className="rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm disabled:opacity-50 transition-colors"
-                        >
-                          {busy ? 'Actualizando...' : 'Marcar como DONE (Listo para entrega)'}
-                        </button>
-                      )}
-
-                      {selected.status === 'done' && lead && (
-                        <>
-                          <button
-                            type="button"
-                            disabled={!approvalsReady}
-                            onClick={() =>
-                              approvalsReady && downloadMediaKitPdf(lead, exportSupports, selected.requestId)
-                            }
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-bold text-gray-800 shadow-2xs hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 transition-colors"
-                            title={!approvalsReady ? 'Defina los precios de todos los soportes primero' : undefined}
-                          >
-                            <Download className="h-3.5 w-3.5" />
-                            <span>Descargar PDF</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            disabled={!approvalsReady}
-                            onClick={() =>
-                              approvalsReady && downloadMediaKitPpt(lead, exportSupports, selected.requestId)
-                            }
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-bold text-gray-800 shadow-2xs hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 transition-colors"
-                            title={!approvalsReady ? 'Defina los precios de todos los soportes primero' : undefined}
-                          >
-                            <FileText className="h-3.5 w-3.5" />
-                            <span>Descargar PPT</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            disabled={!approvalsReady}
-                            onClick={async () => {
-                              if (!approvalsReady) return;
-                              try {
-                                const m = await sendMediaKitToLead(lead, exportSupports, selected.requestId);
-                                notify(
-                                  m === 'shared'
-                                    ? 'Archivos listos para compartir con el lead.'
-                                    : 'Se abrió el cliente de correo para adjuntar la cotización.'
-                                );
-                              } catch (e: any) {
-                                notify(e.message || 'No pudimos preparar el envío.');
-                              }
-                            }}
-                            className="inline-flex items-center gap-1.5 rounded-xl bg-gray-950 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-40 transition-colors"
-                            title={!approvalsReady ? 'Defina los precios de todos los soportes primero' : undefined}
-                          >
-                            <Send className="h-3.5 w-3.5" />
-                            <span>Enviar al Lead</span>
-                          </button>
-                        </>
-                      )}
-                    </div>
-
-                    {selected.status === 'done' && !approvalsReady && (
-                      <div className="flex items-center gap-2 text-xs font-semibold text-amber-800 bg-amber-100/50 p-2.5 rounded-xl border border-amber-200">
-                        <AlertCircle className="w-4 h-4 shrink-0 text-amber-700" />
-                        <span>
-                          Ingrese o aplique el precio final con IVA incluido para cada soporte antes de generar el PDF/PPT o enviar al lead.
-                        </span>
-                      </div>
-                    )}
+                <div
+                  className={`rounded-xl p-3.5 border ${
+                    approvalsReady
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-950'
+                      : 'bg-amber-50 border-amber-200 text-amber-950'
+                  }`}
+                >
+                  <span className="text-[10px] font-bold uppercase tracking-wider opacity-75">Precios Media Kit</span>
+                  <div className="mt-1 font-bold text-xs">
+                    {approvalsReady ? '✓ Todos Aprobados' : '⏳ Precios Pendientes'}
                   </div>
                 </div>
               </div>
 
+              {/* Client Message */}
+              {selected.message && (
+                <div className="mt-4 rounded-xl bg-slate-50 border border-slate-200/80 p-4 text-xs leading-relaxed text-slate-700">
+                  <strong className="block text-[11px] font-bold text-slate-900 mb-1">
+                    Mensaje / Consulta del cliente:
+                  </strong>
+                  "{selected.message}"
+                </div>
+              )}
+
+              {/* Soportes List & Pricing Autofill */}
+              <div className="mt-6 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <h3 className="text-sm font-bold text-gray-950">
+                    Soportes incluidos y tarifas para el Media Kit
+                  </h3>
+
+                  {supports.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={applyBaseCatalogPrices}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-200 transition-colors"
+                    >
+                      <Calculator className="w-3.5 h-3.5 text-emerald-700" />
+                      <span>Aplicar tarifas base de catálogo</span>
+                    </button>
+                  )}
+                </div>
+
+                {loading ? (
+                  <div className="flex items-center justify-center gap-2 py-8 text-xs text-gray-500">
+                    <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+                    <span>Cargando datos del inventario...</span>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {supports.map((s) => {
+                      const base = calculateSupportTotal(s.pricing);
+                      const approved = approvedPrices[s.canonical_id] || '';
+                      const isApproved = approved && Number(approved) > 0;
+
+                      return (
+                        <div
+                          key={s.canonical_id}
+                          className="rounded-2xl border border-gray-200 p-4 sm:p-5 bg-white space-y-3"
+                        >
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                            <div>
+                              <div className="font-bold text-sm text-gray-950">{s.name}</div>
+                              <div className="text-xs text-gray-500 mt-0.5">
+                                {s.ciudad === 'mendoza' ? 'Mendoza' : 'Buenos Aires'} · {s.tipo_soporte}
+                                {s.address ? ` · ${s.address}` : ''}
+                              </div>
+                            </div>
+
+                            <div className="text-left sm:text-right">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                                Tarifa de lista interna
+                              </span>
+                              <div className="font-extrabold text-xs text-gray-900 mt-0.5">
+                                {formatSupportCurrency(base, s.pricing?.currency || 'ARS')}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end pt-2 border-t border-gray-100">
+                            <div>
+                              <label className="block text-xs font-bold text-gray-700 mb-1">
+                                Precio cotizado en Media Kit (IVA incluido)
+                              </label>
+                              <input
+                                type="number"
+                                min="0"
+                                value={approved}
+                                onChange={(e) =>
+                                  setApprovedPrices((prev) => ({ ...prev, [s.canonical_id]: e.target.value }))
+                                }
+                                className="h-10 w-full rounded-xl border border-gray-200 bg-white px-3.5 text-xs sm:text-sm font-bold text-gray-950 outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
+                                placeholder={`Ej: ${base > 0 ? base : '150000'}`}
+                              />
+                            </div>
+
+                            <div
+                              className={`h-10 flex items-center justify-center rounded-xl px-4 text-xs font-bold select-none ${
+                                isApproved
+                                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                  : 'bg-gray-100 text-gray-500 border border-gray-200'
+                              }`}
+                            >
+                              {isApproved ? '✓ PRECIO DEFINIDO' : '⏳ PENDIENTE'}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Workflow Actions Section */}
+              <div className="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-5 space-y-3">
+                <div className="text-xs font-bold uppercase tracking-wider text-emerald-950">
+                  Acciones del Workflow Comercial
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2.5">
+                  {selected.status === 'request' && (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => changeStatus(selected, 'in_progress')}
+                      className="rounded-xl bg-amber-600 hover:bg-amber-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm disabled:opacity-50 transition-colors"
+                    >
+                      {busy ? 'Actualizando...' : 'Pasar a IN PROGRESS (En Cotización)'}
+                    </button>
+                  )}
+
+                  {selected.status === 'in_progress' && (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => changeStatus(selected, 'done')}
+                      className="rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm disabled:opacity-50 transition-colors"
+                    >
+                      {busy ? 'Actualizando...' : 'Marcar como DONE (Listo para entrega)'}
+                    </button>
+                  )}
+
+                  {selected.status === 'done' && lead && (
+                    <>
+                      <button
+                        type="button"
+                        disabled={!approvalsReady}
+                        onClick={() =>
+                          approvalsReady && downloadMediaKitPdf(lead, exportSupports, selected.requestId)
+                        }
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-bold text-gray-800 shadow-2xs hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 transition-colors"
+                        title={!approvalsReady ? 'Defina los precios de todos los soportes primero' : undefined}
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                        <span>Descargar PDF</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={!approvalsReady}
+                        onClick={() =>
+                          approvalsReady && downloadMediaKitPpt(lead, exportSupports, selected.requestId)
+                        }
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-bold text-gray-800 shadow-2xs hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 transition-colors"
+                        title={!approvalsReady ? 'Defina los precios de todos los soportes primero' : undefined}
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        <span>Descargar PPT</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={!approvalsReady}
+                        onClick={async () => {
+                          if (!approvalsReady) return;
+                          try {
+                            const m = await sendMediaKitToLead(lead, exportSupports, selected.requestId);
+                            notify(
+                              m === 'shared'
+                                ? 'Archivos listos para compartir con el lead.'
+                                : 'Se abrió el cliente de correo para adjuntar la cotización.'
+                            );
+                          } catch (e: any) {
+                            notify(e.message || 'No pudimos preparar el envío.');
+                          }
+                        }}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-gray-950 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-40 transition-colors"
+                        title={!approvalsReady ? 'Defina los precios de todos los soportes primero' : undefined}
+                      >
+                        <Send className="h-3.5 w-3.5" />
+                        <span>Enviar al Lead</span>
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                {selected.status === 'done' && !approvalsReady && (
+                  <div className="flex items-center gap-2 text-xs font-semibold text-amber-800 bg-amber-100/50 p-2.5 rounded-xl border border-amber-200">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-amber-700" />
+                    <span>
+                      Ingrese o aplique el precio final con IVA incluido para cada soporte antes de generar el PDF/PPT o enviar al lead.
+                    </span>
+                  </div>
+                )}
+              </div>
+
               {/* Modal Footer */}
-              <div className="mt-6 flex justify-end border-t border-gray-100 pt-4">
+              <div className="mt-6 flex justify-end">
                 <button
                   type="button"
                   onClick={() => setSelected(null)}

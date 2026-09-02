@@ -5,17 +5,17 @@ import { InteriorHero } from '../components/layout/InteriorHero';
 
 export default function Soluciones() {
   const soluciones = [
-    { title: 'Campañas de Posicionamiento', description: 'Lográ máxima recordación de marca mediante circuitos de gran formato en los ingresos viales más transitados.', icon: Zap, label: 'OOH' },
-    { title: 'Activaciones Comerciales', description: 'Impulsá tus ventas y promociones semanales utilizando la versatilidad de pantallas digitales con pauta horaria inteligente.', icon: Lightbulb, label: 'DOOH' },
-    { title: 'Campañas de Proximidad', description: 'Conectá con tu audiencia en puntos de venta o eventos masivos a través de unidades móviles con pantallas LED gigantes.', icon: TrendingUp, label: 'LED Móvil' }
+    { title: 'Campañas de Cobertura Masiva', description: 'Maximizamos el alcance de tu marca utilizando circuitos estratégicos de cartelería tradicional en los principales nudos viales y accesos.', icon: Zap, label: 'OOH' },
+    { title: 'Activaciones Digitales DOOH y Tradicionales OOH', description: 'Formatos dinámicos en pantallas LED de alta resolución, con contenidos flexibles y actualización por franjas horarias.', icon: Lightbulb, label: 'DOOH' },
+    { title: 'Circuitos Móviles', description: 'Llevamos tu mensaje directamente a zonas de alto tránsito peatonal y vehicular, ideal para lanzamientos, eventos y posicionamiento.', icon: TrendingUp, label: 'LED Móvil' }
   ];
 
   return (
     <div className="flex flex-col w-full bg-white">
       <InteriorHero
-        eyebrow="Objetivos de Campaña"
-        title="Soluciones diseñadas para tus objetivos comerciales"
-        description="Adaptamos nuestros soportes publicitarios para acompañar el embudo de ventas y visibilidad de tu marca en cada etapa del negocio."
+        eyebrow="Nuestros servicios"
+        title="Soluciones para ganar presencia."
+        description="Combinamos medios OOH, tecnología DOOH y circuitos móviles para conectar tu marca con la audiencia correcta."
         align="center"
       />
 
@@ -52,10 +52,10 @@ export default function Soluciones() {
             <Sparkles className="w-3.5 h-3.5 text-red-600" /> Planificá tu pauta hoy
           </div>
           <h2 className="mb-5 text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-gray-950">
-            Comenzá a planificar tu próxima campaña
+            Encontrá el soporte adecuado para tu marca
           </h2>
           <p className="mx-auto mb-10 max-w-2xl leading-relaxed text-gray-600 text-base sm:text-lg">
-            Elegí las ubicaciones óptimas en nuestro inventario interactivo y ponete en contacto con nuestro equipo comercial para recibir asesoramiento integral.
+            Explorá nuestra cobertura interactiva, seleccioná los espacios que te interesan y solicitá tu propuesta comercial en minutos.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link

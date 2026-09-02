@@ -78,7 +78,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gray-950 text-xs font-black text-white">GC</div>
               <div className="text-left leading-tight">
                 <span className="block text-xs font-bold text-gray-950">Administrador</span>
-                <span className="text-xs text-gray-500">Centro de Operaciones</span>
+                <span className="text-[10px] text-gray-400">Centro de Operaciones</span>
               </div>
             </div>
 
@@ -159,33 +159,13 @@ export function DashboardShell({ children }: DashboardShellProps) {
           </div>
 
           <div className="hidden border-t border-gray-100 pt-5 md:block">
-            <details className="group rounded-2xl border border-gray-200/80 bg-gray-50/50 p-2 text-xs transition-colors">
-              <summary className="flex cursor-pointer items-center justify-between gap-2 px-2 py-1.5 font-bold text-gray-700 hover:text-gray-950 select-none list-none [&::-webkit-details-marker]:hidden">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.10)]" />
-                  <span className="text-[11px] font-bold text-gray-900">Estado de Servicios</span>
-                </div>
-                <ChevronRight className="h-3.5 w-3.5 text-gray-400 transition-transform duration-200 group-open:rotate-90" />
-              </summary>
-              <div className="mt-2 space-y-1.5 border-t border-gray-200/60 px-2 pt-2 text-[10px] text-gray-500">
-                <div className="flex items-center justify-between">
-                  <span>Servidores</span>
-                  <span className="font-semibold text-emerald-700">Conectados</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Base de Datos</span>
-                  <span className="font-semibold text-gray-700">PostgreSQL</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Almacenamiento</span>
-                  <span className="font-semibold text-gray-700">Cloudflare R2</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Motor Documentos</span>
-                  <span className="font-semibold text-gray-700">PDF / PPT Activo</span>
-                </div>
+            <div className="flex items-center gap-2.5 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-3">
+              <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.10)]" />
+              <div className="text-[11px] leading-tight text-gray-600">
+                <span className="block font-bold text-gray-950">Sistema Operativo</span>
+                <span className="text-gray-400">Servidores Conectados</span>
               </div>
-            </details>
+            </div>
           </div>
         </aside>
 
