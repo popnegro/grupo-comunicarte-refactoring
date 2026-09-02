@@ -5,6 +5,7 @@ import { createServer as createViteServer } from 'vite';
 import { initDatabase, pool, isDatabaseConfigured } from './src/db/index.ts';
 import { getAllSupportsFromDB, getSupportByIdFromDB } from './src/server/supportsService.ts';
 import { handleMediakitRequest, getAllMediakitRequestsFromDB } from './src/server/mediakitService.ts';
+import { handleMediaUpload } from './src/server/multimediaUpload.ts';
 import {
   authenticateAdmin,
   verifyAdminToken,
@@ -134,6 +135,16 @@ export async function createApp() {
     }
     next();
   };
+
+  // Physical media upload: multipart/form-data -> R2 -> support_media.
+  // Keep this route ahead of the JSON media CRUD route and use a route-scoped
+  // raw parser so the existing JSON API remains unchanged.
+  app.post(
+    '/api/admin/supports/:id/media/upload',
+    requireAdmin,
+    express.raw({ type: 'multipart/form-data', limit: '10mb' }),
+    handleMediaUpload,
+  );
 
   app.get('/api/admin/stats', requireAdmin, async (_req, res) => {
     try {
@@ -336,18 +347,4 @@ export async function createApp() {
   }
 
   return app;
-}
-
-if (!process.env.VERCEL) {
-  createApp()
-    .then((app) => {
-      const PORT = 3000;
-      app.listen(PORT, '0.0.0.0', () => {
-        console.log(`Server running on http://0.0.0.0:${PORT}`);
-      });
-    })
-    .catch((err) => {
-      console.error('Failed to start server:', err);
-      process.exit(1);
-    });
 }
