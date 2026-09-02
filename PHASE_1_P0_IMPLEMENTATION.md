@@ -1,46 +1,49 @@
-# PHASE 1 — P0 CRÍTICOS + FUENTE DE VERDAD
+# PHASE 1 — P0: separar bootstrap de Neon del runtime serverless
 
 ## Estado
 
-**Implementación inicial completada en `feat/visual-system-complete`.**
+**Implementación P0 aplicada en `canonical-candidate`.**
 
-## Cambios realizados
+## Cambio principal
 
-### P0 — Selección
+El bootstrap de PostgreSQL/Neon (`DDL + limpieza + seed`) ya no se ejecuta dentro del runtime de Vercel.
 
-`src/pages/Seleccion.tsx` ahora consume correctamente el envelope `{ status, data }` de `/api/supports` y valida que `data` sea un array antes de actualizar el estado.
+`src/db/index.ts` detecta el runtime Vercel mediante `VERCEL` y hace `initDatabase()` no-op en serverless. El acceso normal a `pool`/Drizzle continúa disponible para las consultas de negocio.
 
-### P0 — Pricing
+La responsabilidad de bootstrap queda fuera de las requests de Vercel y continúa disponible para el runtime persistente de Render, preservando la arquitectura:
 
-`src/server/supportsService.ts` incorpora un límite explícito de DTO público: el campo `pricing` se elimina de las respuestas obtenidas por `getAllSupportsFromDB()` y `getSupportByIdFromDB()`.
+`Vercel → API serverless`  
+`Render → runtime persistente / bootstrap`  
+`Neon → PostgreSQL`  
+`R2 → multimedia`
 
-El pricing administrativo continúa disponible mediante los endpoints protegidos existentes bajo `/api/admin/supports/:id/pricing`.
+## Evidencia de validación
 
-### Fuente de verdad
+- Commit P0: `d477c06c59fa0fa95711742d1d8713654a1f699e`
+- Preview Vercel generado desde `canonical-candidate`.
+- Build Vercel completado sin errores; solo permanece el warning no bloqueante de bundle >500 kB.
+- `/api/health` respondió HTTP 200 con `database: connected`.
+- `/api/supports` respondió HTTP 200 con inventario desde Neon.
+- Runtime Vercel, ventana de validación, sin errores/warnings de serverless.
+- `main` no fue modificado.
 
-`src/pages/Home.tsx` dejó de importar `src/data/inventory.ts` para los soportes destacados y ahora utiliza `useInventory()`, que consume `/api/supports`.
+## CI
 
-Los destacados de Home se calculan desde los datos reales recibidos por API y se limitan a 9.
+Se agregó `.github/workflows/ci-candidate.yml` para ejecutar:
 
-## Estado Neon verificado
+1. `npm ci`
+2. `npm run lint` (typecheck)
+3. `npm run build`
+4. `npm test --if-present`
 
-En la rama de Neon utilizada para la validación:
+La ejecución de GitHub Actions queda como gate objetivo para completar la evidencia reproducible del branch.
 
-- Soportes activos: **29**
-- Destacados activos: **6**
-- Mendoza: **19**
-- Buenos Aires: **10**
+## Pendientes para cerrar FASE 1
 
-La regla de máximo 9 destacados continúa teniendo margen operativo.
+- Confirmar ejecución verde del workflow CI.
+- Validar arranque de `canonical-candidate` en Render sin modificar el servicio productivo basado en `main`.
+- Confirmar que no aparecen nuevamente `API_BOOTSTRAP_FAILED`/deadlocks de bootstrap en Vercel.
 
-## Validaciones pendientes
+## Regla de release
 
-- Build/typecheck del branch.
-- Validación runtime de `/api/supports` sin pricing.
-- Validación manual de `/seleccion`.
-- Validación de Dashboard y endpoints administrativos de pricing.
-- Preview Vercel posterior a estos commits.
-
-## Próximo gate
-
-Una vez validados estos puntos, continuar con **FASE 2 — INVENTARIO REAL / NEON** y posteriormente **FASE 3 — SUPPORTCARD / CARDS REALES**.
+No hacer merge a `main` hasta que los gates técnicos estén verdes. El merge final continúa siendo **HUMAN GATE**.
