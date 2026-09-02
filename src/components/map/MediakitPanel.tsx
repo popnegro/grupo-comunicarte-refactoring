@@ -29,7 +29,7 @@ export function MediakitPanel({ selectedItems, onClose }: MediakitPanelProps) {
     <div className="fixed inset-0 z-[3000]" role="presentation">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden="true" />
       <aside
-        className="fixed bottom-0 right-0 left-0 md:top-4 md:bottom-auto md:left-auto md:right-4 w-full md:w-[420px] max-h-[88vh] bg-white rounded-t-3xl md:rounded-2xl shadow-2xl overflow-hidden"
+        className="fixed bottom-0 right-0 left-0 md:top-4 md:bottom-auto md:left-auto md:right-4 w-full md:w-[420px] max-h-[90vh] bg-white rounded-t-3xl md:rounded-2xl shadow-2xl overflow-hidden pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="mediakit-panel-title"

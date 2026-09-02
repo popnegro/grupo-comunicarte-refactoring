@@ -34,10 +34,10 @@ export default function DashboardSupportPreview() {
     run();
   }, [canonicalId, navigate]);
 
-  if (loading) return <DashboardShell><div className="mx-auto max-w-5xl py-20 text-center text-sm text-gray-500"><Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin" />Cargando vista previa…</div></DashboardShell>;
+  if (loading) return <DashboardShell><div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 text-center text-sm text-gray-500"><Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin" />Cargando vista previa…</div></DashboardShell>;
 
   return <DashboardShell>
-    <div className="mx-auto max-w-6xl space-y-6 pb-12">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 pb-12">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <button onClick={() => navigate('/dashboard/soportes')} className="mb-3 inline-flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-gray-900"><ArrowLeft className="h-4 w-4" />Gestión de Soportes</button>

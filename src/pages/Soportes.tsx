@@ -1,4 +1,4 @@
-import { ArrowRight, MapPin, MonitorPlay, Truck } from 'lucide-react';
+import { ArrowRight, MapPin, MonitorPlay, Truck, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { buttonStyles } from '../components/ui/Button';
 import { InteriorHero } from '../components/layout/InteriorHero';
@@ -10,30 +10,30 @@ export default function Soportes() {
       name: 'Vía Pública Tradicional',
       eyebrow: 'OOH · Cobertura',
       icon: MapPin,
-      description: 'Cobertura masiva con ubicaciones estratégicas de alto tránsito en Mendoza y Buenos Aires.',
-      features: ['Cartelería espectacular y gigantografías', 'Séxtuples y mobiliario urbano', 'Puntos de ingreso a la ciudad y rutas principales', 'Iluminación Frontlight para impacto nocturno'],
+      description: 'Presencia masiva y permanente en accesos estratégicos. Ideal para campañas de branding que buscan recordación constante 24/7.',
+      features: ['Gigantografías en rutas y accesos principales', 'Impacto continuo de alta recordación', 'Soportes iluminados de gran escala', 'Cobertura urbana en Mendoza y Buenos Aires'],
       link: '/inventario?tipo=tradicional',
-      image: '/images/mza-trad-01.jpg'
+      image: '/images/soportes-tradicionales-mendoza.webp'
     },
     {
       id: 'led',
       name: 'Pantallas LED (DOOH)',
       eyebrow: 'DOOH · Dinámico',
       icon: MonitorPlay,
-      description: 'Soportes digitales de alta resolución en puntos neurálgicos de concentración comercial.',
-      features: ['Tecnología LED P4 y P6 de alta definición', 'Formatos dinámicos y rotativos', 'Contenidos flexibles y actualización en tiempo real', 'Ubicaciones premium en nudos viales y centros comerciales'],
+      description: 'Flexibilidad y dinamismo para adaptar tu mensaje al instante. Perfecto para promociones temporales, ofertas rotativas y lanzamientos inmediatos.',
+      features: ['Contenido dinámico en alta definición', 'Actualización de pauta en tiempo real', 'Ubicaciones en los nudos viales más transitados', 'Flexibilidad de formatos y segmentación temporal'],
       link: '/inventario?tipo=led',
-      image: '/images/mza-led-01.jpg'
+      image: '/images/pantallas-led-mendoza.webp'
     },
     {
       id: 'led_movil',
       name: 'Camión LED Móvil',
       eyebrow: 'DOOH · En movimiento',
       icon: Truck,
-      description: 'Impacto en movimiento. Llevamos tu mensaje directamente a donde está tu audiencia.',
-      features: ['Pantallas LED laterales de 4x2m', 'Rutas estratégicas programables', 'Activaciones de marca y eventos', 'Alta visibilidad a nivel peatonal y vehicular'],
+      description: 'Publicidad itinerante que acerca tu marca directo a la gente. Diseñado para eventos masivos, activaciones locales y recorridos de alto impacto.',
+      features: ['Recorridos programados y personalizados', 'Pantallas LED gigantes a nivel de calle', 'Ideal para activaciones de marca y eventos', 'Alcance directo al consumidor en vía pública'],
       link: '/inventario?tipo=led_movil',
-      image: '/images/led-movil-feature.webp'
+      image: '/images/led-movil-mendoza.webp'
     }
   ];
 
@@ -43,9 +43,10 @@ export default function Soportes() {
         eyebrow="Ecosistema de medios"
         title="Nuestros soportes"
         description="Combinamos la presencia ineludible del formato tradicional con la versatilidad de la era digital para maximizar el alcance de tu marca."
+        align='center'
       />
 
-      <section className="px-4 py-24 sm:px-6 lg:px-8 bg-white md:py-32">
+      <section className="bg-[#F9F9F9] px-4 py-24 sm:px-6 lg:px-8 md:py-32">
         <div className="mx-auto max-w-7xl space-y-6">
           {soportes.map((soporte, index) => {
             const Icon = soporte.icon;
@@ -89,12 +90,38 @@ export default function Soportes() {
         </div>
       </section>
 
-      <section className="border-t border-gray-200 bg-white px-4 py-24 text-center sm:px-6 lg:px-8 md:py-32">
+      <section className="bg-white px-4 py-24 sm:py-28 text-center sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl">
-          <p className="text-eyebrow mb-4">El próximo paso</p>
-          <h2 className="text-3xl font-bold tracking-tight text-gray-950 md:text-5xl">Descubrí nuestras soluciones de comunicación</h2>
-          <p className="mx-auto mb-9 mt-5 max-w-2xl leading-relaxed text-gray-500">Conocé las soluciones que podemos desarrollar para acompañar los objetivos de tu marca.</p>
-          <Link to="/soluciones" className={buttonStyles({ size: 'lg', className: 'inline-flex rounded-full px-7' })}>Ver soluciones <ArrowRight className="h-5 w-5" /></Link>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 mb-6 rounded-full bg-gray-100 border border-gray-200 text-gray-800 text-xs font-bold uppercase tracking-wider">
+            <Sparkles className="w-3.5 h-3.5 text-red-600" /> Planificá tu pauta hoy
+          </div>
+          <h2 className="mb-5 text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-gray-950">
+            Potenciá la comunicación de tu negocio
+          </h2>
+          <p className="mx-auto mb-10 max-w-2xl leading-relaxed text-gray-600 text-base sm:text-lg">
+            Visualizá nuestras ubicaciones en tiempo real desde el mapa interactivo y seleccioná los formatos ideales para conectar con tus clientes.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Link
+              to="/soluciones"
+              className={buttonStyles({
+                size: 'lg',
+                className: 'inline-flex rounded-full px-8 font-semibold shadow-md'
+              })}
+            >
+              Conocer soluciones <ArrowRight className="h-5 w-5 ml-1" />
+            </Link>
+            <Link
+              to="/contacto"
+              className={buttonStyles({
+                variant: 'outline',
+                size: 'lg',
+                className: 'inline-flex rounded-full px-8 font-semibold'
+              })}
+            >
+              Hablar con Ventas
+            </Link>
+          </div>
         </div>
       </section>
     </div>

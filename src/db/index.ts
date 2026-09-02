@@ -1,19 +1,22 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import * as schema from './schema';
-import { fixedLocations, mobileRoutes } from '../data/inventory';
+import * as schema from './schema.ts';
+import { fixedLocations, mobileRoutes } from '../data/inventory.ts';
 import { eq } from 'drizzle-orm';
 
 const connectionString = process.env.DATABASE_URL;
+export const isDatabaseConfigured = Boolean(connectionString && connectionString.trim().length > 0);
 
-if (!connectionString) {
-  throw new Error('FATAL: DATABASE_URL environment variable is missing. A valid PostgreSQL connection string is required.');
-}
-
-const pool = new Pool({
-  connectionString,
-  ssl: connectionString.includes('neon.tech') || connectionString.includes('sslmode=require') ? { rejectUnauthorized: false } : undefined,
-});
+const pool = new Pool(
+  isDatabaseConfigured
+    ? {
+        connectionString,
+        ssl: connectionString!.includes('neon.tech') || connectionString!.includes('sslmode=require') ? { rejectUnauthorized: false } : undefined,
+      }
+    : {
+        connectionString: 'postgresql://localhost:5432/mockdb',
+      }
+);
 
 export const db = drizzle(pool, { schema });
 
@@ -35,13 +38,18 @@ function sleep(ms: number) {
 }
 
 export async function initDatabase() {
+  if (!isDatabaseConfigured) {
+    console.info('DATABASE_URL is not configured. Running server with in-memory static inventory.');
+    return;
+  }
   for (let attempt = 1; attempt <= BOOTSTRAP_RETRIES; attempt += 1) {
     try {
       await initializeDatabaseOnce();
       return;
     } catch (err) {
       if (attempt === BOOTSTRAP_RETRIES || !isTransientBootstrapError(err)) {
-        throw err;
+        console.warn('Database initialization warning (will continue with static inventory fallback):', err);
+        return;
       }
       console.warn(`Transient database bootstrap failure; retrying (${attempt}/${BOOTSTRAP_RETRIES - 1})`);
       await sleep(BOOTSTRAP_RETRY_DELAY_MS * attempt);

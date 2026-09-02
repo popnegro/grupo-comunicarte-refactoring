@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, CalendarDays, Loader2, Save } from 'lucide-react';
+import { ArrowLeft, CalendarDays, Loader2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
 import { apiFetch } from '../../lib/api';
@@ -100,10 +100,10 @@ export default function DashboardSupportReservation() {
     }
   };
 
-  if (loading) return <DashboardShell><div className="mx-auto max-w-4xl py-20 text-center text-sm text-gray-500">Cargando soporte…</div></DashboardShell>;
+  if (loading) return <DashboardShell><div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 text-center text-sm text-gray-500">Cargando soporte…</div></DashboardShell>;
 
   return <DashboardShell>
-    <div className="mx-auto max-w-4xl space-y-6 pb-12">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 pb-12">
       <header>
         <button onClick={() => navigate('/dashboard/soportes')} className="mb-3 inline-flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-gray-900"><ArrowLeft className="h-4 w-4" /> Gestión de Soportes</button>
         <div className="flex items-start gap-3">
@@ -118,8 +118,8 @@ export default function DashboardSupportReservation() {
       <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-2xs">
         <div className="space-y-6">
           <div>
-            <label className="text-xs font-bold uppercase tracking-[0.08em] text-gray-500">Disponibilidad</label>
-            <select className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100" value={form.disponibilidad} onChange={(e) => setForm((current) => ({ ...current, disponibilidad: e.target.value as ReservationForm['disponibilidad'] }))}>
+            <label className="text-xs font-bold uppercase tracking-wider text-gray-500">Disponibilidad</label>
+            <select className="mt-1 h-10 w-full rounded-xl border border-gray-200 bg-white px-3.5 text-sm font-semibold text-gray-900 outline-none transition focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10" value={form.disponibilidad} onChange={(e) => setForm((current) => ({ ...current, disponibilidad: e.target.value as ReservationForm['disponibilidad'] }))}>
               <option value="disponible">Disponible</option>
               <option value="reservado">Reservado</option>
             </select>
@@ -129,8 +129,8 @@ export default function DashboardSupportReservation() {
             <div className="text-sm font-bold text-gray-900">Período reservado</div>
             <p className="mt-1 text-xs text-gray-600">Las fechas son parte de la información comercial visible en el inventario.</p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div><label className="text-xs font-bold uppercase tracking-[0.08em] text-gray-500">Desde</label><input type="date" className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900" value={form.from} onChange={(e) => setForm((current) => ({ ...current, from: e.target.value }))} /></div>
-              <div><label className="text-xs font-bold uppercase tracking-[0.08em] text-gray-500">Hasta</label><input type="date" className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900" value={form.until} onChange={(e) => setForm((current) => ({ ...current, until: e.target.value }))} /></div>
+              <div><label className="text-xs font-bold uppercase tracking-wider text-gray-500">Desde</label><input type="date" className="mt-1 h-10 w-full rounded-xl border border-gray-200 bg-white px-3.5 text-sm text-gray-900 outline-none transition focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10" value={form.from} onChange={(e) => setForm((current) => ({ ...current, from: e.target.value }))} /></div>
+              <div><label className="text-xs font-bold uppercase tracking-wider text-gray-500">Hasta</label><input type="date" className="mt-1 h-10 w-full rounded-xl border border-gray-200 bg-white px-3.5 text-sm text-gray-900 outline-none transition focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10" value={form.until} onChange={(e) => setForm((current) => ({ ...current, until: e.target.value }))} /></div>
             </div>
             {form.from && form.until && <div className="mt-4 rounded-xl border border-amber-200 bg-white px-4 py-3 text-sm font-semibold text-gray-800">La Card mostrará: <strong>Reservado desde {displayDate(form.from)} a {displayDate(form.until)}</strong></div>}
           </div>}

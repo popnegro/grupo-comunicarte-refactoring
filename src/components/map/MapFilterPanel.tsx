@@ -1,8 +1,9 @@
 import { Plaza, TipoSoporte, Disponibilidad } from '../../types';
 import { cn } from '../../lib/utils';
-import { MapPin, MonitorPlay, PanelTop, AlignLeft, Search, X, CheckCircle2, Lock, SlidersHorizontal } from 'lucide-react';
+import { MapPin, MonitorPlay, PanelTop, AlignLeft, Search, X, CheckCircle2, Lock } from 'lucide-react';
 import { ReactNode } from 'react';
 import { Input } from '../ui/Input';
+import { ViewModeToggle, ViewMode } from '../inventory/ViewModeToggle';
 import { useSelection } from '../../context/SelectionContext';
 
 type DisponibilidadFilter = Disponibilidad | 'todos';
@@ -17,6 +18,8 @@ interface MapFilterPanelProps {
   searchText: string;
   setSearchText: (s: string) => void;
   resultsCount: number;
+  viewMode: ViewMode;
+  onViewModeChange: (mode: ViewMode) => void;
 }
 
 export function MapFilterPanel({
@@ -29,20 +32,13 @@ export function MapFilterPanel({
   searchText,
   setSearchText,
   resultsCount,
+  viewMode,
+  onViewModeChange,
 }: MapFilterPanelProps) {
   const { selectedCount } = useSelection();
 
   return (
     <div className="flex h-full flex-col bg-white p-5 sm:p-6">
-      <div className="mb-5 flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-950 text-white">
-          <SlidersHorizontal className="h-3.5 w-3.5" />
-        </div>
-        <div>
-          <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-emerald-700">Inventario</p>
-          <h2 className="text-sm font-black tracking-tight text-gray-950">Filtros</h2>
-        </div>
-      </div>
 
       <div className="relative mb-5">
         <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -82,6 +78,10 @@ export function MapFilterPanel({
           <FilterButton active={selectedDisponibilidad === 'todos'} onClick={() => setSelectedDisponibilidad('todos')} label="Todos" />
           <FilterButton active={selectedDisponibilidad === 'disponible'} onClick={() => setSelectedDisponibilidad('disponible')} label="Disponibles" icon={<CheckCircle2 className="h-4 w-4" />} />
           <FilterButton active={selectedDisponibilidad === 'reservado'} onClick={() => setSelectedDisponibilidad('reservado')} label="Reservados" icon={<Lock className="h-4 w-4" />} />
+        </FilterGroup>
+
+        <FilterGroup title="Vista">
+          <ViewModeToggle viewMode={viewMode} onViewModeChange={onViewModeChange} className="w-full justify-center" />
         </FilterGroup>
       </div>
 

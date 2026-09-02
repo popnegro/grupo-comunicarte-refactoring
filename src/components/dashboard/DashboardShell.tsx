@@ -27,7 +27,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
   const navClass = ({ isActive }: { isActive: boolean }) =>
     `group flex items-center gap-3 rounded-2xl px-3.5 py-3 text-xs font-bold transition-all duration-200 whitespace-nowrap ${
       isActive
-        ? 'bg-gray-950 text-white shadow-lg shadow-gray-950/10'
+        ? 'bg-gray-950 text-white shadow-md shadow-gray-950/10'
         : 'text-gray-600 hover:bg-gray-100 hover:text-gray-950'
     }`;
 
@@ -45,7 +45,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
               <img src="/brand/brand-dark.svg" alt="Grupo Comunicarte" className="h-6 w-auto" />
             </Link>
             <div className="hidden h-5 w-px bg-gray-200 sm:block" />
-            <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[0.14em] text-emerald-800">
+            <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Portal Admin
             </span>
@@ -75,10 +75,10 @@ export function DashboardShell({ children }: DashboardShellProps) {
             </Link>
 
             <div className="hidden items-center gap-2 border-l border-gray-200 pl-3 lg:flex">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gray-950 text-[10px] font-black text-white">GC</div>
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gray-950 text-xs font-black text-white">GC</div>
               <div className="text-left leading-tight">
-                <span className="block text-xs font-bold text-gray-950">Admin</span>
-                <span className="text-[9px] text-gray-400">Centro de Operaciones</span>
+                <span className="block text-xs font-bold text-gray-950">Administrador</span>
+                <span className="text-xs text-gray-500">Centro de Operaciones</span>
               </div>
             </div>
 
@@ -101,10 +101,10 @@ export function DashboardShell({ children }: DashboardShellProps) {
           <div className="space-y-5">
             <div>
               <div className="mb-3 flex items-center justify-between px-3">
-                <p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-gray-400">Menú de Control</p>
-                <span className="text-[9px] font-bold text-gray-300">PMV 1.0</span>
+                <p className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">Menú de Control</p>
+                <span className="text-[10px] font-bold text-gray-400">PMV 1.0</span>
               </div>
-              <nav className="flex flex-row gap-1 overflow-x-auto pb-1 md:flex-col md:overflow-visible md:pb-0">
+              <nav aria-label="Navegación principal del panel" className="flex flex-row gap-1 overflow-x-auto pb-1 md:flex-col md:overflow-visible md:pb-0">
                 <NavLink to="/dashboard" end className={navClass}>
                   {({ isActive }) => (
                     <>
@@ -133,7 +133,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
                         <span>Solicitudes</span>
                       </div>
                       {newLeadsCount > 0 && (
-                        <span className={`ml-auto rounded-full px-2 py-0.5 text-[9px] font-extrabold ${isActive ? 'bg-emerald-400 text-gray-950' : 'bg-emerald-100 text-emerald-800'}`}>
+                        <span className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-extrabold ${isActive ? 'bg-emerald-400 text-gray-950' : 'bg-emerald-100 text-emerald-800'}`}>
                           {newLeadsCount}
                         </span>
                       )}
@@ -144,7 +144,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
             </div>
 
             <div className="hidden border-t border-gray-100 pt-5 md:block">
-              <p className="mb-2 px-3 text-[9px] font-extrabold uppercase tracking-[0.16em] text-gray-400">Atajos</p>
+              <p className="mb-2 px-3 text-[10px] font-extrabold uppercase tracking-wider text-gray-400">Accesos Rápidos</p>
               <div className="space-y-1">
                 <Link to="/inventario" className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-medium text-gray-600 transition hover:bg-gray-50 hover:text-gray-950">
                   <Layers className="h-4 w-4 text-gray-400" />
@@ -159,13 +159,33 @@ export function DashboardShell({ children }: DashboardShellProps) {
           </div>
 
           <div className="hidden border-t border-gray-100 pt-5 md:block">
-            <div className="flex items-center gap-2.5 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-3">
-              <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.10)]" />
-              <div className="text-[10px] leading-tight text-gray-600">
-                <span className="block font-bold text-gray-950">Sistema Activo</span>
-                <span className="text-gray-400">Operación PMV</span>
+            <details className="group rounded-2xl border border-gray-200/80 bg-gray-50/50 p-2 text-xs transition-colors">
+              <summary className="flex cursor-pointer items-center justify-between gap-2 px-2 py-1.5 font-bold text-gray-700 hover:text-gray-950 select-none list-none [&::-webkit-details-marker]:hidden">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.10)]" />
+                  <span className="text-[11px] font-bold text-gray-900">Estado de Servicios</span>
+                </div>
+                <ChevronRight className="h-3.5 w-3.5 text-gray-400 transition-transform duration-200 group-open:rotate-90" />
+              </summary>
+              <div className="mt-2 space-y-1.5 border-t border-gray-200/60 px-2 pt-2 text-[10px] text-gray-500">
+                <div className="flex items-center justify-between">
+                  <span>Servidores</span>
+                  <span className="font-semibold text-emerald-700">Conectados</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Base de Datos</span>
+                  <span className="font-semibold text-gray-700">PostgreSQL</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Almacenamiento</span>
+                  <span className="font-semibold text-gray-700">Cloudflare R2</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Motor Documentos</span>
+                  <span className="font-semibold text-gray-700">PDF / PPT Activo</span>
+                </div>
               </div>
-            </div>
+            </details>
           </div>
         </aside>
 
