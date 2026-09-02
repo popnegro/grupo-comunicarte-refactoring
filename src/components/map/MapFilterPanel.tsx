@@ -3,6 +3,7 @@ import { cn } from '../../lib/utils';
 import { MapPin, MonitorPlay, PanelTop, AlignLeft, Search, X, CheckCircle2, Lock } from 'lucide-react';
 import { ReactNode } from 'react';
 import { Input } from '../ui/Input';
+import { ViewModeToggle, ViewMode } from '../inventory/ViewModeToggle';
 import { useSelection } from '../../context/SelectionContext';
 
 type DisponibilidadFilter = Disponibilidad | 'todos';
@@ -17,6 +18,8 @@ interface MapFilterPanelProps {
   searchText: string;
   setSearchText: (s: string) => void;
   resultsCount: number;
+  viewMode: ViewMode;
+  onViewModeChange: (mode: ViewMode) => void;
 }
 
 export function MapFilterPanel({
@@ -29,6 +32,8 @@ export function MapFilterPanel({
   searchText,
   setSearchText,
   resultsCount,
+  viewMode,
+  onViewModeChange,
 }: MapFilterPanelProps) {
   const { selectedCount } = useSelection();
 
@@ -73,6 +78,10 @@ export function MapFilterPanel({
           <FilterButton active={selectedDisponibilidad === 'todos'} onClick={() => setSelectedDisponibilidad('todos')} label="Todos" />
           <FilterButton active={selectedDisponibilidad === 'disponible'} onClick={() => setSelectedDisponibilidad('disponible')} label="Disponibles" icon={<CheckCircle2 className="h-4 w-4" />} />
           <FilterButton active={selectedDisponibilidad === 'reservado'} onClick={() => setSelectedDisponibilidad('reservado')} label="Reservados" icon={<Lock className="h-4 w-4" />} />
+        </FilterGroup>
+
+        <FilterGroup title="Vista">
+          <ViewModeToggle viewMode={viewMode} onViewModeChange={onViewModeChange} className="w-full justify-center" />
         </FilterGroup>
       </div>
 
