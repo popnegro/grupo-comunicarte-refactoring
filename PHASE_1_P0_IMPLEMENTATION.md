@@ -29,20 +29,15 @@ La responsabilidad de bootstrap queda fuera de las requests de Vercel y continú
 
 ## CI
 
-Se agregó `.github/workflows/ci-candidate.yml` para ejecutar:
+Se agregó `.github/workflows/ci-candidate.yml` para ejecutar `npm ci`, typecheck, build y tests si existen.
 
-1. `npm ci`
-2. `npm run lint` (typecheck)
-3. `npm run build`
-4. `npm test --if-present`
-
-La ejecución de GitHub Actions queda como gate objetivo para completar la evidencia reproducible del branch.
+El workflow está ejecutándose sobre el último commit de `canonical-candidate`; queda pendiente la conclusión verde del job.
 
 ## Pendientes para cerrar FASE 1
 
-- Confirmar ejecución verde del workflow CI.
+- Obtener CI verde.
 - Validar arranque de `canonical-candidate` en Render sin modificar el servicio productivo basado en `main`.
-- Confirmar que no aparecen nuevamente `API_BOOTSTRAP_FAILED`/deadlocks de bootstrap en Vercel.
+- Mantener observación de Vercel para confirmar ausencia de `API_BOOTSTRAP_FAILED`/deadlocks de bootstrap.
 
 ## Regla de release
 
