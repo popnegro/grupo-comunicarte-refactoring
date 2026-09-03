@@ -5,6 +5,7 @@ import { createServer as createViteServer } from 'vite';
 import { initDatabase, pool, isDatabaseConfigured } from './src/db/index.ts';
 import { getAllSupportsFromDB, getSupportByIdFromDB } from './src/server/supportsService.ts';
 import { handleMediakitRequest, getAllMediakitRequestsFromDB } from './src/server/mediakitService.ts';
+import { saveMediaKit, getMediaKit, listMediaKits, updateMediaKitStatus } from './src/server/mediakitManagementService.ts';
 import { handleMediaUpload } from './src/server/multimediaUpload.ts';
 import {
   authenticateAdmin,
@@ -304,6 +305,50 @@ export async function createApp() {
       const msg = err.message || '';
       const status = msg.includes('inválido') ? 400 : 500;
       res.status(status).json({ status: 'error', message: msg || 'Error al actualizar la ruta.' });
+    }
+  });
+
+  // Persistent Media Kit management (P1)
+  app.get('/api/admin/mediakits', requireAdmin, async (_req, res) => {
+    try {
+      const kits = await listMediaKits();
+      res.status(200).json({ status: 'success', data: kits });
+    } catch (err: any) {
+      console.error('Error fetching media kits:', err);
+      res.status(500).json({ status: 'error', message: 'Error interno al obtener Media Kits.' });
+    }
+  });
+
+  app.get('/api/admin/mediakits/:kitId', requireAdmin, async (req, res) => {
+    try {
+      const kit = await getMediaKit(req.params.kitId);
+      if (!kit) return res.status(404).json({ status: 'error', message: 'Media Kit no encontrado.' });
+      res.status(200).json({ status: 'success', data: kit });
+    } catch (err: any) {
+      console.error(`Error fetching media kit ${req.params.kitId}:`, err);
+      res.status(500).json({ status: 'error', message: 'Error interno al obtener el Media Kit.' });
+    }
+  });
+
+  app.post('/api/admin/mediakits', requireAdmin, async (req, res) => {
+    try {
+      const kit = await saveMediaKit(req.body || {});
+      res.status(201).json({ status: 'success', data: kit, message: 'Media Kit guardado.' });
+    } catch (err: any) {
+      console.error('Error saving media kit:', err);
+      const msg = err.message || 'Error al guardar el Media Kit.';
+      res.status(msg.includes('obligatorio') || msg.includes('requiere') ? 400 : 500).json({ status: 'error', message: msg });
+    }
+  });
+
+  app.patch('/api/admin/mediakits/:kitId/status', requireAdmin, async (req, res) => {
+    try {
+      const kit = await updateMediaKitStatus(req.params.kitId, req.body?.status);
+      if (!kit) return res.status(404).json({ status: 'error', message: 'Media Kit no encontrado.' });
+      res.status(200).json({ status: 'success', data: kit, message: 'Estado del Media Kit actualizado.' });
+    } catch (err: any) {
+      console.error(`Error updating media kit ${req.params.kitId}:`, err);
+      res.status(400).json({ status: 'error', message: err.message || 'Error al actualizar el Media Kit.' });
     }
   });
 
