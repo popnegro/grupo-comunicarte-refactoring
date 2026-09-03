@@ -32,6 +32,8 @@ export function MapFilterPanel({
   searchText,
   setSearchText,
   resultsCount,
+  viewMode,
+  onViewModeChange,
 }: MapFilterPanelProps) {
   const { selectedCount } = useSelection();
 
@@ -83,8 +85,8 @@ export function MapFilterPanel({
           <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-gray-400">Vista</span>
         </div>
         <ViewModeToggle
-          viewMode={arguments[0].viewMode}
-          onViewModeChange={arguments[0].onViewModeChange}
+          viewMode={viewMode}
+          onViewModeChange={onViewModeChange}
           className="w-full justify-center rounded-xl bg-gray-50/80 border-gray-200/80 shadow-none"
         />
       </div>
