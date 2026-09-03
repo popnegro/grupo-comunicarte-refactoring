@@ -8,7 +8,6 @@ interface KPICardProps {
   unit?: string;
   icon: React.ComponentType<{ className?: string }>;
   iconColorClass?: string;
-  iconBgClass?: string;
   statusBadge?: ReactNode;
   footer?: ReactNode;
   className?: string;
@@ -20,7 +19,6 @@ export const KPICard: React.FC<KPICardProps> = ({
   unit,
   icon: Icon,
   iconColorClass = 'text-gray-700',
-  iconBgClass = 'bg-gray-100',
   statusBadge: _statusBadge,
   footer,
   className = '',
