@@ -89,13 +89,7 @@ export default function Inventario() {
 
   const matchesSearch = useCallback((item: InventoryItem) => {
     if (!query) return true;
-    const haystack = [
-      item.name,
-      item.canonical_id,
-      item.tipo_soporte,
-      item.ciudad,
-      'address' in item ? item.address : '',
-    ].join(' ').toLowerCase();
+    const haystack = [item.name, item.canonical_id, item.tipo_soporte, item.ciudad, 'address' in item ? item.address : ''].join(' ').toLowerCase();
     return haystack.includes(query);
   }, [query]);
 
@@ -105,33 +99,26 @@ export default function Inventario() {
     return disponibilidad === selectedDisponibilidad;
   }, [selectedDisponibilidad]);
 
-  const filteredLocations = useMemo(() => {
-    return fixedLocations.filter((loc) => {
-      const matchPlaza = selectedPlaza === 'todos' || loc.ciudad === selectedPlaza;
-      const matchTipo = selectedTipo === 'todos' || loc.tipo_soporte === selectedTipo;
-      return matchPlaza && matchTipo && matchesDisponibilidad(loc) && matchesSearch(loc);
-    });
-  }, [fixedLocations, selectedPlaza, selectedTipo, matchesDisponibilidad, matchesSearch]);
+  const filteredLocations = useMemo(() => fixedLocations.filter((loc) => {
+    const matchPlaza = selectedPlaza === 'todos' || loc.ciudad === selectedPlaza;
+    const matchTipo = selectedTipo === 'todos' || loc.tipo_soporte === selectedTipo;
+    return matchPlaza && matchTipo && matchesDisponibilidad(loc) && matchesSearch(loc);
+  }), [fixedLocations, selectedPlaza, selectedTipo, matchesDisponibilidad, matchesSearch]);
 
-  const filteredRoutes = useMemo(() => {
-    return mobileRoutes.filter((route) => {
-      const matchPlaza = selectedPlaza === 'todos' || route.ciudad === selectedPlaza;
-      const matchTipo = selectedTipo === 'todos' || route.tipo_soporte === selectedTipo;
-      return matchPlaza && matchTipo && matchesDisponibilidad(route) && matchesSearch(route);
-    });
-  }, [mobileRoutes, selectedPlaza, selectedTipo, matchesDisponibilidad, matchesSearch]);
+  const filteredRoutes = useMemo(() => mobileRoutes.filter((route) => {
+    const matchPlaza = selectedPlaza === 'todos' || route.ciudad === selectedPlaza;
+    const matchTipo = selectedTipo === 'todos' || route.tipo_soporte === selectedTipo;
+    return matchPlaza && matchTipo && matchesDisponibilidad(route) && matchesSearch(route);
+  }), [mobileRoutes, selectedPlaza, selectedTipo, matchesDisponibilidad, matchesSearch]);
 
-  const allFilteredItems = useMemo(() => {
-    return [...filteredLocations, ...filteredRoutes];
-  }, [filteredLocations, filteredRoutes]);
-
+  const allFilteredItems = useMemo(() => [...filteredLocations, ...filteredRoutes], [filteredLocations, filteredRoutes]);
   const selectedItems = getSelectedItems(allItems);
 
   if (loading) {
     return (
-      <div className="flex h-[calc(100vh-80px)] items-center justify-center bg-gray-50" role="status" aria-live="polite">
-        <div className="text-center flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 animate-spin text-black" aria-hidden="true" />
+      <div className="flex h-[calc(100vh-64px)] items-center justify-center bg-gray-50" role="status" aria-live="polite">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <Loader2 className="h-7 w-7 animate-spin text-gray-900" aria-hidden="true" />
           <p className="text-sm font-semibold text-gray-600">Cargando inventario comercial...</p>
         </div>
       </div>
@@ -140,15 +127,13 @@ export default function Inventario() {
 
   if (error) {
     return (
-      <div className="flex h-[calc(100vh-80px)] items-center justify-center bg-gray-50 px-4" role="alert">
-        <div className="bg-white p-8 rounded-2xl shadow-lg border border-red-100 max-w-md w-full text-center">
-          <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="w-6 h-6" aria-hidden="true" />
-          </div>
-          <h2 className="text-lg font-bold text-gray-900 mb-2">No pudimos cargar el inventario</h2>
-          <p className="text-sm text-gray-600 mb-6">Estamos teniendo problemas para mostrar los soportes. Probá nuevamente.</p>
-          <Button onClick={refetch} className="w-full flex items-center justify-center gap-2" aria-label="Reintentar cargar el inventario">
-            <RefreshCw className="w-4 h-4" aria-hidden="true" />
+      <div className="flex h-[calc(100vh-64px)] items-center justify-center bg-gray-50 px-4" role="alert">
+        <div className="w-full max-w-md border border-gray-200 bg-white p-6 text-center">
+          <AlertCircle className="mx-auto h-5 w-5 text-red-600" aria-hidden="true" />
+          <h2 className="mb-2 mt-3 text-lg font-bold text-gray-900">No pudimos cargar el inventario</h2>
+          <p className="mb-5 text-sm text-gray-600">Estamos teniendo problemas para mostrar los soportes. Probá nuevamente.</p>
+          <Button onClick={refetch} className="flex min-h-10 w-full items-center justify-center gap-2 rounded-lg" aria-label="Reintentar cargar el inventario">
+            <RefreshCw className="h-4 w-4" aria-hidden="true" />
             Reintentar
           </Button>
         </div>
@@ -159,48 +144,39 @@ export default function Inventario() {
   const hasActiveFilters = selectedPlaza !== 'todos' || selectedTipo !== 'todos' || selectedDisponibilidad !== 'todos' || Boolean(searchText);
 
   return (
-    <div className="flex h-[calc(100vh-80px)] relative overflow-hidden">
-      {/* Controles flotantes superiores en Mobile */}
-      <div className="md:hidden absolute top-3.5 left-3.5 right-3.5 z-[500] flex items-center justify-between pointer-events-none gap-2">
+    <div className="relative flex h-[calc(100vh-64px)] overflow-hidden">
+      <div className="pointer-events-none absolute left-3 right-3 top-3 z-[500] flex items-center justify-between gap-2 md:hidden">
         <button
           type="button"
           onClick={() => setIsMobileFiltersOpen(true)}
-          className="pointer-events-auto bg-white/95 backdrop-blur-md text-gray-950 px-3.5 py-2 rounded-2xl font-bold shadow-sm border border-gray-200/90 flex items-center gap-2 text-xs active:scale-95 transition-all min-h-[38px]"
+          className="pointer-events-auto flex min-h-9 items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-950"
           aria-label={hasActiveFilters ? 'Abrir filtros, hay filtros activos' : 'Abrir filtros'}
         >
-          <SlidersHorizontal className="w-3.5 h-3.5 text-gray-600" aria-hidden="true" />
+          <SlidersHorizontal className="h-3.5 w-3.5 text-gray-600" aria-hidden="true" />
           <span>Filtros</span>
-          {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-200" aria-hidden="true" />}
+          {hasActiveFilters && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />}
         </button>
-
         <div className="pointer-events-auto shrink-0">
           <ViewModeToggle viewMode={viewMode} onViewModeChange={handleViewModeChange} />
         </div>
       </div>
 
-      {/* Drawer / Sidebar de Filtros */}
       <div
         className={cn(
-          'absolute md:relative inset-0 md:inset-auto z-[2000] md:z-10 bg-black/40 md:bg-transparent transition-opacity duration-300 md:opacity-100 md:block',
-          isMobileFiltersOpen ? 'opacity-100 block' : 'opacity-0 hidden'
+          'absolute inset-0 z-[2000] bg-black/30 transition-opacity duration-200 md:relative md:inset-auto md:z-10 md:block md:bg-transparent md:opacity-100',
+          isMobileFiltersOpen ? 'block opacity-100' : 'hidden opacity-0'
         )}
         role={isMobileFiltersOpen ? 'dialog' : undefined}
         aria-modal={isMobileFiltersOpen ? true : undefined}
         aria-label={isMobileFiltersOpen ? 'Filtros de inventario' : undefined}
       >
-        <div className="absolute md:relative inset-y-0 left-0 w-[85%] max-w-sm md:w-80 h-full bg-white flex flex-col shadow-2xl md:shadow-none border-r border-gray-200">
-          <div className="md:hidden p-4 flex justify-between items-center border-b border-gray-100">
-            <span className="font-bold text-base">Filtros</span>
-            <button
-              type="button"
-              onClick={() => setIsMobileFiltersOpen(false)}
-              className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
-              aria-label="Cerrar filtros"
-            >
-              <X className="w-4 h-4" aria-hidden="true" />
+        <div className="absolute inset-y-0 left-0 flex h-full w-[85%] max-w-sm flex-col border-r border-gray-200 bg-white md:relative md:w-80">
+          <div className="flex items-center justify-between border-b border-gray-100 p-4 md:hidden">
+            <span className="text-sm font-bold">Filtros</span>
+            <button type="button" onClick={() => setIsMobileFiltersOpen(false)} className="rounded-lg p-2 text-gray-600 hover:bg-gray-100" aria-label="Cerrar filtros">
+              <X className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
-
           <div className="flex-grow overflow-y-auto">
             <MapFilterPanel
               selectedPlaza={selectedPlaza}
@@ -219,8 +195,7 @@ export default function Inventario() {
         </div>
       </div>
 
-      {/* Área Principal de Contenido (Mapa ↔ Catálogo) */}
-      <div className={cn('flex-grow h-full relative z-0 flex flex-col', viewMode === 'catalogo' && 'pt-16 md:pt-0')}>
+      <div className={cn('relative z-0 flex h-full flex-grow flex-col', viewMode === 'catalogo' && 'pt-14 md:pt-0')}>
         {viewMode === 'mapa' ? (
           <InventoryMap
             locations={filteredLocations}
@@ -231,25 +206,12 @@ export default function Inventario() {
             onResetFilters={handleResetFilters}
           />
         ) : (
-          <SupportCardGrid
-            items={allFilteredItems}
-            onSelectOnMap={handleSelectOnMap}
-            onResetFilters={handleResetFilters}
-          />
+          <SupportCardGrid items={allFilteredItems} onSelectOnMap={handleSelectOnMap} onResetFilters={handleResetFilters} />
         )}
 
-        <StickySelectionBar
-          onOpenMediakit={handleOpenMediakit}
-          currentPlaza={selectedPlaza}
-          inventoryItems={allItems}
-        />
+        <StickySelectionBar onOpenMediakit={handleOpenMediakit} currentPlaza={selectedPlaza} inventoryItems={allItems} />
 
-        {isMediakitOpen && (
-          <MediakitPanel
-            selectedItems={selectedItems}
-            onClose={() => setIsMediakitOpen(false)}
-          />
-        )}
+        {isMediakitOpen && <MediakitPanel selectedItems={selectedItems} onClose={() => setIsMediakitOpen(false)} />}
       </div>
     </div>
   );
