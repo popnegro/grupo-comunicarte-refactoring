@@ -80,9 +80,11 @@ export function MapFilterPanel({
           <FilterButton active={selectedDisponibilidad === 'reservado'} onClick={() => setSelectedDisponibilidad('reservado')} label="Reservados" icon={<Lock className="h-4 w-4" />} />
         </FilterGroup>
 
-        <FilterGroup title="Vista">
-          <ViewModeToggle viewMode={viewMode} onViewModeChange={onViewModeChange} className="w-full justify-center" />
-        </FilterGroup>
+        <div className="md:hidden">
+          <FilterGroup title="Vista">
+            <ViewModeToggle viewMode={viewMode} onViewModeChange={onViewModeChange} className="w-full justify-center" />
+          </FilterGroup>
+        </div>
       </div>
 
       <div className="mt-auto border-t border-gray-100 pt-4">
