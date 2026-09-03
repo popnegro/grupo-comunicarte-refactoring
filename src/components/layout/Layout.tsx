@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ShoppingBag } from 'lucide-react';
 import { cn } from '../../lib/utils';
@@ -9,6 +9,10 @@ export function Layout({ children }: { children: ReactNode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { selectedCount } = useSelection();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [location.pathname, location.search]);
 
   const navLinks = [
     { name: 'Inicio', path: '/' },
@@ -93,7 +97,7 @@ export function Layout({ children }: { children: ReactNode }) {
             </nav>
           </div>
           <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-start gap-4 text-xs text-gray-500">
-            <span>© {new Date().getFullYear()}Todos los derechos reservados.</span>
+            <span>© 2026 Todos los derechos reservados.</span>
             <span><a href="https://wa.me/5492616706710" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white">Powered by SmartWeb</a></span>
           </div>
         </div>
