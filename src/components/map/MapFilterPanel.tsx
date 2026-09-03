@@ -80,6 +80,7 @@ export function MapFilterPanel({
           <FilterButton active={selectedDisponibilidad === 'reservado'} onClick={() => setSelectedDisponibilidad('reservado')} label="Reservados" icon={<Lock className="h-4 w-4" />} />
         </FilterGroup>
 
+        {/* Mobile: se conserva la ubicación original del selector dentro de los filtros. */}
         <div className="md:hidden">
           <FilterGroup title="Vista">
             <ViewModeToggle viewMode={viewMode} onViewModeChange={onViewModeChange} className="w-full justify-center" />
@@ -87,7 +88,19 @@ export function MapFilterPanel({
         </div>
       </div>
 
-      <div className="mt-auto border-t border-gray-100 pt-4">
+      {/* Desktop: selector integrado al panel, inmediatamente antes de Resultados. */}
+      <div className="hidden md:block mt-auto border-t border-gray-100 pt-3">
+        <div className="mb-2 px-1">
+          <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-gray-400">Vista</span>
+        </div>
+        <ViewModeToggle
+          viewMode={viewMode}
+          onViewModeChange={onViewModeChange}
+          className="w-full justify-center rounded-xl bg-gray-50/80 border-gray-200/80 shadow-none"
+        />
+      </div>
+
+      <div className="mt-3 border-t border-gray-100 pt-3">
         <div className="flex items-center justify-between px-1">
           <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-gray-400">
             {selectedCount > 0 ? `${selectedCount} seleccionados` : 'Resultados'}
