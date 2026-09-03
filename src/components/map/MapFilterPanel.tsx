@@ -32,14 +32,11 @@ export function MapFilterPanel({
   searchText,
   setSearchText,
   resultsCount,
-  viewMode,
-  onViewModeChange,
 }: MapFilterPanelProps) {
   const { selectedCount } = useSelection();
 
   return (
     <div className="flex h-full flex-col bg-white p-5 sm:p-6">
-
       <div className="relative mb-5">
         <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
         <Input
@@ -79,23 +76,15 @@ export function MapFilterPanel({
           <FilterButton active={selectedDisponibilidad === 'disponible'} onClick={() => setSelectedDisponibilidad('disponible')} label="Disponibles" icon={<CheckCircle2 className="h-4 w-4" />} />
           <FilterButton active={selectedDisponibilidad === 'reservado'} onClick={() => setSelectedDisponibilidad('reservado')} label="Reservados" icon={<Lock className="h-4 w-4" />} />
         </FilterGroup>
-
-        {/* Mobile: se conserva la ubicación original del selector dentro de los filtros. */}
-        <div className="md:hidden">
-          <FilterGroup title="Vista">
-            <ViewModeToggle viewMode={viewMode} onViewModeChange={onViewModeChange} className="w-full justify-center" />
-          </FilterGroup>
-        </div>
       </div>
 
-      {/* Desktop: selector integrado al panel, inmediatamente antes de Resultados. */}
       <div className="hidden md:block mt-auto border-t border-gray-100 pt-3">
         <div className="mb-2 px-1">
           <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-gray-400">Vista</span>
         </div>
         <ViewModeToggle
-          viewMode={viewMode}
-          onViewModeChange={onViewModeChange}
+          viewMode={arguments[0].viewMode}
+          onViewModeChange={arguments[0].onViewModeChange}
           className="w-full justify-center rounded-xl bg-gray-50/80 border-gray-200/80 shadow-none"
         />
       </div>
