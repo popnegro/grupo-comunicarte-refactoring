@@ -20,6 +20,7 @@ import DashboardSupportProductEditorConnected from './pages/dashboard/DashboardS
 import DashboardSupportPreview from './pages/dashboard/DashboardSupportPreview';
 import DashboardSupportReservation from './pages/dashboard/DashboardSupportReservation';
 import DashboardMediaKitWorkflow from './pages/dashboard/DashboardMediaKitWorkflow';
+import DashboardMediaKitBuilder from './pages/dashboard/DashboardMediaKitBuilder';
 
 function PublicRoutes() {
   const location = useLocation();
@@ -53,6 +54,7 @@ export default function App() {
           <Route path="/dashboard/soportes/:canonicalId/reservation" element={<DashboardSupportReservation />} />
 
           <Route path="/dashboard/solicitudes" element={<DashboardMediaKitWorkflow />} />
+          <Route path="/dashboard/mediakits/nuevo" element={<DashboardMediaKitBuilder />} />
           <Route path="/dashboard/mediakits" element={<DashboardMediaKitWorkflow />} />
           <Route path="*" element={<PublicRoutes />} />
         </Routes>
