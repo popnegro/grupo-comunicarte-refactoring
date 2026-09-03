@@ -1,61 +1,62 @@
 import { ArrowRight, Lightbulb, TrendingUp, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { buttonStyles } from '../components/ui/Button';
-import { InteriorHero } from '../components/layout/InteriorHero';
 
 export default function Soluciones() {
   const soluciones = [
-    { title: 'Campañas de Posicionamiento', description: 'Lográ máxima recordación de marca mediante circuitos de gran formato en los ingresos viales más transitados.', icon: Zap, label: 'OOH' },
-    { title: 'Activaciones Comerciales', description: 'Impulsá tus ventas y promociones semanales utilizando la versatilidad de pantallas digitales con pauta horaria inteligente.', icon: Lightbulb, label: 'DOOH' },
-    { title: 'Campañas de Proximidad', description: 'Conectá con tu audiencia en puntos de venta o eventos masivos a través de unidades móviles con pantallas LED gigantes.', icon: TrendingUp, label: 'LED Móvil' },
+    {
+      title: 'Campañas de Cobertura Masiva',
+      description: 'Maximizamos el alcance de tu marca utilizando circuitos estratégicos de cartelería tradicional en los principales nudos viales y accesos.',
+      icon: Zap
+    },
+    {
+      title: 'Activaciones Digitales DOOH',
+      description: 'Formatos dinámicos en pantallas LED de alta resolución. Permiten actualización de creatividades en tiempo real y comunicación por franjas horarias.',
+      icon: Lightbulb
+    },
+    {
+      title: 'Circuitos Móviles (Camiones LED)',
+      description: 'Llevamos tu mensaje directamente a zonas de alto tránsito peatonal y vehicular, ideal para lanzamientos, eventos y posicionamiento de marca en movimiento.',
+      icon: TrendingUp
+    }
   ];
 
   return (
     <div className="flex flex-col w-full bg-white">
-      <InteriorHero
-        eyebrow="Objetivos de campaña"
-        title="Soluciones diseñadas para tus objetivos comerciales"
-        description="Adaptamos nuestros soportes publicitarios para acompañar el embudo de ventas y visibilidad de tu marca en cada etapa del negocio."
-        align="left"
-        actions={
-          <>
-            <Link to="/inventario" className={buttonStyles({ className: 'rounded-lg px-5' })}>
-              Explorar inventario <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link to="/contacto" className={buttonStyles({ variant: 'outline', className: 'rounded-lg px-5' })}>
-              Hablar con Ventas
-            </Link>
-          </>
-        }
-      />
+      <section 
+        className="relative pt-32 pb-24 px-4 sm:px-6 lg:px-8 border-b border-gray-100 bg-gray-50"
+        style={{ backgroundImage: 'url(/brand/pattern-light.webp)', backgroundRepeat: 'repeat' }}
+      >
+        <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px]"></div>
+        <div className="relative max-w-7xl mx-auto z-10 text-center">
+          <span className="text-red-600 font-bold tracking-wider uppercase text-sm mb-4 block">Nuestros Servicios</span>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-6">Soluciones</h1>
+          <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
+            Grupo Comunicarte ofrece soluciones de comunicación y publicidad exterior (OOH) y digital (DOOH), diseñadas para conectar tu marca con la audiencia correcta.
+          </p>
+        </div>
+      </section>
 
-      <section className="px-4 py-12 sm:px-6 lg:px-8 md:py-16">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-8 flex flex-col gap-2 border-b border-gray-200 pb-6 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gray-500">Elegí tu objetivo</p>
-              <h2 className="mt-2 text-2xl font-bold tracking-tight text-gray-950 md:text-3xl">Una solución para cada necesidad</h2>
-            </div>
-            <p className="max-w-md text-sm leading-relaxed text-gray-500">Seleccioná el enfoque de campaña y llevá la conversación al inventario disponible.</p>
-          </div>
-
-          <div className="divide-y divide-gray-200 border-y border-gray-200">
-            {soluciones.map((solucion) => {
-              const Icon = solucion.icon;
-              return (
-                <article key={solucion.title} className="group grid gap-5 py-6 md:grid-cols-[auto_140px_1fr] md:items-start md:gap-8">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-950 text-white transition-colors group-hover:bg-brand-emerald">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <span className="pt-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-400">{solucion.label}</span>
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-950 md:text-xl">{solucion.title}</h3>
-                    <p className="mt-2 max-w-3xl text-sm leading-relaxed text-gray-600 md:text-base">{solucion.description}</p>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          {soluciones.map((solucion, idx) => {
+            const Icon = solucion.icon;
+            return (
+              <div key={idx} className="flex flex-col items-start bg-gray-50 p-8 rounded-3xl border border-gray-100">
+                <div className="w-14 h-14 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mb-6 border border-red-100">
+                  <Icon className="w-7 h-7" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{solucion.title}</h3>
+                <p className="text-gray-500 leading-relaxed mb-6 flex-grow">{solucion.description}</p>
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-16 text-center">
+          <Link to="/inventario" className={buttonStyles({ size: "lg", className: "rounded-full" })}>
+            Explorar Inventario
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Link>
         </div>
       </section>
     </div>
