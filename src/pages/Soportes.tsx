@@ -1,4 +1,4 @@
-import { ArrowRight, MapPin, MonitorPlay, Truck, Sparkles } from 'lucide-react';
+import { ArrowRight, MapPin, MonitorPlay, Truck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { buttonStyles } from '../components/ui/Button';
 import { InteriorHero } from '../components/layout/InteriorHero';
@@ -13,7 +13,7 @@ export default function Soportes() {
       description: 'Presencia masiva y permanente en accesos estratégicos. Ideal para campañas de branding que buscan recordación constante 24/7.',
       features: ['Gigantografías en rutas y accesos principales', 'Impacto continuo de alta recordación', 'Soportes iluminados de gran escala', 'Cobertura urbana en Mendoza y Buenos Aires'],
       link: '/inventario?tipo=tradicional',
-      image: '/images/soportes-tradicionales-mendoza.webp'
+      image: '/images/soportes-tradicionales-mendoza.webp',
     },
     {
       id: 'led',
@@ -23,7 +23,7 @@ export default function Soportes() {
       description: 'Flexibilidad y dinamismo para adaptar tu mensaje al instante. Perfecto para promociones temporales, ofertas rotativas y lanzamientos inmediatos.',
       features: ['Contenido dinámico en alta definición', 'Actualización de pauta en tiempo real', 'Ubicaciones en los nudos viales más transitados', 'Flexibilidad de formatos y segmentación temporal'],
       link: '/inventario?tipo=led',
-      image: '/images/pantallas-led-mendoza.webp'
+      image: '/images/pantallas-led-mendoza.webp',
     },
     {
       id: 'led_movil',
@@ -33,8 +33,8 @@ export default function Soportes() {
       description: 'Publicidad itinerante que acerca tu marca directo a la gente. Diseñado para eventos masivos, activaciones locales y recorridos de alto impacto.',
       features: ['Recorridos programados y personalizados', 'Pantallas LED gigantes a nivel de calle', 'Ideal para activaciones de marca y eventos', 'Alcance directo al consumidor en vía pública'],
       link: '/inventario?tipo=led_movil',
-      image: '/images/led-movil-mendoza.webp'
-    }
+      image: '/images/led-movil-mendoza.webp',
+    },
   ];
 
   return (
@@ -42,86 +42,59 @@ export default function Soportes() {
       <InteriorHero
         eyebrow="Ecosistema de medios"
         title="Nuestros soportes"
-        description="Combinamos la presencia ineludible del formato tradicional con la versatilidad de la era digital para maximizar el alcance de tu marca."
-        align='center'
+        description="Combinamos la presencia del formato tradicional con la versatilidad digital para maximizar el alcance de tu marca."
+        align="left"
+        actions={
+          <>
+            <Link to="/inventario" className={buttonStyles({ className: 'rounded-lg px-5' })}>
+              Explorar inventario <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link to="/contacto" className={buttonStyles({ variant: 'outline', className: 'rounded-lg px-5' })}>
+              Hablar con Ventas
+            </Link>
+          </>
+        }
       />
 
-      <section className="bg-[#F9F9F9] px-4 py-24 sm:px-6 lg:px-8 md:py-32">
-        <div className="mx-auto max-w-7xl space-y-6">
-          {soportes.map((soporte, index) => {
+      <section className="bg-[#F9F9F9] px-4 py-12 sm:px-6 lg:px-8 md:py-16">
+        <div className="mx-auto max-w-7xl space-y-4">
+          {soportes.map((soporte) => {
             const Icon = soporte.icon;
             return (
-              <article key={soporte.id} className="group overflow-hidden rounded-[2rem] border border-gray-200 bg-white transition-all duration-300 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-2xl">
-                <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
-                  <div className="relative min-h-[300px] overflow-hidden bg-gray-100 lg:min-h-[430px]">
-                    <img src={soporte.image} alt={soporte.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent" />
-                    <div className="absolute left-6 top-6 rounded-full border border-white/20 bg-black/35 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white backdrop-blur-md">0{index + 1} · {soporte.eyebrow}</div>
+              <article key={soporte.id} className="group overflow-hidden rounded-2xl border border-gray-200 bg-white transition-colors hover:border-gray-300">
+                <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
+                  <div className="relative min-h-[260px] overflow-hidden bg-gray-100 lg:min-h-[360px]">
+                    <img src={soporte.image} alt={soporte.name} className="h-full w-full object-cover" />
                   </div>
 
-                  <div className="flex flex-col justify-between p-7 md:p-10 lg:p-12">
+                  <div className="flex flex-col justify-between p-6 md:p-8 lg:p-9">
                     <div>
                       <div className="flex items-center justify-between gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-950 text-white shadow-sm">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-950 text-white">
                           <Icon className="h-5 w-5" />
                         </div>
-                        <span className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-400">Soporte</span>
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-400">{soporte.eyebrow}</span>
                       </div>
-                      <h2 className="mt-10 text-3xl font-bold tracking-[-0.03em] text-gray-950 md:text-4xl">{soporte.name}</h2>
-                      <p className="mt-4 max-w-xl text-base leading-relaxed text-gray-600 md:text-lg">{soporte.description}</p>
+                      <h2 className="mt-7 text-2xl font-bold tracking-[-0.03em] text-gray-950 md:text-3xl">{soporte.name}</h2>
+                      <p className="mt-3 max-w-xl text-sm leading-relaxed text-gray-600 md:text-base">{soporte.description}</p>
 
-                      <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                        {soporte.features.map((feature, featureIndex) => (
-                          <div key={featureIndex} className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm leading-relaxed text-gray-700 transition-colors group-hover:bg-white">
+                      <div className="mt-6 grid gap-2 sm:grid-cols-2">
+                        {soporte.features.map((feature) => (
+                          <div key={feature} className="border-l-2 border-gray-200 py-1 pl-3 text-sm leading-relaxed text-gray-700">
                             {feature}
                           </div>
                         ))}
                       </div>
                     </div>
 
-                    <Link to={soporte.link} className={buttonStyles({ className: 'mt-9 w-full justify-center rounded-full sm:w-fit' })}>
-                      Explorar inventario <ArrowRight className="h-4 w-4" />
+                    <Link to={soporte.link} className={buttonStyles({ variant: 'ghost', className: 'mt-7 w-fit px-0 font-semibold text-gray-900 hover:bg-transparent hover:text-brand-emerald' })}>
+                      Ver soportes disponibles <ArrowRight className="h-4 w-4" />
                     </Link>
                   </div>
                 </div>
               </article>
             );
           })}
-        </div>
-      </section>
-
-      <section className="bg-white px-4 py-24 sm:py-28 text-center sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 mb-6 rounded-full bg-gray-100 border border-gray-200 text-gray-800 text-xs font-bold uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5 text-red-600" /> Planificá tu pauta hoy
-          </div>
-          <h2 className="mb-5 text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-gray-950">
-            Potenciá la comunicación de tu negocio
-          </h2>
-          <p className="mx-auto mb-10 max-w-2xl leading-relaxed text-gray-600 text-base sm:text-lg">
-            Visualizá nuestras ubicaciones en tiempo real desde el mapa interactivo y seleccioná los formatos ideales para conectar con tus clientes.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link
-              to="/soluciones"
-              className={buttonStyles({
-                size: 'lg',
-                className: 'inline-flex rounded-full px-8 font-semibold shadow-md'
-              })}
-            >
-              Conocer soluciones <ArrowRight className="h-5 w-5 ml-1" />
-            </Link>
-            <Link
-              to="/contacto"
-              className={buttonStyles({
-                variant: 'outline',
-                size: 'lg',
-                className: 'inline-flex rounded-full px-8 font-semibold'
-              })}
-            >
-              Hablar con Ventas
-            </Link>
-          </div>
         </div>
       </section>
     </div>
