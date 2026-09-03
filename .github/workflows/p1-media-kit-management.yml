@@ -1,0 +1,52 @@
+name: P1 Media Kit Management Integration
+
+on:
+  push:
+    branches: [canonical-candidate]
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    if: ${{ !contains(github.event.head_commit.message, '[auto-p1]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Integrate persistent Media Kit API
+        shell: python
+        run: |
+          from pathlib import Path
+
+          p = Path('server.ts')
+          s = p.read_text()
+          import_line = "import { handleMediakitRequest, getAllMediakitRequestsFromDB } from './src/server/mediakitService.ts';"
+          new_import = import_line + "\nimport { saveMediaKit, getMediaKit, listMediaKits, updateMediaKitStatus } from './src/server/mediakitManagementService.ts';"
+          if new_import not in s:
+              if import_line not in s:
+                  raise SystemExit('MediaKit service import anchor not found')
+              s = s.replace(import_line, new_import, 1)
+
+          anchor = "  app.get('/api/admin/requests', requireAdmin, async (_req, res) => {"
+          routes = '''  // Persistent Media Kit management (P1)\n  app.get('/api/admin/mediakits', requireAdmin, async (_req, res) => {\n    try {\n      const kits = await listMediaKits();\n      res.status(200).json({ status: 'success', data: kits });\n    } catch (err: any) {\n      console.error('Error fetching media kits:', err);\n      res.status(500).json({ status: 'error', message: 'Error interno al obtener Media Kits.' });\n    }\n  });\n\n  app.get('/api/admin/mediakits/:kitId', requireAdmin, async (req, res) => {\n    try {\n      const kit = await getMediaKit(req.params.kitId);\n      if (!kit) return res.status(404).json({ status: 'error', message: 'Media Kit no encontrado.' });\n      res.status(200).json({ status: 'success', data: kit });\n    } catch (err: any) {\n      console.error(`Error fetching media kit ${req.params.kitId}:`, err);\n      res.status(500).json({ status: 'error', message: 'Error interno al obtener el Media Kit.' });\n    }\n  });\n\n  app.post('/api/admin/mediakits', requireAdmin, async (req, res) => {\n    try {\n      const kit = await saveMediaKit(req.body || {});\n      res.status(201).json({ status: 'success', data: kit, message: 'Media Kit guardado.' });\n    } catch (err: any) {\n      console.error('Error saving media kit:', err);\n      const msg = err.message || 'Error al guardar el Media Kit.';\n      res.status(msg.includes('obligatorio') || msg.includes('requiere') ? 400 : 500).json({ status: 'error', message: msg });\n    }\n  });\n\n  app.patch('/api/admin/mediakits/:kitId/status', requireAdmin, async (req, res) => {\n    try {\n      const kit = await updateMediaKitStatus(req.params.kitId, req.body?.status);\n      if (!kit) return res.status(404).json({ status: 'error', message: 'Media Kit no encontrado.' });\n      res.status(200).json({ status: 'success', data: kit, message: 'Estado del Media Kit actualizado.' });\n    } catch (err: any) {\n      console.error(`Error updating media kit ${req.params.kitId}:`, err);\n      res.status(400).json({ status: 'error', message: err.message || 'Error al actualizar el Media Kit.' });\n    }\n  });\n\n'''
+          if routes not in s:
+              if anchor not in s:
+                  raise SystemExit('admin request route anchor not found')
+              s = s.replace(anchor, routes + anchor, 1)
+          p.write_text(s)
+
+      - name: Commit integration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server.ts
+          if git diff --cached --quiet; then
+            echo "No changes required"
+          else
+            git commit -m "feat(p1): expose persistent media kit management [auto-p1]"
+            git push
+          fi
