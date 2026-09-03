@@ -221,6 +221,12 @@ export default function Inventario() {
 
       {/* Área Principal de Contenido (Mapa ↔ Catálogo) */}
       <div className="flex-grow h-full relative z-0 flex flex-col">
+        <div className="pointer-events-none absolute left-4 top-4 z-[1000] hidden md:block">
+          <div className="pointer-events-auto">
+            <ViewModeToggle viewMode={viewMode} onViewModeChange={handleViewModeChange} />
+          </div>
+        </div>
+
         {viewMode === 'mapa' ? (
           <InventoryMap
             locations={filteredLocations}
