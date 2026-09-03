@@ -37,7 +37,7 @@ export default function DashboardMediaKitBuilder() {
   const [busy, setBusy] = useState(false);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState('');
-  const [requestId, setRequestId] = useState(kitIdParam || makeRequestId);
+  const [requestId, setRequestId] = useState<string>(() => kitIdParam || makeRequestId());
   const notify = (message: string) => { setToast(message); window.setTimeout(() => setToast(''), 3000); };
 
   const authHeaders = (): HeadersInit => {
@@ -69,9 +69,7 @@ export default function DashboardMediaKitBuilder() {
           if (!kitResponse.ok || kitJson.status !== 'success') throw new Error(kitJson.message || 'No pudimos recuperar el Media Kit.');
           const kit = kitJson.data as PersistedKit;
           setRequestId(kit.kitId);
-          setClient({
-            name: kit.clientName || '', company: kit.clientCompany || '', email: kit.clientEmail || '', phone: kit.clientPhone || '',
-          });
+          setClient({ name: kit.clientName || '', company: kit.clientCompany || '', email: kit.clientEmail || '', phone: kit.clientPhone || '' });
           setSelectedIds(Array.isArray(kit.supportIds) ? kit.supportIds : []);
           setPrices(Object.fromEntries(Object.entries(kit.approvedPrices || {}).map(([key, value]) => [key, String(value)])));
           notify(`Media Kit ${kit.kitId} recuperado.`);
@@ -111,18 +109,7 @@ export default function DashboardMediaKitBuilder() {
     const response = await fetch('/api/admin/mediakits', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...authHeaders() },
-      body: JSON.stringify({
-        kitId: requestId,
-        clientName: client.name,
-        clientCompany: client.company || null,
-        clientEmail: client.email || null,
-        clientPhone: client.phone || null,
-        supportIds: selectedIds,
-        approvedPrices: prices,
-        totalAmount: total,
-        currency: 'ARS',
-        status,
-      }),
+      body: JSON.stringify({ kitId: requestId, clientName: client.name, clientCompany: client.company || null, clientEmail: client.email || null, clientPhone: client.phone || null, supportIds: selectedIds, approvedPrices: prices, totalAmount: total, currency: 'ARS', status }),
     });
     const json = await response.json();
     if (!response.ok || json.status !== 'success') throw new Error(json.message || 'No pudimos guardar el Media Kit.');
@@ -144,8 +131,8 @@ export default function DashboardMediaKitBuilder() {
     if (!ready) return;
     setBusy(true);
     try {
-      await persist('ready');
-      await downloadMediaKitPdf(lead, exportSupports, requestId);
+      const kit = await persist('ready');
+      await downloadMediaKitPdf(lead, exportSupports, kit.kitId);
       notify('PDF generado y Media Kit marcado como listo.');
     } catch (e: any) { notify(e.message || 'No pudimos generar el PDF.'); }
     finally { setBusy(false); }
@@ -154,8 +141,8 @@ export default function DashboardMediaKitBuilder() {
     if (!ready) return;
     setBusy(true);
     try {
-      await persist('ready');
-      await downloadMediaKitPpt(lead, exportSupports, requestId);
+      const kit = await persist('ready');
+      await downloadMediaKitPpt(lead, exportSupports, kit.kitId);
       notify('PPT generado y Media Kit marcado como listo.');
     } catch (e: any) { notify(e.message || 'No pudimos generar el PPT.'); }
     finally { setBusy(false); }
