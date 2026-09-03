@@ -5,30 +5,36 @@ interface InteriorHeroProps {
   title: ReactNode;
   description?: string;
   align?: 'left' | 'center';
+  actions?: ReactNode;
 }
 
-export function InteriorHero({ eyebrow, title, description, align = 'left' }: InteriorHeroProps) {
+export function InteriorHero({
+  eyebrow,
+  title,
+  description,
+  align = 'left',
+  actions,
+}: InteriorHeroProps) {
+  const centered = align === 'center';
+
   return (
-    <section className="relative overflow-hidden text-white px-4 py-24 sm:px-6 lg:px-8 md:py-32">
-      {/* Fondo con degradado personalizado */}
-      <div className="absolute inset-0 bg-[linear-gradient(124deg,rgba(0,0,0,1)_0%,_rgba(0,0,0,1)_100%,_rgba(0,122,85,1)_100%)]" aria-hidden="true" />
-
-      {/* Resplandores de Esquinas con Blur */}
-      <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-red-600/15 blur-3xl" aria-hidden="true" />
-      <div className="pointer-events-none absolute -left-24 -bottom-24 h-96 w-96 rounded-full bg-emerald-500/20 blur-3xl" aria-hidden="true" />
-
-      {/* Contenido Principal */}
-      <div className={`relative z-10 max-w-7xl mx-auto ${align === 'center' ? 'text-center' : ''}`}>
-        <div className={align === 'center' ? 'max-w-4xl mx-auto' : 'max-w-4xl'}>
-          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 mb-7 rounded-full bg-white/10 border border-white/20 backdrop-blur-md text-white">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-500" aria-hidden="true" />
-            <span className="text-[11px] font-bold tracking-[0.18em] uppercase">{eyebrow}</span>
-          </span>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-[-0.045em] leading-[0.98] mb-7">{title}</h1>
-          {description && <p className="text-lg md:text-xl text-white/70 leading-relaxed max-w-3xl mx-auto text-center">{description}</p>}
+    <section className="border-b border-gray-200 bg-white px-4 py-10 sm:px-6 md:py-12 lg:px-8">
+      <div className={`mx-auto flex max-w-7xl flex-col gap-7 lg:flex-row lg:items-end lg:justify-between ${centered ? 'lg:items-center' : ''}`}>
+        <div className={`${centered ? 'max-w-3xl text-center lg:mx-auto' : 'max-w-4xl'}`}>
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-gray-500">{eyebrow}</p>
+          <h1 className="text-3xl font-bold tracking-[-0.035em] leading-tight text-gray-950 sm:text-4xl md:text-5xl">{title}</h1>
+          {description && (
+            <p className={`mt-4 max-w-3xl text-base leading-relaxed text-gray-600 md:text-lg ${centered ? 'mx-auto' : ''}`}>
+              {description}
+            </p>
+          )}
         </div>
+        {actions && (
+          <div className={`flex shrink-0 flex-col gap-2 sm:flex-row ${centered ? 'lg:justify-center' : ''}`}>
+            {actions}
+          </div>
+        )}
       </div>
     </section>
-
   );
 }
