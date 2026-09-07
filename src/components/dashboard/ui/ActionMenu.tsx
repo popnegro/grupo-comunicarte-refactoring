@@ -76,26 +76,26 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
         ref={buttonRef}
         type="button"
         onClick={handleToggle}
-        aria-haspopup="true"
+        aria-haspopup="menu"
         aria-expanded={isOpen}
         aria-label={triggerLabel}
-        className="inline-flex items-center justify-center p-2 sm:p-1.5 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-colors min-h-[44px] min-w-[44px] sm:min-h-[34px] sm:min-w-[34px]"
+        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-transparent p-2 text-gray-500 transition-colors hover:border-gray-200 hover:bg-gray-50 hover:text-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-300 sm:min-h-[34px] sm:min-w-[34px] sm:p-1.5"
       >
-        <MoreHorizontal className="w-4 h-4" />
+        <MoreHorizontal className="h-4 w-4" />
       </button>
 
       {isOpen && (
         <div
           role="menu"
           aria-orientation="vertical"
-          className={`absolute z-40 w-44 rounded-xl bg-white shadow-xl ring-1 ring-black/10 divide-y divide-gray-100 py-1 focus:outline-none animate-in fade-in zoom-in-95 duration-100 ${positionClasses}`}
+          className={`absolute z-40 w-48 overflow-hidden rounded-lg border border-gray-200 bg-white py-1 shadow-lg shadow-gray-950/5 focus:outline-none animate-in fade-in zoom-in-95 duration-100 ${positionClasses}`}
         >
           {items.map((item, index) => {
             const Icon = item.icon;
             const isDanger = item.variant === 'danger';
             const isWarning = item.variant === 'warning';
 
-            let itemColorClasses = 'text-gray-700 hover:bg-gray-50 hover:text-gray-900';
+            let itemColorClasses = 'text-gray-700 hover:bg-gray-50 hover:text-gray-950';
             if (isDanger) {
               itemColorClasses = 'text-red-600 hover:bg-red-50 hover:text-red-700';
             } else if (isWarning) {
@@ -113,9 +113,9 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
                   setIsOpen(false);
                   item.onClick();
                 }}
-                className={`w-full flex items-center gap-2.5 px-3.5 py-3 sm:py-2 text-xs font-medium text-left transition-colors disabled:opacity-40 disabled:cursor-not-allowed min-h-[44px] sm:min-h-[36px] ${itemColorClasses}`}
+                className={`flex min-h-[44px] w-full items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-left transition-colors disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-[36px] ${itemColorClasses}`}
               >
-                {Icon && <Icon className="w-3.5 h-3.5 shrink-0" />}
+                {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}
                 <span>{item.label}</span>
               </button>
             );
