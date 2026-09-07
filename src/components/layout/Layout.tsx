@@ -42,6 +42,9 @@ export function Layout({ children }: { children: ReactNode }) {
                 </Link>
               ))}
               <div className="h-4 w-px bg-gray-200" />
+              <Link to="/dashboard" className="text-sm font-semibold text-gray-500 transition-colors hover:text-black" aria-label="Acceder al Portal Admin">
+                Portal Admin
+              </Link>
               <Link to={ctaPath} className={buttonStyles({ size: 'sm' })}>
                 <span>Media Kit</span>
                 {selectedCount > 0 && <span className="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">{selectedCount}</span>}
