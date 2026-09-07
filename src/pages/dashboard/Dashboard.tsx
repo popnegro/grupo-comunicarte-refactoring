@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FilePlus2, FileText, MapPin, MonitorSmartphone, ArrowUpRight } from 'lucide-react';
+import { FilePlus2, FileText, MapPin, MonitorSmartphone, ArrowUpRight, ClipboardList, PackageOpen } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
 import { KPICard } from '../../components/dashboard/ui/KPICard';
@@ -20,9 +20,9 @@ export default function Dashboard() {
   const Header = () => (
     <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p className="text-xs font-medium text-gray-500">Centro de Operaciones</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-950 sm:text-3xl">Resumen Ejecutivo</h1>
-        <p className="mt-1 text-sm text-gray-500">Estado actual del inventario y la actividad comercial.</p>
+        <p className="text-xs font-medium text-gray-500">Centro de trabajo</p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-950 sm:text-3xl">Resumen</h1>
+        <p className="mt-1 text-sm text-gray-500">Una vista rápida de lo que requiere atención y del estado del inventario.</p>
       </div>
       <Link to="/dashboard/mediakits/nuevo" className="inline-flex min-h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-gray-950 px-3 text-xs font-semibold text-white transition hover:bg-gray-800"><FilePlus2 className="h-3.5 w-3.5 text-emerald-400"/>Nuevo Media Kit</Link>
     </header>
@@ -33,6 +33,22 @@ export default function Dashboard() {
 
   return <DashboardShell><div className="mx-auto max-w-[1320px] space-y-5 pb-8">
     <Header/>
+
+    <section aria-label="Accesos de trabajo" className="grid gap-3 md:grid-cols-3">
+      <Link to="/dashboard/soportes" className="group rounded-lg border border-gray-200 bg-white p-4 transition hover:border-gray-300 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-950/10">
+        <div className="flex items-start justify-between gap-4"><span className="flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 text-gray-700"><PackageOpen className="h-4 w-4"/></span><ArrowUpRight className="h-4 w-4 text-gray-400 transition group-hover:text-gray-700"/></div>
+        <p className="mt-3 text-sm font-semibold text-gray-950">Gestionar soportes</p><p className="mt-0.5 text-xs text-gray-500">Editar, revisar disponibilidad y administrar inventario.</p>
+      </Link>
+      <Link to="/dashboard/solicitudes" className="group rounded-lg border border-gray-200 bg-white p-4 transition hover:border-gray-300 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-950/10">
+        <div className="flex items-start justify-between gap-4"><span className="flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 text-gray-700"><ClipboardList className="h-4 w-4"/></span><ArrowUpRight className="h-4 w-4 text-gray-400 transition group-hover:text-gray-700"/></div>
+        <div className="mt-3 flex items-center gap-2"><p className="text-sm font-semibold text-gray-950">Revisar solicitudes</p>{stats.pendingRequests>0&&<span className="rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">{stats.pendingRequests} pendientes</span>}</div>
+        <p className="mt-0.5 text-xs text-gray-500">Consultar contactos y avanzar oportunidades comerciales.</p>
+      </Link>
+      <Link to="/dashboard/mediakits/nuevo" className="group rounded-lg border border-gray-200 bg-white p-4 transition hover:border-gray-300 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-950/10">
+        <div className="flex items-start justify-between gap-4"><span className="flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 text-gray-700"><FilePlus2 className="h-4 w-4"/></span><ArrowUpRight className="h-4 w-4 text-gray-400 transition group-hover:text-gray-700"/></div>
+        <p className="mt-3 text-sm font-semibold text-gray-950">Crear Media Kit</p><p className="mt-0.5 text-xs text-gray-500">Seleccionar soportes y preparar una propuesta comercial.</p>
+      </Link>
+    </section>
 
     <section aria-label="Indicadores principales" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <KPICard title="Soportes" value={stats.total} unit={`${stats.available} disponibles`} icon={MonitorSmartphone} footer={`${availableRate}% del inventario disponible`} />
