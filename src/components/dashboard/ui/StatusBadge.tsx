@@ -92,11 +92,22 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
       break;
 
     case 'ARCHIVED':
+      colorClasses = 'border-gray-200 bg-gray-50 text-gray-500';
+      IconComponent = EyeOff;
+      if (!label) displayLabel = 'Archivado';
+      break;
+
     case 'INACTIVE':
     case 'INACTIVO':
       colorClasses = 'border-gray-200 bg-gray-50 text-gray-500';
       IconComponent = EyeOff;
       if (!label) displayLabel = 'Inactivo';
+      break;
+
+    case 'DRAFT':
+      colorClasses = 'border-gray-200 bg-gray-50 text-gray-600';
+      IconComponent = EyeOff;
+      if (!label) displayLabel = 'Borrador';
       break;
 
     case 'ERROR':
