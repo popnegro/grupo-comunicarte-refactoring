@@ -15,65 +15,64 @@ export default function Home() {
   return (
     <div className="flex flex-col w-full">
       {/* HERO SECTION */}
-      <section className="relative min-h-[680px] md:min-h-[760px] w-full overflow-hidden border-b border-gray-100 flex items-center">
+      <section className="relative min-h-[600px] md:min-h-[680px] w-full overflow-hidden border-b border-gray-100 flex items-center">
         <div className="absolute inset-0 z-0">
           <img src="/images/home.webp" alt="Vía Pública" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/30" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/10 to-black/55" />
+          <div className="absolute inset-0 bg-black/35" />
         </div>
 
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-32 md:pt-24 md:pb-36">
-          <div className="max-w-4xl mx-auto text-center text-white">
-            <div className="inline-flex items-center px-3 py-1 mb-7 rounded-full bg-white/80 border border-gray-200 backdrop-blur-md">
-              <span className="text-xs font-semibold tracking-widest uppercase text-gray-800">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-28 md:pt-16 md:pb-32">
+          <div className="max-w-3xl mx-auto text-center text-white">
+            <div className="inline-flex items-center px-2.5 py-1 mb-5 rounded-full bg-white border border-gray-200">
+              <span className="text-[10px] font-semibold tracking-[0.14em] uppercase text-gray-800">
                 Espacios Publicitarios Premium
               </span>
             </div>
 
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.98] mb-7 max-w-5xl mx-auto">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.02] mb-5 max-w-3xl mx-auto">
               Tu marca, en los lugares que todos ven.
             </h1>
 
-            <p className="mx-auto max-w-2xl text-lg md:text-xl text-white/90 font-medium leading-relaxed">
+            <p className="mx-auto max-w-xl text-base md:text-lg text-white/90 leading-relaxed">
               Espacios publicitarios estratégicos en Mendoza y Buenos Aires.
             </p>
           </div>
 
-          {/* Search: discovery action remains in the hero without duplicating the plaza cards below. */}
-          <div className="absolute left-4 right-4 bottom-7 md:bottom-10 md:left-1/2 md:right-auto md:-translate-x-1/2 w-auto md:w-[min(920px,calc(100%-3rem))]">
+          {/* Search: compact discovery action inspired by the Hero 31 composition. */}
+          <div className="absolute left-4 right-4 bottom-16 md:bottom-[68px] md:left-1/2 md:right-auto md:-translate-x-1/2 w-auto md:w-[min(760px,calc(100%-3rem))]">
             <form
               onSubmit={(event) => {
                 event.preventDefault();
                 const query = new FormData(event.currentTarget).get('q')?.toString().trim();
                 navigate(query ? `/inventario?q=${encodeURIComponent(query)}` : '/inventario');
               }}
-              className="rounded-2xl md:rounded-3xl bg-white/95 backdrop-blur-md border border-white shadow-2xl p-2 md:p-3"
+              className="rounded-xl bg-white border border-gray-200 shadow-lg p-1.5"
             >
-              <div className="flex flex-col sm:flex-row gap-2 md:gap-3 items-stretch">
-                <label className="flex min-h-14 flex-1 items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 focus-within:border-black focus-within:ring-2 focus-within:ring-black/10">
-                  <Search className="w-5 h-5 shrink-0 text-gray-500" aria-hidden="true" />
+              <div className="flex gap-1.5 items-stretch">
+                <label className="flex min-h-12 flex-1 items-center gap-2.5 rounded-lg border border-gray-200 bg-white px-3.5 focus-within:border-black focus-within:ring-1 focus-within:ring-black/10">
+                  <Search className="w-4 h-4 shrink-0 text-gray-500" aria-hidden="true" />
                   <span className="sr-only">Buscar soportes</span>
                   <input
                     name="q"
                     type="search"
                     autoComplete="off"
                     placeholder="Buscá por ubicación, soporte o ciudad"
-                    className="min-w-0 w-full bg-transparent text-sm md:text-base text-gray-900 placeholder:text-gray-400 outline-none"
+                    className="min-w-0 w-full bg-transparent text-sm text-gray-900 placeholder:text-gray-400 outline-none"
                   />
                 </label>
-                <Button type="submit" size="lg" className="min-h-14 rounded-xl px-7 text-base whitespace-nowrap">
+                <Button type="submit" size="lg" className="min-h-12 rounded-lg px-5 text-sm whitespace-nowrap">
                   Buscar
-                  <ArrowRight className="w-5 h-5" />
+                  <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
             </form>
           </div>
         </div>
 
-        {/* Semantic section label at the visual footer of the hero. */}
-        <div className="absolute inset-x-0 bottom-0 z-10 border-t border-white/20 bg-black/20 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <h2 className="text-xs sm:text-sm font-semibold tracking-[0.18em] uppercase text-white/85 text-center">
+        {/* Plain semantic footer: no blur, gradient or decorative effect. */}
+        <div className="absolute inset-x-0 bottom-0 z-10 bg-white border-t border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
+            <h2 className="text-[11px] sm:text-xs font-semibold tracking-[0.14em] uppercase text-gray-700 text-center">
               Vía pública que conecta marcas con audiencias
             </h2>
           </div>
