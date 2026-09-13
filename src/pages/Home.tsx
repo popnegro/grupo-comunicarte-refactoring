@@ -29,12 +29,12 @@ export default function Home() {
           <div className="absolute inset-0 bg-black/35" />
         </div>
 
-        <div className="relative z-10 mx-auto flex w-full max-w-7xl items-center px-4 pb-28 pt-10 sm:px-6 md:pb-32 md:pt-12 lg:px-8">
-          <div className="mx-auto w-full max-w-2xl text-center text-white">
+        <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto w-full max-w-2xl -translate-y-6 text-center text-white md:-translate-y-8">
             <div className="mb-5 inline-flex items-center rounded-full border border-gray-200 bg-white px-2.5 py-1">
               <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-800">Espacios Publicitarios Premium</span>
             </div>
-            <h1 className="mx-auto mb-4 max-w-2xl text-4xl font-bold leading-[1.04] tracking-tight sm:text-5xl md:text-6xl">
+            <h1 className="mx-auto mb-4 max-w-2xl text-4xl font-bold leading-[1.04] tracking-tight sm:text-5xl md:text-[3.5rem]">
               Tu marca, en los lugares que todos ven.
             </h1>
             <p className="mx-auto max-w-lg text-base leading-7 text-white/90 md:text-lg md:leading-7">
@@ -42,7 +42,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="absolute bottom-14 left-4 right-4 md:bottom-16 md:left-1/2 md:right-auto md:w-[min(700px,calc(100%-3rem))] md:-translate-x-1/2">
+          <div className="absolute bottom-8 left-4 right-4 md:bottom-10 md:left-1/2 md:right-auto md:w-[min(700px,calc(100%-3rem))] md:-translate-x-1/2">
             <form
               onSubmit={(event) => {
                 event.preventDefault();
@@ -207,7 +207,7 @@ export default function Home() {
                   <span>MP4 · AVI · JPG</span>
                 </div>
                 <div className="mt-6 flex flex-wrap items-center gap-3.5">
-                  <Button onClick={() => navigate('/inventario?tipo=led_movil')} size="lg" className="h-11 rounded-full px-6 text-sm font-medium">
+                  <Button onClick={() => navigate('/inventario?tipo=led_movil')} className={cn(buttonStyles('primary'), 'px-5')}>
                     Ver recorrido <ArrowRight className="h-4 w-4" />
                   </Button>
                   <span className="text-xs leading-5 text-gray-500">Recorridos personalizados disponibles</span>
@@ -228,11 +228,8 @@ export default function Home() {
                   Explorá nuestra cobertura y descubrí dónde están los soportes que mejor encajan con tu campaña.
                 </p>
               </div>
-              <Link to="/inventario" className={cn(buttonStyles({ size: 'lg' }), 'group relative h-12 w-fit overflow-hidden rounded-full pl-6 pr-14 text-sm font-medium transition-all duration-300 hover:pl-14 hover:pr-6')}>
-                <span className="relative z-10 transition-all duration-300">Explorar inventario</span>
-                <span className="absolute right-1 flex h-10 w-10 items-center justify-center rounded-full bg-white text-gray-950 transition-all duration-300 group-hover:right-[calc(100%-2.75rem)]">
-                  <ArrowRight className="h-4 w-4" />
-                </span>
+              <Link to="/inventario" className="inline-flex items-center gap-2 rounded-lg bg-gray-950 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800">
+                Explorar inventario <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </div>
