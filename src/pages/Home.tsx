@@ -10,10 +10,8 @@ import { SupportCard } from '../components/inventory/SupportCard';
 export default function Home() {
   const navigate = useNavigate();
   const featuredCarouselRef = useRef<HTMLDivElement>(null);
-
   const allItems: InventoryItem[] = [...fixedLocations, ...mobileRoutes];
   const featuredItems = allItems.filter(item => item.isFeatured || (item as any).IsFeatured).slice(0, 9);
-
   const scrollFeatured = (direction: 'prev' | 'next') => {
     const container = featuredCarouselRef.current;
     if (!container) return;
@@ -21,184 +19,17 @@ export default function Home() {
     const amount = firstCard ? firstCard.offsetWidth + 20 : container.clientWidth * 0.82;
     container.scrollBy({ left: direction === 'next' ? amount : -amount, behavior: 'smooth' });
   };
-
   return (
     <div className="flex flex-col w-full">
-      {/* HERO SECTION: viewport height minus the 5rem navbar. */}
       <section className="relative h-[calc(100vh-5rem)] min-h-0 w-full overflow-hidden border-b border-gray-100 flex items-center">
-        <div className="absolute inset-0 z-0">
-          <img src="/images/home.webp" alt="Vía Pública" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/35" />
-        </div>
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-28 md:pt-16 md:pb-32">
-          <div className="max-w-3xl mx-auto text-center text-white">
-            <div className="inline-flex items-center px-2.5 py-1 mb-5 rounded-full bg-white border border-gray-200">
-              <span className="text-[10px] font-semibold tracking-[0.14em] uppercase text-gray-800">Espacios Publicitarios Premium</span>
-            </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.02] mb-5 max-w-3xl mx-auto">Tu marca, en los lugares que todos ven.</h1>
-            <p className="mx-auto max-w-xl text-base md:text-lg text-white/90 leading-relaxed">Espacios publicitarios estratégicos en Mendoza y Buenos Aires.</p>
-          </div>
-          <div className="absolute left-4 right-4 bottom-16 md:bottom-[68px] md:left-1/2 md:right-auto md:-translate-x-1/2 w-auto md:w-[min(760px,calc(100%-3rem))]">
-            <form onSubmit={(event) => { event.preventDefault(); const query = new FormData(event.currentTarget).get('q')?.toString().trim(); navigate(query ? `/inventario?q=${encodeURIComponent(query)}` : '/inventario'); }} className="rounded-xl bg-white border border-gray-200 shadow-lg p-1.5">
-              <div className="flex gap-1.5 items-stretch">
-                <label className="flex min-h-12 flex-1 items-center gap-2.5 rounded-lg border border-gray-200 bg-white px-3.5 focus-within:border-black focus-within:ring-1 focus-within:ring-black/10">
-                  <Search className="w-4 h-4 shrink-0 text-gray-500" aria-hidden="true" />
-                  <span className="sr-only">Buscar soportes</span>
-                  <input name="q" type="search" autoComplete="off" placeholder="Buscá por ubicación, soporte o ciudad" className="min-w-0 w-full bg-transparent text-sm text-gray-900 placeholder:text-gray-400 outline-none" />
-                </label>
-                <Button type="submit" size="lg" className="min-h-12 rounded-lg px-5 text-sm whitespace-nowrap">Buscar <ArrowRight className="w-4 h-4" /></Button>
-              </div>
-            </form>
-          </div>
-        </div>
-        <div className="absolute inset-x-0 bottom-0 z-10 bg-white border-t border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
-            <h2 className="text-[11px] sm:text-xs font-semibold tracking-[0.14em] uppercase text-gray-700 text-center">Vía pública que conecta marcas con audiencias</h2>
-          </div>
-        </div>
+        <div className="absolute inset-0 z-0"><img src="/images/home.webp" alt="Vía Pública" className="w-full h-full object-cover" /><div className="absolute inset-0 bg-black/35" /></div>
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-28 md:pt-16 md:pb-32"><div className="max-w-3xl mx-auto text-center text-white"><div className="inline-flex items-center px-2.5 py-1 mb-5 rounded-full bg-white border border-gray-200"><span className="text-[10px] font-semibold tracking-[0.14em] uppercase text-gray-800">Espacios Publicitarios Premium</span></div><h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.02] mb-5 max-w-3xl mx-auto">Tu marca, en los lugares que todos ven.</h1><p className="mx-auto max-w-xl text-base md:text-lg text-white/90 leading-relaxed">Espacios publicitarios estratégicos en Mendoza y Buenos Aires.</p></div><div className="absolute left-4 right-4 bottom-16 md:bottom-[68px] md:left-1/2 md:right-auto md:-translate-x-1/2 w-auto md:w-[min(760px,calc(100%-3rem))]"><form onSubmit={(event) => { event.preventDefault(); const query = new FormData(event.currentTarget).get('q')?.toString().trim(); navigate(query ? `/inventario?q=${encodeURIComponent(query)}` : '/inventario'); }} className="rounded-xl bg-white border border-gray-200 shadow-lg p-1.5"><div className="flex gap-1.5 items-stretch"><label className="flex min-h-12 flex-1 items-center gap-2.5 rounded-lg border border-gray-200 bg-white px-3.5 focus-within:border-black focus-within:ring-1 focus-within:ring-black/10"><Search className="w-4 h-4 shrink-0 text-gray-500" aria-hidden="true" /><span className="sr-only">Buscar soportes</span><input name="q" type="search" autoComplete="off" placeholder="Buscá por ubicación, soporte o ciudad" className="min-w-0 w-full bg-transparent text-sm text-gray-900 placeholder:text-gray-400 outline-none" /></label><Button type="submit" size="lg" className="min-h-12 rounded-lg px-5 text-sm whitespace-nowrap">Buscar <ArrowRight className="w-4 h-4" /></Button></div></form></div></div>
+        <div className="absolute inset-x-0 bottom-0 z-10 bg-white border-t border-gray-200"><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5"><h2 className="text-[11px] sm:text-xs font-semibold tracking-[0.14em] uppercase text-gray-700 text-center">Vía pública que conecta marcas con audiencias</h2></div></div>
       </section>
-
-      {/* PLAZAS SECTION: inspired by Shadcn Space CTA 11, adapted to the site's neutral visual system. */}
-      <section id="plazas" className="bg-white px-4 sm:px-6 lg:px-8 py-14 md:py-20 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto">
-          <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white">
-            <div className="grid md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-              <div className="relative min-h-[280px] md:min-h-[420px] bg-gray-100 overflow-hidden">
-                <img src="/images/soportes-tradicionales-mendoza.webp" alt="Soportes publicitarios en Mendoza" className="absolute inset-0 h-full w-full object-cover" />
-                <div className="absolute inset-0 bg-black/10" />
-                <div className="absolute left-5 top-5 inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/90 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-800"><MapPin className="h-3.5 w-3.5" aria-hidden="true" />Cobertura nacional</div>
-              </div>
-              <div className="flex flex-col justify-center p-7 sm:p-10 md:p-12 lg:p-14">
-                <div className="mb-5 flex items-center gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-800"><MapPin className="h-4 w-4" aria-hidden="true" /></span><span className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Plazas disponibles</span></div>
-                <h2 className="max-w-xl text-3xl font-semibold tracking-tight text-gray-950 md:text-4xl">Elegí dónde querés estar</h2>
-                <p className="mt-4 max-w-xl text-base leading-relaxed text-gray-600 md:text-lg">Explorá nuestra cobertura y encontrá soportes estratégicos según la ciudad y el alcance de tu campaña.</p>
-                <div className="mt-8 grid gap-3 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2">
-                  <button onClick={() => navigate('/inventario?plaza=mendoza')} className="group flex items-center justify-between gap-4 rounded-xl border border-gray-200 px-4 py-4 text-left transition-colors hover:border-gray-900 hover:bg-gray-50"><span><span className="block text-base font-semibold text-gray-950">Mendoza</span><span className="mt-1 block text-xs leading-relaxed text-gray-500">18 soportes estratégicos</span></span><MoveRight className="h-4 w-4 shrink-0 text-gray-500 transition-transform group-hover:translate-x-1 group-hover:text-gray-950" aria-hidden="true" /></button>
-                  <button onClick={() => navigate('/inventario?plaza=buenos-aires')} className="group flex items-center justify-between gap-4 rounded-xl border border-gray-200 px-4 py-4 text-left transition-colors hover:border-gray-900 hover:bg-gray-50"><span><span className="block text-base font-semibold text-gray-950">Buenos Aires</span><span className="mt-1 block text-xs leading-relaxed text-gray-500">10 soportes estratégicos</span></span><MoveRight className="h-4 w-4 shrink-0 text-gray-500 transition-transform group-hover:translate-x-1 group-hover:text-gray-950" aria-hidden="true" /></button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* DESTACADOS SECTION: services-05 inspired, using the canonical SupportCard used by /dashboard. */}
-      {featuredItems.length > 0 && (
-        <section className="bg-gray-50 border-b border-gray-100 py-16 md:py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-              <div className="max-w-2xl">
-                <div className="mb-4 flex items-center gap-3"><span className="h-px w-8 bg-gray-900" /><span className="text-[11px] font-bold uppercase tracking-[0.16em] text-gray-500">Inventario seleccionado</span></div>
-                <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-gray-950">Soportes destacados</h2>
-                <p className="mt-3 text-base md:text-lg leading-relaxed text-gray-600">Una selección de ubicaciones con información real de disponibilidad, formato y características.</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Link to="/inventario" className="hidden sm:inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-gray-700 hover:text-gray-950">Ver inventario completo <MoveRight className="h-4 w-4" /></Link>
-                <div className="flex items-center gap-2" aria-label="Controles de soportes destacados">
-                  <button type="button" onClick={() => scrollFeatured('prev')} aria-label="Soportes anteriores" className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 transition-colors hover:border-gray-950 hover:text-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/15"><ChevronLeft className="h-4 w-4" /></button>
-                  <button type="button" onClick={() => scrollFeatured('next')} aria-label="Soportes siguientes" className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 transition-colors hover:border-gray-950 hover:text-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/15"><ChevronRight className="h-4 w-4" /></button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-10 px-4 sm:px-6 lg:px-8">
-            <div ref={featuredCarouselRef} className="mx-auto flex max-w-7xl snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain scroll-smooth pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" style={{ touchAction: 'pan-x' }} aria-label="Carrusel de soportes destacados">
-              {featuredItems.map((item) => (
-                <div key={item.canonical_id} data-featured-card className="w-[calc(100vw-2rem)] max-w-[390px] flex-none snap-start sm:w-[min(390px,68vw)] lg:w-[380px]">
-                  <SupportCard item={item} variant="showcase" />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-3 flex justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <p className="text-[11px] font-medium text-gray-500">Deslizá horizontalmente para explorar</p>
-            <Link to="/inventario" className="sm:hidden inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-gray-700">Ver todo <MoveRight className="h-4 w-4" /></Link>
-          </div>
-        </section>
-      )}
-
-      {/* LED MÓVIL SECTION: inspired by Shadcn Space Feature 05, using the real LED mobile asset and verified route data. */}
-      <section className="w-full bg-white py-16 md:py-20">
-        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-3xl border border-gray-200 bg-gray-950 text-white">
-            <div className="grid items-stretch lg:grid-cols-[1.02fr_0.98fr]">
-              <div className="relative order-2 min-h-[430px] overflow-hidden border-t border-white/10 bg-gray-900 lg:order-1 lg:min-h-[560px] lg:border-t-0 lg:border-r">
-                <img src="/images/led-movil-feature.webp" alt="Camión LED Móvil recorriendo Mendoza" className="absolute inset-0 h-full w-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/10 to-transparent" />
-                <div className="absolute left-5 top-5 rounded-full border border-white/20 bg-gray-950/75 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white backdrop-blur-sm">LED Móvil · Mendoza</div>
-                <div className="absolute bottom-5 left-5 right-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                  <div className="rounded-2xl border border-white/15 bg-gray-950/75 p-4 backdrop-blur-sm">
-                    <div className="text-2xl font-semibold tracking-tight">3</div>
-                    <div className="mt-1 text-[11px] leading-relaxed text-gray-300">pantallas digitales</div>
-                  </div>
-                  <div className="rounded-2xl border border-white/15 bg-gray-950/75 p-4 backdrop-blur-sm">
-                    <div className="text-2xl font-semibold tracking-tight">180+</div>
-                    <div className="mt-1 text-[11px] leading-relaxed text-gray-300">salidas diarias</div>
-                  </div>
-                  <div className="hidden rounded-2xl border border-white/15 bg-gray-950/75 p-4 backdrop-blur-sm sm:block">
-                    <div className="text-2xl font-semibold tracking-tight">4 h</div>
-                    <div className="mt-1 text-[11px] leading-relaxed text-gray-300">de recorrido</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="relative order-1 flex flex-col justify-center p-7 sm:p-10 md:p-12 lg:order-2 lg:p-14 xl:p-16">
-                <div className="mb-6 flex items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/10 text-white"><MonitorPlay className="h-4 w-4" aria-hidden="true" /></span>
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400">Innovación dinámica</span>
-                </div>
-                <h2 className="max-w-xl text-3xl font-semibold tracking-tight text-white sm:text-4xl md:text-5xl md:leading-[1.04]">Tu mensaje también puede moverse.</h2>
-                <p className="mt-5 max-w-xl text-base leading-relaxed text-gray-300 md:text-lg">Llevá tu campaña por los principales puntos del Gran Mendoza con un formato digital de alto impacto, flexible y difícil de ignorar.</p>
-
-                <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3.5">
-                    <div className="text-sm font-semibold text-white">Lunes a viernes</div>
-                    <div className="mt-1 text-xs text-gray-400">09:00–20:00 · recorrido de 4 horas</div>
-                  </div>
-                  <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3.5">
-                    <div className="text-sm font-semibold text-white">Contenido dinámico</div>
-                    <div className="mt-1 text-xs text-gray-400">Spot de 10 segundos · formatos MP4, AVI o JPG</div>
-                  </div>
-                </div>
-
-                <div className="mt-8 border-t border-white/10 pt-6">
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-gray-400">
-                    <span className="font-medium text-gray-300">Recorrido predeterminado</span>
-                    <span aria-hidden="true">·</span>
-                    <span>Mendoza</span>
-                    <span aria-hidden="true">·</span>
-                    <span>Godoy Cruz</span>
-                    <span aria-hidden="true">·</span>
-                    <span>Luján de Cuyo</span>
-                    <span aria-hidden="true">·</span>
-                    <span>Guaymallén</span>
-                  </div>
-                  <p className="mt-3 text-xs leading-relaxed text-gray-500">Mendoza Plaza Shopping · Nudo Vial · Arístides · Portones · Km Cero · Casa de Gobierno · Chacras · Palmares · Carrodilla</p>
-                </div>
-
-                <div className="mt-8 flex flex-wrap items-center gap-4">
-                  <Button onClick={() => navigate('/inventario?tipo=led_movil')} size="lg" className="h-11 rounded-full bg-white px-6 text-sm font-medium text-gray-950 hover:bg-gray-100">Ver recorrido <ArrowRight className="h-4 w-4" /></Button>
-                  <span className="text-xs text-gray-500">También disponible para recorridos personalizados</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FINAL CTA: inspired by Shadcn Space CTA 01, adapted to the site's neutral visual system. */}
-      <section className="px-4 sm:px-6 lg:px-8 pt-8 pb-20 md:pt-12 md:pb-24">
-        <div className="max-w-7xl mx-auto">
-          <div className="relative overflow-hidden min-h-[320px] md:min-h-[360px] flex items-center justify-center px-6 py-12 md:px-12 md:py-16 rounded-3xl border border-gray-200 bg-gradient-to-br from-gray-50 via-white to-gray-100">
-            <div className="relative z-10 flex flex-col items-center gap-6 max-w-2xl mx-auto text-center">
-              <div className="flex flex-col items-center gap-3"><h2 className="text-3xl md:text-5xl font-semibold tracking-tight leading-tight text-gray-950">Encontrá el soporte adecuado para tu marca</h2><p className="max-w-xl mx-auto text-base md:text-lg leading-relaxed text-gray-600">Explorá nuestra cobertura y descubrí dónde están los soportes que mejor encajan con tu campaña.</p></div>
-              <Link to="/inventario" className={cn(buttonStyles({ size: 'lg' }), 'group relative h-12 w-fit overflow-hidden rounded-full pl-6 pr-14 text-sm font-medium transition-all duration-300 hover:pl-14 hover:pr-6')}><span className="relative z-10 transition-all duration-300">Explorar inventario</span><span className="absolute right-1 flex h-10 w-10 items-center justify-center rounded-full bg-white text-gray-950 transition-all duration-300 group-hover:right-[calc(100%-2.75rem)]"><ArrowRight className="h-4 w-4" /></span></Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <section id="plazas" className="bg-white px-4 sm:px-6 lg:px-8 py-14 md:py-20 border-b border-gray-100"><div className="max-w-7xl mx-auto"><div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white"><div className="grid md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]"><div className="relative min-h-[280px] md:min-h-[420px] bg-gray-100 overflow-hidden"><img src="/images/soportes-tradicionales-mendoza.webp" alt="Soportes publicitarios en Mendoza" className="absolute inset-0 h-full w-full object-cover" /><div className="absolute inset-0 bg-black/10" /><div className="absolute left-5 top-5 inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/90 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-800"><MapPin className="h-3.5 w-3.5" aria-hidden="true" />Cobertura nacional</div></div><div className="flex flex-col justify-center p-7 sm:p-10 md:p-12 lg:p-14"><div className="mb-5 flex items-center gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-800"><MapPin className="h-4 w-4" aria-hidden="true" /></span><span className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Plazas disponibles</span></div><h2 className="max-w-xl text-3xl font-semibold tracking-tight text-gray-950 md:text-4xl">Elegí dónde querés estar</h2><p className="mt-4 max-w-xl text-base leading-relaxed text-gray-600 md:text-lg">Explorá nuestra cobertura y encontrá soportes estratégicos según la ciudad y el alcance de tu campaña.</p><div className="mt-8 grid gap-3 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2"><button onClick={() => navigate('/inventario?plaza=mendoza')} className="group flex items-center justify-between gap-4 rounded-xl border border-gray-200 px-4 py-4 text-left transition-colors hover:border-gray-900 hover:bg-gray-50"><span><span className="block text-base font-semibold text-gray-950">Mendoza</span><span className="mt-1 block text-xs leading-relaxed text-gray-500">18 soportes estratégicos</span></span><MoveRight className="h-4 w-4 shrink-0 text-gray-500 transition-transform group-hover:translate-x-1 group-hover:text-gray-950" aria-hidden="true" /></button><button onClick={() => navigate('/inventario?plaza=buenos-aires')} className="group flex items-center justify-between gap-4 rounded-xl border border-gray-200 px-4 py-4 text-left transition-colors hover:border-gray-900 hover:bg-gray-50"><span><span className="block text-base font-semibold text-gray-950">Buenos Aires</span><span className="mt-1 block text-xs leading-relaxed text-gray-500">10 soportes estratégicos</span></span><MoveRight className="h-4 w-4 shrink-0 text-gray-500 transition-transform group-hover:translate-x-1 group-hover:text-gray-950" aria-hidden="true" /></button></div></div></div></div></section>
+      {featuredItems.length > 0 && (<section className="bg-gray-50 border-b border-gray-100 py-16 md:py-20"><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between"><div className="max-w-2xl"><div className="mb-4 flex items-center gap-3"><span className="h-px w-8 bg-gray-900" /><span className="text-[11px] font-bold uppercase tracking-[0.16em] text-gray-500">Inventario seleccionado</span></div><h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-gray-950">Soportes destacados</h2><p className="mt-3 text-base md:text-lg leading-relaxed text-gray-600">Una selección de ubicaciones con información real de disponibilidad, formato y características.</p></div><div className="flex items-center gap-3"><Link to="/inventario" className="hidden sm:inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-gray-700 hover:text-gray-950">Ver inventario completo <MoveRight className="h-4 w-4" /></Link><div className="flex items-center gap-2" aria-label="Controles de soportes destacados"><button type="button" onClick={() => scrollFeatured('prev')} aria-label="Soportes anteriores" className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 transition-colors hover:border-gray-950 hover:text-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/15"><ChevronLeft className="h-4 w-4" /></button><button type="button" onClick={() => scrollFeatured('next')} aria-label="Soportes siguientes" className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 transition-colors hover:border-gray-950 hover:text-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/15"><ChevronRight className="h-4 w-4" /></button></div></div></div></div><div className="mt-10 px-4 sm:px-6 lg:px-8"><div ref={featuredCarouselRef} className="mx-auto flex max-w-7xl snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain scroll-smooth pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" style={{ touchAction: 'pan-x' }} aria-label="Carrusel de soportes destacados">{featuredItems.map((item) => (<div key={item.canonical_id} data-featured-card className="w-[calc(100vw-2rem)] max-w-[390px] flex-none snap-start sm:w-[min(390px,68vw)] lg:w-[380px]"><SupportCard item={item} variant="showcase" /></div>))}</div></div><div className="mt-3 flex justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><p className="text-[11px] font-medium text-gray-500">Deslizá horizontalmente para explorar</p><Link to="/inventario" className="sm:hidden inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-gray-700">Ver todo <MoveRight className="h-4 w-4" /></Link></div></section>)}
+      <section className="w-full bg-white py-16 md:py-20"><div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8"><div className="overflow-hidden rounded-3xl border border-gray-200 bg-gray-50"><div className="grid lg:grid-cols-[1.08fr_0.92fr]"><div className="relative min-h-[360px] overflow-hidden lg:min-h-[500px]"><img src="/images/led-movil-feature.webp" alt="Camión LED Móvil recorriendo Mendoza" className="absolute inset-0 h-full w-full object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" /><div className="absolute left-5 top-5 rounded-full border border-white/80 bg-white/95 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-900">LED Móvil · Mendoza</div><div className="absolute bottom-5 left-5 right-5"><div className="max-w-md rounded-2xl border border-white/20 bg-white/95 p-4 shadow-sm"><div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500">Recorrido predeterminado</div><div className="mt-2 text-sm font-medium leading-relaxed text-gray-900">Mendoza Plaza Shopping · Nudo Vial · Arístides · Portones · Km Cero · Casa de Gobierno · Chacras · Palmares · Carrodilla</div></div></div></div><div className="flex flex-col justify-center p-7 sm:p-10 md:p-12 lg:p-14"><div className="flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 text-gray-800"><MonitorPlay className="h-4 w-4" aria-hidden="true" /></span><span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">Innovación dinámica</span></div><h2 className="mt-5 max-w-lg text-3xl font-semibold tracking-tight text-gray-950 sm:text-4xl md:text-5xl md:leading-[1.05]">LED Móvil Mendoza</h2><p className="mt-4 max-w-lg text-base leading-relaxed text-gray-600 md:text-lg">Llevá tu campaña por los principales puntos del Gran Mendoza con tres pantallas digitales de alta resolución y un recorrido flexible.</p><div className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-gray-200 bg-gray-200"><div className="bg-white p-4"><div className="text-2xl font-semibold tracking-tight text-gray-950">3</div><div className="mt-1 text-xs text-gray-500">pantallas digitales</div></div><div className="bg-white p-4"><div className="text-2xl font-semibold tracking-tight text-gray-950">180+</div><div className="mt-1 text-xs text-gray-500">salidas diarias</div></div><div className="bg-white p-4"><div className="text-2xl font-semibold tracking-tight text-gray-950">4 h</div><div className="mt-1 text-xs text-gray-500">por recorrido</div></div><div className="bg-white p-4"><div className="text-2xl font-semibold tracking-tight text-gray-950">10 s</div><div className="mt-1 text-xs text-gray-500">duración del spot</div></div></div><div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 border-t border-gray-200 pt-5 text-xs text-gray-500"><span><strong className="font-semibold text-gray-700">Lun–Vie</strong> · 09:00–20:00</span><span>MP4 · AVI · JPG</span></div><div className="mt-8 flex flex-wrap items-center gap-4"><Button onClick={() => navigate('/inventario?tipo=led_movil')} size="lg" className="h-11 rounded-full px-6 text-sm font-medium">Ver recorrido <ArrowRight className="h-4 w-4" /></Button><span className="text-xs text-gray-500">Recorridos personalizados disponibles</span></div></div></div></div></div></section>
+      <section className="px-4 sm:px-6 lg:px-8 pt-8 pb-20 md:pt-12 md:pb-24"><div className="max-w-7xl mx-auto"><div className="relative overflow-hidden min-h-[320px] md:min-h-[360px] flex items-center justify-center px-6 py-12 md:px-12 md:py-16 rounded-3xl border border-gray-200 bg-gradient-to-br from-gray-50 via-white to-gray-100"><div className="relative z-10 flex flex-col items-center gap-6 max-w-2xl mx-auto text-center"><div className="flex flex-col items-center gap-3"><h2 className="text-3xl md:text-5xl font-semibold tracking-tight leading-tight text-gray-950">Encontrá el soporte adecuado para tu marca</h2><p className="max-w-xl mx-auto text-base md:text-lg leading-relaxed text-gray-600">Explorá nuestra cobertura y descubrí dónde están los soportes que mejor encajan con tu campaña.</p></div><Link to="/inventario" className={cn(buttonStyles({ size: 'lg' }), 'group relative h-12 w-fit overflow-hidden rounded-full pl-6 pr-14 text-sm font-medium transition-all duration-300 hover:pl-14 hover:pr-6')}><span className="relative z-10 transition-all duration-300">Explorar inventario</span><span className="absolute right-1 flex h-10 w-10 items-center justify-center rounded-full bg-white text-gray-950 transition-all duration-300 group-hover:right-[calc(100%-2.75rem)]"><ArrowRight className="h-4 w-4" /></span></Link></div></div></div></section>
     </div>
   );
 }
