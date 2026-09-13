@@ -15,7 +15,7 @@ export default function Home() {
   return (
     <div className="flex flex-col w-full">
       {/* HERO SECTION */}
-      <section className="relative min-h-[600px] md:min-h-[680px] w-full overflow-hidden border-b border-gray-100 flex items-center">
+      <section className="relative h-screen min-h-[600px] w-full overflow-hidden border-b border-gray-100 flex items-center">
         <div className="absolute inset-0 z-0">
           <img src="/images/home.webp" alt="Vía Pública" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/35" />
@@ -38,7 +38,6 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Search: compact discovery action inspired by the Hero 31 composition. */}
           <div className="absolute left-4 right-4 bottom-16 md:bottom-[68px] md:left-1/2 md:right-auto md:-translate-x-1/2 w-auto md:w-[min(760px,calc(100%-3rem))]">
             <form
               onSubmit={(event) => {
@@ -69,7 +68,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Plain semantic footer: no blur, gradient or decorative effect. */}
         <div className="absolute inset-x-0 bottom-0 z-10 bg-white border-t border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
             <h2 className="text-[11px] sm:text-xs font-semibold tracking-[0.14em] uppercase text-gray-700 text-center">
