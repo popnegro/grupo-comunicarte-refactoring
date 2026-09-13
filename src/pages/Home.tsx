@@ -16,15 +16,13 @@ export default function Home() {
     <div className="flex flex-col w-full">
       {/* HERO SECTION */}
       <section className="relative min-h-[680px] md:min-h-[760px] w-full overflow-hidden border-b border-gray-100 flex items-center">
-        {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img src="/images/home.webp" alt="Vía Pública" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/30" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/10 to-black/45" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/10 to-black/55" />
         </div>
 
-        {/* Hero content follows the Hero 31 composition: strong centered message + floating discovery bar. */}
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-32 md:pt-28 md:pb-36">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-32 md:pt-24 md:pb-36">
           <div className="max-w-4xl mx-auto text-center text-white">
             <div className="inline-flex items-center px-3 py-1 mb-7 rounded-full bg-white/80 border border-gray-200 backdrop-blur-md">
               <span className="text-xs font-semibold tracking-widest uppercase text-gray-800">
@@ -32,8 +30,8 @@ export default function Home() {
               </span>
             </div>
 
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.98] mb-7">
-              Tu marca, en los lugares<br className="hidden sm:block" /> que todos ven.
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.98] mb-7 max-w-5xl mx-auto">
+              Tu marca, en los lugares que todos ven.
             </h1>
 
             <p className="mx-auto max-w-2xl text-lg md:text-xl text-white/90 font-medium leading-relaxed">
@@ -41,41 +39,43 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Floating discovery/search bar */}
+          {/* Search: discovery action remains in the hero without duplicating the plaza cards below. */}
           <div className="absolute left-4 right-4 bottom-7 md:bottom-10 md:left-1/2 md:right-auto md:-translate-x-1/2 w-auto md:w-[min(920px,calc(100%-3rem))]">
-            <div className="rounded-2xl md:rounded-3xl bg-white/95 backdrop-blur-md border border-white shadow-2xl p-2 md:p-3">
-              <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-2 md:gap-3 items-stretch">
-                <Link
-                  to="/inventario?plaza=mendoza"
-                  className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-left hover:border-black transition-colors"
-                >
-                  <MapPin className="w-5 h-5 shrink-0 text-gray-500" />
-                  <span className="min-w-0">
-                    <span className="block text-[10px] font-semibold tracking-widest uppercase text-gray-400">Plaza</span>
-                    <span className="block text-sm font-semibold text-gray-900 truncate">Mendoza</span>
-                  </span>
-                </Link>
-
-                <Link
-                  to="/inventario?plaza=buenos-aires"
-                  className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-left hover:border-black transition-colors"
-                >
-                  <Search className="w-5 h-5 shrink-0 text-gray-500" />
-                  <span className="min-w-0">
-                    <span className="block text-[10px] font-semibold tracking-widest uppercase text-gray-400">Explorar</span>
-                    <span className="block text-sm font-semibold text-gray-900 truncate">Buenos Aires</span>
-                  </span>
-                </Link>
-
-                <Link
-                  to="/inventario"
-                  className={buttonStyles({ size: 'lg', className: 'h-full min-h-14 rounded-xl px-6 text-base whitespace-nowrap' })}
-                >
-                  Explorar inventario
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                const query = new FormData(event.currentTarget).get('q')?.toString().trim();
+                navigate(query ? `/inventario?q=${encodeURIComponent(query)}` : '/inventario');
+              }}
+              className="rounded-2xl md:rounded-3xl bg-white/95 backdrop-blur-md border border-white shadow-2xl p-2 md:p-3"
+            >
+              <div className="flex flex-col sm:flex-row gap-2 md:gap-3 items-stretch">
+                <label className="flex min-h-14 flex-1 items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 focus-within:border-black focus-within:ring-2 focus-within:ring-black/10">
+                  <Search className="w-5 h-5 shrink-0 text-gray-500" aria-hidden="true" />
+                  <span className="sr-only">Buscar soportes</span>
+                  <input
+                    name="q"
+                    type="search"
+                    autoComplete="off"
+                    placeholder="Buscá por ubicación, soporte o ciudad"
+                    className="min-w-0 w-full bg-transparent text-sm md:text-base text-gray-900 placeholder:text-gray-400 outline-none"
+                  />
+                </label>
+                <Button type="submit" size="lg" className="min-h-14 rounded-xl px-7 text-base whitespace-nowrap">
+                  Buscar
                   <ArrowRight className="w-5 h-5" />
-                </Link>
+                </Button>
               </div>
-            </div>
+            </form>
+          </div>
+        </div>
+
+        {/* Semantic section label at the visual footer of the hero. */}
+        <div className="absolute inset-x-0 bottom-0 z-10 border-t border-white/20 bg-black/20 backdrop-blur-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <h2 className="text-xs sm:text-sm font-semibold tracking-[0.18em] uppercase text-white/85 text-center">
+              Vía pública que conecta marcas con audiencias
+            </h2>
           </div>
         </div>
       </section>
@@ -87,7 +87,6 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Elegí dónde querés estar</h2>
             <p className="text-gray-600 text-lg">Explorá nuestra cobertura geográfica en puntos clave del país.</p>
           </div>
-          
           <div className="grid md:grid-cols-2 gap-8">
             <button onClick={() => navigate('/inventario?plaza=mendoza')} className="group flex flex-col items-start text-left bg-white p-10 rounded-2xl border border-gray-200 hover:border-black transition-colors shadow-sm hover:shadow-md">
               <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-black group-hover:text-white transition-colors"><MapPin className="w-6 h-6" /></div>
@@ -95,7 +94,6 @@ export default function Home() {
               <p className="text-gray-500 mb-8">18 soportes estratégicos incluyendo tradicionales y LED.</p>
               <span className="flex items-center text-sm font-semibold tracking-wide uppercase mt-auto gap-2 group-hover:gap-3 transition-all">Ver plaza <MoveRight className="w-4 h-4" /></span>
             </button>
-            
             <button onClick={() => navigate('/inventario?plaza=buenos-aires')} className="group flex flex-col items-start text-left bg-white p-10 rounded-2xl border border-gray-200 hover:border-black transition-colors shadow-sm hover:shadow-md">
               <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-black group-hover:text-white transition-colors"><MapPin className="w-6 h-6" /></div>
               <h3 className="text-2xl font-bold mb-2">Buenos Aires</h3>
@@ -116,7 +114,6 @@ export default function Home() {
             </div>
             <Link to="/inventario" className="hidden md:flex items-center text-sm font-semibold tracking-wide uppercase gap-2 hover:gap-3 transition-all">Ver inventario completo <MoveRight className="w-4 h-4" /></Link>
           </div>
-
           <div className="flex overflow-x-auto pb-8 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 snap-x snap-mandatory scrollbar-hide gap-6" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {featuredItems.map(item => {
               const isReservado = getDisponibilidad(item) === 'reservado';
@@ -154,8 +151,6 @@ export default function Home() {
           <div className="w-full md:w-1/3 aspect-square bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center relative"><div className="absolute inset-0 flex items-center justify-center opacity-20"><svg viewBox="0 0 100 100" className="w-full h-full stroke-white fill-none" strokeWidth="1" strokeDasharray="4 4"><path d="M10,90 Q30,10 50,50 T90,10" /></svg></div><MonitorPlay className="w-24 h-24 text-white/50" /></div>
         </div>
       </section>
-      
-      {/* INVENTARIO CALLOUT */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 border-t border-gray-100 text-center">
         <h2 className="text-3xl font-bold tracking-tight mb-4">Encontrá el soporte adecuado para tu marca</h2>
         <p className="text-gray-600 mb-8 max-w-2xl mx-auto">Explorá nuestra cobertura geográfica y descubrí dónde están nuestros soportes.</p>
