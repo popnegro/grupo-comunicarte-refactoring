@@ -14,8 +14,8 @@ export default function Home() {
 
   return (
     <div className="flex flex-col w-full">
-      {/* HERO SECTION */}
-      <section className="relative h-screen min-h-[600px] w-full overflow-hidden border-b border-gray-100 flex items-center">
+      {/* HERO SECTION: viewport height minus the 5rem navbar. */}
+      <section className="relative h-[calc(100vh-5rem)] min-h-0 w-full overflow-hidden border-b border-gray-100 flex items-center">
         <div className="absolute inset-0 z-0">
           <img src="/images/home.webp" alt="Vía Pública" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/35" />
