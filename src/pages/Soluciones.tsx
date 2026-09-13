@@ -1,62 +1,76 @@
 import { ArrowRight, Lightbulb, TrendingUp, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { buttonStyles } from '../components/ui/Button';
+import { InteriorHero } from '../components/layout/InteriorHero';
 
 export default function Soluciones() {
   const soluciones = [
     {
+      index: '01',
       title: 'Campañas de Cobertura Masiva',
       description: 'Maximizamos el alcance de tu marca utilizando circuitos estratégicos de cartelería tradicional en los principales nudos viales y accesos.',
-      icon: Zap
+      icon: Zap,
+      label: 'Vía pública',
     },
     {
+      index: '02',
       title: 'Activaciones Digitales DOOH',
-      description: 'Formatos dinámicos en pantallas LED de alta resolución. Permiten actualización de creatividades en tiempo real y comunicación por franjas horarias.',
-      icon: Lightbulb
+      description: 'Formatos dinámicos en pantallas LED de alta resolución. Permiten actualizar creatividades en tiempo real y comunicar por franjas horarias.',
+      icon: Lightbulb,
+      label: 'Digital',
     },
     {
-      title: 'Circuitos Móviles (Camiones LED)',
+      index: '03',
+      title: 'Circuitos Móviles',
       description: 'Llevamos tu mensaje directamente a zonas de alto tránsito peatonal y vehicular, ideal para lanzamientos, eventos y posicionamiento de marca en movimiento.',
-      icon: TrendingUp
-    }
+      icon: TrendingUp,
+      label: 'LED Móvil',
+    },
   ];
 
   return (
-    <div className="flex flex-col w-full bg-white">
-      <section 
-        className="relative pt-32 pb-24 px-4 sm:px-6 lg:px-8 border-b border-gray-100 bg-gray-50"
-        style={{ backgroundImage: 'url(/brand/pattern-light.webp)', backgroundRepeat: 'repeat' }}
-      >
-        <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px]"></div>
-        <div className="relative max-w-7xl mx-auto z-10 text-center">
-          <span className="text-red-600 font-bold tracking-wider uppercase text-sm mb-4 block">Nuestros Servicios</span>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-6">Soluciones</h1>
-          <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
-            Grupo Comunicarte ofrece soluciones de comunicación y publicidad exterior (OOH) y digital (DOOH), diseñadas para conectar tu marca con la audiencia correcta.
-          </p>
-        </div>
-      </section>
+    <div className="flex w-full flex-col bg-white">
+      <InteriorHero
+        eyebrow="Soluciones de comunicación exterior"
+        title="Medios que conectan tu marca con la ciudad."
+        description="Soluciones OOH y DOOH diseñadas para combinar alcance, ubicación y tecnología según el objetivo de cada campaña."
+        align="left"
+        actions={<Link to="/inventario" className={buttonStyles({ size: 'default' })}>Explorar inventario <ArrowRight className="h-4 w-4" /></Link>}
+      />
 
-      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          {soluciones.map((solucion, idx) => {
-            const Icon = solucion.icon;
-            return (
-              <div key={idx} className="flex flex-col items-start bg-gray-50 p-8 rounded-3xl border border-gray-100">
-                <div className="w-14 h-14 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mb-6 border border-red-100">
-                  <Icon className="w-7 h-7" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{solucion.title}</h3>
-                <p className="text-gray-500 leading-relaxed mb-6 flex-grow">{solucion.description}</p>
-              </div>
-            );
-          })}
-        </div>
-        <div className="mt-16 text-center">
-          <Link to="/inventario" className={buttonStyles({ size: "lg", className: "rounded-full" })}>
-            Explorar Inventario
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Link>
+      <section className="section-space bg-[#F9F9F9]">
+        <div className="page-container">
+          <div className="mb-10 max-w-2xl border-b border-gray-200 pb-6">
+            <p className="text-eyebrow">Cómo podemos ayudarte</p>
+            <h2 className="text-section-title mt-3">Elegí el formato según tu objetivo.</h2>
+            <p className="text-body mt-3">Tres líneas de medios, una misma lógica: ubicación estratégica, claridad comercial y presencia medible.</p>
+          </div>
+
+          <div className="divide-y divide-gray-200 border-y border-gray-200">
+            {soluciones.map((solucion) => {
+              const Icon = solucion.icon;
+              return (
+                <article key={solucion.index} className="grid gap-6 py-8 md:grid-cols-[72px_minmax(0,1fr)_minmax(260px,0.8fr)] md:items-start md:gap-10">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-950 text-white">
+                    <Icon className="h-4 w-4" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <div className="mb-2 flex items-center gap-3">
+                      <span className="text-eyebrow text-gray-400">{solucion.index}</span>
+                      <span className="text-eyebrow">{solucion.label}</span>
+                    </div>
+                    <h3 className="text-card-title">{solucion.title}</h3>
+                  </div>
+                  <p className="text-body max-w-xl">{solucion.description}</p>
+                </article>
+              );
+            })}
+          </div>
+
+          <div className="mt-10 flex flex-wrap items-center gap-4">
+            <Link to="/inventario" className={buttonStyles({ size: 'default' })}>Explorar inventario <ArrowRight className="h-4 w-4" /></Link>
+            <Link to="/contacto" className={buttonStyles({ variant: 'outline', size: 'default' })}>Hablar con ventas</Link>
+          </div>
         </div>
       </section>
     </div>
