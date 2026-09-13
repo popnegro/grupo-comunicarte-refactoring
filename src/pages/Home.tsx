@@ -103,12 +103,7 @@ export default function Home() {
           </div>
 
           <div className="mt-10 px-4 sm:px-6 lg:px-8">
-            <div
-              ref={featuredCarouselRef}
-              className="mx-auto flex max-w-7xl snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain scroll-smooth pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              style={{ touchAction: 'pan-x' }}
-              aria-label="Carrusel de soportes destacados"
-            >
+            <div ref={featuredCarouselRef} className="mx-auto flex max-w-7xl snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain scroll-smooth pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" style={{ touchAction: 'pan-x' }} aria-label="Carrusel de soportes destacados">
               {featuredItems.map((item) => (
                 <div key={item.canonical_id} data-featured-card className="w-[calc(100vw-2rem)] max-w-[390px] flex-none snap-start sm:w-[min(390px,68vw)] lg:w-[380px]">
                   <SupportCard item={item} variant="showcase" />
@@ -124,16 +119,72 @@ export default function Home() {
         </section>
       )}
 
-      {/* LED MÓVIL SECTION */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="bg-black text-white rounded-3xl p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-12 overflow-hidden relative">
-          <div className="relative z-10 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full bg-white/10 border border-white/20"><MonitorPlay className="w-4 h-4" /><span className="text-xs font-semibold tracking-widest uppercase">Innovación Dinámica</span></div>
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 leading-tight">Tu mensaje también puede moverse.</h2>
-            <div className="space-y-4 mb-10 text-gray-300"><p className="flex items-center gap-3"><span className="font-semibold text-white">LED Móvil Mendoza</span></p><p className="flex items-center gap-3"><span className="w-1.5 h-1.5 bg-gray-500 rounded-full"></span>Lunes a Viernes</p><p className="flex items-center gap-3"><span className="w-1.5 h-1.5 bg-gray-500 rounded-full"></span>09:00–20:00</p><p className="flex items-center gap-3"><span className="w-1.5 h-1.5 bg-gray-500 rounded-full"></span>Duración del recorrido: 4 horas</p></div>
-            <Button onClick={() => navigate('/inventario?tipo=led_movil')} variant="secondary" className="bg-white text-black hover:bg-gray-100">Ver recorrido <ArrowRight className="w-4 h-4" /></Button>
+      {/* LED MÓVIL SECTION: inspired by Shadcn Space Feature 05, using the real LED mobile asset and verified route data. */}
+      <section className="w-full bg-white py-16 md:py-20">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="relative overflow-hidden rounded-3xl border border-gray-200 bg-gray-950 text-white">
+            <div className="grid items-stretch lg:grid-cols-[1.02fr_0.98fr]">
+              <div className="relative order-2 min-h-[430px] overflow-hidden border-t border-white/10 bg-gray-900 lg:order-1 lg:min-h-[560px] lg:border-t-0 lg:border-r">
+                <img src="/images/led-movil-feature.webp" alt="Camión LED Móvil recorriendo Mendoza" className="absolute inset-0 h-full w-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/10 to-transparent" />
+                <div className="absolute left-5 top-5 rounded-full border border-white/20 bg-gray-950/75 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white backdrop-blur-sm">LED Móvil · Mendoza</div>
+                <div className="absolute bottom-5 left-5 right-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  <div className="rounded-2xl border border-white/15 bg-gray-950/75 p-4 backdrop-blur-sm">
+                    <div className="text-2xl font-semibold tracking-tight">3</div>
+                    <div className="mt-1 text-[11px] leading-relaxed text-gray-300">pantallas digitales</div>
+                  </div>
+                  <div className="rounded-2xl border border-white/15 bg-gray-950/75 p-4 backdrop-blur-sm">
+                    <div className="text-2xl font-semibold tracking-tight">180+</div>
+                    <div className="mt-1 text-[11px] leading-relaxed text-gray-300">salidas diarias</div>
+                  </div>
+                  <div className="hidden rounded-2xl border border-white/15 bg-gray-950/75 p-4 backdrop-blur-sm sm:block">
+                    <div className="text-2xl font-semibold tracking-tight">4 h</div>
+                    <div className="mt-1 text-[11px] leading-relaxed text-gray-300">de recorrido</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative order-1 flex flex-col justify-center p-7 sm:p-10 md:p-12 lg:order-2 lg:p-14 xl:p-16">
+                <div className="mb-6 flex items-center gap-3">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/10 text-white"><MonitorPlay className="h-4 w-4" aria-hidden="true" /></span>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400">Innovación dinámica</span>
+                </div>
+                <h2 className="max-w-xl text-3xl font-semibold tracking-tight text-white sm:text-4xl md:text-5xl md:leading-[1.04]">Tu mensaje también puede moverse.</h2>
+                <p className="mt-5 max-w-xl text-base leading-relaxed text-gray-300 md:text-lg">Llevá tu campaña por los principales puntos del Gran Mendoza con un formato digital de alto impacto, flexible y difícil de ignorar.</p>
+
+                <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3.5">
+                    <div className="text-sm font-semibold text-white">Lunes a viernes</div>
+                    <div className="mt-1 text-xs text-gray-400">09:00–20:00 · recorrido de 4 horas</div>
+                  </div>
+                  <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3.5">
+                    <div className="text-sm font-semibold text-white">Contenido dinámico</div>
+                    <div className="mt-1 text-xs text-gray-400">Spot de 10 segundos · formatos MP4, AVI o JPG</div>
+                  </div>
+                </div>
+
+                <div className="mt-8 border-t border-white/10 pt-6">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-gray-400">
+                    <span className="font-medium text-gray-300">Recorrido predeterminado</span>
+                    <span aria-hidden="true">·</span>
+                    <span>Mendoza</span>
+                    <span aria-hidden="true">·</span>
+                    <span>Godoy Cruz</span>
+                    <span aria-hidden="true">·</span>
+                    <span>Luján de Cuyo</span>
+                    <span aria-hidden="true">·</span>
+                    <span>Guaymallén</span>
+                  </div>
+                  <p className="mt-3 text-xs leading-relaxed text-gray-500">Mendoza Plaza Shopping · Nudo Vial · Arístides · Portones · Km Cero · Casa de Gobierno · Chacras · Palmares · Carrodilla</p>
+                </div>
+
+                <div className="mt-8 flex flex-wrap items-center gap-4">
+                  <Button onClick={() => navigate('/inventario?tipo=led_movil')} size="lg" className="h-11 rounded-full bg-white px-6 text-sm font-medium text-gray-950 hover:bg-gray-100">Ver recorrido <ArrowRight className="h-4 w-4" /></Button>
+                  <span className="text-xs text-gray-500">También disponible para recorridos personalizados</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="w-full md:w-1/3 aspect-square bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center relative"><div className="absolute inset-0 flex items-center justify-center opacity-20"><svg viewBox="0 0 100 100" className="w-full h-full stroke-white fill-none" strokeWidth="1" strokeDasharray="4 4"><path d="M10,90 Q30,10 50,50 T90,10" /></svg></div><MonitorPlay className="w-24 h-24 text-white/50" /></div>
         </div>
       </section>
 
