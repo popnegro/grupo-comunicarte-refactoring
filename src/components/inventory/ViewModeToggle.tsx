@@ -10,51 +10,30 @@ interface ViewModeToggleProps {
   className?: string;
 }
 
-export const ViewModeToggle: React.FC<ViewModeToggleProps> = ({
-  viewMode,
-  onViewModeChange,
-  className,
-}) => {
-  return (
-    <div
-      role="radiogroup"
-      aria-label="Modo de visualización del inventario"
-      className={cn(
-        'inline-flex items-center p-1 bg-white/95 backdrop-blur-md border border-gray-200/90 rounded-2xl shadow-sm select-none',
-        className
-      )}
-    >
+export const ViewModeToggle: React.FC<ViewModeToggleProps> = ({ viewMode, onViewModeChange, className }) => (
+  <div
+    role="radiogroup"
+    aria-label="Modo de visualización del inventario"
+    className={cn('inline-flex items-center rounded-lg border border-gray-200 bg-white p-1 select-none', className)}
+  >
+    {([
+      { mode: 'mapa' as const, label: 'Mapa', Icon: Map },
+      { mode: 'catalogo' as const, label: 'Catálogo', Icon: LayoutGrid },
+    ]).map(({ mode, label, Icon }) => (
       <button
+        key={mode}
         type="button"
         role="radio"
-        aria-checked={viewMode === 'mapa'}
-        onClick={() => onViewModeChange('mapa')}
+        aria-checked={viewMode === mode}
+        onClick={() => onViewModeChange(mode)}
         className={cn(
-          'flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition-all min-h-[36px] sm:min-h-[38px] active:scale-[0.98]',
-          viewMode === 'mapa'
-            ? 'bg-gray-950 text-white shadow-sm'
-            : 'text-gray-600 hover:text-gray-950 hover:bg-gray-100/70'
+          'flex min-h-9 items-center justify-center gap-1.5 rounded-md px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20',
+          viewMode === mode ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-950'
         )}
       >
-        <Map className={cn('w-3.5 h-3.5', viewMode === 'mapa' ? 'text-emerald-400' : 'text-gray-500')} aria-hidden="true" />
-        <span>Mapa</span>
+        <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+        <span>{label}</span>
       </button>
-
-      <button
-        type="button"
-        role="radio"
-        aria-checked={viewMode === 'catalogo'}
-        onClick={() => onViewModeChange('catalogo')}
-        className={cn(
-          'flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition-all min-h-[36px] sm:min-h-[38px] active:scale-[0.98]',
-          viewMode === 'catalogo'
-            ? 'bg-gray-950 text-white shadow-sm'
-            : 'text-gray-600 hover:text-gray-950 hover:bg-gray-100/70'
-        )}
-      >
-        <LayoutGrid className={cn('w-3.5 h-3.5', viewMode === 'catalogo' ? 'text-emerald-400' : 'text-gray-500')} aria-hidden="true" />
-        <span>Catálogo</span>
-      </button>
-    </div>
-  );
-};
+    ))}
+  </div>
+);
