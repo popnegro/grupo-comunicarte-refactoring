@@ -1,10 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
 import { Button, buttonStyles } from '../components/ui/Button';
-import { Badge } from '../components/ui/Badge';
 import { ArrowRight, ChevronLeft, ChevronRight, MapPin, MonitorPlay, MoveRight, Search } from 'lucide-react';
 import { fixedLocations, mobileRoutes } from '../data/inventory';
-import { InventoryItem, getDisponibilidad } from '../types';
+import { InventoryItem } from '../types';
 import { cn } from '../lib/utils';
 import { SupportCard } from '../components/inventory/SupportCard';
 
@@ -103,17 +102,19 @@ export default function Home() {
             </div>
           </div>
 
-          <div
-            ref={featuredCarouselRef}
-            className="mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain scroll-smooth px-4 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-6 lg:px-[max(2rem,calc((100vw-80rem)/2))]"
-            style={{ touchAction: 'pan-x' }}
-            aria-label="Carrusel de soportes destacados"
-          >
-            {featuredItems.map((item) => (
-              <div key={item.canonical_id} data-featured-card className="w-[calc(100vw-2rem)] max-w-[390px] flex-none snap-start sm:w-[min(390px,68vw)] lg:w-[380px]">
-                <SupportCard item={item} variant="showcase" />
-              </div>
-            ))}
+          <div className="mt-10 px-4 sm:px-6 lg:px-8">
+            <div
+              ref={featuredCarouselRef}
+              className="mx-auto flex max-w-7xl snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain scroll-smooth pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              style={{ touchAction: 'pan-x' }}
+              aria-label="Carrusel de soportes destacados"
+            >
+              {featuredItems.map((item) => (
+                <div key={item.canonical_id} data-featured-card className="w-[calc(100vw-2rem)] max-w-[390px] flex-none snap-start sm:w-[min(390px,68vw)] lg:w-[380px]">
+                  <SupportCard item={item} variant="showcase" />
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="mt-3 flex justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -142,7 +143,7 @@ export default function Home() {
           <div className="relative overflow-hidden min-h-[320px] md:min-h-[360px] flex items-center justify-center px-6 py-12 md:px-12 md:py-16 rounded-3xl border border-gray-200 bg-gradient-to-br from-gray-50 via-white to-gray-100">
             <div className="relative z-10 flex flex-col items-center gap-6 max-w-2xl mx-auto text-center">
               <div className="flex flex-col items-center gap-3"><h2 className="text-3xl md:text-5xl font-semibold tracking-tight leading-tight text-gray-950">Encontrá el soporte adecuado para tu marca</h2><p className="max-w-xl mx-auto text-base md:text-lg leading-relaxed text-gray-600">Explorá nuestra cobertura y descubrí dónde están los soportes que mejor encajan con tu campaña.</p></div>
-              <Link to="/inventario" className={cn(buttonStyles({ size: 'lg' }), 'group relative h-12 w-fit overflow-hidden rounded-full pl-6 pr-14 text-sm font-medium transition-all duration-300 hover:pl-14 hover:pr-6')}><span className="relative z-10 transition-all duration-300">Explorar inventario</span><span className="absolute right-1 flex h-10 w-10 items-center justify-center rounded-full bg-white text-gray-950 transition-all duration-300 group-hover:right-[calc(100%-44px)] group-hover:rotate-45"><ArrowRight className="h-4 w-4" /></span></Link>
+              <Link to="/inventario" className={cn(buttonStyles({ size: 'lg' }), 'group relative h-12 w-fit overflow-hidden rounded-full pl-6 pr-14 text-sm font-medium transition-all duration-300 hover:pl-14 hover:pr-6')}><span className="relative z-10 transition-all duration-300">Explorar inventario</span><span className="absolute right-1 flex h-10 w-10 items-center justify-center rounded-full bg-white text-gray-950 transition-all duration-300 group-hover:right-[calc(100%-2.75rem)]"><ArrowRight className="h-4 w-4" /></span></Link>
             </div>
           </div>
         </div>
