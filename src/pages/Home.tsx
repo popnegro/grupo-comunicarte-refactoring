@@ -29,20 +29,20 @@ export default function Home() {
           <div className="absolute inset-0 bg-black/35" />
         </div>
 
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pb-28 pt-12 sm:px-6 md:pb-32 md:pt-16 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center text-white">
+        <div className="relative z-10 mx-auto flex w-full max-w-7xl items-center px-4 pb-28 pt-10 sm:px-6 md:pb-32 md:pt-12 lg:px-8">
+          <div className="mx-auto w-full max-w-2xl text-center text-white">
             <div className="mb-5 inline-flex items-center rounded-full border border-gray-200 bg-white px-2.5 py-1">
               <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-800">Espacios Publicitarios Premium</span>
             </div>
-            <h1 className="mx-auto mb-5 max-w-3xl text-4xl font-bold leading-[1.02] tracking-tight sm:text-5xl md:text-6xl">
+            <h1 className="mx-auto mb-4 max-w-2xl text-4xl font-bold leading-[1.04] tracking-tight sm:text-5xl md:text-6xl">
               Tu marca, en los lugares que todos ven.
             </h1>
-            <p className="mx-auto max-w-xl text-base leading-relaxed text-white/90 md:text-lg">
+            <p className="mx-auto max-w-lg text-base leading-7 text-white/90 md:text-lg md:leading-7">
               Espacios publicitarios estratégicos en Mendoza y Buenos Aires.
             </p>
           </div>
 
-          <div className="absolute bottom-16 left-4 right-4 md:bottom-[68px] md:left-1/2 md:right-auto md:w-[min(760px,calc(100%-3rem))] md:-translate-x-1/2">
+          <div className="absolute bottom-14 left-4 right-4 md:bottom-16 md:left-1/2 md:right-auto md:w-[min(700px,calc(100%-3rem))] md:-translate-x-1/2">
             <form
               onSubmit={(event) => {
                 event.preventDefault();
@@ -74,11 +74,11 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="plazas" className="border-b border-gray-100 bg-white px-4 py-14 sm:px-6 md:py-20 lg:px-8">
+      <section id="plazas" className="border-b border-gray-100 bg-white px-4 py-14 sm:px-6 md:py-18 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white">
+          <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
             <div className="grid md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-              <div className="relative min-h-[280px] overflow-hidden bg-gray-100 md:min-h-[420px]">
+              <div className="relative min-h-[280px] overflow-hidden bg-gray-100 md:min-h-[400px]">
                 <img src="/images/soportes-tradicionales-mendoza.webp" alt="Soportes publicitarios en Mendoza" className="absolute inset-0 h-full w-full object-cover" />
                 <div className="absolute inset-0 bg-black/10" />
                 <div className="absolute left-5 top-5 inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/90 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-800">
@@ -87,29 +87,29 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="flex flex-col justify-center p-7 sm:p-10 md:p-12 lg:p-14">
-                <div className="mb-5 flex items-center gap-3">
+              <div className="flex flex-col justify-center p-7 sm:p-9 md:p-11 lg:p-12">
+                <div className="mb-4 flex items-center gap-3">
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-800">
                     <MapPin className="h-4 w-4" aria-hidden="true" />
                   </span>
-                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Plazas disponibles</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-gray-500">Plazas disponibles</span>
                 </div>
-                <h2 className="max-w-xl text-3xl font-semibold tracking-tight text-gray-950 md:text-4xl">Elegí dónde querés estar</h2>
-                <p className="mt-4 max-w-xl text-base leading-relaxed text-gray-600 md:text-lg">
+                <h2 className="max-w-xl text-3xl font-semibold leading-tight tracking-tight text-gray-950 md:text-4xl">Elegí dónde querés estar</h2>
+                <p className="mt-3 max-w-xl text-base leading-7 text-gray-600 md:text-lg md:leading-7">
                   Explorá nuestra cobertura y encontrá soportes estratégicos según la ciudad y el alcance de tu campaña.
                 </p>
-                <div className="mt-8 grid gap-3 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2">
-                  <button onClick={() => navigate('/inventario?plaza=mendoza')} className="group flex items-center justify-between gap-4 rounded-xl border border-gray-200 px-4 py-4 text-left transition-colors hover:border-gray-900 hover:bg-gray-50">
+                <div className="mt-7 grid gap-3 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2">
+                  <button onClick={() => navigate('/inventario?plaza=mendoza')} className="group flex items-center justify-between gap-4 rounded-xl border border-gray-200 px-4 py-3.5 text-left transition-colors hover:border-gray-900 hover:bg-gray-50">
                     <span>
                       <span className="block text-base font-semibold text-gray-950">Mendoza</span>
-                      <span className="mt-1 block text-xs leading-relaxed text-gray-500">18 soportes estratégicos</span>
+                      <span className="mt-1 block text-xs leading-5 text-gray-500">18 soportes estratégicos</span>
                     </span>
                     <MoveRight className="h-4 w-4 shrink-0 text-gray-500 transition-transform group-hover:translate-x-1 group-hover:text-gray-950" aria-hidden="true" />
                   </button>
-                  <button onClick={() => navigate('/inventario?plaza=buenos-aires')} className="group flex items-center justify-between gap-4 rounded-xl border border-gray-200 px-4 py-4 text-left transition-colors hover:border-gray-900 hover:bg-gray-50">
+                  <button onClick={() => navigate('/inventario?plaza=buenos-aires')} className="group flex items-center justify-between gap-4 rounded-xl border border-gray-200 px-4 py-3.5 text-left transition-colors hover:border-gray-900 hover:bg-gray-50">
                     <span>
                       <span className="block text-base font-semibold text-gray-950">Buenos Aires</span>
-                      <span className="mt-1 block text-xs leading-relaxed text-gray-500">10 soportes estratégicos</span>
+                      <span className="mt-1 block text-xs leading-5 text-gray-500">10 soportes estratégicos</span>
                     </span>
                     <MoveRight className="h-4 w-4 shrink-0 text-gray-500 transition-transform group-hover:translate-x-1 group-hover:text-gray-950" aria-hidden="true" />
                   </button>
@@ -121,20 +121,20 @@ export default function Home() {
       </section>
 
       {featuredItems.length > 0 && (
-        <section className="border-b border-gray-100 bg-gray-50 py-16 md:py-20">
+        <section className="border-b border-gray-100 bg-gray-50 py-14 md:py-18">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+            <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
               <div className="max-w-2xl">
-                <div className="mb-4 flex items-center gap-3">
+                <div className="mb-3 flex items-center gap-3">
                   <span className="h-px w-8 bg-gray-900" />
                   <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-gray-500">Inventario seleccionado</span>
                 </div>
-                <h2 className="text-3xl font-semibold tracking-tight text-gray-950 md:text-4xl">Soportes destacados</h2>
-                <p className="mt-3 text-base leading-relaxed text-gray-600 md:text-lg">
+                <h2 className="text-3xl font-semibold leading-tight tracking-tight text-gray-950 md:text-4xl">Soportes destacados</h2>
+                <p className="mt-2.5 max-w-xl text-base leading-7 text-gray-600 md:text-lg md:leading-7">
                   Una selección de ubicaciones con información real de disponibilidad, formato y características.
                 </p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between gap-3 md:shrink-0">
                 <Link to="/inventario" className="hidden items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-gray-700 hover:text-gray-950 sm:inline-flex">
                   Ver inventario completo <MoveRight className="h-4 w-4" />
                 </Link>
@@ -150,8 +150,8 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="mt-10 px-4 sm:px-6 lg:px-8">
-            <div ref={featuredCarouselRef} className="mx-auto flex max-w-7xl snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain scroll-smooth pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" style={{ touchAction: 'pan-x' }} aria-label="Carrusel de soportes destacados">
+          <div className="mx-auto mt-8 max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div ref={featuredCarouselRef} className="flex snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain scroll-smooth pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" style={{ touchAction: 'pan-x' }} aria-label="Carrusel de soportes destacados">
               {featuredItems.map((item) => (
                 <div key={item.canonical_id} data-featured-card className="w-[calc(100vw-2rem)] max-w-[390px] flex-none snap-start sm:w-[min(390px,68vw)] lg:w-[380px]">
                   <SupportCard item={item} variant="showcase" />
@@ -160,8 +160,8 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="mx-auto mt-3 flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-            <p className="text-[11px] font-medium text-gray-500">Deslizá horizontalmente para explorar</p>
+          <div className="mx-auto mt-2 flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+            <p className="text-[11px] font-medium leading-5 text-gray-500">Deslizá horizontalmente para explorar</p>
             <Link to="/inventario" className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-gray-700 sm:hidden">
               Ver todo <MoveRight className="h-4 w-4" />
             </Link>
@@ -169,48 +169,48 @@ export default function Home() {
         </section>
       )}
 
-      <section className="w-full bg-white py-16 md:py-20">
+      <section className="w-full bg-white py-14 md:py-18">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="overflow-hidden rounded-3xl border border-gray-200 bg-gray-50">
             <div className="grid lg:grid-cols-[1.08fr_0.92fr]">
-              <div className="relative min-h-[360px] overflow-hidden lg:min-h-[500px]">
+              <div className="relative min-h-[340px] overflow-hidden lg:min-h-[460px]">
                 <img src="/images/led-movil-feature.webp" alt="Camión LED Móvil recorriendo Mendoza" className="absolute inset-0 h-full w-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
                 <div className="absolute left-5 top-5 rounded-full border border-white/80 bg-white/95 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-900">LED Móvil · Mendoza</div>
                 <div className="absolute bottom-5 left-5 right-5">
                   <div className="max-w-md rounded-2xl border border-white/20 bg-white/95 p-4 shadow-sm">
                     <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500">Recorrido predeterminado</div>
-                    <div className="mt-2 text-sm font-medium leading-relaxed text-gray-900">Mendoza Plaza Shopping · Nudo Vial · Arístides · Portones · Km Cero · Casa de Gobierno · Chacras · Palmares · Carrodilla</div>
+                    <div className="mt-1.5 text-sm font-medium leading-6 text-gray-900">Mendoza Plaza Shopping · Nudo Vial · Arístides · Portones · Km Cero · Casa de Gobierno · Chacras · Palmares · Carrodilla</div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-col justify-center p-7 sm:p-10 md:p-12 lg:p-14">
+              <div className="flex flex-col justify-center p-7 sm:p-9 md:p-11 lg:p-12">
                 <div className="flex items-center gap-3">
                   <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 text-gray-800">
                     <MonitorPlay className="h-4 w-4" aria-hidden="true" />
                   </span>
                   <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">Innovación dinámica</span>
                 </div>
-                <h2 className="mt-5 max-w-lg text-3xl font-semibold tracking-tight text-gray-950 sm:text-4xl md:text-5xl md:leading-[1.05]">LED Móvil Mendoza</h2>
-                <p className="mt-4 max-w-lg text-base leading-relaxed text-gray-600 md:text-lg">
+                <h2 className="mt-4 max-w-lg text-3xl font-semibold leading-[1.08] tracking-tight text-gray-950 sm:text-4xl md:text-5xl">LED Móvil Mendoza</h2>
+                <p className="mt-3.5 max-w-lg text-base leading-7 text-gray-600 md:text-lg md:leading-7">
                   Llevá tu campaña por los principales puntos del Gran Mendoza con tres pantallas digitales de alta resolución y un recorrido flexible.
                 </p>
-                <div className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-gray-200 bg-gray-200">
-                  <div className="bg-white p-4"><div className="text-2xl font-semibold tracking-tight text-gray-950">3</div><div className="mt-1 text-xs text-gray-500">pantallas digitales</div></div>
-                  <div className="bg-white p-4"><div className="text-2xl font-semibold tracking-tight text-gray-950">180+</div><div className="mt-1 text-xs text-gray-500">salidas diarias</div></div>
-                  <div className="bg-white p-4"><div className="text-2xl font-semibold tracking-tight text-gray-950">4 h</div><div className="mt-1 text-xs text-gray-500">por recorrido</div></div>
-                  <div className="bg-white p-4"><div className="text-2xl font-semibold tracking-tight text-gray-950">10 s</div><div className="mt-1 text-xs text-gray-500">duración del spot</div></div>
+                <div className="mt-7 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-gray-200 bg-gray-200">
+                  <div className="bg-white p-3.5"><div className="text-2xl font-semibold leading-none tracking-tight text-gray-950">3</div><div className="mt-1.5 text-xs leading-5 text-gray-500">pantallas digitales</div></div>
+                  <div className="bg-white p-3.5"><div className="text-2xl font-semibold leading-none tracking-tight text-gray-950">180+</div><div className="mt-1.5 text-xs leading-5 text-gray-500">salidas diarias</div></div>
+                  <div className="bg-white p-3.5"><div className="text-2xl font-semibold leading-none tracking-tight text-gray-950">4 h</div><div className="mt-1.5 text-xs leading-5 text-gray-500">por recorrido</div></div>
+                  <div className="bg-white p-3.5"><div className="text-2xl font-semibold leading-none tracking-tight text-gray-950">10 s</div><div className="mt-1.5 text-xs leading-5 text-gray-500">duración del spot</div></div>
                 </div>
-                <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 border-t border-gray-200 pt-5 text-xs text-gray-500">
+                <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 border-t border-gray-200 pt-4 text-xs leading-5 text-gray-500">
                   <span><strong className="font-semibold text-gray-700">Lun–Vie</strong> · 09:00–20:00</span>
                   <span>MP4 · AVI · JPG</span>
                 </div>
-                <div className="mt-8 flex flex-wrap items-center gap-4">
+                <div className="mt-6 flex flex-wrap items-center gap-3.5">
                   <Button onClick={() => navigate('/inventario?tipo=led_movil')} size="lg" className="h-11 rounded-full px-6 text-sm font-medium">
                     Ver recorrido <ArrowRight className="h-4 w-4" />
                   </Button>
-                  <span className="text-xs text-gray-500">Recorridos personalizados disponibles</span>
+                  <span className="text-xs leading-5 text-gray-500">Recorridos personalizados disponibles</span>
                 </div>
               </div>
             </div>
@@ -218,13 +218,13 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="px-4 pb-20 pt-8 sm:px-6 md:pb-24 md:pt-12 lg:px-8">
+      <section className="px-4 pb-16 pt-6 sm:px-6 md:pb-20 md:pt-8 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-3xl border border-gray-200 bg-gradient-to-br from-gray-50 via-white to-gray-100 px-6 py-12 md:min-h-[360px] md:px-12 md:py-16">
-            <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center gap-6 text-center">
-              <div className="flex flex-col items-center gap-3">
-                <h2 className="text-3xl font-semibold leading-tight tracking-tight text-gray-950 md:text-5xl">Encontrá el soporte adecuado para tu marca</h2>
-                <p className="mx-auto max-w-xl text-base leading-relaxed text-gray-600 md:text-lg">
+          <div className="relative flex min-h-[300px] items-center justify-center overflow-hidden rounded-3xl border border-gray-200 bg-gradient-to-br from-gray-50 via-white to-gray-100 px-6 py-10 md:min-h-[330px] md:px-12 md:py-14">
+            <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center gap-5 text-center">
+              <div className="flex flex-col items-center gap-2.5">
+                <h2 className="text-3xl font-semibold leading-[1.1] tracking-tight text-gray-950 md:text-5xl">Encontrá el soporte adecuado para tu marca</h2>
+                <p className="mx-auto max-w-xl text-base leading-7 text-gray-600 md:text-lg md:leading-7">
                   Explorá nuestra cobertura y descubrí dónde están los soportes que mejor encajan con tu campaña.
                 </p>
               </div>
