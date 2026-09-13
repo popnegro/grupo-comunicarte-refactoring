@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, buttonStyles } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
-import { ArrowRight, MapPin, MonitorPlay, MoveRight } from 'lucide-react';
+import { ArrowRight, MapPin, MonitorPlay, MoveRight, Search } from 'lucide-react';
 import { fixedLocations, mobileRoutes } from '../data/inventory';
 import { InventoryItem, getDisponibilidad } from '../types';
 import { cn } from '../lib/utils';
@@ -15,36 +15,67 @@ export default function Home() {
   return (
     <div className="flex flex-col w-full">
       {/* HERO SECTION */}
-      <section className="relative pt-24 pb-32 w-full flex flex-col items-start justify-center border-b border-gray-100 overflow-hidden">
+      <section className="relative min-h-[680px] md:min-h-[760px] w-full overflow-hidden border-b border-gray-100 flex items-center">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img src="/images/home.webp" alt="Vía Pública" className="w-full h-full object-cover" />
-          <div className="absolute inset-0"></div>
+          <div className="absolute inset-0 bg-black/30" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/10 to-black/45" />
         </div>
-        
-        <div className="relative z-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-          <div className="inline-block px-3 py-1 mb-8 rounded-full bg-white/80 border border-gray-200 backdrop-blur-md">
-            <span className="text-xs font-semibold tracking-widest uppercase text-gray-800">
-              Espacios Publicitarios Premium
-            </span>
+
+        {/* Hero content follows the Hero 31 composition: strong centered message + floating discovery bar. */}
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-32 md:pt-28 md:pb-36">
+          <div className="max-w-4xl mx-auto text-center text-white">
+            <div className="inline-flex items-center px-3 py-1 mb-7 rounded-full bg-white/80 border border-gray-200 backdrop-blur-md">
+              <span className="text-xs font-semibold tracking-widest uppercase text-gray-800">
+                Espacios Publicitarios Premium
+              </span>
+            </div>
+
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.98] mb-7">
+              Tu marca, en los lugares<br className="hidden sm:block" /> que todos ven.
+            </h1>
+
+            <p className="mx-auto max-w-2xl text-lg md:text-xl text-white/90 font-medium leading-relaxed">
+              Espacios publicitarios estratégicos en Mendoza y Buenos Aires.
+            </p>
           </div>
-          
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white max-w-4xl leading-[1.1] mb-8">
-            Tu marca, en los lugares <br /> que todos ven.
-          </h1>
-          
-          <p className="text-xl text-gray-800 font-medium max-w-2xl mb-12 leading-relaxed">
-            Espacios publicitarios estratégicos en Mendoza y Buenos Aires.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <a href="mailto:ventas@grupocomunicarte.com" className={buttonStyles({ size: "lg", className: "text-lg" })}>
-              Hablar con el equipo
-              <ArrowRight className="w-5 h-5" />
-            </a>
-            <Link to="/inventario" className={buttonStyles({ variant: "outline", size: "lg", className: "text-lg bg-white/50 backdrop-blur-sm" })}>
-              Explorar inventario
-            </Link>
+
+          {/* Floating discovery/search bar */}
+          <div className="absolute left-4 right-4 bottom-7 md:bottom-10 md:left-1/2 md:right-auto md:-translate-x-1/2 w-auto md:w-[min(920px,calc(100%-3rem))]">
+            <div className="rounded-2xl md:rounded-3xl bg-white/95 backdrop-blur-md border border-white shadow-2xl p-2 md:p-3">
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-2 md:gap-3 items-stretch">
+                <Link
+                  to="/inventario?plaza=mendoza"
+                  className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-left hover:border-black transition-colors"
+                >
+                  <MapPin className="w-5 h-5 shrink-0 text-gray-500" />
+                  <span className="min-w-0">
+                    <span className="block text-[10px] font-semibold tracking-widest uppercase text-gray-400">Plaza</span>
+                    <span className="block text-sm font-semibold text-gray-900 truncate">Mendoza</span>
+                  </span>
+                </Link>
+
+                <Link
+                  to="/inventario?plaza=buenos-aires"
+                  className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-left hover:border-black transition-colors"
+                >
+                  <Search className="w-5 h-5 shrink-0 text-gray-500" />
+                  <span className="min-w-0">
+                    <span className="block text-[10px] font-semibold tracking-widest uppercase text-gray-400">Explorar</span>
+                    <span className="block text-sm font-semibold text-gray-900 truncate">Buenos Aires</span>
+                  </span>
+                </Link>
+
+                <Link
+                  to="/inventario"
+                  className={buttonStyles({ size: 'lg', className: 'h-full min-h-14 rounded-xl px-6 text-base whitespace-nowrap' })}
+                >
+                  Explorar inventario
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -58,32 +89,18 @@ export default function Home() {
           </div>
           
           <div className="grid md:grid-cols-2 gap-8">
-            <button 
-              onClick={() => navigate('/inventario?plaza=mendoza')}
-              className="group flex flex-col items-start text-left bg-white p-10 rounded-2xl border border-gray-200 hover:border-black transition-colors shadow-sm hover:shadow-md"
-            >
-              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-black group-hover:text-white transition-colors">
-                <MapPin className="w-6 h-6" />
-              </div>
+            <button onClick={() => navigate('/inventario?plaza=mendoza')} className="group flex flex-col items-start text-left bg-white p-10 rounded-2xl border border-gray-200 hover:border-black transition-colors shadow-sm hover:shadow-md">
+              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-black group-hover:text-white transition-colors"><MapPin className="w-6 h-6" /></div>
               <h3 className="text-2xl font-bold mb-2">Mendoza</h3>
               <p className="text-gray-500 mb-8">18 soportes estratégicos incluyendo tradicionales y LED.</p>
-              <span className="flex items-center text-sm font-semibold tracking-wide uppercase mt-auto gap-2 group-hover:gap-3 transition-all">
-                Ver plaza <MoveRight className="w-4 h-4" />
-              </span>
+              <span className="flex items-center text-sm font-semibold tracking-wide uppercase mt-auto gap-2 group-hover:gap-3 transition-all">Ver plaza <MoveRight className="w-4 h-4" /></span>
             </button>
             
-            <button 
-              onClick={() => navigate('/inventario?plaza=buenos-aires')}
-              className="group flex flex-col items-start text-left bg-white p-10 rounded-2xl border border-gray-200 hover:border-black transition-colors shadow-sm hover:shadow-md"
-            >
-              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-black group-hover:text-white transition-colors">
-                <MapPin className="w-6 h-6" />
-              </div>
+            <button onClick={() => navigate('/inventario?plaza=buenos-aires')} className="group flex flex-col items-start text-left bg-white p-10 rounded-2xl border border-gray-200 hover:border-black transition-colors shadow-sm hover:shadow-md">
+              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-black group-hover:text-white transition-colors"><MapPin className="w-6 h-6" /></div>
               <h3 className="text-2xl font-bold mb-2">Buenos Aires</h3>
               <p className="text-gray-500 mb-8">10 soportes en ubicaciones de alto tránsito vehicular y peatonal.</p>
-              <span className="flex items-center text-sm font-semibold tracking-wide uppercase mt-auto gap-2 group-hover:gap-3 transition-all">
-                Ver plaza <MoveRight className="w-4 h-4" />
-              </span>
+              <span className="flex items-center text-sm font-semibold tracking-wide uppercase mt-auto gap-2 group-hover:gap-3 transition-all">Ver plaza <MoveRight className="w-4 h-4" /></span>
             </button>
           </div>
         </div>
@@ -97,9 +114,7 @@ export default function Home() {
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Soportes destacados</h2>
               <p className="text-gray-600 text-lg">Descubrí las ubicaciones premium con mayor impacto visual.</p>
             </div>
-            <Link to="/inventario" className="hidden md:flex items-center text-sm font-semibold tracking-wide uppercase gap-2 hover:gap-3 transition-all">
-              Ver inventario completo <MoveRight className="w-4 h-4" />
-            </Link>
+            <Link to="/inventario" className="hidden md:flex items-center text-sm font-semibold tracking-wide uppercase gap-2 hover:gap-3 transition-all">Ver inventario completo <MoveRight className="w-4 h-4" /></Link>
           </div>
 
           <div className="flex overflow-x-auto pb-8 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 snap-x snap-mandatory scrollbar-hide gap-6" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
@@ -108,50 +123,22 @@ export default function Home() {
               return (
                 <div key={item.canonical_id} className="w-[85vw] sm:w-[45vw] md:w-[30vw] flex-shrink-0 snap-start group bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
                   {item.imageUrls && item.imageUrls.length > 0 ? (
-                    <div className="w-full h-48 bg-gray-100 overflow-hidden relative">
-                       <img src={item.imageUrls[0]} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                       <div className="absolute inset-0 border-b border-black/5 mix-blend-multiply"></div>
-                    </div>
+                    <div className="w-full h-48 bg-gray-100 overflow-hidden relative"><img src={item.imageUrls[0]} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" /><div className="absolute inset-0 border-b border-black/5 mix-blend-multiply"></div></div>
                   ) : (
-                    <div className="w-full h-48 bg-gray-50 flex items-center justify-center border-b border-gray-100">
-                       <MapPin className="w-8 h-8 text-gray-300" />
-                    </div>
+                    <div className="w-full h-48 bg-gray-50 flex items-center justify-center border-b border-gray-100"><MapPin className="w-8 h-8 text-gray-300" /></div>
                   )}
                   <div className="p-6 flex flex-col flex-grow">
-                    <div className="flex items-center gap-2 mb-3">
-                       <Badge variant={item.tipo_soporte === 'tradicional' ? 'neutral' : item.tipo_soporte === 'led' ? 'red' : 'dark'} className="uppercase text-[10px]">
-                         {item.tipo_soporte.replace('_', ' ')}
-                       </Badge>
-                       <Badge variant={isReservado ? 'outline' : 'green'} className="uppercase text-[10px]">
-                         {isReservado ? 'Reservado' : 'Disponible'}
-                       </Badge>
-                    </div>
+                    <div className="flex items-center gap-2 mb-3"><Badge variant={item.tipo_soporte === 'tradicional' ? 'neutral' : item.tipo_soporte === 'led' ? 'red' : 'dark'} className="uppercase text-[10px]">{item.tipo_soporte.replace('_', ' ')}</Badge><Badge variant={isReservado ? 'outline' : 'green'} className="uppercase text-[10px]">{isReservado ? 'Reservado' : 'Disponible'}</Badge></div>
                     <h3 className="text-xl font-bold mb-2 line-clamp-1">{item.name}</h3>
-                    <p className="text-sm text-gray-500 mb-4 line-clamp-2">
-                      {'address' in item ? item.address : item.description}
-                    </p>
-                    
-                    {isReservado && item.availableFrom && (
-                      <p className="mt-auto mb-4 text-xs text-gray-500 font-medium">
-                        Disponible desde <span className="text-gray-900">{item.availableFrom}</span>
-                      </p>
-                    )}
-
-                    <Button 
-                      onClick={() => navigate(`/inventario?plaza=${item.ciudad}&tipo=${item.tipo_soporte}&soporte=${item.canonical_id}`)} 
-                      variant="outline" 
-                      className={cn("w-full", (!isReservado || !item.availableFrom) ? "mt-auto" : "")}
-                    >
-                      {isReservado ? 'Consultar disponibilidad' : 'Ver detalle'}
-                    </Button>
+                    <p className="text-sm text-gray-500 mb-4 line-clamp-2">{'address' in item ? item.address : item.description}</p>
+                    {isReservado && item.availableFrom && <p className="mt-auto mb-4 text-xs text-gray-500 font-medium">Disponible desde <span className="text-gray-900">{item.availableFrom}</span></p>}
+                    <Button onClick={() => navigate(`/inventario?plaza=${item.ciudad}&tipo=${item.tipo_soporte}&soporte=${item.canonical_id}`)} variant="outline" className={cn("w-full", (!isReservado || !item.availableFrom) ? "mt-auto" : "")}>{isReservado ? 'Consultar disponibilidad' : 'Ver detalle'}</Button>
                   </div>
                 </div>
               )
             })}
           </div>
-          <Link to="/inventario" className="mt-8 md:hidden flex justify-center items-center text-sm font-semibold tracking-wide uppercase gap-2 hover:gap-3 transition-all">
-            Ver inventario completo <MoveRight className="w-4 h-4" />
-          </Link>
+          <Link to="/inventario" className="mt-8 md:hidden flex justify-center items-center text-sm font-semibold tracking-wide uppercase gap-2 hover:gap-3 transition-all">Ver inventario completo <MoveRight className="w-4 h-4" /></Link>
         </section>
       )}
 
@@ -159,48 +146,12 @@ export default function Home() {
       <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         <div className="bg-black text-white rounded-3xl p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-12 overflow-hidden relative">
           <div className="relative z-10 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full bg-white/10 border border-white/20">
-              <MonitorPlay className="w-4 h-4" />
-              <span className="text-xs font-semibold tracking-widest uppercase">
-                Innovación Dinámica
-              </span>
-            </div>
-            
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 leading-tight">
-              Tu mensaje también puede moverse.
-            </h2>
-            
-            <div className="space-y-4 mb-10 text-gray-300">
-              <p className="flex items-center gap-3">
-                <span className="font-semibold text-white">LED Móvil Mendoza</span>
-              </p>
-              <p className="flex items-center gap-3">
-                <span className="w-1.5 h-1.5 bg-gray-500 rounded-full"></span>
-                Lunes a Viernes
-              </p>
-              <p className="flex items-center gap-3">
-                <span className="w-1.5 h-1.5 bg-gray-500 rounded-full"></span>
-                09:00–20:00
-              </p>
-              <p className="flex items-center gap-3">
-                <span className="w-1.5 h-1.5 bg-gray-500 rounded-full"></span>
-                Duración del recorrido: 4 horas
-              </p>
-            </div>
-            
-            <Button onClick={() => navigate('/inventario?tipo=led_movil')} variant="secondary" className="bg-white text-black hover:bg-gray-100">Ver recorrido
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+            <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full bg-white/10 border border-white/20"><MonitorPlay className="w-4 h-4" /><span className="text-xs font-semibold tracking-widest uppercase">Innovación Dinámica</span></div>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 leading-tight">Tu mensaje también puede moverse.</h2>
+            <div className="space-y-4 mb-10 text-gray-300"><p className="flex items-center gap-3"><span className="font-semibold text-white">LED Móvil Mendoza</span></p><p className="flex items-center gap-3"><span className="w-1.5 h-1.5 bg-gray-500 rounded-full"></span>Lunes a Viernes</p><p className="flex items-center gap-3"><span className="w-1.5 h-1.5 bg-gray-500 rounded-full"></span>09:00–20:00</p><p className="flex items-center gap-3"><span className="w-1.5 h-1.5 bg-gray-500 rounded-full"></span>Duración del recorrido: 4 horas</p></div>
+            <Button onClick={() => navigate('/inventario?tipo=led_movil')} variant="secondary" className="bg-white text-black hover:bg-gray-100">Ver recorrido <ArrowRight className="w-4 h-4" /></Button>
           </div>
-          
-          <div className="w-full md:w-1/3 aspect-square bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center relative">
-             <div className="absolute inset-0 flex items-center justify-center opacity-20">
-                <svg viewBox="0 0 100 100" className="w-full h-full stroke-white fill-none" strokeWidth="1" strokeDasharray="4 4">
-                   <path d="M10,90 Q30,10 50,50 T90,10" />
-                </svg>
-             </div>
-             <MonitorPlay className="w-24 h-24 text-white/50" />
-          </div>
+          <div className="w-full md:w-1/3 aspect-square bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center relative"><div className="absolute inset-0 flex items-center justify-center opacity-20"><svg viewBox="0 0 100 100" className="w-full h-full stroke-white fill-none" strokeWidth="1" strokeDasharray="4 4"><path d="M10,90 Q30,10 50,50 T90,10" /></svg></div><MonitorPlay className="w-24 h-24 text-white/50" /></div>
         </div>
       </section>
       
@@ -208,9 +159,7 @@ export default function Home() {
       <section className="py-24 px-4 sm:px-6 lg:px-8 border-t border-gray-100 text-center">
         <h2 className="text-3xl font-bold tracking-tight mb-4">Encontrá el soporte adecuado para tu marca</h2>
         <p className="text-gray-600 mb-8 max-w-2xl mx-auto">Explorá nuestra cobertura geográfica y descubrí dónde están nuestros soportes.</p>
-        <Link to="/inventario" className={buttonStyles({ size: "lg", className: "text-lg inline-flex" })}>
-          Explorar mapa
-        </Link>
+        <Link to="/inventario" className={buttonStyles({ size: "lg", className: "text-lg inline-flex" })}>Explorar mapa</Link>
       </section>
     </div>
   );
