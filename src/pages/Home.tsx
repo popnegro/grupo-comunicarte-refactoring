@@ -148,10 +148,35 @@ export default function Home() {
           <div className="w-full md:w-1/3 aspect-square bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center relative"><div className="absolute inset-0 flex items-center justify-center opacity-20"><svg viewBox="0 0 100 100" className="w-full h-full stroke-white fill-none" strokeWidth="1" strokeDasharray="4 4"><path d="M10,90 Q30,10 50,50 T90,10" /></svg></div><MonitorPlay className="w-24 h-24 text-white/50" /></div>
         </div>
       </section>
-      <section className="py-24 px-4 sm:px-6 lg:px-8 border-t border-gray-100 text-center">
-        <h2 className="text-3xl font-bold tracking-tight mb-4">Encontrá el soporte adecuado para tu marca</h2>
-        <p className="text-gray-600 mb-8 max-w-2xl mx-auto">Explorá nuestra cobertura geográfica y descubrí dónde están nuestros soportes.</p>
-        <Link to="/inventario" className={buttonStyles({ size: "lg", className: "text-lg inline-flex" })}>Explorar mapa</Link>
+
+      {/* FINAL CTA: inspired by Shadcn Space CTA 01, adapted to the site's neutral visual system. */}
+      <section className="px-4 sm:px-6 lg:px-8 pt-8 pb-20 md:pt-12 md:pb-24">
+        <div className="max-w-7xl mx-auto">
+          <div className="relative overflow-hidden min-h-[320px] md:min-h-[360px] flex items-center justify-center px-6 py-12 md:px-12 md:py-16 rounded-3xl border border-gray-200 bg-gradient-to-br from-gray-50 via-white to-gray-100">
+            <div className="relative z-10 flex flex-col items-center gap-6 max-w-2xl mx-auto text-center">
+              <div className="flex flex-col items-center gap-3">
+                <h2 className="text-3xl md:text-5xl font-semibold tracking-tight leading-tight text-gray-950">
+                  Encontrá el soporte adecuado para tu marca
+                </h2>
+                <p className="max-w-xl mx-auto text-base md:text-lg leading-relaxed text-gray-600">
+                  Explorá nuestra cobertura y descubrí dónde están los soportes que mejor encajan con tu campaña.
+                </p>
+              </div>
+              <Link
+                to="/inventario"
+                className={cn(
+                  buttonStyles({ size: 'lg' }),
+                  'group relative h-12 w-fit overflow-hidden rounded-full pl-6 pr-14 text-sm font-medium transition-all duration-300 hover:pl-14 hover:pr-6'
+                )}
+              >
+                <span className="relative z-10 transition-all duration-300">Explorar inventario</span>
+                <span className="absolute right-1 flex h-10 w-10 items-center justify-center rounded-full bg-white text-gray-950 transition-all duration-300 group-hover:right-[calc(100%-44px)] group-hover:rotate-45">
+                  <ArrowRight className="h-4 w-4" />
+                </span>
+              </Link>
+            </div>
+          </div>
+        </div>
       </section>
     </div>
   );
