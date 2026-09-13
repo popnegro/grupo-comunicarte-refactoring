@@ -77,26 +77,64 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PLAZAS SECTION */}
-      <section id="plazas" className="bg-gray-50 py-24 px-4 sm:px-6 lg:px-8 border-t border-gray-100">
+      {/* PLAZAS SECTION: inspired by Shadcn Space CTA 11, adapted to the site's neutral visual system. */}
+      <section id="plazas" className="bg-white px-4 sm:px-6 lg:px-8 py-14 md:py-20 border-b border-gray-100">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Elegí dónde querés estar</h2>
-            <p className="text-gray-600 text-lg">Explorá nuestra cobertura geográfica en puntos clave del país.</p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-8">
-            <button onClick={() => navigate('/inventario?plaza=mendoza')} className="group flex flex-col items-start text-left bg-white p-10 rounded-2xl border border-gray-200 hover:border-black transition-colors shadow-sm hover:shadow-md">
-              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-black group-hover:text-white transition-colors"><MapPin className="w-6 h-6" /></div>
-              <h3 className="text-2xl font-bold mb-2">Mendoza</h3>
-              <p className="text-gray-500 mb-8">18 soportes estratégicos incluyendo tradicionales y LED.</p>
-              <span className="flex items-center text-sm font-semibold tracking-wide uppercase mt-auto gap-2 group-hover:gap-3 transition-all">Ver plaza <MoveRight className="w-4 h-4" /></span>
-            </button>
-            <button onClick={() => navigate('/inventario?plaza=buenos-aires')} className="group flex flex-col items-start text-left bg-white p-10 rounded-2xl border border-gray-200 hover:border-black transition-colors shadow-sm hover:shadow-md">
-              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-black group-hover:text-white transition-colors"><MapPin className="w-6 h-6" /></div>
-              <h3 className="text-2xl font-bold mb-2">Buenos Aires</h3>
-              <p className="text-gray-500 mb-8">10 soportes en ubicaciones de alto tránsito vehicular y peatonal.</p>
-              <span className="flex items-center text-sm font-semibold tracking-wide uppercase mt-auto gap-2 group-hover:gap-3 transition-all">Ver plaza <MoveRight className="w-4 h-4" /></span>
-            </button>
+          <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white">
+            <div className="grid md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+              <div className="relative min-h-[280px] md:min-h-[420px] bg-gray-100 overflow-hidden">
+                <img
+                  src="/images/soportes-tradicionales-mendoza.webp"
+                  alt="Soportes publicitarios en Mendoza"
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/10" />
+                <div className="absolute left-5 top-5 inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/90 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-800">
+                  <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+                  Cobertura nacional
+                </div>
+              </div>
+
+              <div className="flex flex-col justify-center p-7 sm:p-10 md:p-12 lg:p-14">
+                <div className="mb-5 flex items-center gap-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-800">
+                    <MapPin className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Plazas disponibles</span>
+                </div>
+
+                <h2 className="max-w-xl text-3xl font-semibold tracking-tight text-gray-950 md:text-4xl">
+                  Elegí dónde querés estar
+                </h2>
+                <p className="mt-4 max-w-xl text-base leading-relaxed text-gray-600 md:text-lg">
+                  Explorá nuestra cobertura y encontrá soportes estratégicos según la ciudad y el alcance de tu campaña.
+                </p>
+
+                <div className="mt-8 grid gap-3 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2">
+                  <button
+                    onClick={() => navigate('/inventario?plaza=mendoza')}
+                    className="group flex items-center justify-between gap-4 rounded-xl border border-gray-200 px-4 py-4 text-left transition-colors hover:border-gray-900 hover:bg-gray-50"
+                  >
+                    <span>
+                      <span className="block text-base font-semibold text-gray-950">Mendoza</span>
+                      <span className="mt-1 block text-xs leading-relaxed text-gray-500">18 soportes estratégicos</span>
+                    </span>
+                    <MoveRight className="h-4 w-4 shrink-0 text-gray-500 transition-transform group-hover:translate-x-1 group-hover:text-gray-950" aria-hidden="true" />
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/inventario?plaza=buenos-aires')}
+                    className="group flex items-center justify-between gap-4 rounded-xl border border-gray-200 px-4 py-4 text-left transition-colors hover:border-gray-900 hover:bg-gray-50"
+                  >
+                    <span>
+                      <span className="block text-base font-semibold text-gray-950">Buenos Aires</span>
+                      <span className="mt-1 block text-xs leading-relaxed text-gray-500">10 soportes estratégicos</span>
+                    </span>
+                    <MoveRight className="h-4 w-4 shrink-0 text-gray-500 transition-transform group-hover:translate-x-1 group-hover:text-gray-950" aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
