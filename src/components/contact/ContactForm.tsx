@@ -1,12 +1,14 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { CheckCircle2, Loader2 } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import { useSelection } from '../../context/SelectionContext';
 import { Input, Textarea, Label } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { recordNewLead } from '../../lib/dashboard-store';
 
 export function ContactForm({ isMediaKit = false }: { isMediaKit?: boolean }) {
-  const { selectedIds, selectedCount, clearSelection } = useSelection();
+  const [searchParams] = useSearchParams();
+  const { selectedIds, selectedCount, restoreSelection, clearSelection } = useSelection();
   const [name, setName] = useState('');
   const [company, setCompany] = useState('');
   const [email, setEmail] = useState('');
@@ -16,6 +18,14 @@ export function ContactForm({ isMediaKit = false }: { isMediaKit?: boolean }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [requestId, setRequestId] = useState('');
+
+  useEffect(() => {
+    if (!isMediaKit || selectedCount > 0) return;
+    const rawIds = searchParams.get('soportes');
+    if (!rawIds) return;
+    const ids = rawIds.split(',').map(id => decodeURIComponent(id).trim()).filter(Boolean);
+    if (ids.length) restoreSelection(ids);
+  }, [isMediaKit, selectedCount, searchParams, restoreSelection]);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -113,7 +123,7 @@ export function ContactForm({ isMediaKit = false }: { isMediaKit?: boolean }) {
 
       <Button type="submit" disabled={loading} className="w-full sm:w-auto min-w-48">
         {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-        {loading ? 'Enviando…' : isMediaKit ? 'Solicitar Media Kit' : 'Enviar consulta'}
+        {loading ? 'Enviando…' : isMediaKit ? 'Solicitar propuesta' : 'Solicitar propuesta comercial'}
       </Button>
     </form>
   );

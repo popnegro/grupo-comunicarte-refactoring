@@ -1,0 +1,66 @@
+name: Process media assets
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_dir:
+        description: Directory containing source media
+        required: false
+        default: media/incoming
+  push:
+    paths:
+      - 'media/incoming/**'
+      - 'scripts/process-media.sh'
+      - '.github/workflows/process-media.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: media-processing-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify media tools
+        run: |
+          convert -version
+          identify -version
+          ffprobe -version | head -n 1
+
+      - name: Process images and validate videos
+        env:
+          SOURCE_DIR: ${{ inputs.source_dir || 'media/incoming' }}
+          MAX_WIDTH: '1920'
+          MAX_HEIGHT: '1080'
+          WEBP_QUALITY: '82'
+        run: |
+          if [ ! -d "$SOURCE_DIR" ]; then
+            echo "No media directory at $SOURCE_DIR; nothing to process."
+            exit 0
+          fi
+          chmod +x scripts/process-media.sh
+          scripts/process-media.sh "$SOURCE_DIR" media/processed
+
+      - name: Remove source binaries from generated output
+        run: |
+          find media/processed -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) -delete 2>/dev/null || true
+
+      - name: Commit processed assets
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add media/processed
+          if git diff --cached --quiet; then
+            echo 'No generated media changes to commit.'
+            exit 0
+          fi
+          git commit -m 'chore(media): generate optimized webp and validated mp4 assets'
+          git push

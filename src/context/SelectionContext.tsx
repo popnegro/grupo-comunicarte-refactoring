@@ -17,6 +17,7 @@ interface SelectionContextValue {
   hideToast: () => void;
   isSelected: (id: string) => boolean;
   toggleSelect: (item: InventoryItem) => void;
+  restoreSelection: (ids: string[]) => void;
   removeSelected: (id: string, itemName?: string) => void;
   clearSelection: () => void;
   getSelectedItems: (allItems: InventoryItem[]) => InventoryItem[];
@@ -92,6 +93,16 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
     }
   }, [selectedIds, showToast]);
 
+  const restoreSelection = useCallback((ids: string[]) => {
+    const validIds = ids.filter((id): id is string => typeof id === 'string' && id.trim().length > 0);
+    if (!validIds.length) return;
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      validIds.forEach(id => next.add(id));
+      return next;
+    });
+  }, []);
+
   const removeSelected = useCallback((id: string) => {
     setSelectedIds(prev => { if (!prev.has(id)) return prev; const next = new Set(prev); next.delete(id); return next; });
     showToast('Soporte eliminado del Media Kit', {
@@ -115,8 +126,8 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
     [selectedIds]
   );
 
-  const value = useMemo(() => ({ selectedIds, selectedCount: selectedIds.size, toast, showToast, hideToast, isSelected, toggleSelect, removeSelected, clearSelection, getSelectedItems }),
-    [selectedIds, toast, showToast, hideToast, isSelected, toggleSelect, removeSelected, clearSelection, getSelectedItems]);
+  const value = useMemo(() => ({ selectedIds, selectedCount: selectedIds.size, toast, showToast, hideToast, isSelected, toggleSelect, restoreSelection, removeSelected, clearSelection, getSelectedItems }),
+    [selectedIds, toast, showToast, hideToast, isSelected, toggleSelect, restoreSelection, removeSelected, clearSelection, getSelectedItems]);
 
   return <SelectionContext.Provider value={value}>{children}</SelectionContext.Provider>;
 }

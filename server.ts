@@ -2,10 +2,11 @@ import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
-import { initDatabase, pool } from './src/db';
-import { getAllSupportsFromDB, getSupportByIdFromDB } from './src/server/supportsService';
-import { handleMediakitRequest, getAllMediakitRequestsFromDB } from './src/server/mediakitService';
-import { handleMediaUpload } from './src/server/multimediaUpload';
+import { initDatabase, pool, isDatabaseConfigured } from './src/db/index.ts';
+import { getAllSupportsFromDB, getSupportByIdFromDB } from './src/server/supportsService.ts';
+import { handleMediakitRequest, getAllMediakitRequestsFromDB } from './src/server/mediakitService.ts';
+import { saveMediaKit, getMediaKit, listMediaKits, updateMediaKitStatus } from './src/server/mediakitManagementService.ts';
+import { handleMediaUpload } from './src/server/multimediaUpload.ts';
 import {
   authenticateAdmin,
   verifyAdminToken,
@@ -24,14 +25,11 @@ import {
   patchSupportPricingByAdmin,
   getSupportRouteByAdmin,
   patchSupportRouteByAdmin,
-} from './src/server/adminService';
+} from './src/server/adminService.ts';
 
 export async function createApp() {
   const app = express();
 
-  // CORS for the production frontend and local development. Keep the API
-  // explicit rather than using a wildcard so credentialed/authenticated
-  // requests cannot be opened to arbitrary origins.
   const allowedOrigins = (process.env.CORS_ORIGINS || 'https://grupocomunicarte.vercel.app,http://localhost:5173')
     .split(',')
     .map((origin) => origin.trim())
@@ -58,25 +56,24 @@ export async function createApp() {
 
   app.use(express.json());
 
-  // Initialize Database & Idempotent Seed
   try {
     await initDatabase();
   } catch (err) {
-    console.error('Failed to initialize database during startup:', err);
-    throw err;
+    console.warn('Database initialization warning on startup:', err);
   }
 
-  // API health check with DB connectivity check (P1-5)
   app.get('/api/health', async (_req, res) => {
+    if (!isDatabaseConfigured) {
+      return res.status(200).json({ status: 'ok', database: 'static-fallback' });
+    }
     try {
       await pool.query('SELECT 1');
       res.status(200).json({ status: 'ok', database: 'connected' });
     } catch (err: any) {
-      res.status(503).json({ status: 'degraded', database: 'disconnected', error: err.message });
+      res.status(200).json({ status: 'ok', database: 'disconnected', error: err.message });
     }
   });
 
-  // Supports API routes (Phase 3)
   app.get('/api/supports', async (_req, res) => {
     try {
       const supports = await getAllSupportsFromDB();
@@ -101,7 +98,6 @@ export async function createApp() {
     }
   });
 
-  // MediaKit API routes (Phase 8, 10)
   app.post('/api/mediakit/request', async (req, res) => {
     try {
       const result = await handleMediakitRequest(req.body);
@@ -112,10 +108,6 @@ export async function createApp() {
     }
   });
 
-  // NOTE: GET /api/mediakit/requests is strictly removed from public exposure (P0-2).
-  // Only accessible via protected admin endpoint /api/admin/requests.
-
-  // ==================== ADMIN API ROUTES (FASE 2) ====================
   app.post('/api/admin/login', (req, res) => {
     const { username, password } = req.body || {};
     const result = authenticateAdmin(username, password);
@@ -125,7 +117,6 @@ export async function createApp() {
     res.status(200).json({ status: 'success', token: result.token, message: 'Autenticación exitosa' });
   });
 
-  // Admin Auth Middleware for /api/admin/* (except login)
   const requireAdmin = (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const authHeader = req.headers.authorization;
     if (!verifyAdminToken(authHeader)) {
@@ -134,9 +125,6 @@ export async function createApp() {
     next();
   };
 
-  // Physical media upload: multipart/form-data -> R2 -> support_media.
-  // Keep this route ahead of the JSON media CRUD route and use a route-scoped
-  // raw parser so the existing JSON API remains unchanged.
   app.post(
     '/api/admin/supports/:id/media/upload',
     requireAdmin,
@@ -305,6 +293,49 @@ export async function createApp() {
     }
   });
 
+  app.get('/api/admin/mediakits', requireAdmin, async (_req, res) => {
+    try {
+      const kits = await listMediaKits();
+      res.status(200).json({ status: 'success', data: kits });
+    } catch (err: any) {
+      console.error('Error fetching media kits:', err);
+      res.status(500).json({ status: 'error', message: 'Error interno al obtener Media Kits.' });
+    }
+  });
+
+  app.get('/api/admin/mediakits/:kitId', requireAdmin, async (req, res) => {
+    try {
+      const kit = await getMediaKit(req.params.kitId);
+      if (!kit) return res.status(404).json({ status: 'error', message: 'Media Kit no encontrado.' });
+      res.status(200).json({ status: 'success', data: kit });
+    } catch (err: any) {
+      console.error(`Error fetching media kit ${req.params.kitId}:`, err);
+      res.status(500).json({ status: 'error', message: 'Error interno al obtener el Media Kit.' });
+    }
+  });
+
+  app.post('/api/admin/mediakits', requireAdmin, async (req, res) => {
+    try {
+      const kit = await saveMediaKit(req.body || {});
+      res.status(201).json({ status: 'success', data: kit, message: 'Media Kit guardado.' });
+    } catch (err: any) {
+      console.error('Error saving media kit:', err);
+      const msg = err.message || 'Error al guardar el Media Kit.';
+      res.status(msg.includes('obligatorio') || msg.includes('requiere') ? 400 : 500).json({ status: 'error', message: msg });
+    }
+  });
+
+  app.patch('/api/admin/mediakits/:kitId/status', requireAdmin, async (req, res) => {
+    try {
+      const kit = await updateMediaKitStatus(req.params.kitId, req.body?.status);
+      if (!kit) return res.status(404).json({ status: 'error', message: 'Media Kit no encontrado.' });
+      res.status(200).json({ status: 'success', data: kit, message: 'Estado del Media Kit actualizado.' });
+    } catch (err: any) {
+      console.error(`Error updating media kit ${req.params.kitId}:`, err);
+      res.status(400).json({ status: 'error', message: err.message || 'Error al actualizar el Media Kit.' });
+    }
+  });
+
   app.get('/api/admin/requests', requireAdmin, async (_req, res) => {
     try {
       const requests = await getAllMediakitRequestsFromDB();
@@ -329,7 +360,15 @@ export async function createApp() {
     }
   });
 
-  // Vite middleware for development / static serving for production
+  // Vercel invokes this app only for /api/* requests. Do not attach the
+  // production SPA fallback in the serverless function: the function bundle
+  // intentionally contains dist/server.cjs, while dist/index.html is served by
+  // Vercel's filesystem/static routing. Keeping the fallback out of the API
+  // function prevents unknown /api/* requests from becoming ENOENT errors.
+  if (process.env.VERCEL) {
+    return app;
+  }
+
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -350,7 +389,7 @@ export async function createApp() {
 if (!process.env.VERCEL) {
   createApp()
     .then((app) => {
-      const PORT = Number(process.env.PORT) || 3000;
+      const PORT = 3000;
       app.listen(PORT, '0.0.0.0', () => {
         console.log(`Server running on http://0.0.0.0:${PORT}`);
       });

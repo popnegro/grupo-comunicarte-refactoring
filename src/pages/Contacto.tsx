@@ -1,39 +1,44 @@
-import { Mail, MapPin } from 'lucide-react';
+import { Mail, MapPin, PhoneCallIcon } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { buttonStyles } from '../components/ui/Button';
 import { ContactForm } from '../components/contact/ContactForm';
 import { InteriorHero } from '../components/layout/InteriorHero';
+import { buttonStyles } from '../components/ui/Button';
 
 export default function Contacto() {
   const [searchParams] = useSearchParams();
   const isMediaKit = searchParams.get('origen') === 'mediakit';
 
   return (
-    <section className="flex-1 bg-[#F9F9F9]">
+    <main className="flex flex-1 flex-col bg-[#F9F9F9]">
       <InteriorHero
         eyebrow={isMediaKit ? 'Media Kit' : 'Contacto'}
-        title={isMediaKit ? 'Tu selección, lista para avanzar.' : 'Hablemos de tu próxima campaña.'}
-        description={isMediaKit ? 'Completá tus datos y recibí la propuesta consolidada de los soportes que seleccionaste.' : 'Contanos qué necesitás comunicar y te ayudamos a encontrar la solución OOH o DOOH adecuada.'}
+        title="Solicitá tu propuesta personalizada"
+        description="Completá tus datos y te enviamos la cotización de los soportes seleccionados."
+        actions={<Link to="/inventario" className={buttonStyles({ variant: 'outline' })}>Volver al inventario</Link>}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] items-start">
+      <div className="page-container py-12 md:py-16">
+        <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
           <ContactForm isMediaKit={isMediaKit} />
-          <aside className="space-y-4">
-            <a href="mailto:ventas@grupocomunicarte.com" className="block rounded-2xl border border-gray-200 bg-white p-6 hover:border-gray-300 transition-colors">
-              <Mail className="h-5 w-5" aria-hidden="true" />
-              <h2 className="mt-4 text-base font-semibold">Email</h2>
-              <p className="mt-1 text-sm text-gray-500">ventas@grupocomunicarte.com</p>
+          <aside className="grid gap-3">
+            <a href="mailto:comercial@grupocomunicarte.com.ar" className="surface-card block p-5 transition-colors hover:border-gray-300">
+              <Mail className="h-5 w-5 text-gray-700" aria-hidden="true" />
+              <h2 className="text-card-title mt-3 text-base">Email</h2>
+              <p className="mt-1 text-sm leading-6 text-gray-500">comercial@grupocomunicarte.com.ar</p>
             </a>
-            <div className="rounded-2xl border border-gray-200 bg-white p-6">
-              <MapPin className="h-5 w-5" aria-hidden="true" />
-              <h2 className="mt-4 text-base font-semibold">Mendoza · Buenos Aires</h2>
-              <p className="mt-1 text-sm text-gray-500">Atención comercial para campañas OOH y DOOH.</p>
-            </div>
-            <Link to="/inventario" className={buttonStyles({ variant: 'outline', className: 'w-full rounded-full' })}>Volver al inventario</Link>
+            <a href="https://maps.app.goo.gl/V3uZwDq283b1u6UY8" className="surface-card block p-5 transition-colors hover:border-gray-300">
+              <MapPin className="h-5 w-5 text-gray-700" aria-hidden="true" />
+              <h2 className="text-card-title mt-3 text-base">Oficina Comercial</h2>
+              <p className="mt-1 text-sm leading-6 text-gray-500">9 de Julio 891, M5501 Godoy Cruz, Mendoza</p>
+            </a>
+            <a href="https://wa.me/542615830208" className="surface-card block p-5 transition-colors hover:border-gray-300">
+              <PhoneCallIcon className="h-5 w-5 text-gray-700" aria-hidden="true" />
+              <h2 className="text-card-title mt-3 text-base">WhatsApp</h2>
+              <p className="mt-1 text-sm leading-6 text-gray-500">+54 261 583 0208</p>
+            </a>
           </aside>
         </div>
       </div>
-    </section>
+    </main>
   );
 }

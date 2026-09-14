@@ -150,3 +150,41 @@ export const mediakitRequestItems = pgTable('mediakit_request_items', {
   supportId: text('support_id').notNull(),
   createdAt: timestamp('created_at').defaultNow(),
 });
+
+/**
+ * Persistent Media Kit document generated from a request/builder session.
+ * The table is intentionally separate from mediakit_requests so commercial
+ * requests remain the lead/inbox record while a Media Kit can evolve through
+ * its own lifecycle (draft -> ready -> sent -> archived).
+ */
+export const mediakits = pgTable('mediakits', {
+  id: serial('id').primaryKey(),
+  kitId: text('kit_id').notNull().unique(),
+  sourceRequestId: text('source_request_id'),
+  status: text('status').notNull().default('draft'),
+  clientName: text('client_name').notNull(),
+  clientEmail: text('client_email'),
+  clientCompany: text('client_company'),
+  clientPhone: text('client_phone'),
+  supportIds: jsonb('support_ids').$type<string[]>().notNull().default([]),
+  approvedPrices: jsonb('approved_prices').$type<Record<string, string>>().notNull().default({}),
+  totalAmount: numeric('total_amount'),
+  currency: text('currency').notNull().default('ARS'),
+  notes: text('notes'),
+  metadata: jsonb('metadata').$type<Record<string, unknown>>(),
+  pdfUrl: text('pdf_url'),
+  pptUrl: text('ppt_url'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const mediakitItems = pgTable('mediakit_items', {
+  id: serial('id').primaryKey(),
+  kitId: text('kit_id').notNull(),
+  supportId: text('support_id').notNull(),
+  approvedPrice: numeric('approved_price'),
+  sortOrder: integer('sort_order').notNull().default(0),
+  metadata: jsonb('metadata').$type<Record<string, unknown>>(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
