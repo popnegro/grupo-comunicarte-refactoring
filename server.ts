@@ -30,9 +30,6 @@ import {
 export async function createApp() {
   const app = express();
 
-  // CORS for the production frontend and local development. Keep the API
-  // explicit rather than using a wildcard so credentialed/authenticated
-  // requests cannot be opened to arbitrary origins.
   const allowedOrigins = (process.env.CORS_ORIGINS || 'https://grupocomunicarte.vercel.app,http://localhost:5173')
     .split(',')
     .map((origin) => origin.trim())
@@ -59,14 +56,12 @@ export async function createApp() {
 
   app.use(express.json());
 
-  // Initialize Database & Idempotent Seed
   try {
     await initDatabase();
   } catch (err) {
     console.warn('Database initialization warning on startup:', err);
   }
 
-  // API health check with DB connectivity check (P1-5)
   app.get('/api/health', async (_req, res) => {
     if (!isDatabaseConfigured) {
       return res.status(200).json({ status: 'ok', database: 'static-fallback' });
@@ -79,7 +74,6 @@ export async function createApp() {
     }
   });
 
-  // Supports API routes (Phase 3)
   app.get('/api/supports', async (_req, res) => {
     try {
       const supports = await getAllSupportsFromDB();
@@ -104,7 +98,6 @@ export async function createApp() {
     }
   });
 
-  // MediaKit API routes (Phase 8, 10)
   app.post('/api/mediakit/request', async (req, res) => {
     try {
       const result = await handleMediakitRequest(req.body);
@@ -115,10 +108,6 @@ export async function createApp() {
     }
   });
 
-  // NOTE: GET /api/mediakit/requests is strictly removed from public exposure (P0-2).
-  // Only accessible via protected admin endpoint /api/admin/requests.
-
-  // ==================== ADMIN API ROUTES (FASE 2) ====================
   app.post('/api/admin/login', (req, res) => {
     const { username, password } = req.body || {};
     const result = authenticateAdmin(username, password);
@@ -128,7 +117,6 @@ export async function createApp() {
     res.status(200).json({ status: 'success', token: result.token, message: 'Autenticación exitosa' });
   });
 
-  // Admin Auth Middleware for /api/admin/* (except login)
   const requireAdmin = (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const authHeader = req.headers.authorization;
     if (!verifyAdminToken(authHeader)) {
@@ -137,9 +125,6 @@ export async function createApp() {
     next();
   };
 
-  // Physical media upload: multipart/form-data -> R2 -> support_media.
-  // Keep this route ahead of the JSON media CRUD route and use a route-scoped
-  // raw parser so the existing JSON API remains unchanged.
   app.post(
     '/api/admin/supports/:id/media/upload',
     requireAdmin,
@@ -308,7 +293,6 @@ export async function createApp() {
     }
   });
 
-  // Persistent Media Kit management (P1)
   app.get('/api/admin/mediakits', requireAdmin, async (_req, res) => {
     try {
       const kits = await listMediaKits();
@@ -376,7 +360,15 @@ export async function createApp() {
     }
   });
 
-  // Vite middleware for development / static serving for production
+  // Vercel invokes this app only for /api/* requests. Do not attach the
+  // production SPA fallback in the serverless function: the function bundle
+  // intentionally contains dist/server.cjs, while dist/index.html is served by
+  // Vercel's filesystem/static routing. Keeping the fallback out of the API
+  // function prevents unknown /api/* requests from becoming ENOENT errors.
+  if (process.env.VERCEL) {
+    return app;
+  }
+
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
