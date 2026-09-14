@@ -56,8 +56,8 @@ export default function DashboardSupportPreview() {
       {item && (
         <div className="grid gap-6 lg:grid-cols-[minmax(0,420px)_1fr] lg:items-start">
           <section>
-            <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-gray-500">Product Card publicada</div>
-            <SupportCard item={item} variant="catalog" />
+            <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-gray-500">Product Card de gestión</div>
+            <SupportCard item={item} variant="dashboard" />
           </section>
 
           <section className="border border-gray-200 bg-white p-5">
@@ -67,7 +67,7 @@ export default function DashboardSupportPreview() {
               <div className="flex items-start justify-between gap-4 border-b border-gray-100 pb-3"><dt className="font-semibold text-gray-500">Publicación</dt><dd className="font-bold text-gray-900">{item.active === false ? 'No publicado' : 'Publicado'}</dd></div>
               <div className="flex items-start justify-between gap-4 border-b border-gray-100 pb-3"><dt className="font-semibold text-gray-500">Disponibilidad</dt><dd className="font-bold text-gray-900">{item.disponibilidad === 'reservado' ? 'Reservado' : 'Disponible'}</dd></div>
               <div className="flex items-start justify-between gap-4 border-b border-gray-100 pb-3"><dt className="font-semibold text-gray-500">Imagen principal</dt><dd className="font-bold text-gray-900">{item.imageUrls?.[0] ? 'Configurada' : 'Sin imagen'}</dd></div>
-              <div className="flex items-start justify-between gap-4 border-b border-gray-100 pb-3"><dt className="font-semibold text-gray-500">Atributos visibles</dt><dd className="font-bold text-gray-900">Hasta 2 según tipo</dd></div>
+              <div className="flex items-start justify-between gap-4 border-b border-gray-100 pb-3"><dt className="font-semibold text-gray-500">Atributos visibles</dt><dd className="font-bold text-gray-900">Hasta 3 según tipo</dd></div>
               <div className="flex items-start justify-between gap-4"><dt className="font-semibold text-gray-500">Código</dt><dd className="font-mono text-xs font-bold text-gray-900">{item.canonical_id}</dd></div>
             </dl>
           </section>
