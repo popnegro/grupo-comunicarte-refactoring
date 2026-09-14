@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { ArrowLeft, ArrowRight, BarChart3, Check, MapPin, Play, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, MapPin, Play, Plus, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
-import { StatusBadge } from '../dashboard/ui/StatusBadge';
-import { useSelection } from '../../context/SelectionContext';
 import { InventoryItem, MobileRoute, getDisponibilidad, isMobileRoute } from '../../types';
+import { useSelection } from '../../context/SelectionContext';
 
 interface SupportCardProps {
   item: InventoryItem;
@@ -13,6 +12,32 @@ interface SupportCardProps {
   selectable?: boolean;
   onRemove?: (item: InventoryItem) => void;
   onSelectOnMap?: (item: InventoryItem) => void;
+}
+
+function getCardAttributes(item: InventoryItem): string[] {
+  const technical = item.technical;
+  const attributes: string[] = [];
+  if (isMobileRoute(item)) {
+    const route = item as MobileRoute;
+    if (technical?.spot_duration_seconds) attributes.push(`${technical.spot_duration_seconds}s por spot`);
+    else if (route.duration) attributes.push(route.duration);
+    if (technical?.route_duration_hours) attributes.push(`${technical.route_duration_hours}h de recorrido`);
+    else if (route.schedule) attributes.push(route.schedule);
+    return attributes.filter(Boolean).slice(0, 2);
+  }
+  if (technical?.measures) attributes.push(technical.measures);
+  if (item.tipo_soporte === 'led') {
+    if (technical?.resolution) attributes.push(technical.resolution);
+    if (technical?.daily_frequency && attributes.length < 2) attributes.push(technical.daily_frequency);
+  } else if (item.tipo_soporte === 'tradicional') {
+    if (technical?.summary) attributes.push(technical.summary);
+    else if (item.family) attributes.push(item.family.replace('_', ' '));
+  }
+  if (attributes.length < 2 && item.characteristics) {
+    const fallback = item.characteristics.split(/[•\n,;]+/).map((value) => value.trim()).filter(Boolean);
+    attributes.push(...fallback);
+  }
+  return attributes.filter(Boolean).slice(0, 2);
 }
 
 function shortDate(value?: string) {
@@ -33,42 +58,6 @@ function reservationPeriod(item: InventoryItem) {
   return '';
 }
 
-function cardAttributes(item: InventoryItem): string[] {
-  const technical = item.technical;
-  if (isMobileRoute(item)) {
-    const route = item as MobileRoute;
-    return [
-      technical?.spot_duration_seconds ? `${technical.spot_duration_seconds}s por spot` : route.duration,
-      technical?.minimum_daily_outings ? `${technical.minimum_daily_outings} salidas` : '',
-      technical?.route_duration_hours ? `${technical.route_duration_hours}h de recorrido` : '',
-      route.schedule,
-    ].filter(Boolean).slice(0, 4) as string[];
-  }
-  if (item.tipo_soporte === 'tradicional') {
-    return [technical?.summary, technical?.measures, technical?.caras ? `${technical.caras} caras` : '', technical?.impresion].filter(Boolean).slice(0, 4) as string[];
-  }
-  if (item.tipo_soporte === 'led') {
-    return [technical?.summary, technical?.measures, technical?.resolution, technical?.daily_frequency].filter(Boolean).slice(0, 4) as string[];
-  }
-  return [technical?.measures, technical?.resolution, technical?.spot_duration_seconds ? `${technical.spot_duration_seconds}s por spot` : '', technical?.minimum_daily_outings ? `${technical.minimum_daily_outings} salidas` : ''].filter(Boolean).slice(0, 4) as string[];
-}
-
-function getMonthlyImpacts(item: InventoryItem): number | string | null {
-  const value = item.technical?.monthly_impacts ?? item.technical?.metadata?.monthly_impacts ?? item.technical?.metadata?.monthlyImpacts ?? item.technical?.metadata?.impactos_mensuales;
-  return typeof value === 'number' || typeof value === 'string' ? value : null;
-}
-
-function formatMonthlyImpacts(value: number | string | null) {
-  if (value === null || value === '') return null;
-  const numeric = typeof value === 'number' ? value : Number(String(value).replace(/\./g, '').replace(',', '.'));
-  if (Number.isFinite(numeric)) {
-    if (numeric >= 1000000) return `${(numeric / 1000000).toFixed(numeric >= 10000000 ? 0 : 1).replace('.0', '')} M`;
-    if (numeric >= 1000) return `${Math.round(numeric / 1000)} K`;
-    return new Intl.NumberFormat('es-AR').format(numeric);
-  }
-  return String(value);
-}
-
 function isVideoCover(item: InventoryItem) {
   return item.technical?.metadata?.cover_media_type === 'video';
 }
@@ -83,23 +72,34 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
   const navigate = useNavigate();
   const { isSelected, toggleSelect } = useSelection();
   const availability = getDisponibilidad(item);
-  const reserved = availability === 'reservado';
+  const isReserved = availability === 'reservado';
   const isAvailable = availability === 'disponible';
   const selected = isSelected(item.canonical_id);
   const slides = mediaSlides(item);
   const [slide, setSlide] = useState(0);
   const safeIndex = slides.length ? Math.min(slide, slides.length - 1) : 0;
   const active = slides[safeIndex];
-  const attributes = cardAttributes(item);
+  const image = item.imageUrls?.[0];
+  const address = 'address' in item ? item.address : item.ciudad;
+  const typeLabel = item.tipo_soporte.replace('_', ' ');
+  const cardAttributes = getCardAttributes(item);
   const period = reservationPeriod(item);
-  const statusLabel = reserved ? `Reservado${period ? ` (${period})` : ''}` : 'Disponible';
+  const statusLabel = isReserved ? `Reservado${period ? ` (${period})` : ''}` : 'Disponible';
   const altDescription = `Soporte publicitario ${item.name} en ${item.ciudad === 'mendoza' ? 'Mendoza' : 'Buenos Aires'}`;
-  const monthlyImpacts = formatMonthlyImpacts(getMonthlyImpacts(item));
+
+  if (availability === 'inactivo') return null;
+
+  const navigateToMap = () => {
+    if (onSelectOnMap) onSelectOnMap(item);
+    else navigate(`/inventario?plaza=${item.ciudad}&tipo=${item.tipo_soporte}&soporte=${item.canonical_id}`);
+  };
 
   const renderMedia = () => {
-    if (!active) return <div className="flex h-full w-full items-center justify-center bg-gray-50"><MapPin className="h-8 w-8 text-gray-300" /></div>;
-    if (active.kind === 'video') return <div className="relative h-full w-full"><video src={active.url} muted playsInline preload="metadata" className="h-full w-full object-cover" /><div className="pointer-events-none absolute inset-0 flex items-center justify-center"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/55 text-white"><Play className="h-4 w-4 fill-current" /></span></div></div>;
-    return <img src={active.url} alt={altDescription} className="h-full w-full object-cover" loading="lazy" />;
+    if (active) {
+      if (active.kind === 'video') return <div className="relative h-full w-full"><video src={active.url} muted playsInline preload="metadata" className="h-full w-full object-cover" /><div className="pointer-events-none absolute inset-0 flex items-center justify-center"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/55 text-white"><Play className="h-4 w-4 fill-current" /></span></div></div>;
+      return <img src={active.url} alt={altDescription} className="h-full w-full object-cover" loading="lazy" />;
+    }
+    return image ? <img src={image} alt={altDescription} className="h-full w-full object-cover" loading="lazy" /> : <div className="flex h-full w-full items-center justify-center bg-gray-50"><MapPin className="h-8 w-8 text-gray-300" /></div>;
   };
 
   const mediaControls = slides.length > 1 && (
@@ -112,88 +112,49 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
     </>
   );
 
-  if (availability === 'inactivo') return null;
-
-  const navigateToMap = () => {
-    if (onSelectOnMap) onSelectOnMap(item);
-    else navigate(`/inventario?plaza=${item.ciudad}&tipo=${item.tipo_soporte}&soporte=${item.canonical_id}`);
-  };
-
-  if (variant === 'showcase') {
-    return (
-      <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white transition-colors duration-200 hover:border-gray-300">
-        <div className="relative aspect-[16/9] w-full overflow-hidden bg-gray-100">
-          {renderMedia()}
-          <div className="absolute left-3 top-3 z-10"><StatusBadge status={availability} label={statusLabel} size="sm" /></div>
-          {mediaControls}
-        </div>
-        <div className="flex flex-1 flex-col p-5 sm:p-6">
-          <div className="flex items-center gap-2">
-            <Badge variant="neutral" className="uppercase text-[10px] font-semibold tracking-[0.1em]">{item.tipo_soporte.replace('_', ' ')}</Badge>
-          </div>
-          <h3 className="mt-3 text-xl font-semibold leading-6 tracking-tight text-gray-950">{item.name}</h3>
-          <p className="mt-2 flex items-start gap-1.5 text-sm leading-5 text-gray-500"><MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />{'address' in item ? item.address : item.ciudad === 'mendoza' ? 'Mendoza' : 'Buenos Aires'}</p>
-          {monthlyImpacts && (
-            <div className="mt-5 border-t border-gray-100 pt-4">
-              <div className="flex items-center gap-2 text-gray-500"><BarChart3 className="h-4 w-4" /><span className="text-[10px] font-semibold uppercase tracking-[0.12em]">Impactos mensuales</span></div>
-              <div className="mt-1 text-3xl font-semibold tracking-tight text-gray-950">+{monthlyImpacts}</div>
-            </div>
-          )}
-          {attributes.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-gray-500" aria-label="Datos técnicos destacados">
-              {attributes.slice(0, 2).map((attribute) => <span key={attribute}>{attribute}</span>)}
-            </div>
-          )}
-          <div className="mt-auto pt-5">
-            <Button type="button" onClick={navigateToMap} className="h-10 w-full justify-between rounded-lg px-4 text-xs font-semibold"><span>{reserved ? 'Consultar disponibilidad' : 'Ver soporte en mapa'}</span><ArrowRight className="h-4 w-4" /></Button>
-          </div>
-        </div>
-      </article>
-    );
-  }
-
   if (variant === 'selectable') {
     return (
-      <article className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+      <article className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
         <div className="relative aspect-[16/9] w-full overflow-hidden bg-gray-100">{renderMedia()}{mediaControls}</div>
-        <div className="p-5">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500">{item.tipo_soporte.replace('_', ' ')}</p>
-          <h2 className="mt-1 text-base font-semibold leading-5 text-gray-950">{item.name}</h2>
-          <p className="mt-1 text-sm leading-5 text-gray-500">{'address' in item ? item.address : item.ciudad}</p>
-          {monthlyImpacts && <p className="mt-3 text-sm font-semibold text-gray-950">+{monthlyImpacts} <span className="font-normal text-gray-500">impactos mensuales</span></p>}
-          {onRemove && <button type="button" onClick={() => onRemove(item)} className="mt-4 inline-flex min-h-9 items-center gap-1.5 text-xs font-semibold text-red-600 transition hover:text-red-700" aria-label={`Quitar ${item.name} de la selección`}><Trash2 className="h-4 w-4" /> Quitar de la selección</button>}
+        <div className="p-6">
+          <p className="text-xs font-semibold uppercase tracking-wider text-gray-600">{typeLabel}</p>
+          <h2 className="mt-2 text-xl font-semibold">{item.name}</h2>
+          <p className="mt-2 text-sm text-gray-600">{address}</p>
+          {onRemove && <button type="button" onClick={() => onRemove(item)} className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-950"><Trash2 className="h-4 w-4" /> Quitar</button>}
         </div>
       </article>
     );
   }
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white transition-colors duration-200 hover:border-gray-300">
-      <div className="relative aspect-[16/9] w-full overflow-hidden bg-gray-100">{renderMedia()}{mediaControls}</div>
-      <div className="flex flex-grow flex-col p-5 sm:p-6">
-        <div className="mb-3 flex flex-wrap items-center gap-2">
-          <Badge variant="neutral" className="uppercase text-[10px] font-semibold tracking-[0.1em]">{item.tipo_soporte.replace('_', ' ')}</Badge>
-          <StatusBadge status={availability} label={statusLabel} size="sm" />
+    <article className={`group bg-white border border-gray-200 overflow-hidden flex flex-col ${variant === 'showcase' ? 'rounded-3xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300' : 'rounded-2xl'}`}>
+      <div className="w-full aspect-[16/9] bg-gray-100 overflow-hidden relative">
+        {renderMedia()}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" />
+        {mediaControls}
+      </div>
+      <div className="p-6 flex flex-col flex-grow">
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <Badge variant={item.tipo_soporte === 'tradicional' ? 'neutral' : item.tipo_soporte === 'led' ? 'red' : 'dark'} className="uppercase text-[10px]">{typeLabel}</Badge>
+          <Badge variant={isReserved ? 'outline' : 'green'} className="uppercase text-[10px]">{isReserved ? 'Reservado' : 'Disponible'}</Badge>
         </div>
-        <h3 className="mb-1 text-lg font-semibold leading-6 text-gray-950">{item.name}</h3>
-        <p className="text-sm leading-5 text-gray-500">{'address' in item ? item.address : item.ciudad === 'mendoza' ? 'Mendoza' : 'Buenos Aires'}</p>
-        {monthlyImpacts && <div className="mt-4 flex items-baseline gap-2"><BarChart3 className="h-4 w-4 text-emerald-600" /><span className="text-xl font-semibold tracking-tight text-gray-950">+{monthlyImpacts}</span><span className="text-xs text-gray-500">impactos mensuales</span></div>}
-        {attributes.length > 0 && <div className="mt-4 flex flex-wrap gap-1.5" aria-label="Atributos principales">{attributes.map((attribute) => <span key={attribute} className="rounded-md border border-gray-200 bg-gray-50 px-2.5 py-1 text-[11px] font-medium leading-4 text-gray-600">{attribute}</span>)}</div>}
-        <div className="mt-auto pt-5">
+        <h3 className="text-xl font-bold mb-2">{item.name}</h3>
+        <p className="text-sm text-gray-600 leading-relaxed">{address || item.description}</p>
+        {cardAttributes.length > 0 && <div className="mt-4 flex flex-wrap gap-2" aria-label="Atributos principales">{cardAttributes.map((attribute) => <span key={attribute} className="rounded-lg bg-gray-50 border border-gray-200 px-2.5 py-1.5 text-xs font-semibold text-gray-800">{attribute}</span>)}</div>}
+        {isReserved && item.availableFrom && <p className="mt-4 text-xs text-gray-600 font-medium">Disponible desde <span className="text-gray-950">{item.availableFrom}</span></p>}
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center">
           {selectable ? (
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              {isAvailable ? (
-                <button type="button" onClick={() => toggleSelect(item)} aria-pressed={selected} className={`flex min-h-10 flex-1 items-center justify-center gap-2 rounded-lg px-4 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 ${selected ? 'bg-black text-white' : 'border border-gray-200 bg-white text-gray-900 hover:border-gray-300 hover:bg-gray-50'}`}>
-                  {selected ? <Check className="h-4 w-4 text-emerald-400" /> : <Plus className="h-4 w-4 text-gray-500" />}<span>{selected ? 'Soporte seleccionado' : 'Añadir al Media Kit'}</span>
-                </button>
-              ) : (
-                <button type="button" onClick={() => navigate(`/contacto?soporte=${item.canonical_id}`)} className="flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-4 text-xs font-semibold text-amber-900 transition-colors hover:bg-amber-100">Consultar disponibilidad</button>
-              )}
-              <button type="button" onClick={navigateToMap} className="flex min-h-10 items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3.5 text-xs font-semibold text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 hover:text-gray-950" title="Ver ubicación en el mapa" aria-label={`Ver ${item.name} en el mapa`}><MapPin className="h-4 w-4 text-gray-400" /><span className="sm:hidden lg:inline">Mapa</span></button>
-            </div>
+            isAvailable ? (
+              <button type="button" onClick={() => toggleSelect(item)} aria-pressed={selected} className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 ${selected ? 'bg-black text-white' : 'border border-gray-200 bg-white text-gray-900 hover:border-gray-300 hover:bg-gray-50'}`}>
+                {selected ? <Check className="h-4 w-4 text-emerald-400" /> : <Plus className="h-4 w-4 text-gray-500" />}<span>{selected ? 'Soporte seleccionado' : 'Añadir al Media Kit'}</span>
+              </button>
+            ) : (
+              <button type="button" onClick={() => navigate(`/contacto?soporte=${item.canonical_id}`)} className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-4 text-sm font-semibold text-amber-900 transition-colors hover:bg-amber-100">Consultar disponibilidad</button>
+            )
           ) : (
-            <Button type="button" onClick={navigateToMap} variant="outline" className="min-h-10 h-10 w-full justify-between rounded-lg text-xs font-semibold hover:bg-gray-50"><span>{reserved ? 'Consultar disponibilidad' : 'Ver soporte en mapa'}</span><ArrowRight className="h-4 w-4" /></Button>
+            <Button type="button" onClick={navigateToMap} variant="outline" className="w-full rounded-xl min-h-11">{isReserved ? 'Consultar disponibilidad' : 'Ver soporte'} <ArrowRight className="w-4 h-4" /></Button>
           )}
+          {selectable && <button type="button" onClick={navigateToMap} className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-700 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-950" title="Ver ubicación en el mapa" aria-label={`Ver ${item.name} en el mapa`}><MapPin className="h-4 w-4 text-gray-400" /><span>Mapa</span></button>}
         </div>
       </div>
     </article>
