@@ -7,6 +7,7 @@ on:
     branches:
       - canonical-candidate
       - canonical-refinement
+      - fix/stabilize-card-redesign
 
 jobs:
   validate:
