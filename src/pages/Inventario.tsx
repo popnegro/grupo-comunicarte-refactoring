@@ -22,12 +22,13 @@ export default function Inventario() {
   const tipoParam = searchParams.get('tipo') as TipoSoporte | 'todos' | null;
   const dispParam = searchParams.get('disponibilidad') as DisponibilidadFilter | null;
   const vistaParam = searchParams.get('vista') as ViewMode | null;
+  const queryParam = searchParams.get('q') ?? '';
   const [selectedPlaza, setSelectedPlaza] = useState<Plaza | 'todos'>(plazaParam || 'todos');
   const [selectedTipo, setSelectedTipo] = useState<TipoSoporte | 'todos'>(tipoParam || 'todos');
   const [selectedDisponibilidad, setSelectedDisponibilidad] = useState<DisponibilidadFilter>(dispParam || 'todos');
   const [viewMode, setViewMode] = useState<ViewMode>(vistaParam === 'catalogo' ? 'catalogo' : 'mapa');
   const [selectedSoporteId, setSelectedSoporteId] = useState<string | null>(searchParams.get('soporte'));
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState(queryParam);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [isMediakitOpen, setIsMediakitOpen] = useState(false);
   const { selectedCount, showToast, getSelectedItems } = useSelection();
@@ -66,17 +67,19 @@ export default function Inventario() {
     if (selectedPlaza !== 'todos') params.set('plaza', selectedPlaza);
     if (selectedTipo !== 'todos') params.set('tipo', selectedTipo);
     if (selectedDisponibilidad !== 'todos') params.set('disponibilidad', selectedDisponibilidad);
+    if (searchText.trim()) params.set('q', searchText.trim());
     if (viewMode !== 'mapa') params.set('vista', viewMode);
     if (selectedSoporteId && viewMode === 'mapa') params.set('soporte', selectedSoporteId);
     setSearchParams(params, { replace: true });
-  }, [selectedPlaza, selectedTipo, selectedDisponibilidad, viewMode, selectedSoporteId, setSearchParams]);
+  }, [selectedPlaza, selectedTipo, selectedDisponibilidad, searchText, viewMode, selectedSoporteId, setSearchParams]);
 
   useEffect(() => {
     if (plazaParam && plazaParam !== selectedPlaza) setSelectedPlaza(plazaParam);
     if (tipoParam && tipoParam !== selectedTipo) setSelectedTipo(tipoParam);
     if (dispParam && dispParam !== selectedDisponibilidad) setSelectedDisponibilidad(dispParam);
     if (vistaParam && (vistaParam === 'mapa' || vistaParam === 'catalogo') && vistaParam !== viewMode) setViewMode(vistaParam);
-  }, [plazaParam, tipoParam, dispParam, vistaParam]);
+    if (queryParam !== searchText) setSearchText(queryParam);
+  }, [plazaParam, tipoParam, dispParam, vistaParam, queryParam]);
 
   const query = searchText.trim().toLowerCase();
   const matchesSearch = useCallback((item: InventoryItem) => {
