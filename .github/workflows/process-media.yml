@@ -8,6 +8,8 @@ on:
         required: false
         default: media/incoming
   push:
+    branches:
+      - canonical-refinement
     paths:
       - 'media/incoming/**'
       - 'scripts/process-media.sh'
