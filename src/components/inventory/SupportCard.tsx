@@ -1,5 +1,19 @@
 import { useState } from 'react';
-import { ArrowLeft, ArrowRight, Check, Heart, MapPin, Monitor, Play, Plus, Trash2 } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  CheckSquare2,
+  Ellipsis,
+  Eye,
+  Heart,
+  MapPin,
+  Monitor,
+  Pencil,
+  Play,
+  Plus,
+  Trash2,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { InventoryItem, MobileRoute, getDisponibilidad, isMobileRoute } from '../../types';
 import { useSelection } from '../../context/SelectionContext';
@@ -23,11 +37,12 @@ function formatImpacts(value?: number | string | null) {
 
 function getMetrics(item: InventoryItem) {
   const technical = item.technical;
-  const impacts = formatImpacts(technical?.monthly_impacts);
-  const measures = technical?.measures || null;
-  const resolution = technical?.resolution || null;
-  const caras = technical?.caras ? `${technical.caras} caras` : null;
-  return { impacts, measures, resolution, caras };
+  return {
+    impacts: formatImpacts(technical?.monthly_impacts),
+    measures: technical?.measures || null,
+    resolution: technical?.resolution || null,
+    caras: technical?.caras ? `${technical.caras} caras` : null,
+  };
 }
 
 function getRouteAttributes(item: InventoryItem): string[] {
@@ -67,42 +82,68 @@ function isVideoCover(item: InventoryItem) {
 function mediaSlides(item: InventoryItem) {
   const media = (item.media || []).filter((entry) => entry.active !== false && entry.url).slice(0, 3);
   if (media.length) return media.map((entry) => ({ url: entry.url, kind: entry.media_type }));
-  return (item.imageUrls || []).filter(Boolean).slice(0, 3).map((url, index) => ({ url, kind: index === 0 && isVideoCover(item) ? 'video' as const : 'image' as const }));
+  return (item.imageUrls || []).filter(Boolean).slice(0, 3).map((url, index) => ({
+    url,
+    kind: index === 0 && isVideoCover(item) ? 'video' as const : 'image' as const,
+  }));
 }
 
 function statusClasses(status: ReturnType<typeof getDisponibilidad>) {
-  if (status === 'reservado') return 'bg-amber-100 text-amber-900';
-  if (status === 'inactivo') return 'bg-slate-200 text-slate-700';
-  return 'bg-emerald-500 text-white';
+  if (status === 'reservado') return 'bg-amber-50 text-amber-800';
+  if (status === 'inactivo') return 'bg-slate-100 text-slate-600';
+  return 'bg-emerald-50 text-emerald-700';
 }
 
 function statusDot(status: ReturnType<typeof getDisponibilidad>) {
-  if (status === 'reservado') return 'bg-amber-500';
+  if (status === 'reservado') return 'bg-amber-400';
   if (status === 'inactivo') return 'bg-slate-500';
   return 'bg-emerald-500';
 }
 
-function StatusBadge({ status, period }: { status: ReturnType<typeof getDisponibilidad>; period?: string }) {
+function StatusBadge({
+  status,
+  period,
+  dark = false,
+}: {
+  status: ReturnType<typeof getDisponibilidad>;
+  period?: string;
+  dark?: boolean;
+}) {
   const label = status === 'reservado' ? 'Reservado' : status === 'inactivo' ? 'Inactivo' : 'Disponible';
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold shadow-sm ${statusClasses(status)}`}>
-      <span className={`h-2 w-2 rounded-full ${statusDot(status)}`} />
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold shadow-sm ${
+      dark ? 'bg-slate-500/90 text-white' : statusClasses(status)
+    }`}>
+      <span className={`h-2 w-2 rounded-full ${dark ? 'bg-slate-200' : statusDot(status)}`} />
       {label}{status === 'reservado' && period ? ` · ${period}` : ''}
     </span>
   );
 }
 
-function TypeBadge({ item }: { item: InventoryItem }) {
+function TypeBadge({ item, compact = false }: { item: InventoryItem; compact?: boolean }) {
   const label = item.tipo_soporte === 'led_movil' ? 'LED Móvil' : item.tipo_soporte === 'led' ? 'LED' : 'Tradicional';
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-800">
-      <Monitor className="h-3.5 w-3.5" />
+    <span className={`inline-flex items-center gap-1.5 rounded-lg bg-slate-100 text-slate-800 ${
+      compact ? 'px-2 py-1 text-[10px]' : 'px-2.5 py-1.5 text-[11px]'
+    } font-bold`}>
+      <Monitor className={compact ? 'h-3 w-3' : 'h-3.5 w-3.5'} />
       {label}
     </span>
   );
 }
 
-export function SupportCard({ item, variant = 'catalog', selectable = false, onRemove, onSelectOnMap }: SupportCardProps) {
+function MetricIcon({ kind }: { kind: string }) {
+  if (kind === 'impact') return <span className="text-[21px] leading-none text-emerald-500">↗</span>;
+  return <Monitor className="h-4 w-4" />;
+}
+
+export function SupportCard({
+  item,
+  variant = 'catalog',
+  selectable = false,
+  onRemove,
+  onSelectOnMap,
+}: SupportCardProps) {
   const navigate = useNavigate();
   const { isSelected, toggleSelect } = useSelection();
   const availability = getDisponibilidad(item);
@@ -120,7 +161,7 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
   const locationLabel = `${address || item.ciudad} · ${item.ciudad === 'mendoza' ? 'Mendoza' : 'Buenos Aires'}`;
   const altDescription = `Soporte publicitario ${item.name} en ${item.ciudad === 'mendoza' ? 'Mendoza' : 'Buenos Aires'}`;
 
-  if (availability === 'inactivo') return null;
+  if (availability === 'inactivo' && variant !== 'dashboard') return null;
 
   const navigateToMap = () => {
     if (onSelectOnMap) onSelectOnMap(item);
@@ -134,19 +175,38 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
   const renderMedia = () => {
     if (active) {
       if (active.kind === 'video') {
-        return <div className="relative h-full w-full"><video src={active.url} muted playsInline preload="metadata" className="h-full w-full object-cover" /><div className="pointer-events-none absolute inset-0 flex items-center justify-center"><span className="flex h-11 w-11 items-center justify-center rounded-full bg-black/55 text-white"><Play className="h-4 w-4 fill-current" /></span></div></div>;
+        return (
+          <div className="relative h-full w-full">
+            <video src={active.url} muted playsInline preload="metadata" className="h-full w-full object-cover" />
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-black/55 text-white">
+                <Play className="h-4 w-4 fill-current" />
+              </span>
+            </div>
+          </div>
+        );
       }
       return <img src={active.url} alt={altDescription} className="h-full w-full object-cover" loading="lazy" />;
     }
-    return <div className="flex h-full w-full items-center justify-center bg-slate-100"><MapPin className="h-8 w-8 text-slate-300" /></div>;
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-slate-100">
+        <MapPin className="h-8 w-8 text-slate-300" />
+      </div>
+    );
   };
 
   const mediaControls = slides.length > 1 && (
     <>
-      <button type="button" aria-label="Anterior recurso multimedia" onClick={() => setSlide((safeIndex - 1 + slides.length) % slides.length)} className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/55 p-2 text-white transition hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-white"><ArrowLeft className="h-4 w-4" /></button>
-      <button type="button" aria-label="Siguiente recurso multimedia" onClick={() => setSlide((safeIndex + 1) % slides.length)} className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/55 p-2 text-white transition hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-white"><ArrowRight className="h-4 w-4" /></button>
+      <button type="button" aria-label="Anterior recurso multimedia" onClick={() => setSlide((safeIndex - 1 + slides.length) % slides.length)} className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/55 p-2 text-white transition hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-white">
+        <ArrowLeft className="h-4 w-4" />
+      </button>
+      <button type="button" aria-label="Siguiente recurso multimedia" onClick={() => setSlide((safeIndex + 1) % slides.length)} className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/55 p-2 text-white transition hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-white">
+        <ArrowRight className="h-4 w-4" />
+      </button>
       <div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 gap-1.5" role="tablist" aria-label="Miniaturas">
-        {slides.map((_, index) => <button key={index} type="button" aria-label={`Ir al recurso ${index + 1}`} onClick={() => setSlide(index)} className={`h-1.5 rounded-full transition-all ${index === safeIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/60'}`} />)}
+        {slides.map((_, index) => (
+          <button key={index} type="button" aria-label={`Ir al recurso ${index + 1}`} onClick={() => setSlide(index)} className={`h-1.5 rounded-full transition-all ${index === safeIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/60'}`} />
+        ))}
       </div>
     </>
   );
@@ -167,9 +227,7 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
       <div className={`grid ${values.length >= 3 ? 'grid-cols-3' : values.length === 2 ? 'grid-cols-2' : 'grid-cols-1'} divide-x divide-slate-200`}>
         {values.slice(0, 3).map((metric) => (
           <div key={`${metric.label}-${metric.value}`} className={`flex min-w-0 items-center gap-2 ${compact ? 'px-2' : 'px-3'} first:pl-0 last:pr-0`}>
-            <span className={`shrink-0 ${metric.icon === 'impact' ? 'text-emerald-500' : 'text-slate-500'}`}>
-              {metric.icon === 'impact' ? <span className="text-xl leading-none">↗</span> : <Monitor className="h-4 w-4" />}
-            </span>
+            <span className={`shrink-0 ${metric.icon === 'impact' ? 'text-emerald-500' : 'text-slate-500'}`}><MetricIcon kind={metric.icon} /></span>
             <span className="min-w-0">
               <span className={`block font-bold leading-tight ${metric.icon === 'impact' ? 'text-xl text-emerald-600' : 'text-sm text-slate-800'}`}>{metric.value}</span>
               <span className="block truncate text-[10px] leading-tight text-slate-500">{metric.label}</span>
@@ -188,23 +246,28 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
         <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
           {renderMedia()}
           <div className="absolute left-3 top-3"><StatusBadge status={availability} period={period} /></div>
-          <div className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-slate-700 shadow-sm">{selected ? <Check className="h-4 w-4 text-emerald-600" /> : <Heart className="h-4 w-4" />}</div>
+          <div className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-lg bg-white/95 text-slate-700 shadow-sm">
+            {selected ? <CheckSquare2 className="h-5 w-5 text-emerald-600" /> : <span className="h-5 w-5 rounded-md border-2 border-slate-500 bg-white" />}
+          </div>
           {mediaControls}
         </div>
         <div className="p-4 sm:p-5">
-          <div className="flex items-start justify-between gap-3"><div><TypeBadge item={item} /><h3 className="mt-2 text-lg font-bold leading-tight text-slate-950">{item.name}</h3></div></div>
+          <TypeBadge item={item} compact />
+          <h3 className="mt-2 text-[15px] font-bold leading-tight text-slate-950">{item.name}</h3>
           <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-500"><MapPin className="h-3.5 w-3.5" />{locationLabel}</p>
           <div className="mt-5">{renderMetricRow(true)}</div>
           {isReserved && item.availableFrom && <p className="mt-4 text-xs font-medium text-slate-600">Disponible desde <span className="text-slate-950">{item.availableFrom}</span></p>}
           <div className="mt-5 flex gap-3">
             {selectable && isAvailable ? (
-              <button type="button" onClick={() => toggleSelect(item)} aria-pressed={selected} className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold transition ${selected ? 'bg-emerald-50 text-emerald-700' : 'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50'}`}>
+              <button type="button" onClick={() => toggleSelect(item)} aria-pressed={selected} className={`flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl border px-3 text-xs font-bold transition ${selected ? 'border-emerald-100 bg-emerald-50 text-emerald-700' : 'border-slate-300 bg-white text-slate-800 hover:bg-slate-50'}`}>
                 {selected ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}{selected ? 'Seleccionado' : 'Agregar a selección'}
               </button>
             ) : (
-              <button type="button" onClick={() => navigate(`/contacto?soporte=${item.canonical_id}`)} className="flex min-h-11 flex-1 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 px-4 text-sm font-bold text-amber-900">Consultar disponibilidad</button>
+              <button type="button" onClick={() => navigate(`/contacto?soporte=${item.canonical_id}`)} className="flex min-h-10 flex-1 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 px-3 text-xs font-bold text-amber-900">Consultar disponibilidad</button>
             )}
-            <button type="button" onClick={navigateToDetail} className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-bold text-white hover:bg-slate-800">Ver soporte <ArrowRight className="h-4 w-4" /></button>
+            <button type="button" onClick={navigateToDetail} className="flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-3 text-xs font-bold text-slate-800 hover:bg-slate-50">
+              Ver soporte <ArrowRight className="h-4 w-4" />
+            </button>
           </div>
           {onRemove && <button type="button" onClick={() => onRemove(item)} className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-950"><Trash2 className="h-4 w-4" /> Quitar</button>}
         </div>
@@ -234,34 +297,77 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
     );
   }
 
+  if (variant === 'dashboard') {
+    const reviewStatus = item.active === false ? 'En revisión' : availability === 'reservado' ? 'Reservado' : availability === 'inactivo' ? 'Inactivo' : 'Disponible';
+    return (
+      <article className={`${cardBase} rounded-2xl`}>
+        <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
+          {renderMedia()}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/10" />
+          <div className="absolute left-3 top-3">
+            <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold shadow-sm ${reviewStatus === 'Disponible' ? 'bg-emerald-50/95 text-emerald-700' : reviewStatus === 'Reservado' ? 'bg-amber-50/95 text-amber-800' : 'bg-slate-500/90 text-white'}`}>
+              <span className={`h-2 w-2 rounded-full ${reviewStatus === 'Disponible' ? 'bg-emerald-500' : reviewStatus === 'Reservado' ? 'bg-amber-400' : 'bg-slate-200'}`} />
+              {reviewStatus}
+            </span>
+          </div>
+          <button type="button" aria-label="Más acciones" className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-lg bg-white/95 text-slate-700 shadow-sm">
+            <Ellipsis className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="p-4 sm:p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h3 className="text-[15px] font-bold leading-tight text-slate-950">{item.name}</h3>
+              <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-500"><MapPin className="h-3.5 w-3.5" />{locationLabel}</p>
+            </div>
+            <TypeBadge item={item} compact />
+          </div>
+          <div className="mt-5">{renderMetricRow(true)}</div>
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            <button type="button" onClick={() => navigate(`/dashboard/soportes/${encodeURIComponent(item.canonical_id)}/edit`)} className="flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-3 text-xs font-bold text-slate-700 hover:bg-slate-50">
+              <Pencil className="h-3.5 w-3.5" /> Editar
+            </button>
+            <button type="button" onClick={() => navigate(`/dashboard/soportes/${encodeURIComponent(item.canonical_id)}/preview`)} className="flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-3 text-xs font-bold text-slate-700 hover:bg-slate-50">
+              <Eye className="h-3.5 w-3.5" /> Ver preview
+            </button>
+          </div>
+        </div>
+      </article>
+    );
+  }
+
   return (
-    <article className={`${cardBase} ${variant === 'dashboard' ? 'rounded-2xl' : ''}`}>
+    <article className={`${cardBase} rounded-2xl`}>
       <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
         {renderMedia()}
         <div className="absolute left-3 top-3"><StatusBadge status={availability} period={period} /></div>
-        <div className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-slate-700 shadow-sm"><Heart className="h-4 w-4" /></div>
+        <button type="button" aria-label="Agregar a favoritos" className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-slate-700 shadow-sm"><Heart className="h-4 w-4" /></button>
         {mediaControls}
       </div>
       <div className="p-4 sm:p-5">
         <div className="flex items-start justify-between gap-3">
-          <div><TypeBadge item={item} /><h3 className="mt-2 text-lg font-bold leading-tight text-slate-950">{item.name}</h3></div>
-          <button type="button" onClick={navigateToMap} className="hidden shrink-0 items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 sm:inline-flex"><MapPin className="h-3.5 w-3.5" /> Ver en mapa</button>
+          <TypeBadge item={item} compact />
+          <button type="button" onClick={navigateToMap} className="hidden shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-bold text-slate-700 hover:bg-slate-50 sm:inline-flex">
+            <MapPin className="h-3 w-3" /> Ver en mapa
+          </button>
         </div>
+        <h3 className="mt-2 text-[15px] font-bold leading-tight text-slate-950">{item.name}</h3>
         <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-500"><MapPin className="h-3.5 w-3.5" />{locationLabel}</p>
         <div className="mt-5">{renderMetricRow(true)}</div>
         {isReserved && item.availableFrom && <p className="mt-4 text-xs font-medium text-slate-600">Disponible desde <span className="text-slate-950">{item.availableFrom}</span></p>}
         <div className="mt-5 flex gap-3">
-          {selectable ? (
-            isAvailable ? (
-              <button type="button" onClick={() => toggleSelect(item)} aria-pressed={selected} className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold transition ${selected ? 'bg-emerald-50 text-emerald-700' : 'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50'}`}>{selected ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}{selected ? 'Seleccionado' : 'Agregar a selección'}</button>
-            ) : (
-              <button type="button" onClick={() => navigate(`/contacto?soporte=${item.canonical_id}`)} className="flex min-h-11 flex-1 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 px-4 text-sm font-bold text-amber-900">Consultar disponibilidad</button>
-            )
+          {selectable && isAvailable ? (
+            <button type="button" onClick={() => toggleSelect(item)} aria-pressed={selected} className={`flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl border px-3 text-xs font-bold transition ${selected ? 'border-emerald-100 bg-emerald-50 text-emerald-700' : 'border-slate-300 bg-white text-slate-800 hover:bg-slate-50'}`}>
+              {selected ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}{selected ? 'Seleccionado' : 'Agregar a selección'}
+            </button>
           ) : (
-            <button type="button" onClick={navigateToDetail} className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-bold text-white hover:bg-slate-800">Ver detalle <ArrowRight className="h-4 w-4" /></button>
+            <button type="button" onClick={navigateToDetail} className="flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-3 text-xs font-bold text-slate-800 hover:bg-slate-50">Ver detalle <ArrowRight className="h-4 w-4" /></button>
           )}
-          {selectable && <button type="button" onClick={navigateToMap} className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 hover:bg-slate-50 sm:hidden"><MapPin className="h-4 w-4" /> Mapa</button>}
+          <button type="button" onClick={navigateToDetail} className="flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-slate-950 px-3 text-xs font-bold text-white hover:bg-slate-800">
+            {selectable ? 'Ver detalle' : 'Ver soporte'} <ArrowRight className="h-4 w-4" />
+          </button>
         </div>
+        {onRemove && <button type="button" onClick={() => onRemove(item)} className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-950"><Trash2 className="h-4 w-4" /> Quitar</button>}
       </div>
     </article>
   );
