@@ -16,10 +16,10 @@ export function Layout({ children }: { children: ReactNode }) {
 
   const navLinks = [
     { name: 'Inicio', path: '/' },
+    { name: 'Inventario', path: '/inventario' },
     { name: 'Soportes', path: '/soportes' },
     { name: 'Soluciones', path: '/soluciones' },
     { name: 'Nosotros', path: '/nosotros' },
-    { name: 'Inventario', path: '/inventario' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -33,18 +33,18 @@ export function Layout({ children }: { children: ReactNode }) {
             <Link to="/" className="flex items-center gap-2">
               <img src="/brand/brand-dark.webp" alt="Grupo Comunicarte" className="w-full max-w-[240px] aspect-[4/1] object-contain" />
             </Link>
-            <nav className="hidden md:flex items-center gap-6">
+            <nav className="hidden md:flex items-center gap-6" aria-label="Navegación principal">
               {navLinks.map((link) => (
-                <Link key={link.path} to={link.path} className={cn('text-sm font-medium transition-colors hover:text-black', isActive(link.path) ? 'text-black font-semibold' : 'text-gray-500')}>
+                <Link key={link.path} to={link.path} aria-current={isActive(link.path) ? 'page' : undefined} className={cn('text-sm font-medium transition-colors hover:text-black', isActive(link.path) ? 'text-black font-semibold' : 'text-gray-500')}>
                   {link.name}
                 </Link>
               ))}
-              <div className="h-4 w-px bg-gray-200" />
+              <div className="h-4 w-px bg-gray-200" aria-hidden="true" />
               <Link to="/dashboard" className="text-sm font-semibold text-gray-500 transition-colors hover:text-black" aria-label="Acceder al Portal Admin">
                 Portal Admin
               </Link>
               <Link to={ctaPath} className={buttonStyles({ size: 'sm' })}>
-                <span>Media Kit</span>
+                <span>{selectedCount > 0 ? 'Mi selección' : 'Media Kit'}</span>
                 {selectedCount > 0 && <span className="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">{selectedCount}</span>}
               </Link>
             </nav>
@@ -56,7 +56,7 @@ export function Layout({ children }: { children: ReactNode }) {
         {isMobileMenuOpen && (
           <div className="md:hidden bg-white border-b border-gray-100 py-4 px-4 space-y-3 shadow-lg absolute w-full left-0">
             {navLinks.map((link) => (
-              <Link key={link.path} to={link.path} onClick={() => setIsMobileMenuOpen(false)} className={cn('block px-3 py-2 text-base font-medium rounded-xl', isActive(link.path) ? 'text-black bg-gray-50 font-semibold' : 'text-gray-600 hover:bg-gray-50')}>
+              <Link key={link.path} to={link.path} onClick={() => setIsMobileMenuOpen(false)} aria-current={isActive(link.path) ? 'page' : undefined} className={cn('block px-3 py-2 text-base font-medium rounded-xl', isActive(link.path) ? 'text-black bg-gray-50 font-semibold' : 'text-gray-600 hover:bg-gray-50')}>
                 {link.name}
               </Link>
             ))}
@@ -65,7 +65,7 @@ export function Layout({ children }: { children: ReactNode }) {
                 <span>Acceso Portal Admin</span><span className="w-2 h-2 rounded-full bg-emerald-500" />
               </Link>
               <Link to={ctaPath} onClick={() => setIsMobileMenuOpen(false)} className={buttonStyles({ className: 'w-full' })}>
-                Media Kit{selectedCount > 0 && <span className="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">{selectedCount}</span>}
+                {selectedCount > 0 ? 'Mi selección' : 'Media Kit'}{selectedCount > 0 && <span className="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">{selectedCount}</span>}
               </Link>
             </div>
           </div>
