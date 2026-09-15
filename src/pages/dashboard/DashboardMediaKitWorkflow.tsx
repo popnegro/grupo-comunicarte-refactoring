@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
 import { apiFetch } from '../../lib/api';
 import { calculateSupportTotal, formatSupportCurrency } from '../../lib/supportPricing';
-import { downloadMediaKitPdf, downloadMediaKitPpt, sendMediaKitToLead, ExportLead, ExportSupport } from '../../lib/adminMediaKitExport';
+import { downloadMediaKitPdf, downloadMediaKitPpt, sendMediaKitToLead, ExportSupport } from '../../lib/adminMediaKitExport';
 
 type WorkflowStatus = 'request' | 'in_progress' | 'done';
 type Pricing = { exhibition_price?: number | string | null; installation_price?: number | string | null; printing_price?: number | string | null; currency?: string | null };
