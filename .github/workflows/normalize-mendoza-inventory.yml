@@ -3,6 +3,8 @@ name: Normalize Mendoza Inventory
 on:
   workflow_dispatch:
   push:
+    branches:
+      - canonical-refinement
     paths:
       - 'scripts/normalize-mendoza-inventory.py'
       - 'docs/inventario/processed/soportes-mendoza.txt'
@@ -13,6 +15,7 @@ permissions:
 
 jobs:
   normalize:
+    if: github.ref == 'refs/heads/canonical-refinement'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
