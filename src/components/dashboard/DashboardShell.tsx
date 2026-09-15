@@ -11,7 +11,7 @@ interface DashboardShellProps { children: ReactNode; }
 const pageLabels: Record<string, string> = {
   '/dashboard': 'Inicio',
   '/dashboard/soportes': 'Soportes',
-  '/dashboard/soportes/new': 'Nuevo Soporte',
+  '/dashboard/soportes/new': 'Nuevo soporte',
   '/dashboard/solicitudes': 'Solicitudes',
   '/dashboard/mediakits': 'Media Kits',
   '/dashboard/mediakits/nuevo': 'Nuevo Media Kit',
@@ -37,7 +37,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
 
   const currentPage = useMemo(() => {
     if (pageLabels[location.pathname]) return pageLabels[location.pathname];
-    if (location.pathname.includes('/edit')) return 'Editar Soporte';
+    if (location.pathname.includes('/edit')) return 'Editar soporte';
     if (location.pathname.includes('/preview')) return 'Vista previa';
     if (location.pathname.includes('/reservation')) return 'Reserva';
     return 'Panel';
@@ -50,15 +50,15 @@ export function DashboardShell({ children }: DashboardShellProps) {
 
   const navGroups = [
     {
-      label: 'Trabajo',
+      label: 'Operación',
       items: [
-        { to: '/dashboard', label: 'Inicio', icon: BarChart3, end: true },
+        { to: '/dashboard', label: 'Resumen', icon: BarChart3, end: true },
         { to: '/dashboard/soportes', label: 'Soportes', icon: MonitorSmartphone },
         { to: '/dashboard/solicitudes', label: 'Solicitudes', icon: FileText, count: newLeadsCount },
       ],
     },
     {
-      label: 'Contenido',
+      label: 'Comercial',
       items: [
         { to: '/dashboard/mediakits', label: 'Media Kits', icon: FileText },
         { to: '/dashboard/mediakits/nuevo', label: 'Crear Media Kit', icon: FilePlus2 },
@@ -81,6 +81,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
           </div>
           <div className="flex items-center gap-1.5">
             <Link to="/dashboard/solicitudes" className="relative rounded-md p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-950" title={`${newLeadsCount} solicitudes nuevas`} aria-label="Solicitudes nuevas"><Bell className="h-4 w-4" />{newLeadsCount > 0 && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white" />}</Link>
+            <Link to="/inventario" className="hidden items-center gap-1.5 rounded-md border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-700 transition hover:border-gray-300 hover:bg-gray-50 sm:inline-flex" title="Abrir inventario público"><MapPin className="h-3.5 w-3.5 text-gray-500" />Ver inventario</Link>
             <div className="hidden items-center gap-2 border-l border-gray-200 pl-3 sm:flex"><div className="flex h-7 w-7 items-center justify-center rounded-md bg-gray-950 text-[10px] font-bold text-white">GC</div><div className="hidden text-left leading-tight lg:block"><span className="block text-xs font-semibold text-gray-950">Editor</span><span className="text-[10px] text-gray-500">Espacio de trabajo</span></div></div>
             <button type="button" onClick={handleLogout} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-2 text-xs font-medium text-gray-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700" title="Cerrar sesión" aria-label="Cerrar sesión"><LogOut className="h-3.5 w-3.5" /><span className="hidden sm:inline">Salir</span></button>
           </div>
@@ -111,7 +112,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
         </aside>
 
         <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
-          <div className="mb-5 flex min-h-5 items-center gap-1.5 text-xs" aria-label="Breadcrumb"><Link to="/dashboard" className="font-medium text-gray-500 hover:text-gray-950">Inicio</Link><ChevronRight className="h-3 w-3 text-gray-300" aria-hidden="true" /><span className="font-medium text-gray-900" aria-current="page">{currentPage}</span></div>
+          <div className="mb-5 flex min-h-5 items-center gap-1.5 text-xs" aria-label="Breadcrumb"><Link to="/dashboard" className="font-medium text-gray-500 hover:text-gray-950">Resumen</Link>{location.pathname !== '/dashboard' && <><ChevronRight className="h-3 w-3 text-gray-300" aria-hidden="true" /><span className="font-medium text-gray-900" aria-current="page">{currentPage}</span></>}</div>
           {children}
         </main>
       </div>
