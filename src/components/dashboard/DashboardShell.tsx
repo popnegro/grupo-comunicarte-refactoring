@@ -9,7 +9,7 @@ import { getStoredLeads, subscribeToLeads } from '../../lib/dashboard-store';
 interface DashboardShellProps { children: ReactNode; }
 
 const pageLabels: Record<string, string> = {
-  '/dashboard': 'Inicio',
+  '/dashboard': 'Resumen',
   '/dashboard/soportes': 'Soportes',
   '/dashboard/soportes/new': 'Nuevo soporte',
   '/dashboard/solicitudes': 'Solicitudes',
@@ -77,7 +77,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
             <button type="button" onClick={() => setSidebarCollapsed((collapsed) => !collapsed)} className="hidden h-8 w-8 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-950 md:inline-flex" aria-label={sidebarCollapsed ? 'Expandir navegación' : 'Colapsar navegación'} title={sidebarCollapsed ? 'Expandir navegación' : 'Colapsar navegación'}>
               <PanelLeft className="h-4 w-4" />
             </button>
-            <Link to="/dashboard" className="flex shrink-0 items-center" title="Ir al inicio"><img src="/brand/brand-dark.svg" alt="Grupo Comunicarte" className="h-5 w-auto" /></Link>
+            <Link to="/dashboard" className="flex shrink-0 items-center" title="Ir al resumen"><img src="/brand/brand-dark.svg" alt="Grupo Comunicarte" className="h-5 w-auto" /></Link>
           </div>
           <div className="flex items-center gap-1.5">
             <Link to="/dashboard/solicitudes" className="relative rounded-md p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-950" title={`${newLeadsCount} solicitudes nuevas`} aria-label="Solicitudes nuevas"><Bell className="h-4 w-4" />{newLeadsCount > 0 && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white" />}</Link>
