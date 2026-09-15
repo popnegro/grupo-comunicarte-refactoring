@@ -40,7 +40,13 @@ const adminUser = ADMIN_USER;
 const adminPassword = ADMIN_PASSWORD;
 const adminSecret = ADMIN_SECRET;
 
-function canonicalizeEditorMedia(data: SupportWritePayload): SupportWritePayload {
+type AdminSupportWritePayload = SupportWritePayload & {
+  canonical_id?: string;
+};
+
+function canonicalizeEditorMedia(
+  data: AdminSupportWritePayload
+): AdminSupportWritePayload {
   if (data.media !== undefined || !Array.isArray(data.imageUrls)) return data;
 
   const urls = data.imageUrls.map((url) => String(url).trim()).filter(Boolean).slice(0, 3);
