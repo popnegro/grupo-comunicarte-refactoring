@@ -113,7 +113,7 @@ export function ContactForm({ isMediaKit = false }: { isMediaKit?: boolean }) {
 
       <Button type="submit" disabled={loading} className="w-full sm:w-auto min-w-48">
         {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-        {loading ? 'Enviando…' : isMediaKit ? 'Solicitar Media Kit' : 'Enviar consulta'}
+        {loading ? 'Enviando…' : isMediaKit ? 'Solicitar propuesta' : 'Solicitar propuesta comercial'}
       </Button>
     </form>
   );

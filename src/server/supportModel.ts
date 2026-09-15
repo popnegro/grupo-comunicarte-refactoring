@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { and, eq, inArray } from 'drizzle-orm';
-import { db } from '../db';
+import { db, isDatabaseConfigured } from '../db/index.ts';
+import { fixedLocations, mobileRoutes } from '../data/inventory.ts';
 import {
   supportFaces,
   supportLocations,
@@ -9,7 +10,7 @@ import {
   supports,
   supportRoutes,
   supportTechnical,
-} from '../db/schema';
+} from '../db/schema.ts';
 import {
   Disponibilidad,
   InventoryItem,
@@ -24,7 +25,7 @@ import {
   SupportRouteData,
   SupportTechnicalData,
   TipoSoporte,
-} from '../types';
+} from '../types.ts';
 
 export const ALLOWED_FAMILIES: SupportFamily[] = ['traditional', 'medium_format', 'led', 'led_mobile'];
 export const ALLOWED_MEDIA_TYPES: SupportMediaType[] = ['image', 'video', 'document'];
@@ -393,25 +394,52 @@ function rowToInventoryItem(
 }
 
 export async function getSupportCatalog(options?: { includeInactive?: boolean }): Promise<InventoryItem[]> {
-  const rows = await db.select().from(supports);
-  const filtered = rows.filter((row) => {
-    const isComplete = Boolean(row.canonicalId && row.name && row.ciudad && row.tipoSoporte);
-    const isActive = options?.includeInactive ? true : row.active !== false;
-    return isComplete && isActive;
-  });
-  const canonicalIds = filtered.map((row) => row.canonicalId);
-  const related = await loadRelatedRecords(canonicalIds);
-  return filtered.map((row) => rowToInventoryItem(row, related));
+  if (!isDatabaseConfigured) {
+    const all = [...fixedLocations, ...mobileRoutes];
+    return options?.includeInactive ? all : all.filter((item) => item.disponibilidad !== 'inactivo');
+  }
+  try {
+    const rows = await db.select().from(supports);
+    const filtered = rows.filter((row) => {
+      const isComplete = Boolean(row.canonicalId && row.name && row.ciudad && row.tipoSoporte);
+      const isActive = options?.includeInactive ? true : row.active !== false;
+      return isComplete && isActive;
+    });
+    const canonicalIds = filtered.map((row) => row.canonicalId);
+    const related = await loadRelatedRecords(canonicalIds);
+    return filtered.map((row) => rowToInventoryItem(row, related));
+  } catch (err) {
+    console.warn('Falling back to static inventory due to database query error:', err);
+    const all = [...fixedLocations, ...mobileRoutes];
+    return options?.includeInactive ? all : all.filter((item) => item.disponibilidad !== 'inactivo');
+  }
 }
 
 export async function getSupportDetail(canonicalId: string, options?: { includeInactive?: boolean }): Promise<InventoryItem | null> {
-  const rows = await db.select().from(supports).where(eq(supports.canonicalId, canonicalId));
-  if (rows.length === 0) return null;
-  const row = rows[0];
-  if (!(row.canonicalId && row.name && row.ciudad && row.tipoSoporte)) return null;
-  if (!options?.includeInactive && row.active === false) return null;
-  const related = await loadRelatedRecords([canonicalId]);
-  return rowToInventoryItem(row, related);
+  if (!isDatabaseConfigured) {
+    const all = [...fixedLocations, ...mobileRoutes];
+    const match = all.find((item) => item.canonical_id === canonicalId);
+    if (!match) return null;
+    if (!options?.includeInactive && match.disponibilidad === 'inactivo') return null;
+    return match;
+  }
+  try {
+    const rows = await db.select().from(supports).where(eq(supports.canonicalId, canonicalId));
+    if (rows.length === 0) {
+      const all = [...fixedLocations, ...mobileRoutes];
+      return all.find((item) => item.canonical_id === canonicalId) || null;
+    }
+    const row = rows[0];
+    if (!(row.canonicalId && row.name && row.ciudad && row.tipoSoporte)) return null;
+    if (!options?.includeInactive && row.active === false) return null;
+    const related = await loadRelatedRecords([canonicalId]);
+    return rowToInventoryItem(row, related);
+  } catch (err) {
+    console.warn('Falling back to static support lookup due to database query error:', err);
+    const all = [...fixedLocations, ...mobileRoutes];
+    const match = all.find((item) => item.canonical_id === canonicalId);
+    return match || null;
+  }
 }
 
 export function generateCanonicalId(name: string, ciudad: Plaza, family: SupportFamily) {
@@ -688,21 +716,69 @@ async function syncSupportFaces(canonicalId: string, payload: SupportWritePayloa
 
 async function syncSupportMedia(canonicalId: string, payload: SupportWritePayload) {
   if (!payload.media) return;
-  await db.delete(supportMedia).where(eq(supportMedia.supportCanonicalId, canonicalId));
+  const existing = await db.select().from(supportMedia).where(eq(supportMedia.supportCanonicalId, canonicalId));
+
+  const incomingUrls = new Set(payload.media.map(m => m.url));
+
+  // 1. Delete rows from database that are no longer present in incomingUrls
+  for (const row of existing) {
+    if (!incomingUrls.has(row.url)) {
+      await db.delete(supportMedia).where(eq(supportMedia.id, row.id));
+
+      const storageKey = (row.metadata as any)?.storage_key;
+      if (storageKey) {
+        try {
+          const isR2Configured = process.env.R2_ACCOUNT_ID && process.env.R2_BUCKET_NAME && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_PUBLIC_URL;
+          if (isR2Configured) {
+            const { getStorageAdapter } = await import('./r2StorageAdapter.ts');
+            await getStorageAdapter().delete(storageKey);
+          }
+        } catch (cleanupError) {
+          console.error('R2 deletion of orphaned media failed:', cleanupError);
+        }
+      }
+    }
+  }
+
+  // 2. Insert or update the incoming media
   for (const [index, media] of payload.media.entries()) {
     validateMediaType(media.media_type);
-    await db.insert(supportMedia).values({
-      supportCanonicalId: canonicalId,
-      mediaType: media.media_type,
-      url: media.url,
-      title: media.title || null,
-      alt: media.alt || null,
-      mimeType: media.mime_type || null,
-      sortOrder: media.sort_order ?? index,
-      metadata: media.metadata || null,
-      active: media.active ?? true,
-      updatedAt: new Date(),
-    });
+    const existingRow = existing.find(row => row.url === media.url);
+
+    if (existingRow) {
+      // Merge metadata, prioritizing existing R2 metadata
+      const mergedMetadata = {
+        ...(media.metadata || {}),
+        ...(existingRow.metadata || {}),
+      };
+
+      await db
+        .update(supportMedia)
+        .set({
+          mediaType: media.media_type,
+          title: media.title || existingRow.title,
+          alt: media.alt || existingRow.alt,
+          mimeType: media.mime_type || existingRow.mimeType,
+          sortOrder: media.sort_order ?? index,
+          metadata: mergedMetadata,
+          active: media.active ?? existingRow.active,
+          updatedAt: new Date(),
+        })
+        .where(eq(supportMedia.id, existingRow.id));
+    } else {
+      await db.insert(supportMedia).values({
+        supportCanonicalId: canonicalId,
+        mediaType: media.media_type,
+        url: media.url,
+        title: media.title || null,
+        alt: media.alt || null,
+        mimeType: media.mime_type || null,
+        sortOrder: media.sort_order ?? index,
+        metadata: media.metadata || null,
+        active: media.active ?? true,
+        updatedAt: new Date(),
+      });
+    }
   }
 }
 

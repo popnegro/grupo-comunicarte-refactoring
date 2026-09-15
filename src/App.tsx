@@ -15,12 +15,12 @@ import Contacto from './pages/Contacto';
 // Auth & Dashboard
 import Login from './pages/auth/Login';
 import Dashboard from './pages/dashboard/Dashboard';
-import DashboardSoportes from './pages/dashboard/DashboardSoportes';
 import DashboardSupportList from './pages/dashboard/DashboardSupportList';
 import DashboardSupportProductEditorConnected from './pages/dashboard/DashboardSupportProductEditorConnected';
 import DashboardSupportPreview from './pages/dashboard/DashboardSupportPreview';
 import DashboardSupportReservation from './pages/dashboard/DashboardSupportReservation';
 import DashboardMediaKitWorkflow from './pages/dashboard/DashboardMediaKitWorkflow';
+import DashboardMediaKitBuilder from './pages/dashboard/DashboardMediaKitBuilder';
 
 function PublicRoutes() {
   const location = useLocation();
@@ -52,8 +52,9 @@ export default function App() {
           <Route path="/dashboard/soportes/:canonicalId/edit" element={<DashboardSupportProductEditorConnected mode="edit" />} />
           <Route path="/dashboard/soportes/:canonicalId/preview" element={<DashboardSupportPreview />} />
           <Route path="/dashboard/soportes/:canonicalId/reservation" element={<DashboardSupportReservation />} />
-          <Route path="/dashboard/soportes/advanced" element={<DashboardSoportes />} />
+
           <Route path="/dashboard/solicitudes" element={<DashboardMediaKitWorkflow />} />
+          <Route path="/dashboard/mediakits/nuevo" element={<DashboardMediaKitBuilder />} />
           <Route path="/dashboard/mediakits" element={<DashboardMediaKitWorkflow />} />
           <Route path="*" element={<PublicRoutes />} />
         </Routes>
