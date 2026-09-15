@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
 import { ArrowRight, ChevronLeft, ChevronRight, MapPin, MoveRight, Search, Target, TrendingUp, Users } from 'lucide-react';
-import { fixedLocations, mobileRoutes } from '../data/inventory';
+import { useInventory } from '../hooks/useInventory';
 import { InventoryItem } from '../types';
 import { Button } from '../components/ui/Button';
 import { SupportCard } from '../components/inventory/SupportCard';
@@ -9,8 +9,9 @@ import { SupportCard } from '../components/inventory/SupportCard';
 export default function Home() {
   const navigate = useNavigate();
   const featuredCarouselRef = useRef<HTMLDivElement>(null);
-  const allItems: InventoryItem[] = [...fixedLocations, ...mobileRoutes];
-  const featuredItems = allItems.filter(item => item.isFeatured || (item as any).IsFeatured).slice(0, 9);
+  const { items: inventoryItems } = useInventory();
+  const allItems: InventoryItem[] = inventoryItems;
+  const featuredItems = allItems.filter(item => item.isFeatured).slice(0, 9);
 
   const scrollFeatured = (direction: 'prev' | 'next') => {
     const container = featuredCarouselRef.current;
