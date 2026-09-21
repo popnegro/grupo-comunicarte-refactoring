@@ -8,7 +8,7 @@ import { useSelection } from '../../context/SelectionContext';
 export function Layout({ children }: { children: ReactNode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const { selectedCount } = useSelection();
+  const { selectedCount, selectedIds } = useSelection();
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
@@ -23,7 +23,8 @@ export function Layout({ children }: { children: ReactNode }) {
   ];
 
   const isActive = (path: string) => location.pathname === path;
-  const ctaPath = '/contacto?origen=mediakit';
+  const selectionQuery = selectedCount > 0 ? `&soportes=${encodeURIComponent(Array.from(selectedIds).join(','))}` : '';
+  const ctaPath = `/contacto?origen=mediakit${selectionQuery}`;
 
   return (
     <div className="min-h-screen flex flex-col w-full overflow-x-hidden bg-[#F9F9F9]">
