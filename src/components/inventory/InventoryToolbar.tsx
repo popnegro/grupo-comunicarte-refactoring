@@ -2,7 +2,6 @@ import { Search, SlidersHorizontal } from 'lucide-react';
 import { Plaza, TipoSoporte, Disponibilidad } from '../../types';
 import { Input } from '../ui/Input';
 import { ViewModeToggle, ViewMode } from './ViewModeToggle';
-import { cn } from '../../lib/utils';
 
 type DisponibilidadFilter = Disponibilidad | 'todos';
 
@@ -26,6 +25,8 @@ export function InventoryToolbar({
   setSelectedPlaza,
   selectedTipo,
   setSelectedTipo,
+  selectedDisponibilidad,
+  setSelectedDisponibilidad,
   searchText,
   setSearchText,
   resultsCount,
