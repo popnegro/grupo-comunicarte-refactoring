@@ -7,6 +7,7 @@ import { useInventory } from '../hooks/useInventory';
 import { Plaza, TipoSoporte, Disponibilidad, InventoryItem } from '../types';
 import { MapFilterPanel } from '../components/map/MapFilterPanel';
 import { ViewModeToggle, ViewMode } from '../components/inventory/ViewModeToggle';
+import { InventoryToolbar } from '../components/inventory/InventoryToolbar';
 import { SupportCardGrid } from '../components/inventory/SupportCardGrid';
 import { SlidersHorizontal, X, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -128,10 +129,26 @@ export default function Inventario() {
         </div>
       </div>
 
-      <div className={cn('relative z-0 flex h-full flex-grow flex-col', viewMode === 'catalogo' && 'pt-14 md:pt-0')}>
-        {viewMode === 'mapa' ? <InventoryMap locations={filteredLocations} routes={filteredRoutes} onOpenMediakit={handleOpenMediakit} initialSelectedId={selectedSoporteId || searchParams.get('soporte')} selectedPlaza={selectedPlaza} onResetFilters={handleResetFilters} /> : <SupportCardGrid items={allFilteredItems} onSelectOnMap={handleSelectOnMap} onResetFilters={handleResetFilters} />}
-        <StickySelectionBar onOpenMediakit={handleOpenMediakit} currentPlaza={selectedPlaza} inventoryItems={allItems} />
-        {isMediakitOpen && <MediakitPanel selectedItems={selectedItems} onClose={() => setIsMediakitOpen(false)} />}
+      <div className="relative z-0 flex h-full min-w-0 flex-grow flex-col">
+        <InventoryToolbar
+          selectedPlaza={selectedPlaza}
+          setSelectedPlaza={setSelectedPlaza}
+          selectedTipo={selectedTipo}
+          setSelectedTipo={setSelectedTipo}
+          selectedDisponibilidad={selectedDisponibilidad}
+          setSelectedDisponibilidad={setSelectedDisponibilidad}
+          searchText={searchText}
+          setSearchText={setSearchText}
+          resultsCount={allFilteredItems.length}
+          selectedCount={selectedCount}
+          viewMode={viewMode}
+          onViewModeChange={handleViewModeChange}
+        />
+        <div className={cn('relative min-h-0 flex-1', viewMode === 'catalogo' && 'pt-14 md:pt-0')}>
+          {viewMode === 'mapa' ? <InventoryMap locations={filteredLocations} routes={filteredRoutes} onOpenMediakit={handleOpenMediakit} initialSelectedId={selectedSoporteId || searchParams.get('soporte')} selectedPlaza={selectedPlaza} onResetFilters={handleResetFilters} /> : <SupportCardGrid items={allFilteredItems} onSelectOnMap={handleSelectOnMap} onResetFilters={handleResetFilters} />}
+          <StickySelectionBar onOpenMediakit={handleOpenMediakit} currentPlaza={selectedPlaza} inventoryItems={allItems} />
+          {isMediakitOpen && <MediakitPanel selectedItems={selectedItems} onClose={() => setIsMediakitOpen(false)} />}
+        </div>
       </div>
     </div>
   );
