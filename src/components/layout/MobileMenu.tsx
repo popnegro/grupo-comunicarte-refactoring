@@ -13,7 +13,7 @@ const links = [
   { name: 'Contacto', path: '/contacto', icon: Send, sub: 'Hablemos de tu campaña' },
 ];
 
-export function MobileMenu({ open, onClose, onSearch, selectedCount }: MobileMenuProps) {
+export function MobileMenu({ open, onClose, onSearch }: MobileMenuProps) {
   useEffect(() => {
     if (!open) return;
     const previous = document.body.style.overflow;
