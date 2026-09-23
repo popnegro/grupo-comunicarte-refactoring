@@ -155,6 +155,7 @@ export default function Inventario() {
           onNearMe={handleNearMe}
           locating={locating}
           nearMeActive={Boolean(userLocation)}
+          onClearNearMe={() => setUserLocation(null)}
         />
         <div className="relative min-h-0 flex-1">
           {viewMode === 'mapa' ? (

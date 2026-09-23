@@ -1,4 +1,4 @@
-import { Search, SlidersHorizontal, LocateFixed } from 'lucide-react';
+import { Search, SlidersHorizontal, LocateFixed, X } from 'lucide-react';
 import { Plaza, TipoSoporte, Disponibilidad } from '../../types';
 import { Input } from '../ui/Input';
 import { ViewModeToggle, ViewMode } from './ViewModeToggle';
@@ -21,6 +21,7 @@ interface InventoryToolbarProps {
   onNearMe: () => void;
   locating: boolean;
   nearMeActive: boolean;
+  onClearNearMe?: () => void;
 }
 
 export function InventoryToolbar({
@@ -39,10 +40,11 @@ export function InventoryToolbar({
   onNearMe,
   locating,
   nearMeActive,
+  onClearNearMe,
 }: InventoryToolbarProps) {
   return (
-    <div className="flex shrink-0 gap-2 overflow-x-auto border-b border-gray-200 bg-white px-3 py-2.5 md:items-center md:px-4 md:py-3 lg:px-5">
-      <div className="relative min-w-[210px] flex-none md:flex-1 lg:max-w-sm">
+    <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-gray-200 bg-white px-3 py-2.5 md:px-4 md:py-3 lg:px-5">
+      <div className="relative min-w-[210px] flex-1 basis-full md:basis-auto lg:max-w-sm">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
         <Input
           value={searchText}
@@ -53,10 +55,17 @@ export function InventoryToolbar({
         />
       </div>
 
-      <button type="button" onClick={onNearMe} disabled={locating} className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-wait disabled:opacity-60" aria-label="Buscar soportes cerca de mi ubicación">
+      <button type="button" onClick={onNearMe} disabled={locating} className={`flex h-9 shrink-0 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition ${nearMeActive ? "border-gray-950 bg-gray-950 text-white" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"} disabled:cursor-wait disabled:opacity-60`} aria-label="Buscar soportes cerca de mi ubicación">
         <LocateFixed className={`h-3.5 w-3.5 ${locating ? 'animate-pulse' : ''}`} aria-hidden="true" />
         {locating ? 'Ubicando...' : nearMeActive ? 'Cerca de tu ubicación' : 'Cerca mío'}
       </button>
+
+      {nearMeActive && onClearNearMe && (
+        <button type="button" onClick={onClearNearMe} className="flex h-9 shrink-0 items-center gap-1 rounded-lg border border-gray-200 bg-white px-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-50" aria-label="Quitar búsqueda cerca de mi ubicación">
+          <X className="h-3.5 w-3.5" aria-hidden="true" />
+          <span className="hidden sm:inline">Quitar</span>
+        </button>
+      )}
 
       <select
         value={selectedPlaza}
