@@ -21,7 +21,7 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col w-full overflow-x-hidden bg-[#F9F9F9]">
       <Navbar />
-      <main className="flex-grow flex flex-col">{children}</main>
+      <main className="flex-grow flex flex-col pt-20">{children}</main>
       <footer id="site-footer" className="bg-gray-950 text-white border-t border-gray-900 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
           <div className="flex flex-col md:flex-row justify-between items-start gap-10">
