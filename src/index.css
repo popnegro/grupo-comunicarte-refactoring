@@ -98,3 +98,20 @@ body { font-family: var(--font-sans); color: var(--foreground); background-color
 @utility surface-card {
   @apply rounded-2xl border border-gray-200 bg-white;
 }
+
+
+/* Interaction polish: visible keyboard focus without changing the visual language. */
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
