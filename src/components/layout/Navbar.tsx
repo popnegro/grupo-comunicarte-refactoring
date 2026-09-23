@@ -124,10 +124,10 @@ export function Navbar() {
             </button>
             <button
               className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200"
-              onClick={() => setMobileOpen(value => !value)
-            aria-label={mobileOpen ? 'Cerrar menú' : 'Abrir menú'}
-            aria-expanded={mobileOpen}
-          >
+              onClick={() => setMobileOpen(value => !value)}
+              aria-label={mobileOpen ? 'Cerrar menú' : 'Abrir menú'}
+              aria-expanded={mobileOpen}
+            >
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
