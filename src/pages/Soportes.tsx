@@ -85,6 +85,10 @@ export default function Soportes() {
               );
             })}
           </div>
+          <div className="mt-10 flex flex-wrap items-center gap-4">
+            <Link to="/inventario" className={buttonStyles({ size: "default" })}>Explorar inventario <ArrowRight className="h-4 w-4" /></Link>
+            <Link to="/contacto" className={buttonStyles({ variant: "outline", size: "default" })}>Hablar con ventas</Link>
+          </div>
         </div>
       </section>
     </div>

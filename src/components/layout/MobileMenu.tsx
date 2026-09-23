@@ -48,7 +48,7 @@ export function MobileMenu({ open, onClose, onSearch, selectedCount, onMediakit 
           <Link to="/login" onClick={onClose} className="flex items-center gap-3 rounded-2xl border border-zinc-200 p-4">
             <User className="h-5 w-5 text-zinc-500" /><span className="flex-1 text-sm font-semibold">Iniciar sesión</span><ChevronRight className="h-4 w-4 text-zinc-300" />
           </Link>
-          <a href="https://wa.me/5492616706710" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 rounded-xl bg-zinc-950 px-4 py-3 text-sm font-bold text-white">WhatsApp comercial <Send className="h-4 w-4" /></a>
+          <div className="grid gap-2 sm:grid-cols-2"><Link to="/contacto" onClick={onClose} className="flex items-center justify-center gap-2 rounded-xl bg-zinc-950 px-4 py-3 text-sm font-bold text-white">Hablar con ventas <Send className="h-4 w-4" /></Link><a href="https://wa.me/5492616706710" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-bold text-zinc-900">WhatsApp comercial</a></div>
         </div>
       </div>
     </div>

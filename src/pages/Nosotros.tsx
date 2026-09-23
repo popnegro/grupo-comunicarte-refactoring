@@ -1,4 +1,5 @@
 import { ArrowRight, Target, TrendingUp, Users } from 'lucide-react';
+import { useInventory } from '../hooks/useInventory';
 import { Link } from 'react-router-dom';
 import { buttonStyles } from '../components/ui/Button';
 import { InteriorHero } from '../components/layout/InteriorHero';
@@ -31,6 +32,8 @@ export function AnimatedCounter({ end, duration = 1500, prefix = '', suffix = ''
 }
 
 export default function Nosotros() {
+  const { items } = useInventory();
+  const plazaCount = new Set(items.map(item => item.ciudad)).size;
   const pillars = [
     { title: 'Ubicaciones Estratégicas', description: 'Cada espacio es seleccionado rigurosamente por su volumen de tránsito vehicular y peatonal, garantizando una alta tasa de contacto visual con tu audiencia.', icon: Target },
     { title: 'Digitalización DOOH', description: 'Modernizamos la vía pública con pantallas dinámicas de alta definición para ofrecer contenidos adaptables y con óptimo contraste diurno y nocturno.', icon: TrendingUp },
@@ -55,15 +58,15 @@ export default function Nosotros() {
         <div className="page-container">
           <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-gray-200 bg-white md:grid-cols-3">
             <div className="border-b border-gray-200 p-6 md:border-b-0 md:border-r md:p-7">
-              <AnimatedCounter prefix="+" end={30} className="text-3xl font-semibold tracking-tight text-gray-950 md:text-4xl" />
-              <span className="mt-2 block text-xs font-medium leading-relaxed text-gray-500">Soportes activos en Mendoza y Buenos Aires</span>
+              <AnimatedCounter prefix="+" end={items.length} className="text-3xl font-semibold tracking-tight text-gray-950 md:text-4xl" />
+              <span className="mt-2 block text-xs font-medium leading-relaxed text-gray-500">Soportes disponibles en las plazas activas</span>
             </div>
             <div className="border-b border-gray-200 p-6 md:border-b-0 md:border-r md:p-7">
               <span className="text-3xl font-semibold tracking-tight text-gray-950 md:text-4xl">Puntos clave</span>
               <span className="mt-2 block text-xs font-medium leading-relaxed text-gray-500">Ubicaciones de máxima visibilidad urbana</span>
             </div>
             <div className="p-6 md:p-7">
-              <span className="text-3xl font-semibold tracking-tight text-gray-950 md:text-4xl">2</span>
+              <span className="text-3xl font-semibold tracking-tight text-gray-950 md:text-4xl">{plazaCount}</span>
               <span className="mt-2 block text-xs font-medium leading-relaxed text-gray-500">Plazas estratégicas nacionales</span>
             </div>
           </div>
@@ -94,6 +97,10 @@ export default function Nosotros() {
                 </article>
               );
             })}
+          </div>
+          <div className="mt-10 flex flex-wrap items-center gap-4">
+            <Link to="/inventario" className={buttonStyles({ size: "default" })}>Explorar inventario <ArrowRight className="h-4 w-4" /></Link>
+            <Link to="/contacto" className={buttonStyles({ variant: "outline", size: "default" })}>Hablar con ventas</Link>
           </div>
         </div>
       </section>

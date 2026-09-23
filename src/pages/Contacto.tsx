@@ -20,10 +20,10 @@ export default function Contacto() {
       <div className="page-container py-12 md:py-16">
         <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
           <ContactForm isMediaKit={isMediaKit} />
-          <aside className="grid gap-3">
+          <aside className="grid gap-3 lg:sticky lg:top-24">
             <a href="mailto:comercial@grupocomunicarte.com.ar" className="surface-card block p-5 transition-colors hover:border-gray-300">
               <Mail className="h-5 w-5 text-gray-700" aria-hidden="true" />
-              <h2 className="text-card-title mt-3 text-base">Email</h2>
+              <h2 className="text-card-title mt-3 text-base">Email comercial</h2>
               <p className="mt-1 text-sm leading-6 text-gray-500">comercial@grupocomunicarte.com.ar</p>
             </a>
             <a href="https://maps.app.goo.gl/V3uZwDq283b1u6UY8" className="surface-card block p-5 transition-colors hover:border-gray-300">
