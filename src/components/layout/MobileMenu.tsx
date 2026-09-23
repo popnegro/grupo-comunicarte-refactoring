@@ -1,8 +1,8 @@
-import { ChevronRight, Home, Layers, MapPin, Send, Sparkles, Tv, Users, Search, User } from 'lucide-react';
+import { ChevronRight, Home, MapPin, Send, Sparkles, Tv, Users, Search, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
 
-interface MobileMenuProps { open: boolean; onClose: () => void; onSearch: () => void; selectedCount: number; onMediakit: () => void; }
+interface MobileMenuProps { open: boolean; onClose: () => void; onSearch: () => void; selectedCount: number; }
 
 const links = [
   { name: 'Inicio', path: '/', icon: Home, sub: 'Conocé Grupo Comunicarte' },
@@ -13,7 +13,7 @@ const links = [
   { name: 'Contacto', path: '/contacto', icon: Send, sub: 'Hablemos de tu campaña' },
 ];
 
-export function MobileMenu({ open, onClose, onSearch, selectedCount, onMediakit }: MobileMenuProps) {
+export function MobileMenu({ open, onClose, onSearch, selectedCount }: MobileMenuProps) {
   useEffect(() => {
     if (!open) return;
     const previous = document.body.style.overflow;
@@ -30,11 +30,6 @@ export function MobileMenu({ open, onClose, onSearch, selectedCount, onMediakit 
           <button onClick={onSearch} className="flex w-full items-center gap-3 rounded-xl border border-zinc-200 px-4 py-3 text-left">
             <Search className="h-5 w-5 text-zinc-400" />
             <span><span className="block text-sm font-semibold text-zinc-900">Buscar soportes</span><span className="block text-xs text-zinc-500">Nombre, código, dirección o tipo</span></span>
-          </button>
-          <button onClick={onMediakit} className="flex w-full items-center gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-left">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-zinc-950 text-white"><Layers className="h-5 w-5" /></span>
-            <span className="min-w-0 flex-1"><span className="block text-sm font-bold">Media Kit</span><span className="block text-xs text-zinc-500">{selectedCount ? selectedCount + ' soporte' + (selectedCount === 1 ? '' : 's') + ' seleccionado' + (selectedCount === 1 ? '' : 's') : 'Todavía no seleccionaste soportes'}</span></span>
-            <span className="text-sm font-bold">{selectedCount ? 'Abrir' : 'Ver'} <ChevronRight className="inline h-4 w-4" /></span>
           </button>
           <nav className="overflow-hidden rounded-2xl border border-zinc-200 bg-white">
             {links.map(({ name, path, icon: Icon, sub }) => (

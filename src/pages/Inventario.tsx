@@ -9,7 +9,6 @@ import { SupportCardGrid } from '../components/inventory/SupportCardGrid';
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { useSelection } from '../context/SelectionContext';
 import { Button } from '../components/ui/Button';
-import { StickySelectionBar } from '../components/map/StickySelectionBar';
 
 type DisponibilidadFilter = Disponibilidad | 'todos';
 
@@ -165,7 +164,6 @@ export default function Inventario() {
             <SupportCardGrid items={allFilteredItems} onSelectOnMap={handleSelectOnMap} onResetFilters={handleResetFilters} />
           )}
         </div>
-        <StickySelectionBar inventoryItems={[...fixedLocations, ...mobileRoutes]} currentPlaza={selectedPlaza} onOpenMediakit={() => window.dispatchEvent(new CustomEvent('gc:open-mediakit'))} />
       </div>
     </div>
   );

@@ -108,9 +108,23 @@ export function Navbar() {
             </Link>
           </div>
 
-          <button
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 md:hidden"
-            onClick={() => setMobileOpen(value => !value)}
+          <div className="flex items-center gap-2 md:hidden">
+            <button
+              type="button"
+              onClick={() => setMediakitOpen(true)}
+              className="relative flex h-10 min-w-10 items-center justify-center rounded-lg border border-zinc-200 px-2.5 text-zinc-800 transition-colors hover:border-zinc-300 hover:bg-zinc-50"
+              aria-label={selectedCount > 0 ? `Abrir Media Kit, ${selectedCount} soportes seleccionados` : 'Abrir Media Kit'}
+            >
+              <Layers className="h-4 w-4" aria-hidden="true" />
+              {selectedCount > 0 && (
+                <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-zinc-950 px-1 text-[10px] font-bold text-white">
+                  {selectedCount}
+                </span>
+              )}
+            </button>
+            <button
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200"
+              onClick={() => setMobileOpen(value => !value)
             aria-label={mobileOpen ? 'Cerrar menú' : 'Abrir menú'}
             aria-expanded={mobileOpen}
           >
@@ -127,10 +141,6 @@ export function Navbar() {
           setSearchOpen(true);
         }}
         selectedCount={selectedCount}
-        onMediakit={() => {
-          setMobileOpen(false);
-          setMediakitOpen(true);
-        }}
       />
 
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
