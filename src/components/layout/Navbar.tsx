@@ -42,7 +42,7 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-zinc-200/80 bg-white/95 backdrop-blur-md">
+      <header className="fixed inset-x-0 top-0 z-50 w-full border-b border-zinc-200/80 bg-white/95 backdrop-blur-md">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <Link to="/" className="shrink-0" aria-label="Grupo Comunicarte, inicio">
             <img src="/brand/brand-dark.webp" alt="Grupo Comunicarte" className="h-9 w-auto max-w-[220px] object-contain" />
