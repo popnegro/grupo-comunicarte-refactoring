@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { apiFetch } from '../../lib/api';
 
-export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
+export default function ProtectedRoute({ children }: { children: ReactNode }) {
   const location = useLocation();
   const [state, setState] = useState<'checking' | 'authenticated' | 'unauthenticated'>('checking');
 
