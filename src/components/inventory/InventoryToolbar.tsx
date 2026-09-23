@@ -57,7 +57,7 @@ export function InventoryToolbar({
 
       <button type="button" onClick={onNearMe} disabled={locating} className={`flex h-9 shrink-0 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition ${nearMeActive ? "border-gray-950 bg-gray-950 text-white" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"} disabled:cursor-wait disabled:opacity-60`} aria-label="Buscar soportes cerca de mi ubicación">
         <LocateFixed className={`h-3.5 w-3.5 ${locating ? 'animate-pulse' : ''}`} aria-hidden="true" />
-        {locating ? 'Ubicando...' : nearMeActive ? 'Cerca de tu ubicación' : 'Cerca mío'}
+        {locating ? 'Ubicando...' : nearMeActive ? 'Cerca de tu ubicación' : 'Cerca de mí'}
       </button>
 
       {nearMeActive && onClearNearMe && (
