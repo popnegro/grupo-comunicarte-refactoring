@@ -259,7 +259,7 @@ export function SupportCard({
           <div className="mt-5 flex gap-3">
             {selectable && isAvailable ? (
               <button type="button" onClick={() => toggleSelect(item)} aria-pressed={selected} className={`flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl border px-3 text-xs font-bold transition ${selected ? 'border-emerald-100 bg-emerald-50 text-emerald-700' : 'border-slate-300 bg-white text-slate-800 hover:bg-slate-50'}`}>
-                {selected ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}{selected ? 'Seleccionado' : 'Agregar a selección'}
+                {selected ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}{selected ? 'Seleccionado' : 'Seleccionar'}
               </button>
             ) : (
               <button type="button" onClick={() => navigate(`/contacto?soporte=${item.canonical_id}`)} className="flex min-h-10 flex-1 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 px-3 text-xs font-bold text-amber-900">Consultar disponibilidad</button>
@@ -281,7 +281,6 @@ export function SupportCard({
           {renderMedia()}
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/10" />
           <div className="absolute left-3 top-3"><StatusBadge status={availability} period={period} /></div>
-          <div className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-slate-700 shadow-sm"><Heart className="h-4 w-4" /></div>
           {mediaControls}
         </div>
         <div className="p-5 sm:p-6">
