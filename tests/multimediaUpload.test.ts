@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { hasValidMagicNumber } from '../src/server/multimediaUpload.ts';
+import { hasValidMagicNumber } from '../src/server/mediaSignature.ts';
 
 test('accepts matching JPEG and PNG signatures', () => {
   assert.equal(hasValidMagicNumber(Buffer.from([0xff, 0xd8, 0xff, 0x00]), 'image/jpeg'), true);
