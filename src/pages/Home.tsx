@@ -26,10 +26,10 @@ export default function Home() {
               <span className="text-[11px] font-bold tracking-[0.18em] uppercase">Espacios Publicitarios Premium</span>
             </div>
             <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5.25rem] font-bold tracking-[-0.04em] text-white max-w-4xl leading-[0.98] mb-8">Tu marca, en los lugares <span className="text-white/65">que todos ven.</span></h1>
-            <p className="text-lg md:text-xl text-white/80 max-w-2xl mb-10 leading-relaxed">Espacios publicitarios estratégicos en Mendoza y Buenos Aires para generar presencia, alcance y recordación.</p>
+            <p className="text-lg md:text-xl text-white/80 max-w-2xl mb-10 leading-relaxed">Explorá soportes OOH y DOOH en Mendoza y Buenos Aires, seleccioná los que te interesan y solicitá tu Media Kit en un solo flujo.</p>
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-              <Link to="/contacto" className={buttonStyles({ size: 'lg', className: 'text-base rounded-full px-7 bg-white text-gray-950 hover:bg-gray-100' })}>Hablar con el equipo <ArrowRight className="w-5 h-5" /></Link>
-              <Link to="/inventario" className={buttonStyles({ variant: 'outline', size: 'lg', className: 'text-base rounded-full px-7 border-white/30 text-white hover:bg-white/10 hover:text-white bg-transparent' })}>Explorar inventario</Link>
+              <Link to="/inventario" className={buttonStyles({ size: 'lg', className: 'text-base rounded-full px-7 bg-white text-gray-950 hover:bg-gray-100' })}>Explorar inventario <ArrowRight className="w-5 h-5" /></Link>
+              <Link to="/contacto" className={buttonStyles({ variant: 'outline', size: 'lg', className: 'text-base rounded-full px-7 border-white/30 text-white hover:bg-white/10 hover:text-white bg-transparent' })}>Hablar con el equipo</Link>
             </div>
           </div>
           <div className="mt-16 flex flex-wrap gap-x-8 gap-y-4 text-xs font-semibold uppercase tracking-[0.16em] text-white/60"><span>Mendoza</span><span className="text-white/25">•</span><span>Buenos Aires</span><span className="text-white/25">•</span><span>OOH + DOOH</span></div>
@@ -67,7 +67,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-t border-gray-200 bg-white px-4 py-24 text-center sm:px-6 lg:px-8"><div className="mx-auto max-w-3xl"><p className="text-eyebrow mb-4">Soportes</p><h2 className="mb-5 text-3xl font-bold tracking-tight md:text-5xl">Encontrá el soporte adecuado para tu marca</h2><p className="mx-auto mb-9 max-w-2xl leading-relaxed text-gray-500">Explorá nuestra cobertura y descubrí dónde tu próxima campaña puede generar mayor impacto.</p><Link to="/soportes" className={buttonStyles({ size: 'lg', className: 'inline-flex rounded-full px-7' })}>Explorar soportes <ArrowRight className="h-5 w-5" /></Link></div></section>
+      <section className="border-t border-gray-200 bg-white px-4 py-24 text-center sm:px-6 lg:px-8"><div className="mx-auto max-w-3xl"><p className="text-eyebrow mb-4">Siguiente paso</p><h2 className="mb-5 text-3xl font-bold tracking-tight md:text-5xl">Elegí tus soportes y armá tu solicitud</h2><p className="mx-auto mb-9 max-w-2xl leading-relaxed text-gray-500">La selección queda guardada mientras recorrés el inventario. Cuando estés listo, Solicitar Media Kit te lleva a Contacto para completar y enviar la solicitud.</p><Link to="/inventario" className={buttonStyles({ size: 'lg', className: 'inline-flex rounded-full px-7' })}>Explorar inventario <ArrowRight className="h-5 w-5" /></Link></div></section>
     </div>
   );
 }
