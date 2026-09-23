@@ -415,6 +415,25 @@ export async function getSupportCatalog(options?: { includeInactive?: boolean })
   }
 }
 
+export async function getSupportsByCanonicalIds(canonicalIds: string[]): Promise<InventoryItem[]> {
+  const uniqueIds = Array.from(new Set(canonicalIds.filter((id): id is string => typeof id === 'string' && id.trim().length > 0)));
+  if (uniqueIds.length === 0) return [];
+  if (!isDatabaseConfigured) {
+    const all = [...fixedLocations, ...mobileRoutes];
+    return uniqueIds.map((id) => all.find((item) => item.canonical_id === id)).filter(Boolean) as InventoryItem[];
+  }
+  try {
+    const rows = await db.select().from(supports).where(inArray(supports.canonicalId, uniqueIds));
+    const validRows = rows.filter((row) => Boolean(row.canonicalId && row.name && row.ciudad && row.tipoSoporte) && row.active !== false);
+    const related = await loadRelatedRecords(validRows.map((row) => row.canonicalId));
+    return validRows.map((row) => rowToInventoryItem(row, related));
+  } catch (err) {
+    console.warn('Falling back to static support lookup due to database query error:', err);
+    const all = [...fixedLocations, ...mobileRoutes];
+    return uniqueIds.map((id) => all.find((item) => item.canonical_id === id)).filter(Boolean) as InventoryItem[];
+  }
+}
+
 export async function getSupportDetail(canonicalId: string, options?: { includeInactive?: boolean }): Promise<InventoryItem | null> {
   if (!isDatabaseConfigured) {
     const all = [...fixedLocations, ...mobileRoutes];
