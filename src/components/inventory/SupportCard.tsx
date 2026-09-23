@@ -137,7 +137,6 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
           </button>
         </div>
         {onRemove && <button type="button" onClick={() => onRemove(item)} className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900"><Trash2 className="h-4 w-4" /> Quitar</button>}
-        <button type="button" onClick={openMap} className="mt-3 text-xs font-semibold text-slate-500 underline-offset-2 hover:text-slate-900 hover:underline">Ver ubicación en mapa</button>
       </div>
     </article>
   );

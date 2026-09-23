@@ -12,6 +12,18 @@ import { Button } from '../components/ui/Button';
 
 type DisponibilidadFilter = Disponibilidad | 'todos';
 
+function distanceKm(from: [number, number], item: InventoryItem) {
+  const lat = 'lat' in item ? item.lat : item.waypoints[0]?.lat;
+  const lng = 'lng' in item ? item.lng : item.waypoints[0]?.lng;
+  if (lat == null || lng == null) return Number.POSITIVE_INFINITY;
+  const [fromLat, fromLng] = from;
+  const toRad = (value: number) => (value * Math.PI) / 180;
+  const dLat = toRad(lat - fromLat);
+  const dLng = toRad(lng - fromLng);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(fromLat)) * Math.cos(toRad(lat)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 export default function Inventario() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { fixedLocations, mobileRoutes, loading, error, refetch } = useInventory();
@@ -110,7 +122,11 @@ export default function Inventario() {
     const matchTipo = selectedTipo === 'todos' || route.tipo_soporte === selectedTipo;
     return matchPlaza && matchTipo && matchesDisponibilidad(route) && matchesSearch(route);
   }), [mobileRoutes, selectedPlaza, selectedTipo, matchesDisponibilidad, matchesSearch]);
-  const allFilteredItems = useMemo(() => [...filteredLocations, ...filteredRoutes], [filteredLocations, filteredRoutes]);
+  const allFilteredItems = useMemo(() => {
+    const items = [...filteredLocations, ...filteredRoutes];
+    if (!userLocation) return items;
+    return items.slice().sort((a, b) => distanceKm(userLocation, a) - distanceKm(userLocation, b));
+  }, [filteredLocations, filteredRoutes, userLocation]);
 
   if (loading) {
     return <div className="flex h-[calc(100dvh-5rem)] items-center justify-center bg-gray-50" role="status" aria-live="polite"><div className="flex flex-col items-center gap-3 text-center"><Loader2 className="h-7 w-7 animate-spin text-gray-900" aria-hidden="true" /><p className="text-sm font-semibold text-gray-600">Cargando inventario comercial...</p></div></div>;
@@ -138,6 +154,7 @@ export default function Inventario() {
           onViewModeChange={handleViewModeChange}
           onNearMe={handleNearMe}
           locating={locating}
+          nearMeActive={Boolean(userLocation)}
         />
         <div className="relative min-h-0 flex-1">
           {viewMode === 'mapa' ? (
