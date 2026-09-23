@@ -2,7 +2,7 @@ import { ChevronRight, Home, MapPin, Send, Sparkles, Tv, Users, Search, User } f
 import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
 
-interface MobileMenuProps { open: boolean; onClose: () => void; onSearch: () => void; selectedCount: number; }
+interface MobileMenuProps { open: boolean; onClose: () => void; onSearch: () => void; }
 
 const links = [
   { name: 'Inicio', path: '/', icon: Home, sub: 'Conocé Grupo Comunicarte' },

@@ -17,12 +17,6 @@ export function Navbar() {
   const [mediakitOpen, setMediakitOpen] = useState(false);
 
   useEffect(() => {
-    const openMediakit = () => setMediakitOpen(true);
-    window.addEventListener('gc:open-mediakit', openMediakit);
-    return () => window.removeEventListener('gc:open-mediakit', openMediakit);
-  }, []);
-
-  useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
@@ -141,7 +135,6 @@ export function Navbar() {
           setMobileOpen(false);
           setSearchOpen(true);
         }}
-        selectedCount={selectedCount}
       />
 
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
