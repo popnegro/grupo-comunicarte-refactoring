@@ -1,4 +1,4 @@
-import { Layers, Menu, Search, User, X } from 'lucide-react';
+import { Layers, Menu, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSelection } from '../../context/SelectionContext';
 import { cn } from '../../lib/utils';
@@ -31,7 +31,6 @@ export function Navbar() {
     ['Inicio', '/'],
     ['Inventario', '/inventario'],
     ['Servicios', '/soluciones'],
-    ['Nosotros', '/nosotros'],
     ['Contacto', '/contacto'],
   ];
 
@@ -65,9 +64,6 @@ export function Navbar() {
           </nav>
 
           <div className="hidden items-center gap-2 md:flex">
-            <button onClick={() => setSearchOpen(true)} className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-700 transition-colors hover:border-zinc-300 hover:bg-zinc-50" aria-label="Buscar soportes">
-              <Search className="h-4 w-4" />
-            </button>
 
             <button onClick={() => setMediakitOpen(true)} className="relative flex h-10 items-center gap-2 rounded-lg border border-zinc-200 px-3 text-sm font-semibold text-zinc-800 transition-colors hover:border-zinc-300 hover:bg-zinc-50" aria-label="Abrir Media Kit">
               <Layers className="h-4 w-4" />
@@ -79,9 +75,6 @@ export function Navbar() {
               Solicitar propuesta
             </Link>
 
-            <Link to="/login" className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-700 transition-colors hover:border-zinc-300 hover:bg-zinc-50" aria-label="Acceso" title="Acceso">
-              <User className="h-4 w-4" />
-            </Link>
           </div>
 
           <div className="flex items-center gap-2 md:hidden">
