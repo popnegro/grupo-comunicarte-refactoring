@@ -12,13 +12,13 @@ export function InteriorHero({ eyebrow, title, description, align = 'left', acti
   const centered = align === 'center';
 
   return (
-    <header className="border-b border-gray-200 bg-white">
-      <div className={`page-container flex flex-col gap-6 py-14 md:py-16 lg:flex-row lg:items-end lg:justify-between ${centered ? 'lg:items-center' : ''}`}>
+    <header className="relative overflow-hidden border-b border-gray-200 bg-white">
+      <div className={`page-container flex flex-col gap-6 py-16 md:py-20 lg:flex-row lg:items-end lg:justify-between ${centered ? 'lg:items-center' : ''}`}>
         <div className={centered ? 'max-w-3xl text-center lg:mx-auto' : 'max-w-3xl'}>
-          <p className="text-eyebrow">{eyebrow}</p>
+          <div className="mb-1 flex items-center gap-3"><span className="h-px w-8 bg-gray-900" /><p className="text-eyebrow">{eyebrow}</p></div>
           <h1 className="text-page-title mt-3">{title}</h1>
           {description && (
-            <p className={`text-body mt-4 max-w-2xl ${centered ? 'mx-auto' : ''}`}>{description}</p>
+            <p className={`text-body mt-5 max-w-2xl ${centered ? 'mx-auto' : ''}`}>{description}</p>
           )}
         </div>
         {actions && (
