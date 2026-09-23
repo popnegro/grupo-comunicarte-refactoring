@@ -18,12 +18,11 @@ interface SupportCardProps {
   variant?: 'showcase' | 'catalog' | 'selectable' | 'dashboard';
   selectable?: boolean;
   onRemove?: (item: InventoryItem) => void;
-  onSelectOnMap?: (item: InventoryItem) => void;
 }
 
 const cardBase = 'overflow-hidden rounded-2xl border bg-white shadow-sm transition-shadow';
 
-export function SupportCard({ item, variant = 'catalog', selectable = false, onRemove, onSelectOnMap }: SupportCardProps) {
+export function SupportCard({ item, variant = 'catalog', selectable = false, onRemove }: SupportCardProps) {
   const navigate = useNavigate();
   const { isSelected, toggleSelect } = useSelection();
   const status = getDisponibilidad(item);
