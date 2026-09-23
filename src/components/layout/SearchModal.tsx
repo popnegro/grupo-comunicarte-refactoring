@@ -54,7 +54,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
               <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-100"><Tv className="h-4 w-4 text-zinc-600" /></span>
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-semibold text-zinc-950">{item.name}</span>
-                <span className="flex items-center gap-1 truncate text-xs text-zinc-500"><MapPin className="h-3 w-3" />{item.address || item.ciudad || item.tipo_soporte}</span>
+                <span className="flex items-center gap-1 truncate text-xs text-zinc-500"><MapPin className="h-3 w-3" />{'address' in item ? item.address : item.ciudad || item.tipo_soporte}</span>
               </span>
               <span className="text-[10px] font-mono text-zinc-400">{item.canonical_id}</span>
             </button>
