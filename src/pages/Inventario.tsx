@@ -14,7 +14,7 @@ type DisponibilidadFilter = Disponibilidad | 'todos';
 
 export default function Inventario() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { items: allItems, fixedLocations, mobileRoutes, loading, error, refetch } = useInventory();
+  const { fixedLocations, mobileRoutes, loading, error, refetch } = useInventory();
   const plazaParam = searchParams.get('plaza') as Plaza | 'todos' | null;
   const tipoParam = searchParams.get('tipo') as TipoSoporte | 'todos' | null;
   const dispParam = searchParams.get('disponibilidad') as DisponibilidadFilter | null;
