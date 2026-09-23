@@ -1,4 +1,4 @@
-import { getSupportCatalog, getSupportDetail } from './supportModel.ts';
+import { getSupportCatalog, getSupportDetail, getSupportsByCanonicalIds } from './supportModel.ts';
 import { db, isDatabaseConfigured } from '../db/index.ts';
 import { supportTechnical } from '../db/schema.ts';
 import { inArray } from 'drizzle-orm';
@@ -87,18 +87,21 @@ export async function validateSupportsForRequest(selectedIds: string[]): Promise
     };
   }
 
-  const matchedSupports: InventoryItem[] = [];
+  const invalidId = selectedIds.find((id) => typeof id !== 'string');
+  if (invalidId !== undefined) {
+    return {
+      valid: false,
+      statusCode: 400,
+      message: `Identificador de soporte inválido: ${String(invalidId)}`,
+    };
+  }
 
-  for (const id of selectedIds) {
-    if (typeof id !== 'string') {
-      return {
-        valid: false,
-        statusCode: 400,
-        message: `Identificador de soporte inválido: ${String(id)}`,
-      };
-    }
+  const uniqueIds = Array.from(new Set(selectedIds));
+  const supports = await getSupportsByCanonicalIds(uniqueIds);
+  const byId = new Map(supports.map((item) => [item.canonical_id, item]));
 
-    const item = await getSupportByIdFromDB(id);
+  for (const id of uniqueIds) {
+    const item = byId.get(id);
     if (!item) {
       return {
         valid: false,
@@ -106,7 +109,6 @@ export async function validateSupportsForRequest(selectedIds: string[]): Promise
         message: `El soporte con ID '${id}' no existe en el catálogo.`,
       };
     }
-
     if (item.disponibilidad !== 'disponible') {
       return {
         valid: false,
@@ -114,9 +116,10 @@ export async function validateSupportsForRequest(selectedIds: string[]): Promise
         message: `El soporte '${item.name}' no está disponible (estado: ${item.disponibilidad}) y no puede incluirse en el Media Kit.`,
       };
     }
-
-    matchedSupports.push(item);
   }
 
-  return { valid: true, matchedSupports };
+  return {
+    valid: true,
+    matchedSupports: selectedIds.map((id) => byId.get(id)!).filter(Boolean),
+  };
 }
