@@ -1,5 +1,6 @@
 import { ChevronRight, Home, Layers, MapPin, Send, Sparkles, Tv, Users, Search, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
 
 interface MobileMenuProps { open: boolean; onClose: () => void; onSearch: () => void; selectedCount: number; onMediakit: () => void; }
 
@@ -13,6 +14,13 @@ const links = [
 ];
 
 export function MobileMenu({ open, onClose, onSearch, selectedCount, onMediakit }: MobileMenuProps) {
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previous; };
+  }, [open]);
+
   if (!open) return null;
   return (
     <div className="md:hidden fixed inset-0 z-[3000]">
