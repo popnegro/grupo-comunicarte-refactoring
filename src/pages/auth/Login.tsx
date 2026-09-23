@@ -25,7 +25,8 @@ export default function Login() {
       });
       const data = await res.json();
       if (!res.ok || data.status !== 'success') throw new Error(data.message || 'Credenciales inválidas. Verifique usuario y contraseña.');
-      localStorage.setItem('admin_token', data.token);
+      // Compatibility flag only; the credential itself lives in the HttpOnly cookie.
+      localStorage.setItem('admin_token', 'cookie-session');
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Error al iniciar sesión');
