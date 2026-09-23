@@ -1,4 +1,4 @@
-import { ChevronRight, Home, MapPin, Send, Sparkles, Users, Search, User } from 'lucide-react';
+import { ChevronRight, Home, MapPin, Send, Sparkles, Users, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
 
@@ -9,7 +9,6 @@ const links = [
   { name: 'Inventario', path: '/inventario', icon: MapPin, sub: 'Explorá soportes disponibles' },
   { name: 'Servicios', path: '/soluciones', icon: Sparkles, sub: 'Soluciones y formatos para tu campaña' },
   { name: 'Nosotros', path: '/nosotros', icon: Users, sub: 'La empresa y su experiencia' },
-  { name: 'Contacto', path: '/contacto', icon: Send, sub: 'Hablemos de tu campaña' },
 ];
 
 export function MobileMenu({ open, onClose, onSearch }: MobileMenuProps) {
@@ -28,24 +27,18 @@ export function MobileMenu({ open, onClose, onSearch }: MobileMenuProps) {
         <div className="space-y-3 p-4">
           <button onClick={onSearch} className="flex w-full items-center gap-3 rounded-xl border border-zinc-200 px-4 py-3 text-left">
             <Search className="h-5 w-5 text-zinc-400" />
-            <span><span className="block text-sm font-semibold text-zinc-900">Buscar soportes</span><span className="block text-xs text-zinc-500">Nombre, código, dirección o tipo</span></span>
+            <span className="text-sm font-semibold text-zinc-900">BUSCAR</span>
           </button>
           <nav className="overflow-hidden rounded-2xl border border-zinc-200 bg-white" aria-label="Navegación principal">
-            {links.map(({ name, path, icon: Icon, sub }) => (
+            {links.map(({ name, path, icon: Icon }) => (
               <Link key={path} to={path} onClick={onClose} className="flex items-center gap-3 border-b border-zinc-100 px-4 py-4 last:border-0">
                 <Icon className="h-5 w-5 text-zinc-500" />
-                <span className="min-w-0 flex-1"><span className="block text-sm font-semibold">{name}</span><span className="block text-xs text-zinc-500">{sub}</span></span>
+                <span className="min-w-0 flex-1 text-sm font-semibold">{name}</span>
                 <ChevronRight className="h-4 w-4 text-zinc-300" />
               </Link>
             ))}
           </nav>
-          <Link to="/login" onClick={onClose} className="flex items-center gap-3 rounded-2xl border border-zinc-200 p-4">
-            <User className="h-5 w-5 text-zinc-500" /><span className="flex-1 text-sm font-semibold">Acceso</span><ChevronRight className="h-4 w-4 text-zinc-300" />
-          </Link>
-          <div className="grid gap-2 sm:grid-cols-2">
-            <Link to="/contacto" onClick={onClose} className="flex items-center justify-center gap-2 rounded-xl bg-zinc-950 px-4 py-3 text-sm font-bold text-white">Solicitar propuesta <Send className="h-4 w-4" /></Link>
-            <a href="https://wa.me/5492616706710" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-bold text-zinc-900">WhatsApp comercial</a>
-          </div>
+          <Link to="/contacto" onClick={onClose} className="flex items-center justify-center gap-2 rounded-xl bg-zinc-950 px-4 py-3 text-sm font-bold text-white">Solicitar propuesta <Send className="h-4 w-4" /></Link>
         </div>
       </div>
     </div>
