@@ -49,6 +49,17 @@ function parseMultipartMedia(body: Buffer, contentTypeHeader: string): Multipart
   throw new Error('No se encontró un recurso multimedia en el campo multipart file/media/image.');
 }
 
+function hasValidMagicNumber(data: Buffer, mimeType: string): boolean {
+  const startsWith = (...bytes: number[]) => data.length >= bytes.length && bytes.every((value, index) => data[index] === value);
+  if (mimeType === 'image/jpeg') return startsWith(0xff, 0xd8, 0xff);
+  if (mimeType === 'image/png') return startsWith(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a);
+  if (mimeType === 'image/webp') return data.length >= 12 && data.toString('ascii', 0, 4) === 'RIFF' && data.toString('ascii', 8, 12) === 'WEBP';
+  if (mimeType === 'video/mp4') return data.length >= 12 && data.toString('ascii', 4, 8) === 'ftyp';
+  if (mimeType === 'video/webm') return startsWith(0x1a, 0x45, 0xdf, 0xa3);
+  if (mimeType === 'video/quicktime') return data.length >= 12 && data.toString('ascii', 4, 8) === 'ftyp';
+  return false;
+}
+
 export async function handleMediaUpload(req: Request, res: Response) {
   try {
     const canonicalId = req.params.id?.trim();
@@ -66,6 +77,7 @@ export async function handleMediaUpload(req: Request, res: Response) {
     if (!ALLOWED_MEDIA_MIME_TYPES.has(mimeType)) return res.status(415).json({ status: 'error', message: `MIME no permitido: ${mimeType}.` });
     if (media.data.length === 0) return res.status(400).json({ status: 'error', message: 'El archivo está vacío.' });
     if (media.data.length > MAX_UPLOAD_BYTES) return res.status(413).json({ status: 'error', message: 'El archivo excede el límite máximo permitido.' });
+    if (!hasValidMagicNumber(media.data, mimeType)) return res.status(415).json({ status: 'error', message: 'La firma binaria del archivo no coincide con el MIME declarado.' });
 
     const existing = await getSupportMediaByAdmin(canonicalId);
     const sortOrder = existing.reduce((max: number, item: any) => Math.max(max, Number(item.sort_order ?? item.sortOrder ?? 0)), -1) + 1;
