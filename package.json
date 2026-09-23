@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "clean": "rm -rf dist node_modules/.vite",
     "lint": "tsc --noEmit",
-    "test": "node --import tsx --test tests/**/*.test.ts"
+    "test": "node --import tsx --test tests/**/*.test.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
@@ -46,6 +48,7 @@
     "autoprefixer": "^10.4.21",
     "tailwindcss": "^4.1.14",
     "tsx": "4.20.6",
-    "typescript": "~5.8.2"
+    "typescript": "~5.8.2",
+    "drizzle-kit": "^0.31.4"
   }
 }
