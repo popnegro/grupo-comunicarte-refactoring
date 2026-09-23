@@ -31,12 +31,6 @@ const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH;
 const ADMIN_SECRET = process.env.JWT_SECRET || process.env.ADMIN_SECRET;
 const MAX_FEATURED_SUPPORTS = 9;
 
-if (!ADMIN_USER || !ADMIN_PASSWORD_HASH || !ADMIN_SECRET) {
-  throw new Error(
-    'FATAL: ADMIN_USER, ADMIN_PASSWORD_HASH and JWT_SECRET (or legacy ADMIN_SECRET) environment variables are required.'
-  );
-}
-
 const adminUser = ADMIN_USER;
 const adminPasswordHash = ADMIN_PASSWORD_HASH;
 const adminSecret = ADMIN_SECRET;
@@ -64,6 +58,10 @@ function canonicalizeEditorMedia<T extends SupportWritePayload>(data: T): T {
 }
 
 export async function authenticateAdmin(username: string, password: string): Promise<{ success: boolean; token?: string; message?: string }> {
+  if (!adminUser || !adminPasswordHash || !adminSecret) {
+    return { success: false, message: 'Autenticación administrativa no configurada.' };
+  }
+
   if (username === adminUser && await bcrypt.compare(password, adminPasswordHash)) {
     const expiresAt = Date.now() + 8 * 3600 * 1000;
     const payload = `${username}:${expiresAt}`;
@@ -92,6 +90,8 @@ export function clearAdminCookie(): string {
 }
 
 export function verifyAdminToken(authHeader?: string, cookieHeader?: string): boolean {
+  if (!adminSecret) return false;
+
   const bearer = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined;
   const token = bearer && bearer !== 'cookie-session' ? bearer : readCookie(cookieHeader, 'gc_admin_session');
   if (!token) return false;
