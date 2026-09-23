@@ -14,9 +14,10 @@ interface InventoryMapProps {
   initialSelectedId?: string | null;
   selectedPlaza?: Plaza | 'todos';
   onResetFilters?: () => void;
+  userLocation?: [number, number] | null;
 }
 
-function MapUpdater({ locations, routes }: { locations: LocationRecord[], routes: MobileRoute[] }) {
+function MapUpdater({ locations, routes, userLocation }: { locations: LocationRecord[], routes: MobileRoute[], userLocation?: [number, number] | null }) {
   const map = useMap();
   useEffect(() => {
     const validLocations = locations.filter(loc => loc.lat !== null && loc.lng !== null);
@@ -24,12 +25,16 @@ function MapUpdater({ locations, routes }: { locations: LocationRecord[], routes
     const bounds = L.latLngBounds([]);
     validLocations.forEach(loc => { if (loc.lat && loc.lng) bounds.extend([loc.lat, loc.lng]); });
     routes.forEach(route => { if (route.routePath?.length) route.routePath.forEach(point => bounds.extend(point as [number, number])); });
+    if (userLocation) {
+      map.flyTo(userLocation, 13, { duration: 0.8 });
+      return;
+    }
     if (bounds.isValid()) map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
-  }, [locations, routes, map]);
+  }, [locations, routes, userLocation, map]);
   return null;
 }
 
-export default function InventoryMap({ locations, routes, onOpenMediakit, initialSelectedId, selectedPlaza, onResetFilters }: InventoryMapProps) {
+export default function InventoryMap({ locations, routes, onOpenMediakit, initialSelectedId, selectedPlaza, onResetFilters, userLocation }: InventoryMapProps) {
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   useEffect(() => {
     if (initialSelectedId && !selectedItem) {
@@ -46,6 +51,7 @@ export default function InventoryMap({ locations, routes, onOpenMediakit, initia
     <div className="relative w-full h-full bg-gray-100 z-0">
       <MapContainer center={[-34.6037, -58.3816]} zoom={5} style={{ height: '100%', width: '100%' }} zoomControl={false}>
         <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} />
+        {userLocation && <CircleMarker center={userLocation} radius={8} pathOptions={{ color: '#111827', weight: 3, fillColor: '#10b981', fillOpacity: 1 }}><Tooltip direction="top" offset={[0, -8]} opacity={1}>Tu ubicación</Tooltip></CircleMarker>}
         {validLocations.map((loc) => {
           const isItemReservado = getDisponibilidad(loc) === 'reservado';
           const isItemSelected = isSelected(loc.canonical_id);
@@ -109,7 +115,7 @@ export default function InventoryMap({ locations, routes, onOpenMediakit, initia
             })}
           </LayerGroup>
         ))}
-        <MapUpdater locations={locations} routes={routes} />
+        <MapUpdater locations={locations} routes={routes} userLocation={userLocation} />
       </MapContainer>
 
       {selectedItem && (
