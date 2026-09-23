@@ -21,7 +21,7 @@ interface SupportCardProps {
   onSelectOnMap?: (item: InventoryItem) => void;
 }
 
-const cardBase = 'overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm';
+const cardBase = 'overflow-hidden rounded-2xl border bg-white shadow-sm transition-shadow';
 
 export function SupportCard({ item, variant = 'catalog', selectable = false, onRemove, onSelectOnMap }: SupportCardProps) {
   const navigate = useNavigate();
@@ -107,12 +107,14 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
   const canSelect = selectable && status === 'disponible';
 
   return (
-    <article className={`${cardBase} ${selected ? 'ring-2 ring-emerald-400 ring-offset-1' : ''}`}>
+    <article className={`${cardBase} ${selected ? 'border-emerald-300 ring-1 ring-emerald-200 shadow-md' : 'border-slate-200'}`}>
+
       <div className="relative">
         {media}
         {variant === 'selectable' && (
-          <div className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-lg bg-white/95 shadow-sm">
-            {selected ? <CheckSquare2 className="h-5 w-5 text-emerald-600" /> : <span className="h-5 w-5 rounded-md border-2 border-slate-500" />}
+          <div className={`absolute right-3 top-3 flex min-h-8 items-center gap-1.5 rounded-full px-3 shadow-sm ${selected ? 'bg-emerald-600 text-white' : 'bg-white/95 text-slate-600'}`}>
+            {selected ? <Check className="h-3.5 w-3.5" /> : <span className="h-3.5 w-3.5 rounded border-2 border-slate-500" />}
+            <span className="text-[11px] font-bold">{selected ? 'En tu selección' : 'Seleccionar'}</span>
           </div>
         )}
       </div>
@@ -122,8 +124,8 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
         {period && status === 'reservado' && <p className="mt-3 text-xs font-medium text-slate-600">{period}</p>}
         <div className="mt-5 flex gap-3">
           {canSelect ? (
-            <button type="button" onClick={() => toggleSelect(item)} aria-pressed={selected} className={`flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold ${selected ? 'border border-emerald-200 bg-emerald-50 text-emerald-700' : 'bg-slate-950 text-white hover:bg-slate-800'}`}>
-              {selected ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}{selected ? 'Seleccionado' : 'Seleccionar'}
+            <button type="button" onClick={() => toggleSelect(item)} aria-pressed={selected} className={`flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold ${selected ? 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50' : 'bg-slate-950 text-white hover:bg-slate-800'}`}>
+              {selected ? <Check className="h-4 w-4 text-emerald-600" /> : <Plus className="h-4 w-4" />}{selected ? 'Quitar selección' : 'Seleccionar'}
             </button>
           ) : status === 'reservado' ? (
             <button type="button" onClick={() => navigate(contactUrl)} className="flex min-h-10 flex-1 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 px-3 text-xs font-bold text-amber-900">
