@@ -26,7 +26,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
     const q = query.trim().toLowerCase();
     if (!q) return items.slice(0, 8);
     return items.filter(item =>
-      [item.name, item.canonical_id, item.address, item.tipo_soporte, item.ciudad]
+      [item.name, item.canonical_id, 'address' in item ? item.address : '', item.tipo_soporte, item.ciudad]
         .some(value => String(value || '').toLowerCase().includes(q))
     ).slice(0, 10);
   }, [items, query]);
