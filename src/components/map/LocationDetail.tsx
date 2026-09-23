@@ -11,7 +11,7 @@ import { StatusBadge } from '../dashboard/ui/StatusBadge';
 import { useSelection } from '../../context/SelectionContext';
 import { useState } from 'react';
 
-interface LocationDetailProps { item: InventoryItem; onOpenMediakit: () => void; }
+interface LocationDetailProps { item: InventoryItem; }
 
 function getKeyAttributes(item: InventoryItem): string[] {
   const technical = item.technical;
