@@ -1,0 +1,70 @@
+import { Layers, Menu, Search, User, X } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { useSelection } from '../../context/SelectionContext';
+import { cn } from '../../lib/utils';
+import { SearchModal } from './SearchModal';
+import { MobileMenu } from './MobileMenu';
+import { MediakitPanel } from '../map/MediakitPanel';
+import { useInventory } from '../../hooks/useInventory';
+import { useEffect, useState } from 'react';
+
+export function Navbar() {
+  const location = useLocation();
+  const { selectedCount, getSelectedItems } = useSelection();
+  const { items } = useInventory();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [mediakitOpen, setMediakitOpen] = useState(false);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault(); setSearchOpen(true);
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
+  const links = [
+    ['Inicio', '/'], ['Inventario', '/inventario'], ['Soportes', '/soportes'],
+    ['Soluciones', '/soluciones'], ['Nosotros', '/nosotros'], ['Contacto', '/contacto'],
+  ];
+
+  const selectedItems = getSelectedItems(items);
+  const isActive = (path: string) => location.pathname === path;
+
+  return (
+    <>
+      <header className="sticky top-0 z-50 w-full border-b border-zinc-200/80 bg-white/90 backdrop-blur-md">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <Link to="/" className="shrink-0" aria-label="Grupo Comunicarte, inicio">
+            <img src="/brand/brand-dark.webp" alt="Grupo Comunicarte" className="h-9 w-auto max-w-[220px] object-contain" />
+          </Link>
+          <nav className="hidden items-center gap-1 md:flex" aria-label="Navegación principal">
+            {links.map(([name, path]) => (
+              <Link key={path} to={path} aria-current={isActive(path) ? 'page' : undefined}
+                className={cn('rounded-xl px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-950', isActive(path) && 'bg-zinc-100 font-semibold text-zinc-950')}>
+                {name}
+              </Link>
+            ))}
+          </nav>
+          <div className="hidden items-center gap-2 md:flex">
+            <button onClick={() => setSearchOpen(true)} className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 hover:bg-zinc-50" aria-label="Buscar soportes"><Search className="h-4 w-4" /></button>
+            <button onClick={() => setMediakitOpen(true)} className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 hover:bg-zinc-50" aria-label="Abrir Media Kit">
+              <Layers className="h-4 w-4" />
+              {selectedCount > 0 && <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-zinc-950 px-1 text-[10px] font-bold text-white">{selectedCount}</span>}
+            </button>
+            <Link to="/dashboard" className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 hover:bg-zinc-50" aria-label="Mi cuenta / Panel"><User className="h-4 w-4" /></Link>
+          </div>
+          <button className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 md:hidden" onClick={() => setMobileOpen(value => !value)} aria-label={mobileOpen ? 'Cerrar menú' : 'Abrir menú'} aria-expanded={mobileOpen}>
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
+      </header>
+      <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} onSearch={() => { setMobileOpen(false); setSearchOpen(true); }} selectedCount={selectedCount} onMediakit={() => { setMobileOpen(false); setMediakitOpen(true); }} />
+      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
+      {mediakitOpen && <MediakitPanel selectedItems={selectedItems} onClose={() => setMediakitOpen(false)} />}
+    </>
+  );
+}
