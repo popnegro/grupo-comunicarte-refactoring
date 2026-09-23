@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, Check, CheckSquare2, Eye, Pencil, Plus, Trash2 } from 'lucide-react';
+import { ArrowRight, Check, Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { InventoryItem, getDisponibilidad } from '../../types';
 import { useSelection } from '../../context/SelectionContext';
