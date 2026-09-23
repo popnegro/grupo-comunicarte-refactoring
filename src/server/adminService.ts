@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 import { mediakitRequests, supports } from '../db/schema.ts';
 import { getAllMediakitRequestsFromDB } from './mediakitService.ts';
 import {
@@ -26,18 +27,18 @@ import { db } from '../db/index.ts';
 import { and, count, eq } from 'drizzle-orm';
 
 const ADMIN_USER = process.env.ADMIN_USER;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH;
 const ADMIN_SECRET = process.env.JWT_SECRET || process.env.ADMIN_SECRET;
 const MAX_FEATURED_SUPPORTS = 9;
 
-if (!ADMIN_USER || !ADMIN_PASSWORD || !ADMIN_SECRET) {
+if (!ADMIN_USER || !ADMIN_PASSWORD_HASH || !ADMIN_SECRET) {
   throw new Error(
-    'FATAL: ADMIN_USER, ADMIN_PASSWORD and JWT_SECRET (or legacy ADMIN_SECRET) environment variables are required.'
+    'FATAL: ADMIN_USER, ADMIN_PASSWORD_HASH and JWT_SECRET (or legacy ADMIN_SECRET) environment variables are required.'
   );
 }
 
 const adminUser = ADMIN_USER;
-const adminPassword = ADMIN_PASSWORD;
+const adminPasswordHash = ADMIN_PASSWORD_HASH;
 const adminSecret = ADMIN_SECRET;
 
 function canonicalizeEditorMedia<T extends SupportWritePayload>(data: T): T {
@@ -62,8 +63,8 @@ function canonicalizeEditorMedia<T extends SupportWritePayload>(data: T): T {
   };
 }
 
-export function authenticateAdmin(username: string, password: string): { success: boolean; token?: string; message?: string } {
-  if (username === adminUser && password === adminPassword) {
+export async function authenticateAdmin(username: string, password: string): Promise<{ success: boolean; token?: string; message?: string }> {
+  if (username === adminUser && await bcrypt.compare(password, adminPasswordHash)) {
     const expiresAt = Date.now() + 8 * 3600 * 1000;
     const payload = `${username}:${expiresAt}`;
     const signature = crypto.createHmac('sha256', adminSecret).update(payload).digest('hex');
@@ -73,12 +74,29 @@ export function authenticateAdmin(username: string, password: string): { success
   return { success: false, message: 'Credenciales inválidas. Verifica usuario y contraseña.' };
 }
 
-export function verifyAdminToken(authHeader?: string): boolean {
-  if (!authHeader) return false;
-  const parts = authHeader.split(' ');
-  if (parts.length !== 2 || parts[0] !== 'Bearer') return false;
+function readCookie(cookieHeader: string | undefined, name: string): string | undefined {
+  if (!cookieHeader) return undefined;
+  const prefix = name + '=';
+  const entry = cookieHeader.split(';').map((part) => part.trim()).find((part) => part.startsWith(prefix));
+  return entry ? decodeURIComponent(entry.slice(prefix.length)) : undefined;
+}
+
+export function createAdminCookie(token: string): string {
+  const secure = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1' || process.env.VERCEL === 'true';
+  return 'gc_admin_session=' + encodeURIComponent(token) + '; Path=/; HttpOnly; SameSite=Strict; Max-Age=28800' + (secure ? '; Secure' : '');
+}
+
+export function clearAdminCookie(): string {
+  const secure = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1' || process.env.VERCEL === 'true';
+  return 'gc_admin_session=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0' + (secure ? '; Secure' : '');
+}
+
+export function verifyAdminToken(authHeader?: string, cookieHeader?: string): boolean {
+  const bearer = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined;
+  const token = bearer && bearer !== 'cookie-session' ? bearer : readCookie(cookieHeader, 'gc_admin_session');
+  if (!token) return false;
   try {
-    const decoded = Buffer.from(parts[1], 'base64').toString('utf8');
+    const decoded = Buffer.from(token, 'base64').toString('utf8');
     const [username, expiresAtStr, signature] = decoded.split(':');
     if (!username || !expiresAtStr || !signature) return false;
     const expiresAt = Number(expiresAtStr);
