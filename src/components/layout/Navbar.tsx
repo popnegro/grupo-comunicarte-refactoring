@@ -55,7 +55,7 @@ export function Navbar() {
               <Layers className="h-4 w-4" />
               {selectedCount > 0 && <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-zinc-950 px-1 text-[10px] font-bold text-white">{selectedCount}</span>}
             </button>
-            <Link to="/dashboard" className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 hover:bg-zinc-50" aria-label="Mi cuenta / Panel"><User className="h-4 w-4" /></Link>
+            <Link to="/login" className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 hover:bg-zinc-50" aria-label="Iniciar sesión"><User className="h-4 w-4" /></Link>
           </div>
           <button className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 md:hidden" onClick={() => setMobileOpen(value => !value)} aria-label={mobileOpen ? 'Cerrar menú' : 'Abrir menú'} aria-expanded={mobileOpen}>
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
