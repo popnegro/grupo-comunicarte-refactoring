@@ -25,6 +25,8 @@ import {
   patchSupportPricingByAdmin,
   getSupportRouteByAdmin,
   patchSupportRouteByAdmin,
+  createAdminCookie,
+  clearAdminCookie,
 } from './src/server/adminService.ts';
 
 export async function createApp() {
@@ -108,18 +110,29 @@ export async function createApp() {
     }
   });
 
-  app.post('/api/admin/login', (req, res) => {
+  app.post('/api/admin/login', async (req, res) => {
     const { username, password } = req.body || {};
-    const result = authenticateAdmin(username, password);
-    if (!result.success) {
+    const result = await authenticateAdmin(String(username || ''), String(password || ''));
+    if (!result.success || !result.token) {
       return res.status(401).json({ status: 'error', message: result.message });
     }
-    res.status(200).json({ status: 'success', token: result.token, message: 'Autenticación exitosa' });
+    res.setHeader('Set-Cookie', createAdminCookie(result.token));
+    res.status(200).json({ status: 'success', message: 'Autenticación exitosa' });
+  });
+
+  app.get('/api/admin/session', (req, res) => {
+    const valid = verifyAdminToken(req.headers.authorization, req.headers.cookie);
+    res.status(valid ? 200 : 401).json({ status: valid ? 'success' : 'error', authenticated: valid });
+  });
+
+  app.post('/api/admin/logout', (_req, res) => {
+    res.setHeader('Set-Cookie', clearAdminCookie());
+    res.status(200).json({ status: 'success' });
   });
 
   const requireAdmin = (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const authHeader = req.headers.authorization;
-    if (!verifyAdminToken(authHeader)) {
+    if (!verifyAdminToken(authHeader, req.headers.cookie)) {
       return res.status(401).json({ status: 'error', message: 'No autorizado. Se requiere token de administrador válido.' });
     }
     next();
