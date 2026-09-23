@@ -23,7 +23,7 @@ export const SupportCardGrid: React.FC<SupportCardGridProps> = ({
         </div>
         <h3 className="text-lg font-bold text-gray-950 mb-1">No se encontraron soportes</h3>
         <p className="text-sm text-gray-600 max-w-md mb-6">
-          No hay elementos en el inventario que coincidan con los filtros aplicados. Intenta cambiar de plaza, formato o término de búsqueda.
+          No hay elementos en el inventario que coincidan con los filtros aplicados. Probá cambiar la plaza, el formato o el término de búsqueda.
         </p>
         {onResetFilters && (
           <Button onClick={onResetFilters} variant="outline" className="rounded-xl font-bold">
@@ -42,7 +42,7 @@ export const SupportCardGrid: React.FC<SupportCardGridProps> = ({
             <SupportCard
               key={item.canonical_id}
               item={item}
-              variant="catalog"
+              variant="selectable"
               selectable={true}
               onSelectOnMap={onSelectOnMap}
             />
