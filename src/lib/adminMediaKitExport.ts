@@ -57,9 +57,6 @@ async function makePpt(lead:ExportLead,supports:ExportSupport[],requestId:string
   pptx.company = 'Grupo Comunicarte';
   pptx.subject = `Media Kit ${requestId}`;
   pptx.title = `Media Kit ${requestId}`;
-  pptx.lang = 'es-AR';
-  pptx.theme = { headFontFace: 'Aptos Display', bodyFontFace: 'Aptos', lang: 'es-AR' };
-  const W=13.333,H=7.5;
   const teal='06434A', cream='FAF9F5', green='07BE8A', ink='172120', muted='53615F', white='FFFFFF';
   const logoData=logo?.dataUri;
   const addLogo=(slide:any,x:number,y:number,w:number)=>{if(logoData)slide.addImage({data:logoData,x,y,w,h:w*logo.height/logo.width});else slide.addText('GRUPO COMUNICARTE',{x,y,w,h:.3,fontFace:'Aptos',fontSize:15,bold:true,color:cream,margin:0});};
