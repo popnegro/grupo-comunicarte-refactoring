@@ -178,6 +178,13 @@ export default function DashboardMediaKitWorkflow() {
     try {
       const token = localStorage.getItem('admin_token');
       const persisted = next === 'request' ? 'pending' : next === 'in_progress' ? 'contactado' : 'enviado';
+      // DONE requires a persisted Media Kit first. This prevents the request from
+      // becoming "enviado" when the commercial artifact could not be saved.
+      if (next === 'done') {
+        const saved = await persistMediaKit('ready');
+        if (!saved) throw new Error('No pudimos guardar el Media Kit.');
+      }
+
       const r = await fetch(`/api/admin/requests/${encodeURIComponent(lead.requestId)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -185,10 +192,6 @@ export default function DashboardMediaKitWorkflow() {
       });
       const j = await r.json().catch(() => null);
       if (!r.ok || j?.status !== 'success') throw new Error(j?.message || 'No pudimos actualizar el estado.');
-      if (next === 'done') {
-        const saved = await persistMediaKit('ready');
-        if (!saved) throw new Error('No pudimos guardar el Media Kit.');
-      }
       await load();
       setSelected((x) => (x ? { ...x, status: next } : null));
       notify(`Solicitud ${labels[next]}`);
@@ -221,6 +224,11 @@ export default function DashboardMediaKitWorkflow() {
           characteristics: x.characteristics,
           pricing: x.pricing || null,
         }));
+      if (filtered.length !== lead.supportIds.length) {
+        const loadedIds = new Set(filtered.map((support: SupportForKit) => support.canonical_id));
+        const missingIds = lead.supportIds.filter((id) => !loadedIds.has(id));
+        throw new Error(`No pudimos recuperar ${missingIds.length} soporte(s) solicitado(s) desde el inventario.`);
+      }
       setSupports(filtered);
       const token = localStorage.getItem('admin_token');
       const kitResponse = await apiFetch(`/api/admin/mediakits/KIT-${encodeURIComponent(lead.requestId)}`, {
