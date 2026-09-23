@@ -257,7 +257,9 @@ export async function listMediaKits(): Promise<MediaKitRecord[]> {
 export async function updateMediaKitStatus(kitId: string, status: MediaKitStatus): Promise<MediaKitRecord | null> {
   if (!isDatabaseConfigured) return null;
   await ensureTables();
-  normalizeStatus(status);
+  if (!['draft', 'ready', 'sent', 'archived'].includes(status)) {
+    throw new Error('Estado de Media Kit inválido.');
+  }
   const result = await pool.query(
     `UPDATE mediakits SET status = $2, updated_at = CURRENT_TIMESTAMP WHERE kit_id = $1
      RETURNING kit_id, source_request_id, status, client_name, client_email, client_company, client_phone,
