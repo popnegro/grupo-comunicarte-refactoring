@@ -6,7 +6,6 @@ import {
   CheckSquare2,
   Ellipsis,
   Eye,
-  Heart,
   MapPin,
   Monitor,
   Pencil,
@@ -341,8 +340,7 @@ export function SupportCard({
       <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
         {renderMedia()}
         <div className="absolute left-3 top-3"><StatusBadge status={availability} period={period} /></div>
-        <button type="button" aria-label="Agregar a favoritos" className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-slate-700 shadow-sm"><Heart className="h-4 w-4" /></button>
-        {mediaControls}
+                {mediaControls}
       </div>
       <div className="p-4 sm:p-5">
         <div className="flex items-start justify-between gap-3">
@@ -358,13 +356,13 @@ export function SupportCard({
         <div className="mt-5 flex gap-3">
           {selectable && isAvailable ? (
             <button type="button" onClick={() => toggleSelect(item)} aria-pressed={selected} className={`flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl border px-3 text-xs font-bold transition ${selected ? 'border-emerald-100 bg-emerald-50 text-emerald-700' : 'border-slate-300 bg-white text-slate-800 hover:bg-slate-50'}`}>
-              {selected ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}{selected ? 'Seleccionado' : 'Agregar a selección'}
+              {selected ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}{selected ? 'Seleccionado' : 'Seleccionar'}
             </button>
-          ) : (
-            <button type="button" onClick={navigateToDetail} className="flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-3 text-xs font-bold text-slate-800 hover:bg-slate-50">Ver detalle <ArrowRight className="h-4 w-4" /></button>
-          )}
-          <button type="button" onClick={navigateToDetail} className="flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-slate-950 px-3 text-xs font-bold text-white hover:bg-slate-800">
-            {selectable ? 'Ver detalle' : 'Ver soporte'} <ArrowRight className="h-4 w-4" />
+          ) : isReserved ? (
+            <button type="button" onClick={() => navigate(`/contacto?soporte=${item.canonical_id}`)} className="flex min-h-10 flex-1 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 px-3 text-xs font-bold text-amber-900">Consultar disponibilidad</button>
+          ) : null}
+          <button type="button" onClick={navigateToDetail} className={`flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold ${selectable && isAvailable ? 'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50' : 'bg-slate-950 text-white hover:bg-slate-800'}`}>
+            Ver soporte <ArrowRight className="h-4 w-4" />
           </button>
         </div>
         {onRemove && <button type="button" onClick={() => onRemove(item)} className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-950"><Trash2 className="h-4 w-4" /> Quitar</button>}
