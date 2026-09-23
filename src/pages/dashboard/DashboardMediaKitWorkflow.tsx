@@ -908,7 +908,7 @@ export default function DashboardMediaKitWorkflow() {
                                 notify(
                                   m === 'shared'
                                     ? 'Archivos listos para compartir con el lead.'
-                                    : 'Se abrió el cliente de correo para adjuntar la cotización.'
+                                    : 'Se abrió tu correo para que adjuntes los archivos al lead.'
                                 );
                               } catch (e: any) {
                                 notify(e.message || 'No pudimos preparar el envío.');
@@ -918,7 +918,7 @@ export default function DashboardMediaKitWorkflow() {
                             title={!approvalsReady ? 'Defina los precios de todos los soportes primero' : undefined}
                           >
                             <Send className="h-3.5 w-3.5" />
-                            <span>Enviar al Lead</span>
+                            <span>Preparar envío</span>
                           </button>
                         </>
                       )}
