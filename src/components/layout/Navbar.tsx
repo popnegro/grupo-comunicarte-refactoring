@@ -30,14 +30,15 @@ export function Navbar() {
   const links = [
     ['Inicio', '/'],
     ['Inventario', '/inventario'],
-    ['Soportes', '/soportes'],
-    ['Soluciones', '/soluciones'],
+    ['Servicios', '/soluciones'],
     ['Nosotros', '/nosotros'],
     ['Contacto', '/contacto'],
   ];
 
   const selectedItems = getSelectedItems(items);
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) =>
+    location.pathname === path ||
+    (path === '/soluciones' && location.pathname === '/soportes');
 
   return (
     <>
@@ -64,79 +65,38 @@ export function Navbar() {
           </nav>
 
           <div className="hidden items-center gap-2 md:flex">
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-700 transition-colors hover:border-zinc-300 hover:bg-zinc-50"
-              aria-label="Buscar soportes"
-            >
+            <button onClick={() => setSearchOpen(true)} className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-700 transition-colors hover:border-zinc-300 hover:bg-zinc-50" aria-label="Buscar soportes">
               <Search className="h-4 w-4" />
             </button>
 
-            <button
-              onClick={() => setMediakitOpen(true)}
-              className="relative flex h-10 items-center gap-2 rounded-lg border border-zinc-200 px-3 text-sm font-semibold text-zinc-800 transition-colors hover:border-zinc-300 hover:bg-zinc-50"
-              aria-label="Abrir Media Kit"
-            >
+            <button onClick={() => setMediakitOpen(true)} className="relative flex h-10 items-center gap-2 rounded-lg border border-zinc-200 px-3 text-sm font-semibold text-zinc-800 transition-colors hover:border-zinc-300 hover:bg-zinc-50" aria-label="Abrir Media Kit">
               <Layers className="h-4 w-4" />
               <span>Media Kit</span>
-              {selectedCount > 0 && (
-                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-zinc-950 px-1 text-[10px] font-bold text-white">
-                  {selectedCount}
-                </span>
-              )}
+              {selectedCount > 0 && <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-zinc-950 px-1 text-[10px] font-bold text-white">{selectedCount}</span>}
             </button>
 
-            <Link
-              to="/contacto"
-              className="flex h-10 items-center rounded-lg bg-zinc-950 px-4 text-sm font-semibold text-white transition-colors hover:bg-zinc-800"
-            >
-              Hablar con ventas
+            <Link to="/contacto" className="flex h-10 items-center rounded-lg bg-zinc-950 px-4 text-sm font-semibold text-white transition-colors hover:bg-zinc-800">
+              Solicitar propuesta
             </Link>
 
-            <Link
-              to="/login"
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-700 transition-colors hover:border-zinc-300 hover:bg-zinc-50"
-              aria-label="Iniciar sesión"
-            >
+            <Link to="/login" className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-700 transition-colors hover:border-zinc-300 hover:bg-zinc-50" aria-label="Acceso" title="Acceso">
               <User className="h-4 w-4" />
             </Link>
           </div>
 
           <div className="flex items-center gap-2 md:hidden">
-            <button
-              type="button"
-              onClick={() => setMediakitOpen(true)}
-              className="relative flex h-10 min-w-10 items-center justify-center rounded-lg border border-zinc-200 px-2.5 text-zinc-800 transition-colors hover:border-zinc-300 hover:bg-zinc-50"
-              aria-label={selectedCount > 0 ? `Abrir Media Kit, ${selectedCount} soportes seleccionados` : 'Abrir Media Kit'}
-            >
+            <button type="button" onClick={() => setMediakitOpen(true)} className="relative flex h-10 min-w-10 items-center justify-center rounded-lg border border-zinc-200 px-2.5 text-zinc-800 transition-colors hover:border-zinc-300 hover:bg-zinc-50" aria-label={selectedCount > 0 ? `Abrir Media Kit, ${selectedCount} soportes seleccionados` : 'Abrir Media Kit'}>
               <Layers className="h-4 w-4" aria-hidden="true" />
-              {selectedCount > 0 && (
-                <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-zinc-950 px-1 text-[10px] font-bold text-white">
-                  {selectedCount}
-                </span>
-              )}
+              {selectedCount > 0 && <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-zinc-950 px-1 text-[10px] font-bold text-white">{selectedCount}</span>}
             </button>
-            <button
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200"
-              onClick={() => setMobileOpen(value => !value)}
-              aria-label={mobileOpen ? 'Cerrar menú' : 'Abrir menú'}
-              aria-expanded={mobileOpen}
-            >
+            <button className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200" onClick={() => setMobileOpen(value => !value)} aria-label={mobileOpen ? 'Cerrar menú' : 'Abrir menú'} aria-expanded={mobileOpen}>
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
       </header>
 
-      <MobileMenu
-        open={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-        onSearch={() => {
-          setMobileOpen(false);
-          setSearchOpen(true);
-        }}
-      />
-
+      <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} onSearch={() => { setMobileOpen(false); setSearchOpen(true); }} />
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
       {mediakitOpen && <MediakitPanel selectedItems={selectedItems} onClose={() => setMediakitOpen(false)} />}
     </>
