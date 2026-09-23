@@ -5,11 +5,10 @@ import { MediakitPanel } from '../components/map/MediakitPanel';
 import { StickySelectionBar } from '../components/map/StickySelectionBar';
 import { useInventory } from '../hooks/useInventory';
 import { Plaza, TipoSoporte, Disponibilidad, InventoryItem } from '../types';
-import { MapFilterPanel } from '../components/map/MapFilterPanel';
 import { ViewModeToggle, ViewMode } from '../components/inventory/ViewModeToggle';
 import { InventoryToolbar } from '../components/inventory/InventoryToolbar';
 import { SupportCardGrid } from '../components/inventory/SupportCardGrid';
-import { SlidersHorizontal, X, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Loader2, AlertCircle, RefreshCw, LocateFixed } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useSelection } from '../context/SelectionContext';
 import { Button } from '../components/ui/Button';
@@ -30,7 +29,8 @@ export default function Inventario() {
   const [viewMode, setViewMode] = useState<ViewMode>(vistaParam === 'catalogo' ? 'catalogo' : 'mapa');
   const [selectedSoporteId, setSelectedSoporteId] = useState<string | null>(searchParams.get('soporte'));
   const [searchText, setSearchText] = useState(queryParam);
-  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [locating, setLocating] = useState(false);
   const [isMediakitOpen, setIsMediakitOpen] = useState(false);
   const { selectedCount, showToast, getSelectedItems } = useSelection();
 
@@ -40,7 +40,6 @@ export default function Inventario() {
       return;
     }
     setIsMediakitOpen(true);
-    setIsMobileFiltersOpen(false);
   }, [selectedCount, showToast]);
 
   const handleResetFilters = useCallback(() => {
@@ -49,6 +48,27 @@ export default function Inventario() {
     setSelectedDisponibilidad('todos');
     setSearchText('');
   }, []);
+
+  const handleNearMe = useCallback(() => {
+    if (!navigator.geolocation) {
+      showToast('Tu navegador no permite obtener tu ubicación.', undefined, 2800);
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setUserLocation([coords.latitude, coords.longitude]);
+        setViewMode('mapa');
+        setLocating(false);
+        showToast('Mapa centrado cerca de tu ubicación.', undefined, 2200);
+      },
+      () => {
+        setLocating(false);
+        showToast('No pudimos obtener tu ubicación. Revisá los permisos del navegador.', undefined, 3200);
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 },
+    );
+  }, [showToast]);
 
   const handleViewModeChange = useCallback((mode: ViewMode) => setViewMode(mode), []);
 
@@ -113,23 +133,9 @@ export default function Inventario() {
     return <div className="flex h-[calc(100dvh-5rem)] items-center justify-center bg-gray-50 px-4" role="alert"><div className="w-full max-w-md border border-gray-200 bg-white p-6 text-center"><AlertCircle className="mx-auto h-5 w-5 text-red-600" aria-hidden="true" /><h2 className="mb-2 mt-3 text-lg font-bold text-gray-900">No pudimos cargar el inventario</h2><p className="mb-5 text-sm text-gray-600">Estamos teniendo problemas para mostrar los soportes. Probá nuevamente.</p><Button onClick={refetch} className="flex min-h-10 w-full items-center justify-center gap-2 rounded-lg" aria-label="Reintentar cargar el inventario"><RefreshCw className="h-4 w-4" aria-hidden="true" />Reintentar</Button></div></div>;
   }
 
-  const hasActiveFilters = selectedPlaza !== 'todos' || selectedTipo !== 'todos' || selectedDisponibilidad !== 'todos' || Boolean(searchText);
-
   return (
     <div className="relative flex h-[calc(100dvh-5rem)] overflow-hidden">
-      <div className="pointer-events-none absolute left-3 right-3 top-3 z-[500] flex items-center justify-between gap-2 md:hidden">
-        <button type="button" onClick={() => setIsMobileFiltersOpen(true)} className="pointer-events-auto flex min-h-9 items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-950" aria-label={hasActiveFilters ? 'Abrir filtros, hay filtros activos' : 'Abrir filtros'}><SlidersHorizontal className="h-3.5 w-3.5 text-gray-600" aria-hidden="true" /><span>Filtros</span>{hasActiveFilters && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />}</button>
-        <div className="pointer-events-auto shrink-0"><ViewModeToggle viewMode={viewMode} onViewModeChange={handleViewModeChange} /></div>
-      </div>
-
-      <div className={cn('absolute inset-0 z-[2000] bg-black/30 transition-opacity duration-200 md:relative md:inset-auto md:z-10 md:block md:bg-transparent md:opacity-100', isMobileFiltersOpen ? 'block opacity-100' : 'hidden opacity-0')} role={isMobileFiltersOpen ? 'dialog' : undefined} aria-modal={isMobileFiltersOpen ? true : undefined} aria-label={isMobileFiltersOpen ? 'Filtros de inventario' : undefined}>
-        <div className="absolute inset-y-0 left-0 flex h-full w-[85%] max-w-sm flex-col border-r border-gray-200 bg-white md:relative md:w-80">
-          <div className="flex items-center justify-between border-b border-gray-100 p-4 md:hidden"><span className="text-sm font-bold">Filtros</span><button type="button" onClick={() => setIsMobileFiltersOpen(false)} className="rounded-lg p-2 text-gray-600 hover:bg-gray-100" aria-label="Cerrar filtros"><X className="h-4 w-4" /></button></div>
-          <div className="flex-grow overflow-y-auto"><MapFilterPanel selectedPlaza={selectedPlaza} setSelectedPlaza={setSelectedPlaza} selectedTipo={selectedTipo} setSelectedTipo={setSelectedTipo} selectedDisponibilidad={selectedDisponibilidad} setSelectedDisponibilidad={setSelectedDisponibilidad} searchText={searchText} setSearchText={setSearchText} resultsCount={allFilteredItems.length} viewMode={viewMode} onViewModeChange={handleViewModeChange} /></div>
-        </div>
-      </div>
-
-      <div className="relative z-0 flex h-full min-w-0 flex-grow flex-col">
+      <div className="relative z-10 flex h-full min-w-0 flex-grow flex-col">
         <InventoryToolbar
           selectedPlaza={selectedPlaza}
           setSelectedPlaza={setSelectedPlaza}
@@ -143,13 +149,19 @@ export default function Inventario() {
           selectedCount={selectedCount}
           viewMode={viewMode}
           onViewModeChange={handleViewModeChange}
+          onNearMe={handleNearMe}
+          locating={locating}
         />
-        <div className={cn('relative min-h-0 flex-1', viewMode === 'catalogo' && 'pt-14 md:pt-0')}>
-          {viewMode === 'mapa' ? <InventoryMap locations={filteredLocations} routes={filteredRoutes} onOpenMediakit={handleOpenMediakit} initialSelectedId={selectedSoporteId || searchParams.get('soporte')} selectedPlaza={selectedPlaza} onResetFilters={handleResetFilters} /> : <SupportCardGrid items={allFilteredItems} onSelectOnMap={handleSelectOnMap} onResetFilters={handleResetFilters} />}
+        <div className="relative min-h-0 flex-1">
+          {viewMode === 'mapa' ? (
+            <InventoryMap locations={filteredLocations} routes={filteredRoutes} onOpenMediakit={handleOpenMediakit} initialSelectedId={selectedSoporteId || searchParams.get('soporte')} selectedPlaza={selectedPlaza} onResetFilters={handleResetFilters} userLocation={userLocation} />
+          ) : (
+            <SupportCardGrid items={allFilteredItems} onSelectOnMap={handleSelectOnMap} onResetFilters={handleResetFilters} />
+          )}
           <StickySelectionBar onOpenMediakit={handleOpenMediakit} currentPlaza={selectedPlaza} inventoryItems={allItems} />
           {isMediakitOpen && <MediakitPanel selectedItems={selectedItems} onClose={() => setIsMediakitOpen(false)} />}
         </div>
       </div>
     </div>
   );
-}
+}}
