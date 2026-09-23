@@ -16,7 +16,6 @@ export interface ExportSupport {
 export interface ExportLead { name: string; email: string; company?: string; phone?: string; }
 const clean=(v?:string)=>(v||'').replace(/\r?\n/g,' ').trim();
 const esc=(v?:string)=>clean(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\x20-\x7E]/g,'').replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)');
-const html=(v?:string)=>clean(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
 const money=(v?:number)=>Number(v)>0?`ARS ${Number(v).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}`:'';
 const wrap=(v:string,max=54)=>{const out:string[]=[];let line='';for(const w of esc(v).split(/\s+/).filter(Boolean)){const n=line?`${line} ${w}`:w;if(n.length>max&&line){out.push(line);line=w;}else line=n;}if(line)out.push(line);return out;};
 const text=(l:string[],value:string,x:number,y:number,size:number,bold=false)=>l.push('BT',`/${bold?'F2':'F1'} ${size} Tf`,`${x} ${y} Td`,`(${esc(value)}) Tj`,'ET');
