@@ -1,4 +1,4 @@
-import { and, desc, eq } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { db, isDatabaseConfigured } from '../db/index.ts';
 import { mediakits, mediakitItems } from '../db/schema.ts';
 
