@@ -36,7 +36,7 @@ export default function Inventario() {
   const [selectedTipo, setSelectedTipo] = useState<TipoSoporte | 'todos'>(tipoParam || 'todos');
   const [selectedDisponibilidad, setSelectedDisponibilidad] = useState<DisponibilidadFilter>(dispParam || 'todos');
   const [viewMode, setViewMode] = useState<ViewMode>(vistaParam === 'catalogo' ? 'catalogo' : 'mapa');
-  const [selectedSoporteId, setSelectedSoporteId] = useState<string | null>(searchParams.get('soporte'));
+  const [selectedSoporteId] = useState<string | null>(searchParams.get('soporte'));
   const [searchText, setSearchText] = useState(queryParam);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [locating, setLocating] = useState(false);
