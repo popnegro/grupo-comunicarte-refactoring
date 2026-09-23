@@ -72,17 +72,6 @@ export default function Inventario() {
 
   const handleViewModeChange = useCallback((mode: ViewMode) => setViewMode(mode), []);
 
-  const handleSelectOnMap = useCallback((item: InventoryItem) => {
-    setSelectedSoporteId(item.canonical_id);
-    setViewMode('mapa');
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.set('soporte', item.canonical_id);
-      next.set('vista', 'mapa');
-      return next;
-    }, { replace: true });
-  }, [setSearchParams]);
-
   useEffect(() => {
     const params = new URLSearchParams();
     if (selectedPlaza !== 'todos') params.set('plaza', selectedPlaza);
@@ -161,7 +150,7 @@ export default function Inventario() {
           {viewMode === 'mapa' ? (
             <InventoryMap locations={filteredLocations} routes={filteredRoutes} initialSelectedId={selectedSoporteId || searchParams.get('soporte')} selectedPlaza={selectedPlaza} onResetFilters={handleResetFilters} userLocation={userLocation} />
           ) : (
-            <SupportCardGrid items={allFilteredItems} onSelectOnMap={handleSelectOnMap} onResetFilters={handleResetFilters} />
+            <SupportCardGrid items={allFilteredItems} onResetFilters={handleResetFilters} />
           )}
         </div>
       </div>
