@@ -4,7 +4,7 @@ import {
   Menu, X, FilePlus2, PanelLeft,
 } from 'lucide-react';
 import { NavLink, useLocation, useNavigate, Link } from 'react-router-dom';
-import { getStoredLeads, subscribeToLeads } from '../../lib/dashboard-store';
+import { apiFetch } from '../../lib/api';
 
 interface DashboardShellProps { children: ReactNode; }
 
@@ -25,13 +25,36 @@ export function DashboardShell({ children }: DashboardShellProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
-    const leads = getStoredLeads();
-    setNewLeadsCount(leads.filter((l) => l.status === 'nuevo').length);
-    const unsubscribe = subscribeToLeads((updatedLeads) => {
-      setNewLeadsCount(updatedLeads.filter((l) => l.status === 'nuevo').length);
-    });
-    return () => unsubscribe();
-  }, []);
+    let cancelled = false;
+
+    const loadNewLeadsCount = async () => {
+      const token = localStorage.getItem('admin_token');
+      if (!token) return;
+
+      try {
+        const response = await apiFetch('/api/admin/requests', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) return;
+
+        const json = await response.json();
+        if (cancelled || json.status !== 'success' || !Array.isArray(json.data)) return;
+
+        setNewLeadsCount(
+          json.data.filter((lead: { status?: string }) =>
+            lead.status === 'nuevo' || lead.status === 'pending'
+          ).length
+        );
+      } catch {
+        // The shell remains usable if the notification count cannot be loaded.
+      }
+    };
+
+    loadNewLeadsCount();
+    return () => {
+      cancelled = true;
+    };
+  }, [location.pathname]);
 
   useEffect(() => { setMobileNavOpen(false); }, [location.pathname]);
 
