@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Calculator,
+  Save,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
@@ -184,6 +185,10 @@ export default function DashboardMediaKitWorkflow() {
       });
       const j = await r.json().catch(() => null);
       if (!r.ok || j?.status !== 'success') throw new Error(j?.message || 'No pudimos actualizar el estado.');
+      if (next === 'done') {
+        const saved = await persistMediaKit('ready');
+        if (!saved) throw new Error('No pudimos guardar el Media Kit.');
+      }
       await load();
       setSelected((x) => (x ? { ...x, status: next } : null));
       notify(`Solicitud ${labels[next]}`);
@@ -217,11 +222,52 @@ export default function DashboardMediaKitWorkflow() {
           pricing: x.pricing || null,
         }));
       setSupports(filtered);
+      const token = localStorage.getItem('admin_token');
+      const kitResponse = await apiFetch(`/api/admin/mediakits/KIT-${encodeURIComponent(lead.requestId)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (kitResponse.ok) {
+        const kitJson = await kitResponse.json().catch(() => null);
+        const savedPrices = kitJson?.data?.approvedPrices;
+        if (savedPrices && typeof savedPrices === 'object') {
+          setApprovedPrices(Object.fromEntries(Object.entries(savedPrices).map(([key, value]) => [key, String(value)])));
+        }
+      }
     } catch (e: any) {
       notify(e.message || 'Error al cargar soportes.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const persistMediaKit = async (status: 'draft' | 'ready' = 'draft') => {
+    if (!selected || !supports.length || !approvalsReady) {
+      notify('Complete el precio de todos los soportes antes de guardar.');
+      return false;
+    }
+    const token = localStorage.getItem('admin_token');
+    const kitId = `KIT-${selected.requestId}`;
+    const r = await apiFetch('/api/admin/mediakits', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        kitId,
+        sourceRequestId: selected.requestId,
+        status,
+        clientName: selected.clientName,
+        clientEmail: selected.email,
+        clientCompany: selected.company,
+        clientPhone: selected.phone,
+        supportIds: selected.supportIds,
+        approvedPrices,
+        totalAmount: totalApprovedQuote,
+        currency: 'ARS',
+      }),
+    });
+    const j = await r.json().catch(() => null);
+    if (!r.ok || j?.status !== 'success') throw new Error(j?.message || 'No pudimos guardar el Media Kit.');
+    notify(status === 'ready' ? 'Media Kit listo para entrega.' : 'Cotización guardada.');
+    return true;
   };
 
   const applyBaseCatalogPrices = () => {
@@ -778,6 +824,22 @@ export default function DashboardMediaKitWorkflow() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2.5">
+                      {approvalsReady && (
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={async () => {
+                            setBusy(true);
+                            try { await persistMediaKit(selected.status === 'done' ? 'ready' : 'draft'); }
+                            catch (e: any) { notify(e.message || 'No pudimos guardar la cotización.'); }
+                            finally { setBusy(false); }
+                          }}
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-bold text-gray-800 shadow-2xs hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                        >
+                          <Save className="h-3.5 w-3.5" />
+                          <span>Guardar cotización</span>
+                        </button>
+                      )}
                       {selected.status === 'request' && (
                         <button
                           type="button"
