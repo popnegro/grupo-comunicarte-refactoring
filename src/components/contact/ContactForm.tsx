@@ -4,7 +4,6 @@ import { useSearchParams } from 'react-router-dom';
 import { useSelection } from '../../context/SelectionContext';
 import { Input, Textarea, Label } from '../ui/Input';
 import { Button } from '../ui/Button';
-import { recordNewLead } from '../../lib/dashboard-store';
 
 export function ContactForm({ isMediaKit = false }: { isMediaKit?: boolean }) {
   const [searchParams] = useSearchParams();
@@ -69,17 +68,6 @@ export function ContactForm({ isMediaKit = false }: { isMediaKit?: boolean }) {
       }
 
       const newRequestId = data?.requestId || `REQ-${new Date().getFullYear()}-${Date.now().toString().slice(-8)}`;
-      recordNewLead({
-        requestId: newRequestId,
-        clientName: normalizedName,
-        company: company.trim(),
-        email: normalizedEmail,
-        phone: phone.trim(),
-        message: message.trim(),
-        supportIds: selectedSupportIds,
-        supportNames: [],
-        plazas: [],
-      });
       setRequestId(newRequestId);
       setSuccess(isMediaKit ? 'Solicitud de Media Kit recibida.' : 'Recibimos tu consulta.');
       if (isMediaKit) clearSelection();
