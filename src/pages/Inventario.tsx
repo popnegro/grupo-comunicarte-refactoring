@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import InventoryMap from '../components/map/InventoryMap';
-import { MediakitPanel } from '../components/map/MediakitPanel';
-import { StickySelectionBar } from '../components/map/StickySelectionBar';
 import { useInventory } from '../hooks/useInventory';
 import { Plaza, TipoSoporte, Disponibilidad, InventoryItem } from '../types';
 import { ViewMode } from '../components/inventory/ViewModeToggle';
@@ -30,16 +28,7 @@ export default function Inventario() {
   const [searchText, setSearchText] = useState(queryParam);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [locating, setLocating] = useState(false);
-  const [isMediakitOpen, setIsMediakitOpen] = useState(false);
-  const { selectedCount, showToast, getSelectedItems } = useSelection();
-
-  const handleOpenMediakit = useCallback(() => {
-    if (selectedCount === 0) {
-      showToast('Selecciona al menos un soporte para armar tu propuesta.', undefined, 2800);
-      return;
-    }
-    setIsMediakitOpen(true);
-  }, [selectedCount, showToast]);
+  const { selectedCount, showToast } = useSelection();
 
   const handleResetFilters = useCallback(() => {
     setSelectedPlaza('todos');
@@ -122,7 +111,6 @@ export default function Inventario() {
     return matchPlaza && matchTipo && matchesDisponibilidad(route) && matchesSearch(route);
   }), [mobileRoutes, selectedPlaza, selectedTipo, matchesDisponibilidad, matchesSearch]);
   const allFilteredItems = useMemo(() => [...filteredLocations, ...filteredRoutes], [filteredLocations, filteredRoutes]);
-  const selectedItems = getSelectedItems(allItems);
 
   if (loading) {
     return <div className="flex h-[calc(100dvh-5rem)] items-center justify-center bg-gray-50" role="status" aria-live="polite"><div className="flex flex-col items-center gap-3 text-center"><Loader2 className="h-7 w-7 animate-spin text-gray-900" aria-hidden="true" /><p className="text-sm font-semibold text-gray-600">Cargando inventario comercial...</p></div></div>;
@@ -153,12 +141,10 @@ export default function Inventario() {
         />
         <div className="relative min-h-0 flex-1">
           {viewMode === 'mapa' ? (
-            <InventoryMap locations={filteredLocations} routes={filteredRoutes} onOpenMediakit={handleOpenMediakit} initialSelectedId={selectedSoporteId || searchParams.get('soporte')} selectedPlaza={selectedPlaza} onResetFilters={handleResetFilters} userLocation={userLocation} />
+            <InventoryMap locations={filteredLocations} routes={filteredRoutes} initialSelectedId={selectedSoporteId || searchParams.get('soporte')} selectedPlaza={selectedPlaza} onResetFilters={handleResetFilters} userLocation={userLocation} />
           ) : (
             <SupportCardGrid items={allFilteredItems} onSelectOnMap={handleSelectOnMap} onResetFilters={handleResetFilters} />
           )}
-          <StickySelectionBar onOpenMediakit={handleOpenMediakit} currentPlaza={selectedPlaza} inventoryItems={allItems} />
-          {isMediakitOpen && <MediakitPanel selectedItems={selectedItems} onClose={() => setIsMediakitOpen(false)} />}
         </div>
       </div>
     </div>
