@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   Send,
   Eye,
-  Download,
   ExternalLink,
   X,
 } from 'lucide-react';
@@ -163,17 +162,6 @@ export default function DashboardMediaKits() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                showToast('Exportación de leads en CSV simulada correctamente');
-              }}
-              className="px-3.5 py-2 bg-white text-gray-700 border border-gray-200 hover:border-gray-300 rounded-xl text-xs font-bold transition-all shadow-2xs flex items-center gap-2"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Exportar Reporte</span>
-            </button>
-          </div>
         </header>
 
         {/* Status Count Tabs */}
@@ -541,17 +529,7 @@ export default function DashboardMediaKits() {
               </div>
 
               {/* Footer Actions */}
-              <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                <button
-                  onClick={() => {
-                    showToast('Media Kit en PDF descargado exitosamente');
-                  }}
-                  className="px-3.5 py-2 rounded-xl border border-gray-200 text-gray-700 font-bold text-xs hover:bg-gray-50 flex items-center gap-1.5"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Generar Ficha PDF</span>
-                </button>
-
+              <div className="flex items-center justify-end pt-3 border-t border-gray-100">
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setSelectedLead(null)}
