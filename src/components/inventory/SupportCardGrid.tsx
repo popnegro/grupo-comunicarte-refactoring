@@ -6,13 +6,11 @@ import { Button } from '../ui/Button';
 
 interface SupportCardGridProps {
   items: InventoryItem[];
-  onSelectOnMap?: (item: InventoryItem) => void;
   onResetFilters?: () => void;
 }
 
 export const SupportCardGrid: React.FC<SupportCardGridProps> = ({
   items,
-  onSelectOnMap,
   onResetFilters,
 }) => {
   if (items.length === 0) {
@@ -44,7 +42,6 @@ export const SupportCardGrid: React.FC<SupportCardGridProps> = ({
               item={item}
               variant="selectable"
               selectable={true}
-              onSelectOnMap={onSelectOnMap}
             />
           ))}
         </div>
