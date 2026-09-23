@@ -9,7 +9,6 @@ import { ViewMode } from '../components/inventory/ViewModeToggle';
 import { InventoryToolbar } from '../components/inventory/InventoryToolbar';
 import { SupportCardGrid } from '../components/inventory/SupportCardGrid';
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
-import { cn } from '../lib/utils';
 import { useSelection } from '../context/SelectionContext';
 import { Button } from '../components/ui/Button';
 
