@@ -31,6 +31,7 @@ export function Navbar() {
     ['Inicio', '/'],
     ['Inventario', '/inventario'],
     ['Servicios', '/soluciones'],
+    ['Nosotros', '/nosotros'],
     ['Contacto', '/contacto'],
   ];
 
