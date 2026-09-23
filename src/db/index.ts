@@ -12,7 +12,7 @@ const pool = new Pool(
   isDatabaseConfigured
     ? {
         connectionString,
-        ssl: connectionString!.includes('neon.tech') || connectionString!.includes('sslmode=require') ? { rejectUnauthorized: false } : undefined,
+        ssl: connectionString!.includes('neon.tech') || connectionString!.includes('sslmode=require') ? { rejectUnauthorized: true } : undefined,
       }
     : {
         connectionString: 'postgresql://localhost:5432/mockdb',
