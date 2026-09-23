@@ -10,7 +10,6 @@ import { useSelection } from '../../context/SelectionContext';
 interface InventoryMapProps {
   locations: LocationRecord[];
   routes: MobileRoute[];
-  onOpenMediakit: () => void;
   initialSelectedId?: string | null;
   selectedPlaza?: Plaza | 'todos';
   onResetFilters?: () => void;
@@ -34,7 +33,7 @@ function MapUpdater({ locations, routes, userLocation }: { locations: LocationRe
   return null;
 }
 
-export default function InventoryMap({ locations, routes, onOpenMediakit, initialSelectedId, selectedPlaza, onResetFilters, userLocation }: InventoryMapProps) {
+export default function InventoryMap({ locations, routes, initialSelectedId, selectedPlaza, onResetFilters, userLocation }: InventoryMapProps) {
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   useEffect(() => {
     if (initialSelectedId && !selectedItem) {
@@ -138,7 +137,7 @@ export default function InventoryMap({ locations, routes, onOpenMediakit, initia
             </button>
           </div>
           <div className={`px-0 pt-4 overflow-y-auto ${selectedCount > 0 ? 'pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]' : 'pb-6'} md:p-6`}>
-            <LocationDetail item={selectedItem} onOpenMediakit={() => { setSelectedItem(null); onOpenMediakit(); }} />
+            <LocationDetail item={selectedItem} />
           </div>
         </div>
       )}
