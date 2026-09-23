@@ -108,11 +108,11 @@ export default function Home() {
                 </p>
                 <div className="mt-7 grid gap-3 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2">
                   <button onClick={() => navigate('/inventario?plaza=mendoza')} className="group flex items-center justify-between gap-4 rounded-xl border border-gray-200 px-4 py-3.5 text-left transition-colors hover:border-gray-900 hover:bg-gray-50">
-                    <span><span className="block text-base font-semibold text-gray-950">Mendoza</span><span className="mt-1 block text-xs leading-5 text-gray-500">${allItems.filter(item => item.ciudad === 'mendoza').length} soportes estratégicos</span></span>
+                    <span><span className="block text-base font-semibold text-gray-950">Mendoza</span><span className="mt-1 block text-xs leading-5 text-gray-500">{allItems.filter(item => item.ciudad === 'mendoza').length} soportes estratégicos</span></span>
                     <MoveRight className="h-4 w-4 shrink-0 text-gray-500 transition-transform group-hover:translate-x-1 group-hover:text-gray-950" aria-hidden="true" />
                   </button>
                   <button onClick={() => navigate('/inventario?plaza=buenos-aires')} className="group flex items-center justify-between gap-4 rounded-xl border border-gray-200 px-4 py-3.5 text-left transition-colors hover:border-gray-900 hover:bg-gray-50">
-                    <span><span className="block text-base font-semibold text-gray-950">Buenos Aires</span><span className="mt-1 block text-xs leading-5 text-gray-500">${allItems.filter(item => item.ciudad === 'buenos-aires').length} soportes estratégicos</span></span>
+                    <span><span className="block text-base font-semibold text-gray-950">Buenos Aires</span><span className="mt-1 block text-xs leading-5 text-gray-500">{allItems.filter(item => item.ciudad === 'buenos-aires').length} soportes estratégicos</span></span>
                     <MoveRight className="h-4 w-4 shrink-0 text-gray-500 transition-transform group-hover:translate-x-1 group-hover:text-gray-950" aria-hidden="true" />
                   </button>
                 </div>
