@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - canonical-refinement
+      - p0-p1-p2-hardening
   pull_request:
     branches:
       - main
@@ -35,6 +36,9 @@ jobs:
 
       - name: Lint / Typecheck
         run: npm run lint
+
+      - name: Tests
+        run: npm test
 
       - name: Build
         run: npm run build
