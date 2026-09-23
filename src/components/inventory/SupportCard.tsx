@@ -39,10 +39,6 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
 
   if (status === 'inactivo' && variant !== 'dashboard') return null;
 
-  const openMap = () => {
-    if (onSelectOnMap) onSelectOnMap(item);
-    else navigate(locationUrl);
-  };
 
   const openDetail = () => navigate(detailUrl);
 
