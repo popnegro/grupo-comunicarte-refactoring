@@ -1,3 +1,4 @@
+import pptxgen from 'pptxgenjs';
 export interface ExportSupport {
   canonical_id: string;
   name: string;
