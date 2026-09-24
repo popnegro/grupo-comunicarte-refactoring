@@ -66,13 +66,13 @@ export async function createApp() {
 
   app.get('/api/health', async (_req, res) => {
     if (!isDatabaseConfigured) {
-      return res.status(200).json({ status: 'ok', database: 'static-fallback' });
+      return res.status(200).json({ status: 'ok', database: 'static-fallback', buildSha: process.env.VERCEL_GIT_COMMIT_SHA ?? 'local' });
     }
     try {
       await pool.query('SELECT 1');
-      res.status(200).json({ status: 'ok', database: 'connected' });
+      res.status(200).json({ status: 'ok', database: 'connected', buildSha: process.env.VERCEL_GIT_COMMIT_SHA ?? 'local' });
     } catch (err: any) {
-      res.status(200).json({ status: 'ok', database: 'disconnected', error: err.message });
+      res.status(200).json({ status: 'ok', database: 'disconnected', error: err.message, buildSha: process.env.VERCEL_GIT_COMMIT_SHA ?? 'local' });
     }
   });
 
