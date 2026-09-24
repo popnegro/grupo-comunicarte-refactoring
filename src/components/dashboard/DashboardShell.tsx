@@ -1,175 +1,141 @@
-import { BarChart3, ExternalLink, LogOut, FileText, MonitorSmartphone, Layers, MapPin, Bell, ChevronRight } from 'lucide-react';
-import { NavLink, useNavigate, Link } from 'react-router-dom';
-import { useState, useEffect, ReactNode } from 'react';
-import { getStoredLeads, subscribeToLeads } from '../../lib/dashboard-store';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  BarChart3, ExternalLink, LogOut, FileText, MonitorSmartphone, MapPin, Bell, ChevronRight,
+  Menu, X, FilePlus2, PanelLeft,
+} from 'lucide-react';
+import { NavLink, useLocation, useNavigate, Link } from 'react-router-dom';
+import { apiFetch } from '../../lib/api';
 
-interface DashboardShellProps {
-  children: ReactNode;
-}
+interface DashboardShellProps { children: ReactNode; }
+
+const pageLabels: Record<string, string> = {
+  '/dashboard': 'Resumen',
+  '/dashboard/soportes': 'Soportes',
+  '/dashboard/soportes/new': 'Nuevo soporte',
+  '/dashboard/solicitudes': 'Solicitudes',
+  '/dashboard/mediakits': 'Media Kits',
+  '/dashboard/mediakits/nuevo': 'Nuevo Media Kit',
+};
 
 export function DashboardShell({ children }: DashboardShellProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [newLeadsCount, setNewLeadsCount] = useState(0);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
-    const leads = getStoredLeads();
-    const pending = leads.filter((l) => l.status === 'nuevo').length;
-    setNewLeadsCount(pending);
+    let cancelled = false;
 
-    const unsubscribe = subscribeToLeads((updatedLeads) => {
-      const p = updatedLeads.filter((l) => l.status === 'nuevo').length;
-      setNewLeadsCount(p);
-    });
+    const loadNewLeadsCount = async () => {
+      const token = localStorage.getItem('admin_token');
+      if (!token) return;
 
-    return () => unsubscribe();
-  }, []);
+      try {
+        const response = await apiFetch('/api/admin/requests', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) return;
+
+        const json = await response.json();
+        if (cancelled || json.status !== 'success' || !Array.isArray(json.data)) return;
+
+        setNewLeadsCount(
+          json.data.filter((lead: { status?: string }) =>
+            lead.status === 'nuevo' || lead.status === 'pending'
+          ).length
+        );
+      } catch {
+        // The shell remains usable if the notification count cannot be loaded.
+      }
+    };
+
+    loadNewLeadsCount();
+    return () => {
+      cancelled = true;
+    };
+  }, [location.pathname]);
+
+  useEffect(() => { setMobileNavOpen(false); }, [location.pathname]);
+
+  const currentPage = useMemo(() => {
+    if (pageLabels[location.pathname]) return pageLabels[location.pathname];
+    if (location.pathname.includes('/edit')) return 'Editar soporte';
+    if (location.pathname.includes('/preview')) return 'Vista previa';
+    if (location.pathname.includes('/reservation')) return 'Reserva';
+    return 'Panel';
+  }, [location.pathname]);
 
   const navClass = ({ isActive }: { isActive: boolean }) =>
-    `group flex items-center gap-3 rounded-2xl px-3.5 py-3 text-xs font-bold transition-all duration-200 whitespace-nowrap ${
-      isActive
-        ? 'bg-gray-950 text-white shadow-lg shadow-gray-950/10'
-        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-950'
-    }`;
+    `group flex min-h-9 items-center gap-3 rounded-md px-3 py-2 text-xs font-medium transition-colors ${isActive ? 'bg-gray-100 text-gray-950' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-950'}`;
 
-  const handleLogout = () => {
-    localStorage.removeItem('admin_token');
-    navigate('/login');
-  };
+  const handleLogout = () => { localStorage.removeItem('admin_token'); navigate('/login'); };
+
+  const navGroups = [
+    {
+      label: 'Operación',
+      items: [
+        { to: '/dashboard', label: 'Resumen', icon: BarChart3, end: true },
+        { to: '/dashboard/soportes', label: 'Soportes', icon: MonitorSmartphone },
+        { to: '/dashboard/solicitudes', label: 'Solicitudes', icon: FileText, count: newLeadsCount },
+      ],
+    },
+    {
+      label: 'Comercial',
+      items: [
+        { to: '/dashboard/mediakits', label: 'Media Kits', icon: FileText },
+        { to: '/dashboard/mediakits/nuevo', label: 'Crear Media Kit', icon: FilePlus2 },
+      ],
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-[#f5f6f3] text-gray-900 flex flex-col font-sans selection:bg-gray-950 selection:text-white">
-      <header className="sticky top-0 z-40 border-b border-black/10 bg-white/90 backdrop-blur-xl">
-        <div className="flex h-[68px] items-center justify-between px-4 md:px-6 max-w-[1600px] mx-auto w-full">
-          <div className="flex items-center gap-3">
-            <Link to="/dashboard" className="flex items-center gap-2.5" title="Ir al Dashboard">
-              <img src="/brand/brand-dark.svg" alt="Grupo Comunicarte" className="h-6 w-auto" />
-            </Link>
-            <div className="hidden h-5 w-px bg-gray-200 sm:block" />
-            <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[0.14em] text-emerald-800">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Portal Admin
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <Link
-              to="/inventario"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-gray-700 transition hover:border-gray-300 hover:text-gray-950"
-              title="Abrir mapa de inventario público"
-            >
-              <MapPin className="h-3.5 w-3.5 text-emerald-600" />
-              <span className="hidden md:inline">Mapa Público</span>
-              <ExternalLink className="h-3 w-3 text-gray-400" />
-            </Link>
-
-            <Link
-              to="/dashboard/solicitudes"
-              className="relative rounded-xl p-2.5 text-gray-500 transition hover:bg-gray-100 hover:text-gray-950"
-              title={`${newLeadsCount} solicitudes nuevas`}
-              aria-label="Solicitudes nuevas"
-            >
-              <Bell className="h-4 w-4" />
-              {newLeadsCount > 0 && (
-                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white" />
-              )}
-            </Link>
-
-            <div className="hidden items-center gap-2 border-l border-gray-200 pl-3 lg:flex">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gray-950 text-[10px] font-black text-white">GC</div>
-              <div className="text-left leading-tight">
-                <span className="block text-xs font-bold text-gray-950">Admin</span>
-                <span className="text-[9px] text-gray-400">Centro de Operaciones</span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-bold text-gray-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700"
-              title="Cerrar sesión"
-              aria-label="Cerrar sesión"
-            >
-              <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
-              <span className="hidden sm:inline">Salir</span>
+    <div className="min-h-screen bg-[#f7f7f5] font-sans text-gray-900 selection:bg-gray-950 selection:text-white">
+      <header className="sticky top-0 z-50 h-14 border-b border-gray-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex h-full w-full max-w-[1600px] items-center justify-between px-3 sm:px-5 lg:px-6">
+          <div className="flex min-w-0 items-center gap-2">
+            <button type="button" onClick={() => setMobileNavOpen((open) => !open)} className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 md:hidden" aria-label={mobileNavOpen ? 'Cerrar navegación' : 'Abrir navegación'} aria-expanded={mobileNavOpen}>
+              {mobileNavOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
+            <button type="button" onClick={() => setSidebarCollapsed((collapsed) => !collapsed)} className="hidden h-8 w-8 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-950 md:inline-flex" aria-label={sidebarCollapsed ? 'Expandir navegación' : 'Colapsar navegación'} title={sidebarCollapsed ? 'Expandir navegación' : 'Colapsar navegación'}>
+              <PanelLeft className="h-4 w-4" />
+            </button>
+            <Link to="/dashboard" className="flex shrink-0 items-center" title="Ir al resumen"><img src="/brand/brand-dark.svg" alt="Grupo Comunicarte" className="h-5 w-auto" /></Link>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Link to="/dashboard/solicitudes" className="relative rounded-md p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-950" title={`${newLeadsCount} solicitudes nuevas`} aria-label="Solicitudes nuevas"><Bell className="h-4 w-4" />{newLeadsCount > 0 && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white" />}</Link>
+            <Link to="/inventario" className="hidden items-center gap-1.5 rounded-md border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-700 transition hover:border-gray-300 hover:bg-gray-50 sm:inline-flex" title="Abrir inventario público"><MapPin className="h-3.5 w-3.5 text-gray-500" />Ver inventario</Link>
+            <div className="hidden items-center gap-2 border-l border-gray-200 pl-3 sm:flex"><div className="flex h-7 w-7 items-center justify-center rounded-md bg-gray-950 text-[10px] font-bold text-white">GC</div><div className="hidden text-left leading-tight lg:block"><span className="block text-xs font-semibold text-gray-950">Editor</span><span className="text-[10px] text-gray-500">Espacio de trabajo</span></div></div>
+            <button type="button" onClick={handleLogout} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-2 text-xs font-medium text-gray-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700" title="Cerrar sesión" aria-label="Cerrar sesión"><LogOut className="h-3.5 w-3.5" /><span className="hidden sm:inline">Salir</span></button>
           </div>
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col md:flex-row max-w-[1600px] w-full mx-auto">
-        <aside className="w-full shrink-0 border-b border-black/10 bg-white p-3 md:border-b-0 md:border-r md:p-4 lg:w-64 lg:p-5 flex flex-col justify-between">
-          <div className="space-y-5">
-            <div>
-              <div className="mb-3 flex items-center justify-between px-3">
-                <p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-gray-400">Menú de Control</p>
-                <span className="text-[9px] font-bold text-gray-300">PMV 1.0</span>
+      <div className="relative mx-auto flex w-full max-w-[1600px]">
+        {mobileNavOpen && <button type="button" aria-label="Cerrar menú" onClick={() => setMobileNavOpen(false)} className="fixed inset-0 top-14 z-30 bg-gray-950/20 md:hidden" />}
+        <aside className={`${mobileNavOpen ? 'translate-x-0' : '-translate-x-full'} fixed left-0 top-14 bottom-0 z-40 w-[280px] border-r border-gray-200 bg-white px-3 py-4 shadow-xl transition-all duration-200 md:static md:z-auto md:block md:translate-x-0 md:shadow-none ${sidebarCollapsed ? 'md:w-[68px]' : 'md:w-56 lg:w-60'}`}>
+          <nav aria-label="Navegación principal del panel" className="space-y-4">
+            {navGroups.map((group) => (
+              <div key={group.label}>
+                {!sidebarCollapsed && <div className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-400">{group.label}</div>}
+                <div className="space-y-0.5">
+                  {group.items.map(({ to, label, icon: Icon, end, count }) => (
+                    <NavLink key={to} to={to} end={end} className={navClass} title={sidebarCollapsed ? label : undefined}>
+                      {({ isActive }) => <><Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-emerald-600' : 'text-gray-400'}`} /><span className={sidebarCollapsed ? 'sr-only' : ''}>{label}</span>{count ? <span className={`${sidebarCollapsed ? 'ml-auto h-1.5 w-1.5 p-0' : 'ml-auto px-1.5 py-0.5'} shrink-0 rounded-full bg-emerald-50 text-[10px] font-semibold text-emerald-800 ${sidebarCollapsed ? 'bg-emerald-500' : ''}`}>{sidebarCollapsed ? null : count}</span> : null}{isActive && !sidebarCollapsed && <ChevronRight className="ml-auto h-3 w-3 text-gray-400" />}</>}
+                    </NavLink>
+                  ))}
+                </div>
               </div>
-              <nav className="flex flex-row gap-1 overflow-x-auto pb-1 md:flex-col md:overflow-visible md:pb-0">
-                <NavLink to="/dashboard" end className={navClass}>
-                  {({ isActive }) => (
-                    <>
-                      <BarChart3 className={`h-4 w-4 shrink-0 ${isActive ? 'text-emerald-400' : 'text-gray-400 group-hover:text-gray-700'}`} />
-                      <span>Resumen Ejecutivo</span>
-                      {isActive && <ChevronRight className="ml-auto hidden h-3.5 w-3.5 text-gray-500 md:block" />}
-                    </>
-                  )}
-                </NavLink>
+            ))}
+          </nav>
 
-                <NavLink to="/dashboard/soportes" className={navClass}>
-                  {({ isActive }) => (
-                    <>
-                      <MonitorSmartphone className={`h-4 w-4 shrink-0 ${isActive ? 'text-emerald-400' : 'text-gray-400 group-hover:text-gray-700'}`} />
-                      <span>Gestión de Soportes</span>
-                      {isActive && <ChevronRight className="ml-auto hidden h-3.5 w-3.5 text-gray-500 md:block" />}
-                    </>
-                  )}
-                </NavLink>
-
-                <NavLink to="/dashboard/solicitudes" className={navClass}>
-                  {({ isActive }) => (
-                    <>
-                      <div className="flex items-center gap-3">
-                        <FileText className={`h-4 w-4 shrink-0 ${isActive ? 'text-emerald-400' : 'text-gray-400 group-hover:text-gray-700'}`} />
-                        <span>Solicitudes</span>
-                      </div>
-                      {newLeadsCount > 0 && (
-                        <span className={`ml-auto rounded-full px-2 py-0.5 text-[9px] font-extrabold ${isActive ? 'bg-emerald-400 text-gray-950' : 'bg-emerald-100 text-emerald-800'}`}>
-                          {newLeadsCount}
-                        </span>
-                      )}
-                    </>
-                  )}
-                </NavLink>
-              </nav>
-            </div>
-
-            <div className="hidden border-t border-gray-100 pt-5 md:block">
-              <p className="mb-2 px-3 text-[9px] font-extrabold uppercase tracking-[0.16em] text-gray-400">Atajos</p>
-              <div className="space-y-1">
-                <Link to="/inventario" className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-medium text-gray-600 transition hover:bg-gray-50 hover:text-gray-950">
-                  <Layers className="h-4 w-4 text-gray-400" />
-                  <span>Explorador de Mapa</span>
-                </Link>
-                <Link to="/" className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-medium text-gray-600 transition hover:bg-gray-50 hover:text-gray-950">
-                  <ExternalLink className="h-4 w-4 text-gray-400" />
-                  <span>Portal Institucional</span>
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          <div className="hidden border-t border-gray-100 pt-5 md:block">
-            <div className="flex items-center gap-2.5 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-3">
-              <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.10)]" />
-              <div className="text-[10px] leading-tight text-gray-600">
-                <span className="block font-bold text-gray-950">Sistema Activo</span>
-                <span className="text-gray-400">Operación PMV</span>
-              </div>
-            </div>
+          <div className="mt-5 border-t border-gray-100 pt-4">
+            <Link to="/inventario" title={sidebarCollapsed ? 'Inventario público' : undefined} className="flex min-h-9 items-center gap-3 rounded-md px-3 py-2 text-xs font-medium text-gray-600 transition hover:bg-gray-50 hover:text-gray-950"><MapPin className="h-4 w-4 shrink-0 text-gray-400" /><span className={sidebarCollapsed ? 'sr-only' : ''}>Inventario público</span><ExternalLink className={sidebarCollapsed ? 'hidden' : 'ml-auto h-3 w-3 text-gray-400'} /></Link>
           </div>
         </aside>
 
-        <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
+        <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
+          <div className="mb-5 flex min-h-5 items-center gap-1.5 text-xs" aria-label="Breadcrumb"><Link to="/dashboard" className="font-medium text-gray-500 hover:text-gray-950">Resumen</Link>{location.pathname !== '/dashboard' && <><ChevronRight className="h-3 w-3 text-gray-300" aria-hidden="true" /><span className="font-medium text-gray-900" aria-current="page">{currentPage}</span></>}</div>
           {children}
         </main>
       </div>

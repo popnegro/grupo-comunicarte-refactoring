@@ -1,50 +1,31 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
-/* 
- * ========================================================
- * GRUPO COMUNICARTE - UNIFIED DESIGN SYSTEM TOKENS
- * ========================================================
- * SOURCE OF TRUTH: Landing Page
- * Typography: Hanken Grotesk
- * Neutrals: #F9F9F9 (canvas), #FFFFFF (surface), #1A1A1A / gray-900 (text)
- * Borders: #E5E7EB / #F3F4F6 (gray-200 / gray-100)
- * Radiuses: sm: 0.25rem, md: 0.375rem, lg: 0.5rem, xl: 0.75rem, 2xl: 1rem, 3xl: 1.5rem, full: 9999px
- */
-
+/* Grupo Comunicarte — canonical visual system */
 @theme {
-  /* 1. TYPOGRAPHY */
   --font-sans: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-
-  /* 2. COLOR TOKENS */
   --color-background: #F9F9F9;
-  --color-foreground: #1A1A1A; /* Primary text */
+  --color-foreground: #1A1A1A;
   --color-primary: #000000;
   --color-primary-foreground: #FFFFFF;
-  --color-secondary: #F3F4F6; /* gray-100 */
-  --color-secondary-foreground: #111827; /* gray-900 */
-  --color-muted: #F9FAFB; /* gray-50 */
-  --color-muted-foreground: #6B7280; /* gray-500 */
-  --color-border: #E5E7EB; /* gray-200 */
+  --color-secondary: #F3F4F6;
+  --color-secondary-foreground: #111827;
+  --color-muted: #F9FAFB;
+  --color-muted-foreground: #6B7280;
+  --color-border: #E5E7EB;
   --color-surface: #FFFFFF;
   --color-surface-elevated: #FFFFFF;
-  
-  /* Semantic Status Tokens matching Landing & Inventario */
-  --color-brand-emerald: #059669; /* emerald-600 */
-  --color-brand-emerald-light: #ECFDF5; /* emerald-50 */
-  --color-brand-amber: #D97706; /* amber-600 */
-  --color-brand-amber-light: #FFFBEB; /* amber-50 */
-  --color-brand-blue: #2563EB; /* blue-600 */
-  --color-brand-blue-light: #EFF6FF; /* blue-50 */
-
-  /* Borders extensions */
-  --color-border-subtle: #F3F4F6; /* gray-100 */
-  --color-border-strong: #E5E7EB; /* gray-200 */
+  --color-brand-emerald: #059669;
+  --color-brand-emerald-light: #ECFDF5;
+  --color-brand-amber: #D97706;
+  --color-brand-amber-light: #FFFBEB;
+  --color-brand-blue: #2563EB;
+  --color-brand-blue-light: #EFF6FF;
+  --color-border-subtle: #F3F4F6;
+  --color-border-strong: #E5E7EB;
 }
 
-/* Base custom properties for non-Tailwind compatibility */
 :root {
-  /* Colors */
   --background: #F9F9F9;
   --foreground: #1A1A1A;
   --primary: #000000;
@@ -56,68 +37,81 @@
   --border: #E5E7EB;
   --surface: #FFFFFF;
   --surface-elevated: #FFFFFF;
-
   --border-subtle: #F3F4F6;
   --border-strong: #E5E7EB;
-
-  /* Typography */
   --font-sans: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  
-  /* Spacing */
-  --page-padding-x: 1rem; /* px-4 */
-  --page-padding-x-sm: 1.5rem; /* px-6 */
-  --page-padding-x-lg: 2rem; /* px-8 */
-  --section-padding-y: 6rem; /* py-24 */
-  
-  /* Radius */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
-  --radius-2xl: 1rem;
-  --radius-3xl: 1.5rem;
+  --page-padding-x: 1rem;
+  --page-padding-x-sm: 1.5rem;
+  --page-padding-x-lg: 2rem;
+  --section-padding-y: 5rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
   --radius-full: 9999px;
-  
-  /* Shadows */
-  --shadow-2xs: 0 1px 2px 0 rgb(0 0 0 / 0.03);
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow-md: 0 4px 12px -4px rgb(0 0 0 / 0.08);
 }
 
-body {
-  font-family: var(--font-sans);
-  color: var(--foreground);
-  background-color: var(--background);
-}
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-sans); color: var(--foreground); background-color: var(--background); }
 
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 
-/* Formalized typography utility classes */
+@utility page-container {
+  @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+@utility section-space {
+  @apply py-16 md:py-20;
+}
+
 @utility text-hero-display {
-  @apply text-5xl md:text-7xl font-bold tracking-tight leading-[1.08] text-gray-900;
+  @apply text-5xl md:text-6xl font-bold tracking-[-0.035em] leading-[1.06] text-gray-950;
 }
 
 @utility text-page-title {
-  @apply text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900;
+  @apply text-3xl sm:text-4xl md:text-5xl font-bold tracking-[-0.03em] leading-[1.08] text-gray-950;
 }
 
 @utility text-section-title {
-  @apply text-2xl sm:text-3xl font-bold tracking-tight text-gray-900;
+  @apply text-2xl sm:text-3xl md:text-4xl font-semibold tracking-[-0.025em] leading-[1.12] text-gray-950;
 }
 
 @utility text-card-title {
-  @apply text-lg sm:text-xl font-bold text-gray-900;
+  @apply text-lg sm:text-xl font-semibold leading-[1.2] text-gray-950;
 }
 
 @utility text-eyebrow {
-  @apply text-xs font-bold uppercase tracking-wider text-gray-400;
+  @apply text-[10px] font-semibold uppercase tracking-[0.16em] leading-[1.4] text-gray-500;
 }
 
 @utility text-field-label {
-  @apply text-xs font-bold uppercase tracking-wider text-gray-500;
+  @apply text-xs font-semibold uppercase tracking-[0.08em] leading-[1.4] text-gray-500;
 }
 
 @utility text-body {
-  @apply text-sm text-gray-600 leading-relaxed;
+  @apply text-sm md:text-base text-gray-600 leading-[1.6];
+}
+
+@utility surface-card {
+  @apply rounded-2xl border border-gray-200 bg-white;
+}
+
+
+/* Interaction polish: visible keyboard focus without changing the visual language. */
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

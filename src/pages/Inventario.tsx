@@ -1,43 +1,46 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import InventoryMap from '../components/map/InventoryMap';
-import { MediakitPanel } from '../components/map/MediakitPanel';
-import { StickySelectionBar } from '../components/map/StickySelectionBar';
 import { useInventory } from '../hooks/useInventory';
 import { Plaza, TipoSoporte, Disponibilidad, InventoryItem } from '../types';
-import { MapFilterPanel } from '../components/map/MapFilterPanel';
-import { SlidersHorizontal, X, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { ViewMode } from '../components/inventory/ViewModeToggle';
+import { InventoryToolbar } from '../components/inventory/InventoryToolbar';
+import { SupportCardGrid } from '../components/inventory/SupportCardGrid';
+import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { useSelection } from '../context/SelectionContext';
 import { Button } from '../components/ui/Button';
 
 type DisponibilidadFilter = Disponibilidad | 'todos';
 
+function distanceKm(from: [number, number], item: InventoryItem) {
+  const lat = 'lat' in item ? item.lat : item.waypoints[0]?.lat;
+  const lng = 'lng' in item ? item.lng : item.waypoints[0]?.lng;
+  if (lat == null || lng == null) return Number.POSITIVE_INFINITY;
+  const [fromLat, fromLng] = from;
+  const toRad = (value: number) => (value * Math.PI) / 180;
+  const dLat = toRad(lat - fromLat);
+  const dLng = toRad(lng - fromLng);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(fromLat)) * Math.cos(toRad(lat)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 export default function Inventario() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { items: allItems, fixedLocations, mobileRoutes, loading, error, refetch } = useInventory();
-
+  const { fixedLocations, mobileRoutes, loading, error, refetch } = useInventory();
   const plazaParam = searchParams.get('plaza') as Plaza | 'todos' | null;
   const tipoParam = searchParams.get('tipo') as TipoSoporte | 'todos' | null;
   const dispParam = searchParams.get('disponibilidad') as DisponibilidadFilter | null;
-
+  const vistaParam = searchParams.get('vista') as ViewMode | null;
+  const queryParam = searchParams.get('q') ?? '';
   const [selectedPlaza, setSelectedPlaza] = useState<Plaza | 'todos'>(plazaParam || 'todos');
   const [selectedTipo, setSelectedTipo] = useState<TipoSoporte | 'todos'>(tipoParam || 'todos');
   const [selectedDisponibilidad, setSelectedDisponibilidad] = useState<DisponibilidadFilter>(dispParam || 'todos');
-  const [searchText, setSearchText] = useState('');
-  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
-  const [isMediakitOpen, setIsMediakitOpen] = useState(false);
-
-  const { selectedCount, showToast, getSelectedItems } = useSelection();
-
-  const handleOpenMediakit = useCallback(() => {
-    if (selectedCount === 0) {
-      showToast('Selecciona al menos un soporte para armar tu propuesta.', undefined, 2800);
-      return;
-    }
-    setIsMediakitOpen(true);
-    setIsMobileFiltersOpen(false);
-  }, [selectedCount, showToast]);
+  const [viewMode, setViewMode] = useState<ViewMode>(vistaParam === 'catalogo' ? 'catalogo' : 'mapa');
+  const [selectedSoporteId] = useState<string | null>(searchParams.get('soporte'));
+  const [searchText, setSearchText] = useState(queryParam);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [locating, setLocating] = useState(false);
+  const { selectedCount, showToast } = useSelection();
 
   const handleResetFilters = useCallback(() => {
     setSelectedPlaza('todos');
@@ -46,160 +49,110 @@ export default function Inventario() {
     setSearchText('');
   }, []);
 
+  const handleNearMe = useCallback(() => {
+    if (!navigator.geolocation) {
+      showToast('Tu navegador no permite obtener tu ubicación.', undefined, 2800);
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setUserLocation([coords.latitude, coords.longitude]);
+        setViewMode('mapa');
+        setLocating(false);
+        showToast('Mapa centrado cerca de tu ubicación.', undefined, 2200);
+      },
+      () => {
+        setLocating(false);
+        showToast('No pudimos obtener tu ubicación. Revisá los permisos del navegador.', undefined, 3200);
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 },
+    );
+  }, [showToast]);
+
+  const handleViewModeChange = useCallback((mode: ViewMode) => setViewMode(mode), []);
+
   useEffect(() => {
     const params = new URLSearchParams();
     if (selectedPlaza !== 'todos') params.set('plaza', selectedPlaza);
     if (selectedTipo !== 'todos') params.set('tipo', selectedTipo);
     if (selectedDisponibilidad !== 'todos') params.set('disponibilidad', selectedDisponibilidad);
+    if (searchText.trim()) params.set('q', searchText.trim());
+    if (viewMode !== 'mapa') params.set('vista', viewMode);
+    if (selectedSoporteId && viewMode === 'mapa') params.set('soporte', selectedSoporteId);
     setSearchParams(params, { replace: true });
-  }, [selectedPlaza, selectedTipo, selectedDisponibilidad, setSearchParams]);
+  }, [selectedPlaza, selectedTipo, selectedDisponibilidad, searchText, viewMode, selectedSoporteId, setSearchParams]);
 
   useEffect(() => {
     if (plazaParam && plazaParam !== selectedPlaza) setSelectedPlaza(plazaParam);
     if (tipoParam && tipoParam !== selectedTipo) setSelectedTipo(tipoParam);
     if (dispParam && dispParam !== selectedDisponibilidad) setSelectedDisponibilidad(dispParam);
-  }, [plazaParam, tipoParam, dispParam]);
+    if (vistaParam && (vistaParam === 'mapa' || vistaParam === 'catalogo') && vistaParam !== viewMode) setViewMode(vistaParam);
+    if (queryParam !== searchText) setSearchText(queryParam);
+  }, [plazaParam, tipoParam, dispParam, vistaParam, queryParam]);
 
   const query = searchText.trim().toLowerCase();
-
-  const matchesSearch = (item: InventoryItem) => {
+  const matchesSearch = useCallback((item: InventoryItem) => {
     if (!query) return true;
-    const haystack = [
-      item.name,
-      item.canonical_id,
-      item.tipo_soporte,
-      item.ciudad,
-      'address' in item ? item.address : '',
-    ].join(' ').toLowerCase();
+    const haystack = [item.name, item.canonical_id, item.tipo_soporte, item.ciudad, 'address' in item ? item.address : ''].join(' ').toLowerCase();
     return haystack.includes(query);
-  };
-
-  const matchesDisponibilidad = (item: InventoryItem) => {
+  }, [query]);
+  const matchesDisponibilidad = useCallback((item: InventoryItem) => {
     if (selectedDisponibilidad === 'todos') return true;
-    const disponibilidad = item.disponibilidad ?? 'disponible';
-    return disponibilidad === selectedDisponibilidad;
-  };
-
-  const filteredLocations = fixedLocations.filter((loc) => {
+    return (item.disponibilidad ?? 'disponible') === selectedDisponibilidad;
+  }, [selectedDisponibilidad]);
+  const filteredLocations = useMemo(() => fixedLocations.filter((loc) => {
     const matchPlaza = selectedPlaza === 'todos' || loc.ciudad === selectedPlaza;
     const matchTipo = selectedTipo === 'todos' || loc.tipo_soporte === selectedTipo;
     return matchPlaza && matchTipo && matchesDisponibilidad(loc) && matchesSearch(loc);
-  });
-
-  const filteredRoutes = mobileRoutes.filter((route) => {
+  }), [fixedLocations, selectedPlaza, selectedTipo, matchesDisponibilidad, matchesSearch]);
+  const filteredRoutes = useMemo(() => mobileRoutes.filter((route) => {
     const matchPlaza = selectedPlaza === 'todos' || route.ciudad === selectedPlaza;
     const matchTipo = selectedTipo === 'todos' || route.tipo_soporte === selectedTipo;
     return matchPlaza && matchTipo && matchesDisponibilidad(route) && matchesSearch(route);
-  });
-
-  const selectedItems = getSelectedItems(allItems);
+  }), [mobileRoutes, selectedPlaza, selectedTipo, matchesDisponibilidad, matchesSearch]);
+  const allFilteredItems = useMemo(() => {
+    const items = [...filteredLocations, ...filteredRoutes];
+    if (!userLocation) return items;
+    return items.slice().sort((a, b) => distanceKm(userLocation, a) - distanceKm(userLocation, b));
+  }, [filteredLocations, filteredRoutes, userLocation]);
 
   if (loading) {
-    return (
-      <div className="flex h-[calc(100vh-80px)] items-center justify-center bg-gray-50" role="status" aria-live="polite">
-        <div className="text-center flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 animate-spin text-black" aria-hidden="true" />
-          <p className="text-sm font-semibold text-gray-600">Cargando inventario comercial...</p>
-        </div>
-      </div>
-    );
+    return <div className="flex h-[calc(100dvh-5rem)] items-center justify-center bg-gray-50" role="status" aria-live="polite"><div className="flex flex-col items-center gap-3 text-center"><Loader2 className="h-7 w-7 animate-spin text-gray-900" aria-hidden="true" /><p className="text-sm font-semibold text-gray-600">Cargando inventario comercial...</p></div></div>;
   }
 
   if (error) {
-    return (
-      <div className="flex h-[calc(100vh-80px)] items-center justify-center bg-gray-50 px-4" role="alert">
-        <div className="bg-white p-8 rounded-2xl shadow-lg border border-red-100 max-w-md w-full text-center">
-          <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="w-6 h-6" aria-hidden="true" />
-          </div>
-          <h2 className="text-lg font-bold text-gray-900 mb-2">No pudimos cargar el inventario</h2>
-          <p className="text-sm text-gray-600 mb-6">Estamos teniendo problemas para mostrar los soportes. Probá nuevamente.</p>
-          <Button onClick={refetch} className="w-full flex items-center justify-center gap-2" aria-label="Reintentar cargar el inventario">
-            <RefreshCw className="w-4 h-4" aria-hidden="true" />
-            Reintentar
-          </Button>
-        </div>
-      </div>
-    );
+    return <div className="flex h-[calc(100dvh-5rem)] items-center justify-center bg-gray-50 px-4" role="alert"><div className="w-full max-w-md border border-gray-200 bg-white p-6 text-center"><AlertCircle className="mx-auto h-5 w-5 text-red-600" aria-hidden="true" /><h2 className="mb-2 mt-3 text-lg font-bold text-gray-900">No pudimos cargar el inventario</h2><p className="mb-5 text-sm text-gray-600">Estamos teniendo problemas para mostrar los soportes. Probá nuevamente.</p><Button onClick={refetch} className="flex min-h-10 w-full items-center justify-center gap-2 rounded-lg" aria-label="Reintentar cargar el inventario"><RefreshCw className="h-4 w-4" aria-hidden="true" />Reintentar</Button></div></div>;
   }
 
-  const hasActiveFilters = selectedPlaza !== 'todos' || selectedTipo !== 'todos' || selectedDisponibilidad !== 'todos' || Boolean(searchText);
-
   return (
-    <div className="flex h-[calc(100vh-80px)] relative overflow-hidden">
-      <div className="md:hidden absolute top-4 left-4 z-[500]">
-        <button
-          type="button"
-          onClick={() => setIsMobileFiltersOpen(true)}
-          className="bg-white text-black px-4 py-2.5 rounded-full font-bold shadow-lg border border-gray-100 flex items-center gap-2 text-sm active:scale-95 transition-transform"
-          aria-label={hasActiveFilters ? 'Abrir filtros, hay filtros activos' : 'Abrir filtros'}
-        >
-          <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
-          Filtros
-          {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-emerald-500 absolute top-0 right-0 m-2" aria-hidden="true" />}
-        </button>
-      </div>
-
-      <div
-        className={cn(
-          'absolute md:relative inset-0 md:inset-auto z-[2000] md:z-10 bg-black/40 md:bg-transparent transition-opacity duration-300 md:opacity-100 md:block',
-          isMobileFiltersOpen ? 'opacity-100 block' : 'opacity-0 hidden'
-        )}
-        role={isMobileFiltersOpen ? 'dialog' : undefined}
-        aria-modal={isMobileFiltersOpen ? true : undefined}
-        aria-label={isMobileFiltersOpen ? 'Filtros de inventario' : undefined}
-      >
-        <div className="absolute md:relative inset-y-0 left-0 w-[85%] max-w-sm md:w-80 h-full bg-white flex flex-col shadow-2xl md:shadow-none border-r border-gray-200">
-          <div className="md:hidden p-4 flex justify-between items-center border-b border-gray-100">
-            <span className="font-bold text-lg">Filtros</span>
-            <button
-              type="button"
-              onClick={() => setIsMobileFiltersOpen(false)}
-              className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
-              aria-label="Cerrar filtros"
-            >
-              <X className="w-5 h-5" aria-hidden="true" />
-            </button>
-          </div>
-
-          <div className="flex-grow overflow-y-auto">
-            <MapFilterPanel
-              selectedPlaza={selectedPlaza}
-              setSelectedPlaza={setSelectedPlaza}
-              selectedTipo={selectedTipo}
-              setSelectedTipo={setSelectedTipo}
-              selectedDisponibilidad={selectedDisponibilidad}
-              setSelectedDisponibilidad={setSelectedDisponibilidad}
-              searchText={searchText}
-              setSearchText={setSearchText}
-              resultsCount={filteredLocations.length + filteredRoutes.length}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="flex-grow h-full relative z-0">
-        <InventoryMap
-          locations={filteredLocations}
-          routes={filteredRoutes}
-          onOpenMediakit={handleOpenMediakit}
-          initialSelectedId={searchParams.get('soporte')}
+    <div className="relative flex h-[calc(100dvh-5rem)] overflow-hidden">
+      <div className="relative z-10 flex h-full min-w-0 flex-grow flex-col">
+        <InventoryToolbar
           selectedPlaza={selectedPlaza}
-          onResetFilters={handleResetFilters}
+          setSelectedPlaza={setSelectedPlaza}
+          selectedTipo={selectedTipo}
+          setSelectedTipo={setSelectedTipo}
+          selectedDisponibilidad={selectedDisponibilidad}
+          setSelectedDisponibilidad={setSelectedDisponibilidad}
+          searchText={searchText}
+          setSearchText={setSearchText}
+          resultsCount={allFilteredItems.length}
+          selectedCount={selectedCount}
+          viewMode={viewMode}
+          onViewModeChange={handleViewModeChange}
+          onNearMe={handleNearMe}
+          locating={locating}
+          nearMeActive={Boolean(userLocation)}
+          onClearNearMe={() => setUserLocation(null)}
         />
-
-        <StickySelectionBar
-          onOpenMediakit={handleOpenMediakit}
-          currentPlaza={selectedPlaza}
-          inventoryItems={allItems}
-        />
-
-        {isMediakitOpen && (
-          <MediakitPanel
-            selectedItems={selectedItems}
-            onClose={() => setIsMediakitOpen(false)}
-          />
-        )}
+        <div className="relative min-h-0 flex-1">
+          {viewMode === 'mapa' ? (
+            <InventoryMap locations={filteredLocations} routes={filteredRoutes} initialSelectedId={selectedSoporteId || searchParams.get('soporte')} selectedPlaza={selectedPlaza} onResetFilters={handleResetFilters} userLocation={userLocation} />
+          ) : (
+            <SupportCardGrid items={allFilteredItems} onResetFilters={handleResetFilters} />
+          )}
+        </div>
       </div>
     </div>
   );
