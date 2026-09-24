@@ -65,13 +65,18 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
 
   if (variant === 'showcase') {
     return (
-      <article className={`${cardBase} rounded-3xl`}>
-        {media}
-        <div className="p-5 sm:p-6">
+      <article className={`${cardBase} border-slate-200`}>
+        <div className="relative">
+          {media}
+          <span className="absolute right-3 top-3 inline-flex min-h-8 items-center rounded-full bg-white/95 px-3 text-[11px] font-bold text-slate-700 shadow-sm">
+            Destacado
+          </span>
+        </div>
+        <div className="p-4 sm:p-5">
           {titleBlock}
           <div className="mt-5"><FactStrip item={item} /></div>
           {period && status === 'reservado' && <p className="mt-3 text-xs font-medium text-slate-600">{period}</p>}
-          <button type="button" onClick={openDetail} className="mt-5 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-bold text-white hover:bg-slate-800">
+          <button type="button" onClick={openDetail} className="mt-5 flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-xs font-bold text-white hover:bg-slate-800">
             Ver soporte <ArrowRight className="h-4 w-4" />
           </button>
         </div>
