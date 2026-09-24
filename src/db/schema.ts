@@ -67,6 +67,7 @@ export const supportTechnical = pgTable('support_technical', {
   supportCanonicalId: text('support_canonical_id').primaryKey(),
   summary: text('summary'),
   measures: text('measures'),
+  monthlyImpacts: numeric('monthly_impacts'),
   resolution: text('resolution'),
   turnOnSchedule: text('turn_on_schedule'),
   dailyFrequency: text('daily_frequency'),
