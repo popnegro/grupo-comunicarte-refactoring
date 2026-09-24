@@ -77,6 +77,7 @@ export const supportTechnical = pgTable('support_technical', {
   routeDurationHours: numeric('route_duration_hours'),
   operationDays: text('operation_days'),
   videoMode: text('video_mode'),
+  monthlyImpacts: integer('monthly_impacts'),
   metadata: jsonb('metadata').$type<Record<string, unknown>>(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
