@@ -95,20 +95,32 @@ export function LocationDetail({ item }: LocationDetailProps) {
             </div>
             <DetailTabs tabs={tabs} />
             {isAvailable && (
-              <button
-                type="button"
-                onClick={() => toggleSelect(item)}
-                aria-pressed={selected}
-                className={cn(
-                  "mt-5 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs font-bold transition-all shadow-2xs",
-                  selected
-                    ? "bg-gray-950 text-white border border-gray-950 hover:bg-gray-800"
-                    : "bg-white text-gray-800 border border-gray-300 hover:border-gray-950 hover:bg-gray-50"
-                )}
-              >
-                {selected ? <Check className="w-4 h-4 text-emerald-400" /> : <Plus className="w-4 h-4" />}
-                <span>{selected ? 'Soporte seleccionado' : 'Añadir al Media Kit'}</span>
-              </button>
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => toggleSelect(item)}
+                  aria-pressed={selected}
+                  className={cn(
+                    "min-h-11 flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-xs font-bold transition-all shadow-2xs",
+                    selected
+                      ? "bg-gray-950 text-white border border-gray-950 hover:bg-gray-800"
+                      : "bg-white text-gray-800 border border-gray-300 hover:border-gray-950 hover:bg-gray-50"
+                  )}
+                >
+                  {selected ? <Check className="w-4 h-4 text-emerald-400" /> : <Plus className="w-4 h-4" />}
+                  <span>{selected ? 'En Mediakit' : '+ Añadir al Mediakit'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const event = new CustomEvent('gc:map-continue');
+                    window.dispatchEvent(event);
+                  }}
+                  className="min-h-11 flex items-center justify-center gap-2 px-3 py-3 rounded-xl border border-gray-300 bg-white text-gray-800 text-xs font-bold hover:border-gray-950 hover:bg-gray-50 transition-all shadow-2xs"
+                >
+                  Seguir seleccionando
+                </button>
+              </div>
             )}
           </motion.div>
         )}
