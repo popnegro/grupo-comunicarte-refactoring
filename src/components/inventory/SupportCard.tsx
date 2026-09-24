@@ -76,9 +76,15 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
           {titleBlock}
           <div className="mt-5"><FactStrip item={item} /></div>
           {period && status === 'reservado' && <p className="mt-3 text-xs font-medium text-slate-600">{period}</p>}
-          <button type="button" onClick={openDetail} className="mt-5 flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-xs font-bold text-white hover:bg-slate-800">
-            Ver soporte <ArrowRight className="h-4 w-4" />
-          </button>
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            <button type="button" onClick={() => toggleSelect(item)} aria-pressed={selected} className="flex min-h-10 items-center justify-center gap-2 rounded-xl bg-slate-950 px-3 text-xs font-bold text-white hover:bg-slate-800">
+              {selected ? <Check className="h-4 w-4 text-emerald-300" /> : <Plus className="h-4 w-4" />}
+              {selected ? 'En tu selección' : '+Seleccionar'}
+            </button>
+            <button type="button" onClick={openDetail} className="flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-3 text-xs font-bold text-slate-800 hover:bg-slate-50">
+              Ver soporte <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </article>
     );
