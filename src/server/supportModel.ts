@@ -269,6 +269,7 @@ function mapTechnicalRow(row: SupportTechnicalRow | null | undefined): SupportTe
     route_duration_hours: row.routeDurationHours === null || row.routeDurationHours === undefined ? null : Number(row.routeDurationHours),
     operation_days: row.operationDays || undefined,
     video_mode: row.videoMode || undefined,
+    monthly_impacts: row.monthlyImpacts ?? null,
   };
 }
 
