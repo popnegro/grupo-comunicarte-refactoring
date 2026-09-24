@@ -37,6 +37,7 @@ type EditorSupport = {
   technical: {
     summary: string;
     measures: string;
+    monthly_impacts: string;
     resolution: string;
     turn_on_schedule: string;
     daily_frequency: string;
@@ -104,6 +105,7 @@ const emptySupport: EditorSupport = {
   technical: {
     summary: '',
     measures: '',
+    monthly_impacts: '',
     resolution: '',
     turn_on_schedule: '',
     daily_frequency: '',
@@ -194,6 +196,7 @@ function mapItemToEditor(item: any): EditorSupport {
     technical: {
       summary: technical.summary || '',
       measures: technical.measures || '',
+      monthly_impacts: technical.monthly_impacts === null || technical.monthly_impacts === undefined ? '' : String(technical.monthly_impacts),
       resolution: technical.resolution || '',
       turn_on_schedule: technical.turn_on_schedule || '',
       daily_frequency: technical.daily_frequency || '',
@@ -273,6 +276,7 @@ function mapCorePayload(editor: EditorSupport) {
     technical: {
       summary: editor.technical.summary,
       measures: editor.technical.measures,
+      monthly_impacts: editor.technical.monthly_impacts === '' ? null : Number(editor.technical.monthly_impacts),
       resolution: editor.technical.resolution,
       turn_on_schedule: editor.technical.turn_on_schedule,
       daily_frequency: editor.technical.daily_frequency,
@@ -1097,6 +1101,11 @@ export default function DashboardSoportes() {
                         <div className="sm:col-span-2">
                           <Label>Medidas</Label>
                           <Input value={editor.technical.measures} onChange={(e) => setEditor({ ...editor, technical: { ...editor.technical, measures: e.target.value } })} />
+                        <div>
+                          <Label>Impactos mensuales</Label>
+                          <Input type="number" min="0" value={editor.technical.monthly_impacts} onChange={(e) => setEditor({ ...editor, technical: { ...editor.technical, monthly_impacts: e.target.value } })} />
+                          <p className="mt-1 text-[11px] text-gray-500">Dato editorial/manual. No se calcula automáticamente.</p>
+                        </div>
                         </div>
                         {editor.family === 'led' && (
                           <>
