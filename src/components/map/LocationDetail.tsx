@@ -70,11 +70,15 @@ export function LocationDetail({ item, onContinueSelecting }: LocationDetailProp
           </motion.div>
         ) : (
           <motion.div key="detail" initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.2 }}>
-            {hasImages && <MediaCarousel urls={item.imageUrls!} altPrefix={item.name} />}
+            {hasImages && (
+              <div className="relative">
+                <MediaCarousel urls={item.imageUrls!} altPrefix={item.name} />
+                <div className="absolute left-3 top-3 z-20"><StatusBadge item={item} /></div>
+              </div>
+            )}
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <div className="flex items-center gap-2">
                 <TypeBadge item={item} />
-                <StatusBadge item={item} />
               </div>
               <h2 className="mt-1.5 text-[17px] font-bold leading-tight text-slate-950">{item.name}</h2>
               <div className="mt-2">
