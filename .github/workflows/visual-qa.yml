@@ -1,0 +1,70 @@
+name: Visual QA
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - p0-p1-p2-hardening
+      - canonical-refinement
+
+permissions:
+  contents: read
+
+concurrency:
+  group: visual-qa-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  visual:
+    name: Visual QA
+    runs-on: ubuntu-latest
+    env:
+      VISUAL_QA_URL: https://grupo-comunicarte-refactoring-git-p0-00c042-popnegros-projects.vercel.app
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Wait for Vercel deployment of this commit
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 36); do
+            body="$(curl -fsS "${VISUAL_QA_URL}/api/health" || true)"
+            if printf '%s' "$body" | grep -q "\"buildSha\":\"${EXPECTED_SHA}\""; then
+              echo "Vercel deployment matches ${EXPECTED_SHA}"
+              exit 0
+            fi
+            echo "Waiting for Vercel deployment of ${EXPECTED_SHA} (${attempt}/36)"
+            sleep 10
+          done
+          echo "Timed out waiting for Vercel deployment matching ${EXPECTED_SHA}" >&2
+          exit 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Install Playwright Chromium
+        run: npx --yes playwright@1.55.0 install --with-deps chromium
+
+      - name: Run visual QA
+        run: npx --yes playwright@1.55.0 test tests/visual-qa.spec.ts --config=playwright.visual.config.ts
+
+      - name: Upload visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-qa-evidence
+          path: |
+            artifacts/
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
