@@ -1,6 +1,8 @@
 name: Sync lockfile
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - canonical-refinement
 permissions:
   contents: write
 jobs:
