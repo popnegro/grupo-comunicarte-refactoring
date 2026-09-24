@@ -118,7 +118,7 @@ export default function InventoryMap({ locations, routes, initialSelectedId, sel
       </MapContainer>
 
       {selectedItem && (
-        <div className="absolute bottom-0 left-0 right-0 md:bottom-auto md:top-4 md:left-auto md:right-4 md:w-[410px] bg-white rounded-t-3xl md:rounded-2xl shadow-2xl md:shadow-xl z-[1000] border-t md:border border-gray-200/80 overflow-hidden flex flex-col max-h-[78vh] md:max-h-[85vh] transition-all">
+        <div className="absolute bottom-0 left-0 right-0 md:bottom-auto md:top-4 md:left-auto md:right-4 md:w-[410px] bg-white rounded-t-2xl md:rounded-2xl shadow-xl z-[1000] border border-slate-200 overflow-hidden flex flex-col max-h-[78vh] md:max-h-[85vh] transition-all">
           <div className="md:hidden pt-2.5 pb-1 flex justify-center shrink-0 bg-white">
             <div className="w-10 h-1 rounded-full bg-gray-300" aria-hidden="true" />
           </div>
