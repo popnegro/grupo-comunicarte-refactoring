@@ -10,7 +10,7 @@ import { FactStrip, LocationLine, StatusBadge, TypeBadge } from '../inventory/Su
 import { useSelection } from '../../context/SelectionContext';
 import { useState } from 'react';
 
-interface LocationDetailProps { item: InventoryItem; }
+interface LocationDetailProps { item: InventoryItem; onContinueSelecting?: () => void; }
 
 function getKeyAttributes(item: InventoryItem): string[] {
   const technical = item.technical;
@@ -40,7 +40,7 @@ function getKeyAttributes(item: InventoryItem): string[] {
   return attributes.filter(Boolean).slice(0, 2);
 }
 
-export function LocationDetail({ item }: LocationDetailProps) {
+export function LocationDetail({ item, onContinueSelecting }: LocationDetailProps) {
   const [view, setView] = useState<'detail' | 'contact'>('detail');
   const { isSelected, toggleSelect } = useSelection();
   const isRoute = isMobileRoute(item);
@@ -112,10 +112,7 @@ export function LocationDetail({ item }: LocationDetailProps) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    const event = new CustomEvent('gc:map-continue');
-                    window.dispatchEvent(event);
-                  }}
+                  onClick={() => onContinueSelecting?.()}
                   className="min-h-11 flex items-center justify-center gap-2 px-3 py-3 rounded-xl border border-gray-300 bg-white text-gray-800 text-xs font-bold hover:border-gray-950 hover:bg-gray-50 transition-all shadow-2xs"
                 >
                   Seguir seleccionando
