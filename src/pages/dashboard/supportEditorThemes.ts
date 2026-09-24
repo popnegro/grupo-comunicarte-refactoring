@@ -25,14 +25,15 @@ export type SupportCardAttributeKey =
   | 'spot_duration_seconds'
   | 'minimum_daily_outings'
   | 'route_duration_hours'
-  | 'summary';
+  | 'summary'
+  | 'monthly_impacts';
 
 export interface SupportEditorThemeConfig {
   id: SupportEditorTheme;
   label: string;
   family: 'traditional' | 'led' | 'led_mobile';
   sections: SupportEditorSection[];
-  recommendedCardAttributes: [SupportCardAttributeKey, SupportCardAttributeKey];
+  recommendedCardAttributes: [SupportCardAttributeKey, SupportCardAttributeKey, SupportCardAttributeKey];
   hiddenFields: string[];
 }
 
@@ -51,7 +52,7 @@ export const SUPPORT_EDITOR_THEMES: Record<SupportEditorTheme, SupportEditorThem
     label: 'Tradicionales',
     family: 'traditional',
     sections: [...COMMON_SECTIONS, 'technical'],
-    recommendedCardAttributes: ['measures', 'summary'],
+    recommendedCardAttributes: ['measures', 'summary', 'monthly_impacts'],
     hiddenFields: [
       'technical.resolution',
       'technical.daily_frequency',
@@ -72,7 +73,7 @@ export const SUPPORT_EDITOR_THEMES: Record<SupportEditorTheme, SupportEditorThem
     label: 'LED',
     family: 'led',
     sections: [...COMMON_SECTIONS, 'technical', 'operations'],
-    recommendedCardAttributes: ['resolution', 'daily_frequency'],
+    recommendedCardAttributes: ['measures', 'resolution', 'monthly_impacts'],
     hiddenFields: [
       'route.*',
     ],
@@ -83,7 +84,7 @@ export const SUPPORT_EDITOR_THEMES: Record<SupportEditorTheme, SupportEditorThem
     label: 'LED móvil',
     family: 'led_mobile',
     sections: [...COMMON_SECTIONS, 'technical', 'operations', 'route'],
-    recommendedCardAttributes: ['spot_duration_seconds', 'minimum_daily_outings'],
+    recommendedCardAttributes: ['route_duration_hours', 'spot_duration_seconds', 'monthly_impacts'],
     hiddenFields: [],
   },
 };
