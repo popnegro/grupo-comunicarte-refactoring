@@ -137,7 +137,7 @@ export default function InventoryMap({ locations, routes, initialSelectedId, sel
             </button>
           </div>
           <div className={`px-0 pt-4 overflow-y-auto ${selectedCount > 0 ? 'pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]' : 'pb-6'} md:p-6`}>
-            <LocationDetail item={selectedItem} />
+            <LocationDetail item={selectedItem} onContinueSelecting={handleCloseDetail} />
           </div>
         </div>
       )}
