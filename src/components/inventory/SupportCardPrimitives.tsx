@@ -98,7 +98,7 @@ export function SupportMedia({ slides, index, onPrevious, onNext, onSelect, alt 
 export function FactStrip({ item }: { item: InventoryItem }) {
   const facts = getCardFacts(item);
   if (!facts.length) return null;
-  return <div className="grid grid-cols-2 divide-x divide-slate-200 border-y border-slate-100 py-3">
+  return <div className="grid grid-cols-3 divide-x divide-slate-200 border-y border-slate-100 py-3">
     {facts.map((fact) => <div key={fact.label} className="min-w-0 px-3 first:pl-0 last:pr-0">
       <div className="truncate text-sm font-bold text-slate-900">{fact.value}</div>
       <div className="truncate text-[10px] font-medium text-slate-500">{fact.label}</div>
