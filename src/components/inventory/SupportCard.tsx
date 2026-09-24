@@ -131,7 +131,7 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
         <div className="mt-5 flex gap-3">
           {canSelect ? (
             <button type="button" onClick={() => toggleSelect(item)} aria-pressed={selected} className={`flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold ${selected ? 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50' : 'bg-slate-950 text-white hover:bg-slate-800'}`}>
-              {selected ? <Check className="h-4 w-4 text-emerald-600" /> : <Plus className="h-4 w-4" />}{selected ? 'Quitar selección' : 'Seleccionar'}
+              {selected ? <Check className="h-4 w-4 text-emerald-600" /> : <Plus className="h-4 w-4" />}{selected ? 'En tu selección' : '+Seleccionar'}
             </button>
           ) : status === 'reservado' ? (
             <button type="button" onClick={() => navigate(contactUrl)} className="flex min-h-10 flex-1 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 px-3 text-xs font-bold text-amber-900">
