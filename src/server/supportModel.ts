@@ -259,6 +259,7 @@ function mapTechnicalRow(row: SupportTechnicalRow | null | undefined): SupportTe
   return {
     summary: row.summary || undefined,
     measures: row.measures || undefined,
+    monthly_impacts: row.monthlyImpacts === null || row.monthlyImpacts === undefined ? null : Number(row.monthlyImpacts),
     resolution: row.resolution || undefined,
     turn_on_schedule: row.turnOnSchedule || undefined,
     daily_frequency: row.dailyFrequency || undefined,
@@ -532,6 +533,7 @@ async function syncSupportTechnical(canonicalId: string, payload: SupportWritePa
       supportCanonicalId: canonicalId,
       summary: technical.summary || null,
       measures: technical.measures || null,
+      monthlyImpacts: technical.monthly_impacts === undefined || technical.monthly_impacts === null || technical.monthly_impacts === '' ? null : String(technical.monthly_impacts),
       resolution: technical.resolution || null,
       turnOnSchedule: technical.turn_on_schedule || null,
       dailyFrequency: technical.daily_frequency || null,
@@ -549,6 +551,7 @@ async function syncSupportTechnical(canonicalId: string, payload: SupportWritePa
       set: {
         summary: technical.summary || null,
         measures: technical.measures || null,
+        monthlyImpacts: technical.monthly_impacts === undefined || technical.monthly_impacts === null || technical.monthly_impacts === '' ? null : String(technical.monthly_impacts),
         resolution: technical.resolution || null,
         turnOnSchedule: technical.turn_on_schedule || null,
         dailyFrequency: technical.daily_frequency || null,
