@@ -1,13 +1,12 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { LocationRecord, MobileRoute, InventoryItem, isMobileRoute, getDisponibilidad } from '../../types';
-import { MapPin, MonitorPlay, PanelTop, Navigation, Check, Plus } from 'lucide-react';
+import { MapPin, Check, Plus } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { MediaCarousel } from './MediaCarousel';
 import { DetailTabs } from './DetailTabs';
 import { ContactSlide } from './ContactSlide';
 import { Button } from '../ui/Button';
-import { Badge } from '../ui/Badge';
-import { StatusBadge } from '../dashboard/ui/StatusBadge';
+import { FactStrip, LocationLine, StatusBadge, TypeBadge } from '../inventory/SupportCardPrimitives';
 import { useSelection } from '../../context/SelectionContext';
 import { useState } from 'react';
 
@@ -63,7 +62,7 @@ export function LocationDetail({ item }: LocationDetailProps) {
   ];
 
   return (
-    <div className="flex flex-col px-5 pb-6 md:px-0 md:pb-0">
+    <div className="flex flex-col px-4 pb-6 md:px-0 md:pb-0">
       <AnimatePresence mode="wait">
         {view === 'contact' ? (
           <motion.div key="contact" initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 16 }} transition={{ duration: 0.2 }}>
@@ -72,33 +71,27 @@ export function LocationDetail({ item }: LocationDetailProps) {
         ) : (
           <motion.div key="detail" initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.2 }}>
             {hasImages && <MediaCarousel urls={item.imageUrls!} altPrefix={item.name} />}
-            <div className="flex items-start gap-4 mb-6">
-              <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm border", item.tipo_soporte === 'tradicional' ? "bg-gray-50 border-gray-200 text-gray-900" : item.tipo_soporte === 'led' ? "bg-red-50 border-red-100 text-red-600" : "bg-gray-900 border-gray-800 text-white")}>
-                {item.tipo_soporte === 'tradicional' && <PanelTop className="w-6 h-6" />}
-                {item.tipo_soporte === 'led' && <MonitorPlay className="w-6 h-6" />}
-                {item.tipo_soporte === 'led_movil' && <Navigation className="w-6 h-6" />}
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                <TypeBadge item={item} />
+                <StatusBadge item={item} />
               </div>
-              <div>
-                <h2 className="text-xl font-bold leading-tight mb-1">{item.name}</h2>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="neutral" className="uppercase tracking-wider text-[10px]">
-                    {item.ciudad.replace('-', ' ')}
-                  </Badge>
-                  <Badge variant={item.tipo_soporte === 'tradicional' ? 'neutral' : item.tipo_soporte === 'led' ? 'red' : 'dark'} className="uppercase tracking-wider text-[10px]">
-                    {item.tipo_soporte.replace('_', ' ')}
-                  </Badge>
-                  <StatusBadge status={disponibilidad} label={isReserved ? 'Reservado' : 'Disponible'} size="sm" />
+              <h2 className="mt-1.5 text-[17px] font-bold leading-tight text-slate-950">{item.name}</h2>
+              <div className="mt-2">
+                <LocationLine item={item} />
+              </div>
+              <div className="mt-5">
+                <FactStrip item={item} />
+              </div>
+              {keyAttributes.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-1.5" aria-label="Atributos principales">
+                  {keyAttributes.map((attribute) => (
+                    <span key={attribute} className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">{attribute}</span>
+                  ))}
                 </div>
-                {keyAttributes.length > 0 && (
-                  <div className="mt-3.5 flex flex-wrap gap-1.5" aria-label="Atributos principales">
-                    {keyAttributes.map((attribute) => (
-                      <span key={attribute} className="rounded-lg bg-gray-50 border border-gray-200 px-2.5 py-1 text-xs font-semibold text-gray-800">{attribute}</span>
-                    ))}
-                  </div>
-                )}
-                {isReserved && <div className="mt-3 p-3 bg-amber-50/70 rounded-xl border border-amber-200 text-xs text-amber-900 leading-relaxed"><p className="font-semibold text-amber-950 mb-0.5">Soporte actualmente ocupado</p><p>Puedes consultar la fecha de liberación o alternativas en la misma zona.</p></div>}
-                {isReserved && item.availableFrom && <p className="mt-2 text-xs text-gray-500 font-medium">Fecha estimada de liberación: <span className="text-gray-900 font-semibold">{item.availableFrom}</span></p>}
-              </div>
+              )}
+              {isReserved && <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-xs leading-relaxed text-amber-900"><p className="font-semibold text-amber-950">Soporte actualmente ocupado</p><p className="mt-0.5">Podés consultar la fecha de liberación o alternativas en la misma zona.</p></div>}
+              {isReserved && item.availableFrom && <p className="mt-2 text-xs font-medium text-slate-500">Fecha estimada de liberación: <span className="font-semibold text-slate-900">{item.availableFrom}</span></p>}
             </div>
             <DetailTabs tabs={tabs} />
             {isAvailable && (
