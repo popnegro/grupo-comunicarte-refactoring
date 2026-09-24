@@ -40,5 +40,8 @@ jobs:
       - name: Tests
         run: npm test
 
+      - name: Drizzle schema check
+        run: npm run db:check
+
       - name: Build
         run: npm run build
