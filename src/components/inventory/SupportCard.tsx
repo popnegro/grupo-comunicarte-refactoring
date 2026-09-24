@@ -20,6 +20,7 @@ interface SupportCardProps {
   onRemove?: (item: InventoryItem) => void;
 }
 
+// Canonical card contract: catalog/showcase use +Seleccionar + Ver soporte; map detail uses its own selection CTAs.
 const cardBase = 'overflow-hidden rounded-2xl border bg-white shadow-sm transition-shadow';
 
 export function SupportCard({ item, variant = 'catalog', selectable = false, onRemove }: SupportCardProps) {
