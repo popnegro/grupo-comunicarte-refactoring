@@ -1,16 +1,16 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { LocationRecord, MobileRoute, InventoryItem, isMobileRoute, getDisponibilidad } from '../../types';
-import { MapPin, MonitorPlay, PanelTop, Navigation, Check, Plus } from 'lucide-react';
+import { MapPin, Check, Plus } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { MediaCarousel } from './MediaCarousel';
 import { DetailTabs } from './DetailTabs';
 import { ContactSlide } from './ContactSlide';
 import { Button } from '../ui/Button';
-import { Badge } from '../ui/Badge';
+import { FactStrip, LocationLine, StatusBadge, TypeBadge } from '../inventory/SupportCardPrimitives';
 import { useSelection } from '../../context/SelectionContext';
 import { useState } from 'react';
 
-interface LocationDetailProps { item: InventoryItem; onOpenMediakit: () => void; }
+interface LocationDetailProps { item: InventoryItem; onContinueSelecting?: () => void; }
 
 function getKeyAttributes(item: InventoryItem): string[] {
   const technical = item.technical;
@@ -40,7 +40,7 @@ function getKeyAttributes(item: InventoryItem): string[] {
   return attributes.filter(Boolean).slice(0, 2);
 }
 
-export function LocationDetail({ item }: LocationDetailProps) {
+export function LocationDetail({ item, onContinueSelecting }: LocationDetailProps) {
   const [view, setView] = useState<'detail' | 'contact'>('detail');
   const { isSelected, toggleSelect } = useSelection();
   const isRoute = isMobileRoute(item);
@@ -62,7 +62,7 @@ export function LocationDetail({ item }: LocationDetailProps) {
   ];
 
   return (
-    <div className="flex flex-col px-5 pb-6 md:px-0 md:pb-0">
+    <div className="flex flex-col px-4 pb-6 md:px-0 md:pb-0">
       <AnimatePresence mode="wait">
         {view === 'contact' ? (
           <motion.div key="contact" initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 16 }} transition={{ duration: 0.2 }}>
@@ -70,33 +70,69 @@ export function LocationDetail({ item }: LocationDetailProps) {
           </motion.div>
         ) : (
           <motion.div key="detail" initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.2 }}>
-            {hasImages && <MediaCarousel urls={item.imageUrls!} altPrefix={item.name} />}
-            <div className="flex items-start gap-4 mb-6">
-              <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm border", item.tipo_soporte === 'tradicional' ? "bg-gray-50 border-gray-200 text-gray-900" : item.tipo_soporte === 'led' ? "bg-red-50 border-red-100 text-red-600" : "bg-gray-900 border-gray-800 text-white")}>
-                {item.tipo_soporte === 'tradicional' && <PanelTop className="w-6 h-6" />}
-                {item.tipo_soporte === 'led' && <MonitorPlay className="w-6 h-6" />}
-                {item.tipo_soporte === 'led_movil' && <Navigation className="w-6 h-6" />}
+            {hasImages && (
+              <div className="relative">
+                <MediaCarousel urls={item.imageUrls!} altPrefix={item.name} />
+                <div className="absolute left-3 top-3 z-20"><StatusBadge item={item} /></div>
               </div>
-              <div>
-                <h2 className="text-xl font-bold leading-tight mb-1">{item.name}</h2>
-                <div className="flex flex-wrap items-center gap-2"><Badge variant="neutral" className="uppercase tracking-wider">{item.ciudad.replace('-', ' ')}</Badge><Badge variant={item.tipo_soporte === 'tradicional' ? 'neutral' : item.tipo_soporte === 'led' ? 'red' : 'dark'} className="uppercase tracking-wider">{item.tipo_soporte.replace('_', ' ')}</Badge><Badge variant={isReserved ? 'outline' : 'green'} className="uppercase tracking-wider">{isReserved ? 'Reservado' : 'Disponible'}</Badge></div>
-                {keyAttributes.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-2" aria-label="Atributos principales">
-                    {keyAttributes.map((attribute) => (
-                      <span key={attribute} className="rounded-lg bg-gray-50 border border-gray-200 px-2.5 py-1.5 text-xs font-semibold text-gray-800">{attribute}</span>
-                    ))}
-                  </div>
-                )}
-                {isReserved && <div className="mt-3 p-3 bg-gray-50 rounded-xl border border-gray-200 text-xs text-gray-700 leading-relaxed"><p className="font-semibold text-gray-900 mb-0.5">Soporte actualmente ocupado</p><p>Puedes consultar la fecha de liberación o alternativas en la misma zona.</p></div>}
-                {isReserved && item.availableFrom && <p className="mt-2 text-xs text-gray-500 font-medium">Fecha estimada de liberación: <span className="text-gray-900 font-semibold">{item.availableFrom}</span></p>}
+            )}
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <TypeBadge item={item} />
               </div>
+              <h2 className="mt-1.5 text-[17px] font-bold leading-tight text-slate-950">{item.name}</h2>
+              <div className="mt-2">
+                <LocationLine item={item} />
+              </div>
+              <div className="mt-5">
+                <FactStrip item={item} />
+              </div>
+              {keyAttributes.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-1.5" aria-label="Atributos principales">
+                  {keyAttributes.map((attribute) => (
+                    <span key={attribute} className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">{attribute}</span>
+                  ))}
+                </div>
+              )}
+              {isReserved && <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-xs leading-relaxed text-amber-900"><p className="font-semibold text-amber-950">Soporte actualmente ocupado</p><p className="mt-0.5">Podés consultar la fecha de liberación o alternativas en la misma zona.</p></div>}
+              {isReserved && item.availableFrom && <p className="mt-2 text-xs font-medium text-slate-500">Fecha estimada de liberación: <span className="font-semibold text-slate-900">{item.availableFrom}</span></p>}
             </div>
             <DetailTabs tabs={tabs} />
-            {isAvailable && <button type="button" onClick={() => toggleSelect(item)} aria-pressed={selected} className={cn("mt-5 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors", selected ? "bg-black text-white border-black" : "bg-white text-gray-700 border-gray-200 hover:border-black")}>{selected ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}{selected ? 'Soporte seleccionado' : 'Seleccionar soporte'}</button>}
+            {isAvailable && (
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => toggleSelect(item)}
+                  aria-pressed={selected}
+                  className={cn(
+                    "min-h-11 flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-xs font-bold transition-all shadow-2xs",
+                    selected
+                      ? "bg-gray-950 text-white border border-gray-950 hover:bg-gray-800"
+                      : "bg-white text-gray-800 border border-gray-300 hover:border-gray-950 hover:bg-gray-50"
+                  )}
+                >
+                  {selected ? <Check className="w-4 h-4 text-emerald-400" /> : <Plus className="w-4 h-4" />}
+                  <span>{selected ? 'En Mediakit' : '+ Añadir al Mediakit'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onContinueSelecting?.()}
+                  className="min-h-11 flex items-center justify-center gap-2 px-3 py-3 rounded-xl border border-gray-300 bg-white text-gray-800 text-xs font-bold hover:border-gray-950 hover:bg-gray-50 transition-all shadow-2xs"
+                >
+                  Seguir seleccionando
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
-      {isReserved && view === 'detail' && <div className="mt-6 pt-6 border-t border-gray-100"><Button className="w-full" onClick={() => setView('contact')}>Consultar disponibilidad</Button></div>}
+      {isReserved && view === 'detail' && (
+        <div className="mt-6 pt-6 border-t border-gray-100">
+          <Button className="w-full h-11 text-xs font-bold rounded-xl" onClick={() => setView('contact')}>
+            Consultar disponibilidad
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

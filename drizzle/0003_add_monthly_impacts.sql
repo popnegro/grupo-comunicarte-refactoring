@@ -1,0 +1,1 @@
+ALTER TABLE support_technical ADD COLUMN IF NOT EXISTS monthly_impacts INTEGER;
