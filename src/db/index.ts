@@ -145,6 +145,7 @@ async function initializeDatabaseOnce() {
         support_canonical_id TEXT PRIMARY KEY,
         summary TEXT,
         measures TEXT,
+        monthly_impacts NUMERIC,
         resolution TEXT,
         turn_on_schedule TEXT,
         daily_frequency TEXT,
@@ -159,6 +160,8 @@ async function initializeDatabaseOnce() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+
+      ALTER TABLE support_technical ADD COLUMN IF NOT EXISTS monthly_impacts NUMERIC;
 
       CREATE TABLE IF NOT EXISTS support_pricing (
         support_canonical_id TEXT PRIMARY KEY,
