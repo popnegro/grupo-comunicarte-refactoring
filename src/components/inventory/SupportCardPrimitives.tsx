@@ -13,15 +13,28 @@ export function formatImpacts(value?: number | string | null) {
 export function getCardFacts(item: InventoryItem) {
   const technical = item.technical;
   const route = isMobileRoute(item) ? item as MobileRoute : null;
-  const facts = [
-    technical?.monthly_impacts ? { label: 'Impactos / mes', value: formatImpacts(technical.monthly_impacts), priority: 1 } : null,
-    technical?.measures ? { label: 'Medidas', value: technical.measures, priority: 2 } : null,
-    technical?.resolution ? { label: 'Resolución', value: technical.resolution, priority: 3 } : null,
-    technical?.caras ? { label: 'Caras', value: `${technical.caras}`, priority: 4 } : null,
-    route?.duration ? { label: 'Duración', value: route.duration, priority: 2 } : null,
-    technical?.spot_duration_seconds ? { label: 'Spot', value: `${technical.spot_duration_seconds}s`, priority: 3 } : null,
-  ].filter(Boolean) as { label: string; value: string | null; priority: number }[];
-  return facts.filter((fact) => fact.value).sort((a, b) => a.priority - b.priority).slice(0, 2);
+  const family = item.family || (item.tipo_soporte === 'led_movil' ? 'led_mobile' : item.tipo_soporte);
+  const candidates = family === 'led_mobile'
+    ? [
+        route?.duration ? { label: 'Duración', value: route.duration, priority: 1 } : null,
+        technical?.spot_duration_seconds ? { label: 'Spot', value: `${technical.spot_duration_seconds}s`, priority: 2 } : null,
+        technical?.monthly_impacts !== null && technical?.monthly_impacts !== undefined && technical.monthly_impacts !== ''
+          ? { label: 'Impactos / mes', value: formatImpacts(technical.monthly_impacts), priority: 3 } : null,
+      ]
+    : family === 'led'
+      ? [
+          technical?.measures ? { label: 'Medidas', value: technical.measures, priority: 1 } : null,
+          technical?.resolution ? { label: 'Resolución', value: technical.resolution, priority: 2 } : null,
+          technical?.monthly_impacts !== null && technical?.monthly_impacts !== undefined && technical.monthly_impacts !== ''
+            ? { label: 'Impactos / mes', value: formatImpacts(technical.monthly_impacts), priority: 3 } : null,
+        ]
+      : [
+          technical?.measures ? { label: 'Medidas', value: technical.measures, priority: 1 } : null,
+          technical?.caras ? { label: 'Caras', value: `${technical.caras}`, priority: 2 } : null,
+          technical?.monthly_impacts !== null && technical?.monthly_impacts !== undefined && technical.monthly_impacts !== ''
+            ? { label: 'Impactos / mes', value: formatImpacts(technical.monthly_impacts), priority: 3 } : null,
+        ];
+  return candidates.filter(Boolean).sort((a, b) => a!.priority - b!.priority).slice(0, 3) as { label: string; value: string | null; priority: number }[];
 }
 
 export function reservationPeriod(item: InventoryItem) {
