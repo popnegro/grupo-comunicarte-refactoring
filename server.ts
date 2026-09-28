@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
-import { initDatabase, pool, isDatabaseConfigured } from './src/db/index.ts';
+import { initDatabase, pool } from './src/db/index.ts';
 import { getAllSupportsFromDB, getSupportByIdFromDB } from './src/server/supportsService.ts';
 import { handleMediakitRequest, getAllMediakitRequestsFromDB } from './src/server/mediakitService.ts';
 import { saveMediaKit, getMediaKit, listMediaKits, updateMediaKitStatus } from './src/server/mediakitManagementService.ts';
@@ -63,14 +63,12 @@ export async function createApp() {
   }
 
   app.get('/api/health', async (_req, res) => {
-    if (!isDatabaseConfigured) {
-      return res.status(200).json({ status: 'ok', database: 'static-fallback' });
-    }
     try {
       await pool.query('SELECT 1');
       res.status(200).json({ status: 'ok', database: 'connected' });
     } catch (err: any) {
-      res.status(503).json({ status: 'error', database: 'disconnected', error: err.message });
+      console.error('Database health check failed:', err);
+      res.status(503).json({ status: 'error', database: 'disconnected' });
     }
   });
 
