@@ -70,7 +70,7 @@ export async function createApp() {
       await pool.query('SELECT 1');
       res.status(200).json({ status: 'ok', database: 'connected' });
     } catch (err: any) {
-      res.status(200).json({ status: 'ok', database: 'disconnected', error: err.message });
+      res.status(503).json({ status: 'error', database: 'disconnected', error: err.message });
     }
   });
 
