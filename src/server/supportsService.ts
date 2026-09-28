@@ -1,5 +1,5 @@
 import { getSupportCatalog, getSupportDetail } from './supportModel.ts';
-import { db, isDatabaseConfigured } from '../db/index.ts';
+import { db } from '../db/index.ts';
 import { supportTechnical } from '../db/schema.ts';
 import { inArray } from 'drizzle-orm';
 import { InventoryItem } from '../types.ts';
@@ -22,7 +22,7 @@ function monthlyImpactsFromMetadata(metadata: unknown): number | string | null {
 }
 
 async function enrichTechnicalMetadata(items: InventoryItem[]): Promise<InventoryItem[]> {
-  if (!isDatabaseConfigured || items.length === 0) return items;
+  if (items.length === 0) return items;
 
   const canonicalIds = items.map((item) => item.canonical_id).filter(Boolean);
   if (canonicalIds.length === 0) return items;
