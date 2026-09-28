@@ -70,6 +70,7 @@ export default function Home() {
                 <a
                   href="https://wa.me/542615830208"
                   target="_blank"
+                  aria-label="Hablar con Grupo Comunicarte por WhatsApp"
                   rel="noreferrer"
                   className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/5 px-5 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/50"
                 >
