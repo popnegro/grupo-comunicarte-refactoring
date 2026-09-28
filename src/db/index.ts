@@ -1,7 +1,6 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import * as schema from './schema.ts';
-import { eq } from 'drizzle-orm';
 
 const connectionString = process.env.DATABASE_URL?.trim();
 export const isDatabaseConfigured = Boolean(connectionString);
