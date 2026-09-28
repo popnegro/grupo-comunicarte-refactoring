@@ -192,8 +192,8 @@ export default function Home() {
           <div className="rounded-2xl border border-gray-200 bg-gray-50 px-6 py-12 text-center md:px-12 md:py-16">
             <div className="mx-auto max-w-2xl">
               <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gray-500">Empezá por una ubicación</p>
-              <h2 className="mt-3 text-3xl font-semibold leading-[1.08] tracking-tight text-gray-950 md:text-5xl">Encontrá el soporte adecuado para tu marca</h2>
-              <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-gray-600 md:text-lg md:leading-7">Explorá nuestra cobertura y descubrí dónde están los soportes que mejor encajan con tu campaña.</p>
+              <h2 className="mt-3 text-3xl font-semibold leading-[1.08] tracking-tight text-gray-950 md:text-5xl">Elegí tus soportes y armá tu solicitud</h2>
+              <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-gray-600 md:text-lg md:leading-7">La selección queda guardada mientras recorrés el inventario. Cuando estés listo, Solicitar Media Kit te lleva a Contacto para completar y enviar la solicitud.</p>
               <Link to="/inventario" className="mt-7 inline-flex items-center gap-2 rounded-lg bg-gray-950 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800">Explorar inventario <ArrowRight className="h-4 w-4" /></Link>
             </div>
           </div>
