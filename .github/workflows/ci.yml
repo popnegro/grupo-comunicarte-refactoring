@@ -5,6 +5,7 @@ on:
     branches:
       - canonical-refinement
       - pmv-production-refinement
+      - coming-soon-commercial
   pull_request:
     branches:
       - main
