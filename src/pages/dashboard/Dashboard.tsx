@@ -7,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/dashb
 import { LoadingState, EmptyState, ErrorState } from '../../components/dashboard/ui/Feedback';
 import { apiFetch } from '../../lib/api';
 
-interface Stats { total:number; available:number; reserved:number; inactive:number; mendozaTotal:number; mendozaAvailable:number; buenosAiresTotal:number; buenosAiresAvailable:number; tradicionalCount:number; ledCount:number; movilCount:number; totalRequests:number; pendingRequests:number; }
-const emptyStats: Stats = { total:0, available:0, reserved:0, inactive:0, mendozaTotal:0, mendozaAvailable:0, buenosAiresTotal:0, buenosAiresAvailable:0, tradicionalCount:0, ledCount:0, movilCount:0, totalRequests:0, pendingRequests:0 };
+interface Stats { total:number; available:number; reserved:number; inactive:number; mendozaTotal:number; mendozaAvailable:number; buenosAiresTotal:number; buenosAiresAvailable:number; tradicionalCount:number; ledCount:number; movilCount:number; totalRequests:number; pendingRequests:number; plazaCount:number; }
+const emptyStats: Stats = { total:0, available:0, reserved:0, inactive:0, mendozaTotal:0, mendozaAvailable:0, buenosAiresTotal:0, buenosAiresAvailable:0, tradicionalCount:0, ledCount:0, movilCount:0, totalRequests:0, pendingRequests:0, plazaCount:0 };
 function formatDate(value: unknown) { if (!value) return ''; const d = new Date(String(value)); return Number.isNaN(d.getTime()) ? '' : new Intl.DateTimeFormat('es-AR',{day:'2-digit',month:'short'}).format(d); }
 
 export default function Dashboard() {
@@ -54,7 +54,7 @@ export default function Dashboard() {
       <KPICard title="Soportes" value={stats.total} unit={`${stats.available} disponibles`} icon={MonitorSmartphone} footer={`${availableRate}% del inventario disponible`} />
       <KPICard title="Ocupación" value={`${occupancyRate}%`} unit={`${stats.reserved} reservados`} icon={MapPin} footer="Inventario actualmente reservado" />
       <KPICard title="Solicitudes" value={stats.totalRequests||requests.length} unit={stats.pendingRequests?`${stats.pendingRequests} pendientes`:'sin pendientes'} icon={FileText} footer="Solicitudes recibidas" />
-      <KPICard title="Plazas" value="2" unit="Mendoza · Buenos Aires" icon={MapPin} footer={`${stats.mendozaTotal+stats.buenosAiresTotal} soportes registrados`} />
+      <KPICard title="Plazas" value={stats.plazaCount} unit="Ciudades con inventario activo" icon={MapPin} footer={`${stats.mendozaTotal+stats.buenosAiresTotal} soportes registrados`} />
     </section>
 
     <div className="grid gap-5 xl:grid-cols-[1.35fr_1fr]">
