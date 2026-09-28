@@ -12,8 +12,8 @@ export default function Contacto() {
     <main className="flex flex-1 flex-col bg-[#F9F9F9]">
       <InteriorHero
         eyebrow={isMediaKit ? 'Media Kit' : 'Contacto'}
-        title="Solicitá tu propuesta personalizada"
-        description="Completá tus datos y te enviamos la cotización de los soportes seleccionados."
+        title={isMediaKit ? 'Tu selección, lista para avanzar.' : 'Hablemos de tu próxima campaña.'}
+        description={isMediaKit ? 'Este es el cierre de tu selección: completá tus datos y enviá la solicitud para que el equipo comercial prepare tu propuesta.' : 'Contanos qué necesitás comunicar y te ayudamos a encontrar la solución OOH o DOOH adecuada.'}
         actions={<Link to="/inventario" className={buttonStyles({ variant: 'outline' })}>Volver al inventario</Link>}
       />
 
@@ -21,6 +21,13 @@ export default function Contacto() {
         <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
           <ContactForm isMediaKit={isMediaKit} />
           <aside className="grid gap-3 lg:sticky lg:top-24">
+            {isMediaKit && (
+              <div className="surface-card p-5">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-gray-400">Cierre de solicitud</p>
+                <h2 className="mt-2 text-base font-semibold text-gray-950">No perdés tu selección</h2>
+                <p className="mt-2 text-sm leading-6 text-gray-500">Los soportes que elegiste se envían junto con tus datos. No necesitás volver al inventario.</p>
+              </div>
+            )}
             <a href="mailto:comercial@grupocomunicarte.com.ar" className="surface-card block p-5 transition-colors hover:border-gray-300">
               <Mail className="h-5 w-5 text-gray-700" aria-hidden="true" />
               <h2 className="text-card-title mt-3 text-base">Email comercial</h2>
