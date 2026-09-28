@@ -114,6 +114,8 @@ export async function getAdminStats() {
   const ledCount = allSupports.filter((s: any) => s.active !== false && (s.family === 'led' || s.tipo_soporte === 'led')).length;
   const movilCount = allSupports.filter((s: any) => s.active !== false && (s.family === 'led_mobile' || s.tipo_soporte === 'led_movil')).length;
 
+  const plazaCount = new Set(allSupports.filter((s: any) => s.active !== false).map((s: any) => String(s.ciudad || '').trim().toLowerCase()).filter(Boolean)).size;
+
   const totalRequests = allRequests.length;
   const pendingRequests = allRequests.filter((r: any) => r.status === 'pending' || r.status === 'nuevo').length;
 
@@ -130,6 +132,7 @@ export async function getAdminStats() {
     ledCount,
     movilCount,
     totalRequests,
+    plazaCount,
     pendingRequests,
   };
 }
