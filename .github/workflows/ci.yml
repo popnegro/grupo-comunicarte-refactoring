@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - canonical-refinement
+      - pmv-production-refinement
   pull_request:
     branches:
       - main
