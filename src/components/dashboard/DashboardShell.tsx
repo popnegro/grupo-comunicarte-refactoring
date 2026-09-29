@@ -13,7 +13,7 @@ const pageLabels: Record<string, string> = {
   '/dashboard/soportes': 'Soportes',
   '/dashboard/soportes/new': 'Nuevo soporte',
   '/dashboard/solicitudes': 'Solicitudes',
-  '/dashboard/mediakits': 'Media Kits',
+  '/dashboard/mediakits': 'Solicitudes',
   '/dashboard/mediakits/nuevo': 'Nuevo Media Kit',
 };
 
@@ -80,7 +80,12 @@ export function DashboardShell({ children }: DashboardShellProps) {
   const navClass = ({ isActive }: { isActive: boolean }) =>
     `group flex min-h-9 items-center gap-3 rounded-md px-3 py-2 text-xs font-medium transition-colors ${isActive ? 'bg-gray-100 text-gray-950' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-950'}`;
 
-  const handleLogout = () => { localStorage.removeItem('admin_token'); navigate('/login'); };
+  const handleLogout = () => {
+    localStorage.removeItem('admin_token');
+    void apiFetch('/api/admin/logout', { method: 'POST' }).finally(() => {
+      navigate('/login');
+    });
+  };
 
   const navGroups = [
     {
@@ -94,7 +99,6 @@ export function DashboardShell({ children }: DashboardShellProps) {
     {
       label: 'Comercial',
       items: [
-        { to: '/dashboard/mediakits', label: 'Media Kits', icon: FileText },
         { to: '/dashboard/mediakits/nuevo', label: 'Crear Media Kit', icon: FilePlus2 },
       ],
     },
@@ -136,7 +140,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
               <div key={group.label}>
                 {!sidebarCollapsed && <div className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-400">{group.label}</div>}
                 <div className="space-y-0.5">
-                  {group.items.map(({ to, label, icon: Icon, end, count }) => (
+                  {group.items.map(({ to, label, icon: Icon, end, count }: any) => (
                     <NavLink key={to} to={to} end={end} className={navClass} title={sidebarCollapsed ? label : undefined}>
                       {({ isActive }) => <><Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-emerald-600' : 'text-gray-400'}`} /><span className={sidebarCollapsed ? 'sr-only' : ''}>{label}</span>{count ? <span className={`${sidebarCollapsed ? 'ml-auto h-1.5 w-1.5 p-0' : 'ml-auto px-1.5 py-0.5'} shrink-0 rounded-full bg-emerald-50 text-[10px] font-semibold text-emerald-800 ${sidebarCollapsed ? 'bg-emerald-500' : ''}`}>{sidebarCollapsed ? null : count}</span> : null}{isActive && !sidebarCollapsed && <ChevronRight className="ml-auto h-3 w-3 text-gray-400" />}</>}
                     </NavLink>
