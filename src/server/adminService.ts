@@ -81,8 +81,9 @@ export function verifyAdminToken(authHeader?: string): boolean {
     const decoded = Buffer.from(parts[1], 'base64').toString('utf8');
     const [username, expiresAtStr, signature] = decoded.split(':');
     if (!username || !expiresAtStr || !signature) return false;
+    if (username !== adminUser) return false;
     const expiresAt = Number(expiresAtStr);
-    if (Date.now() > expiresAt) return false;
+    if (!Number.isFinite(expiresAt) || Date.now() > expiresAt) return false;
 
     const payload = `${username}:${expiresAt}`;
     const expectedSignature = crypto.createHmac('sha256', adminSecret).update(payload).digest('hex');
