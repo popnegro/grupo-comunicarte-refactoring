@@ -27,6 +27,30 @@ import {
   patchSupportRouteByAdmin,
 } from './src/server/adminService.ts';
 
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const LOGIN_MAX_ATTEMPTS = 10;
+const loginAttempts = new Map<string, { count: number; resetAt: number }>();
+
+function clientIp(req: { headers: Record<string, unknown>; socket?: { remoteAddress?: string } }): string {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string' && forwarded.trim()) {
+    return forwarded.split(',')[0].trim();
+  }
+  return req.socket?.remoteAddress || 'unknown';
+}
+
+function allowLoginAttempt(ip: string): boolean {
+  const now = Date.now();
+  const entry = loginAttempts.get(ip);
+  if (!entry || now > entry.resetAt) {
+    loginAttempts.set(ip, { count: 1, resetAt: now + LOGIN_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= LOGIN_MAX_ATTEMPTS) return false;
+  entry.count += 1;
+  return true;
+}
+
 export async function createApp() {
   const app = express();
 
@@ -107,6 +131,13 @@ export async function createApp() {
   });
 
   app.post('/api/admin/login', (req, res) => {
+    const ip = clientIp(req);
+    if (!allowLoginAttempt(ip)) {
+      return res.status(429).json({
+        status: 'error',
+        message: 'Demasiados intentos de acceso. Probá de nuevo en unos minutos.',
+      });
+    }
     const { username, password } = req.body || {};
     const result = authenticateAdmin(username, password);
     if (!result.success) {
