@@ -63,9 +63,11 @@ function canonicalizeEditorMedia<T extends SupportWritePayload>(data: T): T {
 }
 
 export function authenticateAdmin(username: string, password: string): { success: boolean; token?: string; message?: string } {
-  if (username === adminUser && password === adminPassword) {
+  const user = String(username ?? '').trim();
+  const pass = String(password ?? '');
+  if (user === adminUser && pass === adminPassword) {
     const expiresAt = Date.now() + 8 * 3600 * 1000;
-    const payload = `${username}:${expiresAt}`;
+    const payload = `${user}:${expiresAt}`;
     const signature = crypto.createHmac('sha256', adminSecret).update(payload).digest('hex');
     const token = Buffer.from(`${payload}:${signature}`).toString('base64');
     return { success: true, token };
@@ -104,8 +106,7 @@ export async function getAdminStats() {
   const inactive = allSupports.filter((s: any) => s.active === false).length;
 
   const mendozaSupports = allSupports.filter((s: any) => s.active !== false && (s.ciudad || '').toLowerCase() === 'mendoza');
-  const mendozaTotal = mendozaSupports.length;
-  const mendozaAvailable = mendozaSupports.filter((s: any) => s.disponibilidad === 'disponible').length;
+  const mendozaTotal = mendozaSupports.filter((s: any) => s.disponibilidad === 'disponible').length;
 
   const buenosAiresSupports = allSupports.filter((s: any) => s.active !== false && (s.ciudad || '').toLowerCase() === 'buenos-aires');
   const buenosAiresTotal = buenosAiresSupports.length;
@@ -125,8 +126,8 @@ export async function getAdminStats() {
     available,
     reserved,
     inactive,
-    mendozaTotal,
-    mendozaAvailable,
+    mendozaTotal: mendozaSupports.length,
+    mendozaAvailable: mendozaTotal,
     buenosAiresTotal,
     buenosAiresAvailable,
     tradicionalCount,
