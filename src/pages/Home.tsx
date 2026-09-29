@@ -30,7 +30,7 @@ const steps = [
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#F7F7F4] text-gray-950">
+    <div className="min-h-full bg-[#F7F7F4] text-gray-950">
       <section className="relative overflow-hidden bg-[#0B3035] text-white">
         <div className="absolute inset-0">
           <img
@@ -198,7 +198,7 @@ export default function Home() {
 
             <Link
               to="/contacto?origen=coming-soon"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-5 text-sm font-bold text-[#0B3035] transition-transform hover:-translate-y-0.5"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-5 text-sm font-bold text-[#0B3035] transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-[#0B3035]"
             >
               Hablemos de tu campaña
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -207,14 +207,6 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="border-t border-gray-200 bg-white px-4 py-7 sm:px-6 lg:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 text-xs text-gray-500 sm:flex-row sm:items-center sm:justify-between">
-          <span>Grupo Comunicarte · Publicidad OOH &amp; DOOH</span>
-          <a href="mailto:comercial@grupocomunicarte.com.ar" className="font-medium text-gray-700 hover:text-gray-950">
-            comercial@grupocomunicarte.com.ar
-          </a>
-        </div>
-      </footer>
-    </main>
+    </div>
   );
 }
