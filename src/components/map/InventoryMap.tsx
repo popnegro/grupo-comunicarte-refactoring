@@ -36,10 +36,9 @@ function MapUpdater({ locations, routes, userLocation }: { locations: LocationRe
 export default function InventoryMap({ locations, routes, initialSelectedId, selectedPlaza, onResetFilters, userLocation }: InventoryMapProps) {
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   useEffect(() => {
-    if (initialSelectedId && !selectedItem) {
-      const found = [...locations, ...routes].find(item => item.canonical_id === initialSelectedId);
-      if (found) setSelectedItem(found);
-    }
+    if (!initialSelectedId) return;
+    const found = [...locations, ...routes].find(item => item.canonical_id === initialSelectedId);
+    if (found) setSelectedItem(found);
   }, [initialSelectedId, locations, routes]);
   const { isSelected, selectedCount } = useSelection();
   const handleSelect = (item: InventoryItem) => setSelectedItem(item);
