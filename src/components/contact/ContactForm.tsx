@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useSelection } from '../../context/SelectionContext';
 import { Input, Textarea, Label } from '../ui/Input';
 import { Button } from '../ui/Button';
+import { apiFetch } from '../../lib/api';
 
 export function ContactForm({ isMediaKit = false }: { isMediaKit?: boolean }) {
   const [searchParams] = useSearchParams();
@@ -49,7 +50,7 @@ export function ContactForm({ isMediaKit = false }: { isMediaKit?: boolean }) {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/mediakit/request', {
+      const response = await apiFetch('/api/mediakit/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
