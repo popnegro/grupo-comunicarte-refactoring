@@ -28,7 +28,12 @@ export default function Login() {
       localStorage.setItem('admin_token', data.token);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Error al iniciar sesión');
+      const message = String(err?.message || '');
+      if (message === 'Failed to fetch' || message.toLowerCase().includes('network')) {
+        setError('No pudimos conectar con el servidor. Revisá la red o reintentá en unos segundos.');
+      } else {
+        setError(message || 'Error al iniciar sesión');
+      }
       usernameInputRef.current?.focus();
     } finally {
       setLoading(false);
