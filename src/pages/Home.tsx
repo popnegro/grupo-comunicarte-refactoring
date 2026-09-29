@@ -9,7 +9,7 @@ import { SupportCard } from '../components/inventory/SupportCard';
 export default function Home() {
   const navigate = useNavigate();
   const featuredCarouselRef = useRef<HTMLDivElement>(null);
-  const { items: inventoryItems } = useInventory();
+  const { items: inventoryItems, loading: inventoryLoading, error: inventoryError } = useInventory();
   const allItems: InventoryItem[] = inventoryItems;
   const featuredItems = allItems.filter(item => item.isFeatured).slice(0, 9);
 
@@ -80,6 +80,21 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {(inventoryError || inventoryLoading) && (
+        <div className="border-b border-gray-100 bg-white px-4 py-3 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            {inventoryLoading && !inventoryError && (
+              <p className="text-sm text-gray-500">Cargando inventario…</p>
+            )}
+            {inventoryError && (
+              <p role="alert" className="text-sm text-red-700">
+                No pudimos cargar el inventario en este momento. {inventoryError}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Plazas disponibles */}
       <section id="plazas" className="border-b border-gray-100 bg-white px-4 py-14 sm:px-6 md:py-18 lg:px-8">
