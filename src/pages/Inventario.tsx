@@ -36,7 +36,7 @@ export default function Inventario() {
   const [selectedTipo, setSelectedTipo] = useState<TipoSoporte | 'todos'>(tipoParam || 'todos');
   const [selectedDisponibilidad, setSelectedDisponibilidad] = useState<DisponibilidadFilter>(dispParam || 'todos');
   const [viewMode, setViewMode] = useState<ViewMode>(vistaParam === 'catalogo' ? 'catalogo' : 'mapa');
-  const [selectedSoporteId] = useState<string | null>(searchParams.get('soporte'));
+  const selectedSoporteId = searchParams.get('soporte');
   const [searchText, setSearchText] = useState(queryParam);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [locating, setLocating] = useState(false);
@@ -147,8 +147,18 @@ export default function Inventario() {
           onClearNearMe={() => setUserLocation(null)}
         />
         <div className="relative min-h-0 flex-1">
-          {viewMode === 'mapa' ? (
-            <InventoryMap locations={filteredLocations} routes={filteredRoutes} initialSelectedId={selectedSoporteId || searchParams.get('soporte')} selectedPlaza={selectedPlaza} onResetFilters={handleResetFilters} userLocation={userLocation} />
+          {allFilteredItems.length === 0 ? (
+            <div className="flex h-full flex-col items-center justify-center gap-3 bg-gray-50 px-4 text-center" role="status">
+              <p className="text-base font-semibold text-gray-950">Sin resultados con estos filtros</p>
+              <p className="max-w-sm text-sm text-gray-600">
+                Probá ampliar la búsqueda o limpiar plaza, tipo y disponibilidad para ver el inventario completo.
+              </p>
+              <Button onClick={handleResetFilters} className="mt-2 min-h-10 rounded-lg px-4">
+                Limpiar filtros
+              </Button>
+            </div>
+          ) : viewMode === 'mapa' ? (
+            <InventoryMap locations={filteredLocations} routes={filteredRoutes} initialSelectedId={selectedSoporteId} selectedPlaza={selectedPlaza} onResetFilters={handleResetFilters} userLocation={userLocation} />
           ) : (
             <SupportCardGrid items={allFilteredItems} onResetFilters={handleResetFilters} />
           )}
