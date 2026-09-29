@@ -9,26 +9,34 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   size?: ButtonSize;
 }
 
+/** Dashboard button aligned with public primary (black) language. */
+const variants: Record<ButtonVariant, string> = {
+  primary: 'bg-gray-950 text-white hover:bg-gray-800 focus-visible:ring-black/20',
+  secondary: 'border border-gray-200 bg-white text-gray-900 hover:bg-gray-50 focus-visible:ring-black/20',
+  ghost: 'text-gray-700 hover:bg-gray-100 hover:text-gray-950 focus-visible:ring-black/20',
+  danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500/30',
+};
+
+const sizes: Record<ButtonSize, string> = {
+  sm: 'h-8 px-3 text-xs rounded-lg',
+  md: 'h-10 px-4 text-sm rounded-lg',
+  lg: 'h-11 px-5 text-sm rounded-xl',
+};
+
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'primary', size = 'md', className, ...props },
+  { variant = 'primary', size = 'md', className, type = 'button', ...props },
   ref,
 ) {
   return (
     <button
       ref={ref}
+      type={type}
       className={cn(
-        'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg border text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
-        {
-          primary: 'border-black bg-black text-white hover:bg-gray-800',
-          secondary: 'border-gray-200 bg-white text-gray-900 hover:border-gray-300 hover:bg-gray-50',
-          ghost: 'border-transparent bg-transparent text-gray-700 hover:bg-gray-100 hover:text-gray-950',
-          danger: 'border-red-200 bg-white text-red-700 hover:bg-red-50',
-        }[variant],
-        {
-          sm: 'min-h-9 rounded-md px-4 text-xs',
-          md: 'min-h-10 px-5',
-          lg: 'min-h-12 rounded-lg px-6 text-sm',
-        }[size],
+        'inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold transition-colors',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+        'disabled:pointer-events-none disabled:opacity-50',
+        variants[variant],
+        sizes[size],
         className,
       )}
       {...props}

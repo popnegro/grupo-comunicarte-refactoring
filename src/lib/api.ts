@@ -20,13 +20,19 @@ export function apiUrl(path: string): string {
 
 /**
  * Same-origin aware fetch for API routes.
+ * Sends cookies (HttpOnly session) and optional Authorization bearer.
  * On 401 from protected admin endpoints, clears the session and sends the user to /login.
  */
 export async function apiFetch(
   path: string,
   init?: RequestInit
 ): Promise<Response> {
-  const response = await fetch(apiUrl(path), init);
+  const headers = new Headers(init?.headers || {});
+  const response = await fetch(apiUrl(path), {
+    ...init,
+    headers,
+    credentials: 'include',
+  });
 
   if (
     response.status === 401 &&
