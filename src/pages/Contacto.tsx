@@ -28,13 +28,6 @@ export default function Contacto() {
                 <p className="mt-2 text-sm leading-6 text-gray-500">Los soportes que elegiste se envían junto con tus datos. No necesitás volver al inventario.</p>
               </div>
             )}
-            {isMediaKit && (
-              <div className="surface-card p-5">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-gray-400">Cierre de solicitud</p>
-                <h2 className="mt-2 text-base font-semibold text-gray-950">No perdés tu selección</h2>
-                <p className="mt-2 text-sm leading-6 text-gray-500">Los soportes que elegiste se envían junto con tus datos. No necesitás volver al inventario.</p>
-              </div>
-            )}
             <a href="mailto:comercial@grupocomunicarte.com.ar" className="surface-card block p-5 transition-colors hover:border-gray-300">
               <Mail className="h-5 w-5 text-gray-700" aria-hidden="true" />
               <h2 className="text-card-title mt-3 text-base">Email comercial</h2>

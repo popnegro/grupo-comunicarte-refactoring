@@ -18,9 +18,30 @@ export function apiUrl(path: string): string {
   return `${API_URL}${path}`;
 }
 
-export function apiFetch(
+/**
+ * Same-origin aware fetch for API routes.
+ * On 401 from protected admin endpoints, clears the session and sends the user to /login.
+ */
+export async function apiFetch(
   path: string,
   init?: RequestInit
 ): Promise<Response> {
-  return fetch(apiUrl(path), init);
+  const response = await fetch(apiUrl(path), init);
+
+  if (
+    response.status === 401 &&
+    path.startsWith('/api/admin') &&
+    path !== '/api/admin/login'
+  ) {
+    try {
+      localStorage.removeItem('admin_token');
+    } catch {
+      // ignore storage errors
+    }
+    if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+      window.location.assign('/login');
+    }
+  }
+
+  return response;
 }

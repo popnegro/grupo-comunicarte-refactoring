@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { InventoryItem, getDisponibilidad } from '../types';
+import { apiFetch } from '../lib/api';
 
 function normalizeItems(rawItems: InventoryItem[]): InventoryItem[] {
   const seen = new Set<string>();
@@ -19,7 +20,7 @@ export function useInventory() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/supports');
+      const response = await apiFetch('/api/supports');
       if (!response.ok) {
         throw new Error(`Error HTTP: ${response.status}`);
       }
