@@ -59,9 +59,22 @@ export async function createApp() {
     .map((origin) => origin.trim())
     .filter(Boolean);
 
+  const isAllowedOrigin = (origin?: string): boolean => {
+    if (!origin) return true;
+    if (allowedOrigins.includes(origin)) return true;
+    try {
+      const host = new URL(origin).hostname;
+      if (host.endsWith('.vercel.app') || host === 'vercel.app') return true;
+      if (host === 'localhost' || host === '127.0.0.1') return true;
+    } catch {
+      return false;
+    }
+    return false;
+  };
+
   app.use((req, res, next) => {
-    const origin = req.headers.origin;
-    if (origin && allowedOrigins.includes(origin)) {
+    const origin = typeof req.headers.origin === 'string' ? req.headers.origin : undefined;
+    if (origin && isAllowedOrigin(origin)) {
       res.setHeader('Access-Control-Allow-Origin', origin);
       res.setHeader('Vary', 'Origin');
       res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
@@ -69,7 +82,7 @@ export async function createApp() {
     }
 
     if (req.method === 'OPTIONS') {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (isAllowedOrigin(origin)) {
         return res.sendStatus(204);
       }
       return res.sendStatus(403);
@@ -389,11 +402,6 @@ export async function createApp() {
     }
   });
 
-  // Vercel invokes this app only for /api/* requests. Do not attach the
-  // production SPA fallback in the serverless function: the function bundle
-  // intentionally contains dist/server.cjs, while dist/index.html is served by
-  // Vercel's filesystem/static routing. Keeping the fallback out of the API
-  // function prevents unknown /api/* requests from becoming ENOENT errors.
   if (process.env.VERCEL) {
     return app;
   }
