@@ -10,13 +10,13 @@ import { useSelection } from '../../context/SelectionContext';
 interface InventoryMapProps {
   locations: LocationRecord[];
   routes: MobileRoute[];
-  onOpenMediakit: () => void;
   initialSelectedId?: string | null;
   selectedPlaza?: Plaza | 'todos';
   onResetFilters?: () => void;
+  userLocation?: [number, number] | null;
 }
 
-function MapUpdater({ locations, routes }: { locations: LocationRecord[], routes: MobileRoute[] }) {
+function MapUpdater({ locations, routes, userLocation }: { locations: LocationRecord[], routes: MobileRoute[], userLocation?: [number, number] | null }) {
   const map = useMap();
   useEffect(() => {
     const validLocations = locations.filter(loc => loc.lat !== null && loc.lng !== null);
@@ -24,12 +24,16 @@ function MapUpdater({ locations, routes }: { locations: LocationRecord[], routes
     const bounds = L.latLngBounds([]);
     validLocations.forEach(loc => { if (loc.lat && loc.lng) bounds.extend([loc.lat, loc.lng]); });
     routes.forEach(route => { if (route.routePath?.length) route.routePath.forEach(point => bounds.extend(point as [number, number])); });
+    if (userLocation) {
+      map.flyTo(userLocation, 13, { duration: 0.8 });
+      return;
+    }
     if (bounds.isValid()) map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
-  }, [locations, routes, map]);
+  }, [locations, routes, userLocation, map]);
   return null;
 }
 
-export default function InventoryMap({ locations, routes, onOpenMediakit, initialSelectedId, selectedPlaza, onResetFilters }: InventoryMapProps) {
+export default function InventoryMap({ locations, routes, initialSelectedId, selectedPlaza, onResetFilters, userLocation }: InventoryMapProps) {
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   useEffect(() => {
     if (initialSelectedId && !selectedItem) {
@@ -46,9 +50,61 @@ export default function InventoryMap({ locations, routes, onOpenMediakit, initia
     <div className="relative w-full h-full bg-gray-100 z-0">
       <MapContainer center={[-34.6037, -58.3816]} zoom={5} style={{ height: '100%', width: '100%' }} zoomControl={false}>
         <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} />
-        {validLocations.map((loc) => (
-          <Marker key={loc.canonical_id} position={[loc.lat!, loc.lng!]} icon={getIcon(loc.tipo_soporte, { isActive: selectedItem?.canonical_id === loc.canonical_id, isReservado: getDisponibilidad(loc) === 'reservado', isSelected: isSelected(loc.canonical_id) })} eventHandlers={{ click: () => handleSelect(loc) }} />
-        ))}
+        {userLocation && <CircleMarker center={userLocation} radius={8} pathOptions={{ color: '#111827', weight: 3, fillColor: '#10b981', fillOpacity: 1 }}><Tooltip direction="top" offset={[0, -8]} opacity={1}>Tu ubicación</Tooltip></CircleMarker>}
+        {validLocations.map((loc) => {
+          const isItemReservado = getDisponibilidad(loc) === 'reservado';
+          const isItemSelected = isSelected(loc.canonical_id);
+          const isItemActive = selectedItem?.canonical_id === loc.canonical_id;
+
+          return (
+            <Marker
+              key={loc.canonical_id}
+              position={[loc.lat!, loc.lng!]}
+              icon={getIcon(loc.tipo_soporte, {
+                isActive: isItemActive,
+                isReservado: isItemReservado,
+                isSelected: isItemSelected,
+              })}
+              eventHandlers={{ click: () => handleSelect(loc) }}
+            >
+              <Tooltip
+                direction="top"
+                offset={[0, -36]}
+                opacity={1}
+                className="font-sans shadow-xl rounded-xl border border-gray-200/90 bg-white/95 backdrop-blur-md p-0 overflow-hidden text-xs"
+              >
+                <div className="px-3 py-2 text-left min-w-[160px] max-w-[220px]">
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-gray-500">
+                      {loc.tipo_soporte.replace('_', ' ')}
+                    </span>
+                    <span
+                      className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                        isItemReservado
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-emerald-100 text-emerald-800'
+                      }`}
+                    >
+                      {isItemReservado ? 'Reservado' : 'Disponible'}
+                    </span>
+                  </div>
+                  <p className="font-bold text-gray-950 text-xs leading-snug line-clamp-2">
+                    {loc.name}
+                  </p>
+                  <p className="text-[10px] text-gray-500 mt-0.5 capitalize">
+                    {loc.ciudad.replace('-', ' ')}
+                  </p>
+                  <div className="mt-1.5 pt-1.5 border-t border-gray-100 flex items-center justify-between text-[10px] font-semibold text-gray-700">
+                    <span className="text-emerald-700">
+                      {isItemSelected ? '✓ Seleccionado' : 'Ver detalles'}
+                    </span>
+                    <span className="text-gray-400">→</span>
+                  </div>
+                </div>
+              </Tooltip>
+            </Marker>
+          );
+        })}
         {routes.map((route) => (
           <LayerGroup key={route.canonical_id}>
             <Polyline positions={route.routePath as [number, number][]} color="#E53935" weight={4} opacity={0.8} dashArray="10, 10" eventHandlers={{ click: () => handleSelect(route) }} />
@@ -58,17 +114,30 @@ export default function InventoryMap({ locations, routes, onOpenMediakit, initia
             })}
           </LayerGroup>
         ))}
-        <MapUpdater locations={locations} routes={routes} />
+        <MapUpdater locations={locations} routes={routes} userLocation={userLocation} />
       </MapContainer>
 
       {selectedItem && (
-        <div className="absolute bottom-0 left-0 right-0 md:bottom-auto md:top-4 md:left-auto md:right-4 md:w-[400px] bg-white rounded-t-3xl md:rounded-2xl shadow-2xl md:shadow-xl z-[1000] md:border border-gray-100 overflow-hidden flex flex-col max-h-[75vh] md:max-h-[85vh] transition-transform">
-          <div className="p-4 bg-white md:bg-gray-50 flex justify-between items-center border-b border-gray-100 shrink-0">
-            <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Detalle de Soporte</span>
-            <button type="button" onClick={handleCloseDetail} className="p-1.5 bg-gray-50 md:bg-white rounded-full text-gray-500 hover:text-black hover:bg-gray-100 transition-colors shadow-sm" aria-label="Cerrar detalle"><X className="w-4 h-4" /></button>
+        <div className="absolute bottom-0 left-0 right-0 md:bottom-auto md:top-4 md:left-auto md:right-4 md:w-[410px] bg-white rounded-t-3xl md:rounded-2xl shadow-2xl md:shadow-xl z-[1000] border-t md:border border-gray-200/80 overflow-hidden flex flex-col max-h-[78vh] md:max-h-[85vh] transition-all">
+          <div className="md:hidden pt-2.5 pb-1 flex justify-center shrink-0 bg-white">
+            <div className="w-10 h-1 rounded-full bg-gray-300" aria-hidden="true" />
           </div>
-          <div className={`px-0 pt-5 overflow-y-auto ${selectedCount > 0 ? 'pb-[calc(5rem+env(safe-area-inset-bottom,0px))]' : 'pb-0'} md:p-6`}>
-            <LocationDetail item={selectedItem} onOpenMediakit={() => { setSelectedItem(null); onOpenMediakit(); }} />
+          <div className="px-4 py-3 md:p-4 bg-white md:bg-gray-50/80 flex justify-between items-center border-b border-gray-100 shrink-0">
+            <div>
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">Ficha Técnica</span>
+              <h4 className="text-xs font-bold text-gray-900 truncate max-w-[240px]">{selectedItem.name}</h4>
+            </div>
+            <button
+              type="button"
+              onClick={handleCloseDetail}
+              className="p-2 bg-gray-100 md:bg-white rounded-full text-gray-500 hover:text-black hover:bg-gray-200 transition-colors shadow-2xs min-h-[36px] min-w-[36px] flex items-center justify-center"
+              aria-label="Cerrar detalle"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className={`px-0 pt-4 overflow-y-auto ${selectedCount > 0 ? 'pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]' : 'pb-6'} md:p-6`}>
+            <LocationDetail item={selectedItem} />
           </div>
         </div>
       )}

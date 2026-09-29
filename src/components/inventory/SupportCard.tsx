@@ -1,92 +1,138 @@
 import { useState } from 'react';
-import { ArrowLeft, ArrowRight, MapPin, Play, Trash2 } from 'lucide-react';
+import { ArrowRight, Check, Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Badge } from '../ui/Badge';
-import { Button } from '../ui/Button';
-import { InventoryItem, MobileRoute, getDisponibilidad, isMobileRoute } from '../../types';
+import { InventoryItem, getDisponibilidad } from '../../types';
+import { useSelection } from '../../context/SelectionContext';
+import {
+  FactStrip,
+  LocationLine,
+  StatusBadge,
+  SupportMedia,
+  TypeBadge,
+  mediaSlides,
+  reservationPeriod,
+} from './SupportCardPrimitives';
 
 interface SupportCardProps {
   item: InventoryItem;
-  variant?: 'showcase' | 'catalog' | 'selectable';
+  variant?: 'showcase' | 'catalog' | 'selectable' | 'dashboard';
+  selectable?: boolean;
   onRemove?: (item: InventoryItem) => void;
 }
 
-function shortDate(value?: string) {
-  if (!value) return '';
-  const match = String(value).match(/^(?:\d{4}-)?(\d{2})[-\/](\d{2})/);
-  if (match) return `${match[2]}/${match[1]}`;
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return String(value);
-  return `${String(parsed.getDate()).padStart(2, '0')}/${String(parsed.getMonth() + 1).padStart(2, '0')}`;
-}
+const cardBase = 'overflow-hidden rounded-2xl border bg-white shadow-sm transition-shadow';
 
-function reservationPeriod(item: InventoryItem) {
-  const from = item.reservedFrom || item.technical?.metadata?.reserved_from;
-  const until = item.reservedUntil || item.technical?.metadata?.reserved_until;
-  if (from && until) return `desde ${shortDate(String(from))} a ${shortDate(String(until))}`;
-  const legacy = item.availableFrom?.split('|');
-  if (legacy?.length === 2 && legacy[0] && legacy[1]) return `desde ${shortDate(legacy[0])} a ${shortDate(legacy[1])}`;
-  return '';
-}
-
-function cardAttributes(item: InventoryItem): string[] {
-  const technical = item.technical;
-  if (isMobileRoute(item)) {
-    const route = item as MobileRoute;
-    return [
-      technical?.spot_duration_seconds ? `${technical.spot_duration_seconds}s por spot` : route.duration,
-      technical?.minimum_daily_outings ? `${technical.minimum_daily_outings} salidas` : '',
-      technical?.route_duration_hours ? `${technical.route_duration_hours}h de recorrido` : '',
-      route.schedule,
-    ].filter(Boolean).slice(0, 4) as string[];
-  }
-
-  if (item.tipo_soporte === 'tradicional') {
-    return [technical?.summary, technical?.measures, technical?.caras ? `${technical.caras} caras` : '', technical?.impresion]
-      .filter(Boolean).slice(0, 4) as string[];
-  }
-
-  if (item.tipo_soporte === 'led') {
-    return [technical?.summary, technical?.measures, technical?.resolution, technical?.daily_frequency]
-      .filter(Boolean).slice(0, 4) as string[];
-  }
-
-  return [technical?.measures, technical?.resolution, technical?.spot_duration_seconds ? `${technical.spot_duration_seconds}s por spot` : '', technical?.minimum_daily_outings ? `${technical.minimum_daily_outings} salidas` : '']
-    .filter(Boolean).slice(0, 4) as string[];
-}
-
-function isVideoCover(item: InventoryItem) {
-  return item.technical?.metadata?.cover_media_type === 'video';
-}
-
-function mediaSlides(item: InventoryItem) {
-  const media = (item.media || []).filter((entry) => entry.active !== false && entry.url).slice(0, 3);
-  if (media.length) return media.map((entry) => ({ url: entry.url, kind: entry.media_type }));
-  return (item.imageUrls || []).filter(Boolean).slice(0, 3).map((url, index) => ({ url, kind: index === 0 && isVideoCover(item) ? 'video' as const : 'image' as const }));
-}
-
-export function SupportCard({ item, variant = 'catalog', onRemove }: SupportCardProps) {
+export function SupportCard({ item, variant = 'catalog', selectable = false, onRemove }: SupportCardProps) {
   const navigate = useNavigate();
-  const availability = getDisponibilidad(item);
-  const reserved = availability === 'reservado';
+  const { isSelected, toggleSelect } = useSelection();
+  const status = getDisponibilidad(item);
+  const selected = isSelected(item.canonical_id);
   const slides = mediaSlides(item);
   const [slide, setSlide] = useState(0);
-  const safeIndex = slides.length ? Math.min(slide, slides.length - 1) : 0;
-  const active = slides[safeIndex];
-  const attributes = cardAttributes(item);
+  const index = slides.length ? Math.min(slide, slides.length - 1) : 0;
   const period = reservationPeriod(item);
-  const statusLabel = reserved ? `Reservado${period ? ` ${period}` : ''}` : 'Disponible';
+  const locationUrl = `/inventario?plaza=${item.ciudad}&tipo=${item.tipo_soporte}&soporte=${encodeURIComponent(item.canonical_id)}`;
+  const detailUrl = locationUrl;
+  const contactUrl = `/contacto?soporte=${encodeURIComponent(item.canonical_id)}`;
+  const alt = `Soporte publicitario ${item.name}`;
 
-  const renderMedia = () => {
-    if (!active) return <div className="flex h-full w-full items-center justify-center bg-gray-50"><MapPin className="h-8 w-8 text-gray-300" /></div>;
-    if (active.kind === 'video') return <div className="relative h-full w-full"><video src={active.url} muted playsInline preload="metadata" className="h-full w-full object-cover" /><div className="pointer-events-none absolute inset-0 flex items-center justify-center"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/55 text-white"><Play className="h-4 w-4 fill-current" /></span></div></div>;
-    return <img src={active.url} alt={item.name} className="h-full w-full object-cover" />;
-  };
+  if (status === 'inactivo' && variant !== 'dashboard') return null;
 
-  const mediaControls = slides.length > 1 && <><button type="button" aria-label="Anterior" onClick={() => setSlide((safeIndex - 1 + slides.length) % slides.length)} className="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white"><ArrowLeft className="h-4 w-4" /></button><button type="button" aria-label="Siguiente" onClick={() => setSlide((safeIndex + 1) % slides.length)} className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white"><ArrowRight className="h-4 w-4" /></button><div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">{slides.map((_, index) => <button key={index} type="button" aria-label={`Ir al recurso ${index + 1}`} onClick={() => setSlide(index)} className={`h-1.5 rounded-full transition-all ${index === safeIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/60'}`} />)}</div></>;
 
-  if (availability === 'inactivo') return null;
-  if (variant === 'selectable') return <article className="overflow-hidden rounded-2xl border border-gray-200 bg-white"><div className="relative aspect-[16/9] w-full overflow-hidden bg-gray-100">{renderMedia()}{mediaControls}</div><div className="p-6"><p className="text-xs font-semibold uppercase tracking-wider text-gray-600">{item.tipo_soporte.replace('_', ' ')}</p><h2 className="mt-2 text-xl font-semibold">{item.name}</h2><p className="mt-2 text-sm text-gray-600">{'address' in item ? item.address : item.ciudad}</p>{onRemove && <button type="button" onClick={() => onRemove(item)} className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-950"><Trash2 className="h-4 w-4" /> Quitar</button>}</div></article>;
+  const openDetail = () => navigate(detailUrl);
 
-  return <article className={`group flex flex-col overflow-hidden border border-gray-200 bg-white ${variant === 'showcase' ? 'rounded-3xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl' : 'rounded-2xl'}`}><div className="relative aspect-[16/9] w-full overflow-hidden bg-gray-100">{renderMedia()}{variant === 'showcase' && <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" />}{mediaControls}</div><div className="flex flex-grow flex-col p-6"><div className="mb-4 flex flex-wrap items-center gap-2"><Badge variant={item.tipo_soporte === 'tradicional' ? 'neutral' : item.tipo_soporte === 'led' ? 'red' : 'dark'} className="uppercase text-[10px]">{item.tipo_soporte.replace('_', ' ')}</Badge><Badge variant={reserved ? 'outline' : 'green'} className="uppercase text-[10px]">{statusLabel}</Badge></div><h3 className="mb-2 text-xl font-bold">{item.name}</h3><p className="text-sm leading-relaxed text-gray-600">{'address' in item ? item.address : item.ciudad}</p>{attributes.length > 0 && <div className="mt-4 flex flex-wrap gap-2" aria-label="Atributos principales">{attributes.map((attribute) => <span key={attribute} className="rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-xs font-semibold text-gray-800">{attribute}</span>)}</div>}<Button type="button" onClick={() => navigate(`/inventario?plaza=${item.ciudad}&tipo=${item.tipo_soporte}&soporte=${item.canonical_id}`)} variant="outline" className="mt-6 min-h-11 w-full rounded-xl">{reserved ? 'Consultar disponibilidad' : 'Ver soporte'} <ArrowRight className="h-4 w-4" /></Button></div></article>;
+  const media = (
+    <div className="relative aspect-[16/9] overflow-hidden bg-slate-100">
+      <SupportMedia
+        slides={slides}
+        index={index}
+        onPrevious={() => setSlide((index - 1 + slides.length) % slides.length)}
+        onNext={() => setSlide((index + 1) % slides.length)}
+        onSelect={setSlide}
+        alt={alt}
+      />
+      <div className="absolute left-3 top-3"><StatusBadge item={item} /></div>
+    </div>
+  );
+
+  const titleBlock = (
+    <div className="min-w-0">
+      <div className="flex items-center gap-2"><TypeBadge item={item} /></div>
+      <h3 className="mt-1.5 line-clamp-2 text-[15px] font-bold leading-tight text-slate-950">{item.name}</h3>
+      <div className="mt-2"><LocationLine item={item} /></div>
+    </div>
+  );
+
+  if (variant === 'showcase') {
+    return (
+      <article className={`${cardBase} rounded-3xl`}>
+        {media}
+        <div className="p-5 sm:p-6">
+          {titleBlock}
+          <div className="mt-5"><FactStrip item={item} /></div>
+          {period && status === 'reservado' && <p className="mt-3 text-xs font-medium text-slate-600">{period}</p>}
+          <button type="button" onClick={openDetail} className="mt-5 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-bold text-white hover:bg-slate-800">
+            Ver soporte <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
+      </article>
+    );
+  }
+
+  if (variant === 'dashboard') {
+    return (
+      <article className={`${cardBase} rounded-2xl`}>
+        {media}
+        <div className="p-4 sm:p-5">
+          {titleBlock}
+          <div className="mt-5"><FactStrip item={item} /></div>
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            <button type="button" onClick={() => navigate(`/dashboard/soportes/${encodeURIComponent(item.canonical_id)}/edit`)} className="flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-3 text-xs font-bold text-slate-700 hover:bg-slate-50">
+              <Pencil className="h-3.5 w-3.5" /> Editar
+            </button>
+            <button type="button" onClick={() => navigate(`/dashboard/soportes/${encodeURIComponent(item.canonical_id)}/preview`)} className="flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-3 text-xs font-bold text-slate-700 hover:bg-slate-50">
+              <Eye className="h-3.5 w-3.5" /> Preview
+            </button>
+          </div>
+        </div>
+      </article>
+    );
+  }
+
+  const canSelect = selectable && status === 'disponible';
+
+  return (
+    <article className={`${cardBase} ${selected ? 'border-emerald-300 ring-1 ring-emerald-200 shadow-md' : 'border-slate-200'}`}>
+
+      <div className="relative">
+        {media}
+        {variant === 'selectable' && (
+          <div className={`absolute right-3 top-3 flex min-h-8 items-center gap-1.5 rounded-full px-3 shadow-sm ${selected ? 'bg-emerald-600 text-white' : 'bg-white/95 text-slate-600'}`}>
+            {selected ? <Check className="h-3.5 w-3.5" /> : <span className="h-3.5 w-3.5 rounded border-2 border-slate-500" />}
+            <span className="text-[11px] font-bold">{selected ? 'En tu selección' : 'Seleccionar'}</span>
+          </div>
+        )}
+      </div>
+      <div className="p-4 sm:p-5">
+        {titleBlock}
+        <div className="mt-5"><FactStrip item={item} /></div>
+        {period && status === 'reservado' && <p className="mt-3 text-xs font-medium text-slate-600">{period}</p>}
+        <div className="mt-5 flex gap-3">
+          {canSelect ? (
+            <button type="button" onClick={() => toggleSelect(item)} aria-pressed={selected} className={`flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold ${selected ? 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50' : 'bg-slate-950 text-white hover:bg-slate-800'}`}>
+              {selected ? <Check className="h-4 w-4 text-emerald-600" /> : <Plus className="h-4 w-4" />}{selected ? 'Quitar selección' : 'Seleccionar'}
+            </button>
+          ) : status === 'reservado' ? (
+            <button type="button" onClick={() => navigate(contactUrl)} className="flex min-h-10 flex-1 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 px-3 text-xs font-bold text-amber-900">
+              Consultar disponibilidad
+            </button>
+          ) : null}
+          <button type="button" onClick={openDetail} className={`flex min-h-10 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold ${canSelect || status === 'reservado' ? 'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50' : 'bg-slate-950 text-white'}`}>
+            Ver soporte <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
+        {onRemove && <button type="button" onClick={() => onRemove(item)} className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900"><Trash2 className="h-4 w-4" /> Quitar</button>}
+      </div>
+    </article>
+  );
 }

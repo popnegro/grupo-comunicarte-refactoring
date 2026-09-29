@@ -1,6 +1,6 @@
 import crypto from 'crypto';
-import { mediakitRequests, supports } from '../db/schema';
-import { getAllMediakitRequestsFromDB } from './mediakitService';
+import { mediakitRequests, supports } from '../db/schema.ts';
+import { getAllMediakitRequestsFromDB } from './mediakitService.ts';
 import {
   createSupportMediaRecord,
   deleteSupportMediaRecord,
@@ -20,9 +20,9 @@ import {
   SupportWritePayload,
   validateFamily,
   validateAvailability,
-} from './supportModel';
-import { getAllSupportsFromDB, getSupportByIdFromDB } from './supportsService';
-import { db } from '../db';
+} from './supportModel.ts';
+import { getAllSupportsFromDB, getSupportByIdFromDB } from './supportsService.ts';
+import { db } from '../db/index.ts';
 import { and, count, eq } from 'drizzle-orm';
 
 const ADMIN_USER = process.env.ADMIN_USER;
@@ -40,7 +40,7 @@ const adminUser = ADMIN_USER;
 const adminPassword = ADMIN_PASSWORD;
 const adminSecret = ADMIN_SECRET;
 
-function canonicalizeEditorMedia(data: SupportWritePayload): SupportWritePayload {
+function canonicalizeEditorMedia<T extends SupportWritePayload>(data: T): T {
   if (data.media !== undefined || !Array.isArray(data.imageUrls)) return data;
 
   const urls = data.imageUrls.map((url) => String(url).trim()).filter(Boolean).slice(0, 3);
@@ -114,6 +114,8 @@ export async function getAdminStats() {
   const ledCount = allSupports.filter((s: any) => s.active !== false && (s.family === 'led' || s.tipo_soporte === 'led')).length;
   const movilCount = allSupports.filter((s: any) => s.active !== false && (s.family === 'led_mobile' || s.tipo_soporte === 'led_movil')).length;
 
+  const plazaCount = new Set(allSupports.filter((s: any) => s.active !== false).map((s: any) => String(s.ciudad || '').trim().toLowerCase()).filter(Boolean)).size;
+
   const totalRequests = allRequests.length;
   const pendingRequests = allRequests.filter((r: any) => r.status === 'pending' || r.status === 'nuevo').length;
 
@@ -130,6 +132,7 @@ export async function getAdminStats() {
     ledCount,
     movilCount,
     totalRequests,
+    plazaCount,
     pendingRequests,
   };
 }

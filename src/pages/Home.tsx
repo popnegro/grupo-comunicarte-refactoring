@@ -1,73 +1,212 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { Button, buttonStyles } from '../components/ui/Button';
-import { ArrowRight, MapPin, MonitorPlay, MoveRight } from 'lucide-react';
-import { InventoryItem } from '../types';
-import { useInventory } from '../hooks/useInventory';
-import { SupportCard } from '../components/inventory/SupportCard';
+import { ArrowRight, Check, MapPin, MessageCircle, MonitorPlay, Route, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+const formats = [
+  {
+    icon: Route,
+    eyebrow: 'OOH',
+    title: 'Vía pública',
+    description: 'Soportes tradicionales ubicados en puntos estratégicos para construir presencia y alcance.',
+  },
+  {
+    icon: MonitorPlay,
+    eyebrow: 'DOOH',
+    title: 'Pantallas LED',
+    description: 'Formatos digitales para campañas dinámicas, flexibles y de alto impacto visual.',
+  },
+  {
+    icon: Sparkles,
+    eyebrow: 'Móvil',
+    title: 'LED Móvil',
+    description: 'Circuitos móviles pensados para llevar tu campaña a donde está la audiencia.',
+  },
+];
+
+const steps = [
+  ['01', 'Definimos el objetivo', 'Entendemos qué querés comunicar, a quién y dónde necesitás ganar visibilidad.'],
+  ['02', 'Elegimos los espacios', 'Exploramos formatos y ubicaciones para construir una propuesta alineada a tu campaña.'],
+  ['03', 'Recibís tu Media Kit', 'Consolidamos la selección para que puedas evaluar y avanzar con tu equipo.'],
+];
 
 export default function Home() {
-  const navigate = useNavigate();
-  const { items: inventoryItems, loading: inventoryLoading } = useInventory();
-  const allItems: InventoryItem[] = inventoryItems;
-  const featuredItems = allItems.filter(item => item.isFeatured).slice(0, 9);
-
   return (
-    <div className="flex flex-col w-full bg-white">
-      <section className="relative min-h-[680px] md:min-h-[760px] w-full flex items-center overflow-hidden bg-gray-950">
-        <div className="absolute inset-0 z-0">
-          <img src="/images/home.webp" alt="Publicidad exterior en vía pública" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/20" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+    <div className="min-h-full bg-[#F7F7F4] text-gray-950">
+      <section className="relative overflow-hidden bg-[#0B3035] text-white">
+        <div className="absolute inset-0">
+          <img
+            src="/images/home.webp"
+            alt=""
+            className="h-full w-full object-cover opacity-30"
+            aria-hidden="true"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0B3035] via-[#0B3035]/95 to-[#0B3035]/65" />
         </div>
-        <div className="relative z-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full py-28">
-          <div className="max-w-4xl">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 mb-7 rounded-full bg-white/10 border border-white/20 backdrop-blur-md text-white">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-              <span className="text-[11px] font-bold tracking-[0.18em] uppercase">Espacios Publicitarios Premium</span>
+
+        <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-20 sm:px-6 sm:pb-20 lg:px-8 lg:pb-24 lg:pt-24">
+          <div className="grid items-center gap-12 lg:grid-cols-[1.02fr_0.98fr] lg:gap-16">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/90 backdrop-blur-sm">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#4BE0B2]" />
+                Nueva plataforma · Próximamente
+              </div>
+
+              <h1 className="mt-7 max-w-2xl text-[clamp(2.65rem,6vw,5.35rem)] font-semibold leading-[0.94] tracking-[-0.045em]">
+                Hacé que tu marca sea parte del paisaje.
+              </h1>
+
+              <p className="mt-6 max-w-xl text-base leading-7 text-white/75 sm:text-lg sm:leading-8">
+                Inventario OOH y DOOH para campañas que necesitan visibilidad real.
+                Explorá ubicaciones, elegí soportes y convertí tu selección en una propuesta comercial.
+              </p>
+
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  to="/contacto?origen=coming-soon"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-5 text-sm font-bold text-[#0B3035] transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-[#0B3035]"
+                >
+                  Quiero una propuesta
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+                <a
+                  href="https://wa.me/542615830208"
+                  target="_blank"
+                  aria-label="Hablar con Grupo Comunicarte por WhatsApp"
+                  rel="noreferrer"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/5 px-5 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/50"
+                >
+                  <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                  Hablar por WhatsApp
+                </a>
+              </div>
+
+              <div className="mt-9 flex flex-wrap gap-x-6 gap-y-2 text-xs font-medium text-white/60">
+                <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#4BE0B2]" /> Mendoza</span>
+                <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#4BE0B2]" /> Buenos Aires</span>
+                <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#4BE0B2]" /> OOH + DOOH</span>
+              </div>
             </div>
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5.25rem] font-bold tracking-[-0.04em] text-white max-w-4xl leading-[0.98] mb-8">Tu marca, en los lugares <span className="text-white/65">que todos ven.</span></h1>
-            <p className="text-lg md:text-xl text-white/80 max-w-2xl mb-10 leading-relaxed">Espacios publicitarios estratégicos en Mendoza y Buenos Aires para generar presencia, alcance y recordación.</p>
-            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-              <Link to="/contacto" className={buttonStyles({ size: 'lg', className: 'text-base rounded-full px-7 bg-white text-gray-950 hover:bg-gray-100' })}>Hablar con el equipo <ArrowRight className="w-5 h-5" /></Link>
-              <Link to="/inventario" className={buttonStyles({ variant: 'outline', size: 'lg', className: 'text-base rounded-full px-7 border-white/30 text-white hover:bg-white/10 hover:text-white bg-transparent' })}>Explorar inventario</Link>
+
+            <div className="relative mx-auto w-full max-w-xl lg:ml-auto">
+              <div className="relative overflow-hidden rounded-[1.5rem] border border-white/15 bg-white/10 p-2 shadow-2xl backdrop-blur-sm">
+                <img
+                  src="/images/home.webp"
+                  alt="Espacio publicitario en vía pública"
+                  className="aspect-[4/5] w-full rounded-[1.15rem] object-cover"
+                />
+                <div className="absolute inset-x-5 bottom-5 rounded-2xl border border-white/20 bg-[#0B3035]/90 p-4 backdrop-blur-md sm:inset-x-7 sm:bottom-7 sm:p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/50">Propuesta comercial</p>
+                      <p className="mt-1 text-sm font-semibold text-white">Del objetivo al soporte indicado.</p>
+                    </div>
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#4BE0B2] text-[#0B3035]">
+                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="absolute -bottom-5 -left-3 hidden rounded-xl border border-white/20 bg-white px-4 py-3 text-[#0B3035] shadow-xl sm:block lg:-left-8">
+                <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-gray-400">Cobertura</p>
+                <p className="mt-0.5 text-sm font-bold">Mendoza · Buenos Aires</p>
+              </div>
             </div>
           </div>
-          <div className="mt-16 flex flex-wrap gap-x-8 gap-y-4 text-xs font-semibold uppercase tracking-[0.16em] text-white/60"><span>Mendoza</span><span className="text-white/25">•</span><span>Buenos Aires</span><span className="text-white/25">•</span><span>OOH + DOOH</span></div>
         </div>
       </section>
 
-      <section id="plazas" className="bg-[#F9F9F9] py-24 px-4 sm:px-6 lg:px-8 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14"><div><p className="text-eyebrow mb-3">Presencia estratégica</p><h2 className="text-section-title text-3xl md:text-4xl">Elegí dónde querés estar</h2></div><p className="text-gray-500 text-base md:max-w-md md:text-right leading-relaxed">Cobertura en puntos de alto tránsito para construir presencia donde importa.</p></div>
-          <div className="grid md:grid-cols-2 gap-5">{[{ city: 'Mendoza', count: 'Soportes disponibles', detail: 'Tradicionales, LED y circuitos móviles.', query: 'mendoza' }, { city: 'Buenos Aires', count: 'Soportes disponibles', detail: 'Ubicaciones de alto tránsito vehicular y peatonal.', query: 'buenos-aires' }].map((plaza) => (
-            <button key={plaza.city} onClick={() => navigate(`/inventario?plaza=${plaza.query}`)} className="group relative text-left bg-white p-8 md:p-10 rounded-3xl border border-gray-200 hover:border-gray-400 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-              <div className="flex items-start justify-between gap-6"><div className="w-12 h-12 bg-gray-950 text-white rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-red-600 transition-colors"><MapPin className="w-5 h-5" /></div><MoveRight className="w-5 h-5 text-gray-300 group-hover:text-gray-950 group-hover:translate-x-1 transition-all" /></div>
-              <div className="mt-14"><p className="text-xs font-bold uppercase tracking-[0.16em] text-red-600 mb-2">{plaza.count}</p><h3 className="text-3xl font-bold tracking-tight mb-3">{plaza.city}</h3><p className="text-gray-500 leading-relaxed">{plaza.detail}</p></div>
-            </button>
-          ))}</div>
+      <section className="border-b border-gray-200 bg-white">
+        <div className="mx-auto grid max-w-7xl gap-px bg-gray-200 sm:grid-cols-3">
+          {[
+            ['Inventario', 'OOH y DOOH en un solo lugar.'],
+            ['Selección', 'Elegí ubicaciones según tu objetivo.'],
+            ['Media Kit', 'Llevá tu selección a una propuesta.'],
+          ].map(([title, description]) => (
+            <div key={title} className="bg-white px-5 py-6 sm:px-7">
+              <p className="text-sm font-bold text-gray-950">{title}</p>
+              <p className="mt-1 text-sm leading-6 text-gray-500">{description}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {(inventoryLoading || featuredItems.length > 0) && <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="mb-12 flex flex-col md:flex-row md:justify-between md:items-end gap-5"><div><p className="text-eyebrow mb-3">Selección premium</p><h2 className="text-section-title text-3xl md:text-4xl mb-3">Soportes destacados</h2><p className="text-gray-500 text-base">Ubicaciones con alto potencial de impacto visual.</p></div><Link to="/inventario" className="hidden md:flex items-center text-sm font-bold uppercase tracking-wider gap-2 hover:gap-3 transition-all">Ver inventario completo <MoveRight className="w-4 h-4" /></Link></div>
-        {inventoryLoading ? <div className="py-16 text-center text-gray-600">Cargando soportes destacados…</div> : <div className="flex overflow-x-auto pb-8 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 snap-x snap-mandatory scrollbar-hide gap-5">{featuredItems.map(item => <div key={item.canonical_id} className="w-[84vw] sm:w-[44vw] md:w-[31vw] lg:w-[30%] flex-shrink-0 snap-start"><SupportCard item={item} variant="showcase" /></div>)}</div>}
-        <Link to="/inventario" className="mt-6 md:hidden flex justify-center items-center text-sm font-bold uppercase tracking-wider gap-2">Ver inventario completo <MoveRight className="w-4 h-4" /></Link>
-      </section>}
-
-      <section className="relative overflow-hidden bg-gray-950 px-4 py-24 text-white sm:px-6 lg:px-8">
-        <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-emerald-400/10 blur-3xl" aria-hidden="true" />
-        <div className="relative mx-auto grid max-w-7xl items-center gap-10 rounded-[2rem] border border-white/10 bg-white/[0.04] p-7 md:grid-cols-[1fr_0.8fr] md:p-12">
-          <div className="max-w-xl">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5"><MonitorPlay className="h-4 w-4" /><span className="text-[11px] font-bold tracking-[0.16em] uppercase">Innovación dinámica</span></div>
-            <h2 className="mb-6 text-3xl font-bold leading-[1.05] tracking-tight md:text-5xl">Tu mensaje también puede moverse.</h2>
-            <div className="mb-9 space-y-3 text-sm text-gray-300 md:text-base"><p className="font-semibold text-white">LED Móvil Mendoza</p><p>Lunes a Viernes · 09:00–20:00</p><p>Duración del recorrido: 4 horas</p></div>
-            <Button onClick={() => navigate('/inventario?tipo=led_movil')} variant="secondary" className="rounded-full bg-white px-6 text-black hover:bg-gray-100">Ver recorrido <ArrowRight className="h-4 w-4" /></Button>
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-20 lg:px-8">
+        <div className="grid gap-10 lg:grid-cols-[0.75fr_1.25fr] lg:gap-20">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gray-400">Qué hacemos</p>
+            <h2 className="mt-3 max-w-md text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
+              Presencia que empieza antes de contratar.
+            </h2>
+            <p className="mt-4 max-w-md text-base leading-7 text-gray-600">
+              La nueva experiencia de Grupo Comunicarte está pensada para que pasar de una necesidad de comunicación a una selección concreta sea simple.
+            </p>
           </div>
-          <div className="w-full overflow-hidden rounded-[2rem] border border-white/10 bg-black/20 shadow-2xl aspect-[4/3] md:aspect-[5/4]"><img src="/images/led-movil-feature.webp" alt="Camión LED Móvil de Grupo Comunicarte" className="h-full w-full object-cover transition-transform duration-700 hover:scale-[1.02]" /></div>
+
+          <div className="grid gap-3">
+            {formats.map(({ icon: Icon, eyebrow, title, description }) => (
+              <article key={title} className="group rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-lg sm:p-6">
+                <div className="flex gap-5">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E9F5F1] text-[#0B5C5C]">
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400">{eyebrow}</p>
+                    <h3 className="mt-1 text-lg font-semibold text-gray-950">{title}</h3>
+                    <p className="mt-1.5 max-w-xl text-sm leading-6 text-gray-600">{description}</p>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
-      <section className="border-t border-gray-200 bg-white px-4 py-24 text-center sm:px-6 lg:px-8"><div className="mx-auto max-w-3xl"><p className="text-eyebrow mb-4">Soportes</p><h2 className="mb-5 text-3xl font-bold tracking-tight md:text-5xl">Encontrá el soporte adecuado para tu marca</h2><p className="mx-auto mb-9 max-w-2xl leading-relaxed text-gray-500">Explorá nuestra cobertura y descubrí dónde tu próxima campaña puede generar mayor impacto.</p><Link to="/soportes" className={buttonStyles({ size: 'lg', className: 'inline-flex rounded-full px-7' })}>Explorar soportes <ArrowRight className="h-5 w-5" /></Link></div></section>
+      <section className="border-y border-gray-200 bg-[#F0F3F1]">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-20 lg:px-8">
+          <div className="max-w-2xl">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gray-400">Una experiencia comercial más simple</p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">Tres pasos. Una decisión más clara.</h2>
+          </div>
+
+          <div className="mt-10 grid gap-0 border-y border-gray-300 md:grid-cols-3">
+            {steps.map(([number, title, description]) => (
+              <article key={number} className="border-b border-gray-300 py-7 last:border-b-0 md:border-b-0 md:border-r md:px-7 md:first:pl-0 md:last:border-r-0 md:last:pr-0">
+                <span className="text-xs font-bold tracking-[0.14em] text-[#0B5C5C]">{number}</span>
+                <h3 className="mt-3 text-lg font-semibold text-gray-950">{title}</h3>
+                <p className="mt-2 text-sm leading-6 text-gray-600">{description}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-4 py-16 sm:px-6 md:py-20 lg:px-8">
+        <div className="mx-auto max-w-5xl overflow-hidden rounded-[1.5rem] bg-[#0B3035] px-6 py-12 text-white shadow-xl sm:px-10 md:px-14 md:py-14">
+          <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
+            <div>
+              <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#8EDCC7]">
+                <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+                Mendoza · Buenos Aires
+              </div>
+              <h2 className="mt-3 max-w-2xl text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
+                La plataforma está llegando. Tu próxima campaña puede empezar hoy.
+              </h2>
+              <p className="mt-4 max-w-xl text-sm leading-6 text-white/65">
+                Dejanos tu necesidad comercial y nuestro equipo puede ayudarte a definir el próximo paso.
+              </p>
+            </div>
+
+            <Link
+              to="/contacto?origen=coming-soon"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-5 text-sm font-bold text-[#0B3035] transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-[#0B3035]"
+            >
+              Hablemos de tu campaña
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }

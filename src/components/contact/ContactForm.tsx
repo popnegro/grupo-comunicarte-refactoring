@@ -1,12 +1,14 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { CheckCircle2, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useSelection } from '../../context/SelectionContext';
 import { Input, Textarea, Label } from '../ui/Input';
 import { Button } from '../ui/Button';
-import { recordNewLead } from '../../lib/dashboard-store';
 
 export function ContactForm({ isMediaKit = false }: { isMediaKit?: boolean }) {
-  const { selectedIds, selectedCount, clearSelection } = useSelection();
+  const [searchParams] = useSearchParams();
+  const { selectedIds, selectedCount, restoreSelection, clearSelection } = useSelection();
   const [name, setName] = useState('');
   const [company, setCompany] = useState('');
   const [email, setEmail] = useState('');
@@ -16,6 +18,14 @@ export function ContactForm({ isMediaKit = false }: { isMediaKit?: boolean }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [requestId, setRequestId] = useState('');
+
+  useEffect(() => {
+    if (!isMediaKit || selectedCount > 0) return;
+    const rawIds = searchParams.get('soportes');
+    if (!rawIds) return;
+    const ids = rawIds.split(',').map(id => decodeURIComponent(id).trim()).filter(Boolean);
+    if (ids.length) restoreSelection(ids);
+  }, [isMediaKit, selectedCount, searchParams, restoreSelection]);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -59,17 +69,6 @@ export function ContactForm({ isMediaKit = false }: { isMediaKit?: boolean }) {
       }
 
       const newRequestId = data?.requestId || `REQ-${new Date().getFullYear()}-${Date.now().toString().slice(-8)}`;
-      recordNewLead({
-        requestId: newRequestId,
-        clientName: normalizedName,
-        company: company.trim(),
-        email: normalizedEmail,
-        phone: phone.trim(),
-        message: message.trim(),
-        supportIds: selectedSupportIds,
-        supportNames: [],
-        plazas: [],
-      });
       setRequestId(newRequestId);
       setSuccess(isMediaKit ? 'Solicitud de Media Kit recibida.' : 'Recibimos tu consulta.');
       if (isMediaKit) clearSelection();
@@ -84,10 +83,11 @@ export function ContactForm({ isMediaKit = false }: { isMediaKit?: boolean }) {
     return (
       <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-6 md:p-8">
         <CheckCircle2 className="h-7 w-7 text-emerald-600" aria-hidden="true" />
-        <h2 className="mt-4 text-xl font-semibold text-gray-950">Listo</h2>
+        <h2 className="mt-4 text-xl font-semibold text-gray-950">Solicitud enviada</h2>
         <p className="mt-2 text-sm text-gray-600">{success}</p>
         {isMediaKit && requestId && <p className="mt-3 text-sm font-semibold text-gray-800">Solicitud {requestId}</p>}
-        {isMediaKit && <p className="mt-1 text-xs text-gray-500">Nuestro equipo comercial preparará el Media Kit y te lo enviará.</p>}
+        {isMediaKit && <p className="mt-1 text-xs text-gray-500">El equipo comercial recibió tu selección y preparará el Media Kit.</p>}
+        <Link to="/inventario" className="mt-5 inline-flex items-center rounded-xl bg-gray-950 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800">Volver al inventario</Link>
       </div>
     );
   }
@@ -109,11 +109,11 @@ export function ContactForm({ isMediaKit = false }: { isMediaKit?: boolean }) {
         <div><Label htmlFor="contact-phone">Teléfono</Label><Input id="contact-phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+54 9 ..." /></div>
       </div>
 
-      <div><Label htmlFor="contact-message">Mensaje</Label><Textarea id="contact-message" rows={5} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Contanos brevemente qué necesitás." /></div>
+      <div><Label htmlFor="contact-message">Mensaje</Label><Textarea id="contact-message" rows={5} value={message} onChange={(e) => setMessage(e.target.value)} placeholder={isMediaKit ? "Opcional: fechas, campaña, objetivos o comentarios." : "Contanos brevemente qué necesitás."} /></div>
 
       <Button type="submit" disabled={loading} className="w-full sm:w-auto min-w-48">
         {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-        {loading ? 'Enviando…' : isMediaKit ? 'Solicitar Media Kit' : 'Enviar consulta'}
+        {loading ? 'Enviando…' : isMediaKit ? 'Enviar solicitud de Media Kit' : 'Enviar consulta'}
       </Button>
     </form>
   );
