@@ -1,0 +1,3 @@
+* { caret-color: transparent !important; }
+video { visibility: hidden !important; }
+[aria-busy="true"] { visibility: hidden !important; }
