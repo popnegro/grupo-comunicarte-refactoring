@@ -9,7 +9,8 @@
     "start": "node dist/server.cjs",
     "preview": "vite preview",
     "clean": "rm -rf dist node_modules/.vite",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test:visual": "playwright test"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
@@ -44,6 +45,7 @@
     "autoprefixer": "^10.4.21",
     "tailwindcss": "^4.1.14",
     "tsx": "4.20.6",
-    "typescript": "~5.8.2"
+    "typescript": "~5.8.2",
+    "@playwright/test": "^1.63.0"
   }
 }
