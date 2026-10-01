@@ -3,6 +3,8 @@ name: Process Inventory PDFs
 on:
   workflow_dispatch:
   push:
+    branches:
+      - canonical-refinement
     paths:
       - "docs/inventario/source/*.pdf"
 
@@ -11,6 +13,7 @@ permissions:
 
 jobs:
   process-inventory:
+    if: github.ref == 'refs/heads/canonical-refinement'
     runs-on: ubuntu-latest
 
     steps:

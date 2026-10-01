@@ -1,41 +1,466 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Download, Eye, FileText, Loader2, RefreshCw, Send, X } from 'lucide-react';
+import {
+  Download,
+  FileText,
+  Loader2,
+  RefreshCw,
+  X,
+  Search,
+  FilterX,
+  Inbox,
+  Save,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
+import { StatusBadge } from '../../components/dashboard/ui/StatusBadge';
+import { Input } from '../../components/ui/Input';
 import { apiFetch } from '../../lib/api';
 import { calculateSupportTotal, formatSupportCurrency } from '../../lib/supportPricing';
-import { downloadMediaKitPdf, downloadMediaKitPpt, sendMediaKitToLead, ExportLead, ExportSupport } from '../../lib/adminMediaKitExport';
+import {
+  downloadMediaKitPdf,
+  downloadMediaKitPpt,
+  ExportSupport,
+} from '../../lib/adminMediaKitExport';
 
 type WorkflowStatus = 'request' | 'in_progress' | 'done';
-type Pricing = { exhibition_price?: number | string | null; installation_price?: number | string | null; printing_price?: number | string | null; currency?: string | null };
-type LeadRequest = { id:string; requestId:string; clientName:string; email:string; company:string; phone:string; message:string; status:WorkflowStatus; supportIds:string[]; supportNames:string[]; createdAt:string };
-type SupportForKit = ExportSupport & { pricing?: Pricing | null };
-const labels:Record<WorkflowStatus,string>={request:'REQUEST',in_progress:'IN PROGRESS',done:'DONE'};
-function toWorkflowStatus(status:string):WorkflowStatus { if(status==='contactado'||status==='in_progress') return 'in_progress'; if(status==='enviado'||status==='quoted'||status==='done'||status==='cerrado') return 'done'; return 'request'; }
 
-export default function DashboardMediaKitWorkflow(){
-  const navigate=useNavigate();
-  const [leads,setLeads]=useState<LeadRequest[]>([]); const [filter,setFilter]=useState<'all'|WorkflowStatus>('all'); const [selected,setSelected]=useState<LeadRequest|null>(null); const [supports,setSupports]=useState<SupportForKit[]>([]); const [approvedPrices,setApprovedPrices]=useState<Record<string,string>>({}); const [loading,setLoading]=useState(false); const [busy,setBusy]=useState(false); const [toast,setToast]=useState('');
-  const notify=(m:string)=>{setToast(m);window.setTimeout(()=>setToast(''),2500)};
-  const load=async()=>{const token=localStorage.getItem('admin_token');if(!token){navigate('/login');return;}const r=await apiFetch('/api/admin/requests',{headers:{Authorization:`Bearer ${token}`}});if(r.status===401){localStorage.removeItem('admin_token');navigate('/login');return;}const j=await r.json();if(j.status!=='success')throw new Error(j.message||'No pudimos cargar las solicitudes.');setLeads((j.data||[]).map((x:any)=>({id:String(x.id),requestId:x.requestId,clientName:x.requesterName,email:x.requesterEmail,company:x.requesterCompany||'Particular / Directo',phone:x.requesterPhone||'',message:x.message||'',status:toWorkflowStatus(x.status),supportIds:x.supportIds||[],supportNames:x.supportNames||x.supportIds||[],createdAt:x.createdAt||new Date().toISOString()})));};
-  useEffect(()=>{load().catch(e=>notify(e instanceof Error?e.message:'Error al cargar solicitudes.'));},[navigate]);
-  const counts=useMemo(()=>({all:leads.length,request:leads.filter(x=>x.status==='request').length,in_progress:leads.filter(x=>x.status==='in_progress').length,done:leads.filter(x=>x.status==='done').length}),[leads]);
-  const visible=filter==='all'?leads:leads.filter(x=>x.status===filter);
-  const changeStatus=async(lead:LeadRequest,next:WorkflowStatus)=>{setBusy(true);try{const token=localStorage.getItem('admin_token');const persisted=next==='request'?'pending':next==='in_progress'?'contactado':'enviado';const r=await fetch(`/api/admin/requests/${encodeURIComponent(lead.requestId)}`,{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({status:persisted})});const j=await r.json().catch(()=>null);if(!r.ok||j?.status!=='success')throw new Error(j?.message||'No pudimos actualizar el estado.');await load();setSelected(x=>x?{...x,status:next}:null);notify(`Solicitud ${labels[next]}`);}catch(e){notify(e instanceof Error?e.message:'Error al actualizar.');}finally{setBusy(false);}};
-  const open=async(lead:LeadRequest)=>{setSelected(lead);setSupports([]);setApprovedPrices({});setLoading(true);try{const r=await fetch('/api/supports');const j=await r.json();if(!r.ok||j.status!=='success')throw new Error('No pudimos cargar los datos del inventario.');const ids=new Set(lead.supportIds);setSupports((j.data||[]).filter((x:any)=>ids.has(x.canonical_id)).map((x:any)=>({canonical_id:x.canonical_id,name:x.name,ciudad:x.ciudad,tipo_soporte:x.tipo_soporte,address:x.address,description:x.description,characteristics:x.characteristics,pricing:x.pricing||null})));}catch(e){notify(e instanceof Error?e.message:'Error al cargar soportes.');}finally{setLoading(false);}};
-  const lead=selected?{name:selected.clientName,email:selected.email,company:selected.company,phone:selected.phone}:null;
-  const approvalsReady=supports.length>0 && supports.every(s=>{const v=Number(approvedPrices[s.canonical_id]||0);return Number.isFinite(v)&&v>0;});
-  const exportSupports:ExportSupport[]=supports.map(s=>({...s,approvedPriceWithTax:Number(approvedPrices[s.canonical_id]||0)} as ExportSupport));
-  return <DashboardShell><div className="max-w-7xl space-y-6">{toast&&<div role="status" className="fixed right-6 top-20 z-50 rounded-xl bg-gray-900 px-4 py-2.5 text-xs font-bold text-white shadow-lg">{toast}</div>}
-    <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div><div className="text-eyebrow text-emerald-700">GESTIÓN COMERCIAL</div><h1 className="mt-2 text-page-title text-gray-900">Solicitudes de Media Kit</h1><p className="mt-1 text-sm text-gray-500">REQUEST → IN PROGRESS → DONE. La generación y entrega pertenecen al equipo comercial.</p></div><button onClick={()=>load().catch(()=>notify('No pudimos actualizar la bandeja.'))} className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-xs font-bold text-gray-700"><RefreshCw className="h-3.5 w-3.5"/>Actualizar</button></header>
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">{([['all','Todas',counts.all],['request','REQUEST',counts.request],['in_progress','IN PROGRESS',counts.in_progress],['done','DONE',counts.done]] as const).map(([v,l,c])=><button key={v} onClick={()=>setFilter(v)} className={`rounded-2xl border p-4 text-left ${filter===v?'border-gray-900 bg-gray-900 text-white':'border-gray-200 bg-white text-gray-800'}`}><span className="block text-[10px] font-bold uppercase tracking-wider opacity-70">{l}</span><span className="mt-1 block text-2xl font-extrabold">{c}</span></button>)}</div>
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white"><div className="overflow-x-auto"><table className="w-full text-left text-xs"><thead className="border-b border-gray-200 bg-gray-50 text-[11px] uppercase tracking-wider text-gray-500"><tr><th className="px-4 py-3">Solicitud</th><th className="px-4 py-3">Lead</th><th className="px-4 py-3">Soportes</th><th className="px-4 py-3">Estado</th><th className="px-4 py-3 text-right">Acción</th></tr></thead><tbody className="divide-y divide-gray-100">{visible.map(x=><tr key={x.id}><td className="px-4 py-3"><div className="font-mono font-bold text-gray-400">{x.requestId}</div><div className="text-gray-500">{new Date(x.createdAt).toLocaleString('es-AR')}</div></td><td className="px-4 py-3"><div className="font-bold text-gray-900">{x.clientName}</div><div className="text-gray-500">{x.company}</div><div className="text-gray-500">{x.email}</div></td><td className="max-w-sm px-4 py-3"><div className="flex flex-wrap gap-1">{x.supportNames.slice(0,3).map((n:string)=><span key={n} className="rounded-md bg-gray-100 px-2 py-1 text-[10px] font-semibold">{n}</span>)}{x.supportNames.length>3&&<span className="px-1 py-1 text-[10px] font-bold text-gray-400">+{x.supportNames.length-3}</span>}</div></td><td className="px-4 py-3"><span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${x.status==='done'?'bg-emerald-50 text-emerald-800':x.status==='in_progress'?'bg-amber-50 text-amber-800':'bg-blue-50 text-blue-800'}`}>{labels[x.status]}</span></td><td className="px-4 py-3 text-right"><button onClick={()=>open(x)} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 font-bold"><Eye className="h-3.5 w-3.5"/>Detalle</button></td></tr>)}{visible.length===0&&<tr><td colSpan={5} className="px-4 py-12 text-center text-gray-400">No hay solicitudes en este estado.</td></tr>}</tbody></table></div></div>
-    {selected&&<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"><div className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl"><div className="flex items-start justify-between border-b border-gray-100 pb-4"><div><div className="font-mono text-xs font-bold text-gray-400">{selected.requestId}</div><h2 className="mt-1 text-xl font-bold text-gray-900">{selected.clientName}</h2><p className="mt-1 text-sm text-gray-500">{selected.company} · {selected.email}</p></div><button onClick={()=>setSelected(null)} aria-label="Cerrar" className="rounded-full p-2 text-gray-400 hover:bg-gray-100"><X className="h-5 w-5"/></button></div>
-      <div className="mt-5 grid gap-3 sm:grid-cols-4"><div className="rounded-xl bg-gray-50 p-3"><div className="text-[9px] font-bold uppercase text-gray-400">Estado</div><div className="mt-1 font-bold">{labels[selected.status]}</div></div><div className="rounded-xl bg-gray-50 p-3"><div className="text-[9px] font-bold uppercase text-gray-400">Teléfono</div><div className="mt-1 font-bold">{selected.phone||'—'}</div></div><div className="rounded-xl bg-gray-50 p-3"><div className="text-[9px] font-bold uppercase text-gray-400">Soportes</div><div className="mt-1 font-bold">{selected.supportIds.length}</div></div><div className={`rounded-xl p-3 ${approvalsReady?'bg-emerald-50':'bg-amber-50'}`}><div className="text-[9px] font-bold uppercase text-gray-500">Precio</div><div className="mt-1 font-bold">{approvalsReady?'Aprobado':'Pendiente'}</div></div></div>
-      {selected.message&&<div className="mt-4 rounded-xl bg-gray-50 p-4 text-sm text-gray-700">{selected.message}</div>}
-      <div className="mt-5 space-y-3">{loading?<div className="flex items-center gap-2 text-sm text-gray-500"><Loader2 className="h-4 w-4 animate-spin"/>Cargando soportes…</div>:supports.map(s=>{const base=calculateSupportTotal(s.pricing);const approved=approvedPrices[s.canonical_id]||'';return <div key={s.canonical_id} className="rounded-xl border border-gray-200 p-4"><div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between"><div><div className="font-semibold">{s.name}</div><div className="mt-1 text-xs text-gray-500">{s.ciudad} · {s.tipo_soporte}{s.address?` · ${s.address}`:''}</div></div><div className="text-right"><div className="text-[9px] font-bold uppercase text-gray-400">Total soporte interno</div><div className="mt-1 font-extrabold">{formatSupportCurrency(base,s.pricing?.currency||'ARS')}</div></div></div><div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto] md:items-end"><div><label className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Precio Media Kit · IVA incluido</label><input type="number" min="0" value={approved} onChange={e=>setApprovedPrices(prev=>({...prev,[s.canonical_id]:e.target.value}))} className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm font-bold text-gray-900 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100" placeholder="Ingresar precio aprobado" /></div><div className={`rounded-xl px-4 py-2.5 text-xs font-extrabold ${approved&&Number(approved)>0?'bg-emerald-50 text-emerald-800':'bg-gray-50 text-gray-400'}`}>{approved&&Number(approved)>0?'APROBADO':'PENDIENTE'}</div></div></div>})}</div>
-      <div className="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4"><div className="mb-3 text-sm font-bold text-emerald-950">Workflow comercial</div><div className="flex flex-wrap gap-2">{selected.status==='request'&&<button disabled={busy} onClick={()=>changeStatus(selected,'in_progress')} className="rounded-xl bg-amber-600 px-3 py-2 text-xs font-bold text-white disabled:opacity-50">Pasar a IN PROGRESS</button>}{selected.status==='in_progress'&&<button disabled={busy} onClick={()=>changeStatus(selected,'done')} className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white disabled:opacity-50">Marcar DONE</button>}{selected.status==='done'&&lead&&<><button disabled={!approvalsReady} onClick={()=>approvalsReady&&downloadMediaKitPdf(lead,exportSupports,selected.requestId)} className="inline-flex items-center gap-1.5 rounded-xl border bg-white px-3 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-40"><Download className="h-3.5 w-3.5"/>PDF</button><button disabled={!approvalsReady} onClick={()=>approvalsReady&&downloadMediaKitPpt(lead,exportSupports,selected.requestId)} className="inline-flex items-center gap-1.5 rounded-xl border bg-white px-3 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-40"><FileText className="h-3.5 w-3.5"/>PPT</button><button disabled={!approvalsReady} onClick={async()=>{if(!approvalsReady)return;try{const m=await sendMediaKitToLead(lead,exportSupports,selected.requestId);notify(m==='shared'?'Archivos listos para compartir con el lead.':'Se abrió el correo del lead para adjuntar los archivos.');}catch(e){notify(e instanceof Error?e.message:'No pudimos preparar el envío.');}}} className="inline-flex items-center gap-1.5 rounded-xl bg-gray-900 px-3 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"><Send className="h-3.5 w-3.5"/>Enviar al lead</button></>}</div>{selected.status==='done'&&!approvalsReady&&<p className="mt-3 text-xs font-semibold text-amber-800">Aprobá el precio Media Kit con IVA incluido para cada soporte antes de generar el PDF/PPT.</p>}</div>
-      <div className="mt-5 flex justify-end"><button onClick={()=>setSelected(null)} className="rounded-xl bg-gray-900 px-4 py-2 text-xs font-bold text-white">Cerrar</button></div>
-    </div></div>}
-  </div></DashboardShell>;
+type Pricing = {
+  exhibition_price?: number | string | null;
+  installation_price?: number | string | null;
+  printing_price?: number | string | null;
+  currency?: string | null;
+};
+
+type LeadRequest = {
+  id: string;
+  requestId: string;
+  clientName: string;
+  email: string;
+  company: string;
+  phone: string;
+  message: string;
+  status: WorkflowStatus;
+  supportIds: string[];
+  supportNames: string[];
+  createdAt: string;
+};
+
+type SupportForKit = ExportSupport & { pricing?: Pricing | null };
+
+const labels: Record<WorkflowStatus, string> = {
+  request: 'REQUEST',
+  in_progress: 'IN PROGRESS',
+  done: 'DONE',
+};
+
+function toWorkflowStatus(status: string): WorkflowStatus {
+  if (status === 'contactado' || status === 'in_progress') return 'in_progress';
+  if (status === 'enviado' || status === 'quoted' || status === 'done' || status === 'cerrado') return 'done';
+  return 'request';
+}
+
+export default function DashboardMediaKitWorkflow() {
+  const navigate = useNavigate();
+  const [leads, setLeads] = useState<LeadRequest[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState<'all' | WorkflowStatus>('all');
+  const [selected, setSelected] = useState<LeadRequest | null>(null);
+  const [supports, setSupports] = useState<SupportForKit[]>([]);
+  const [approvedPrices, setApprovedPrices] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+  const [isFetchingLeads, setIsFetchingLeads] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [toast, setToast] = useState('');
+
+  const notify = (m: string) => {
+    setToast(m);
+    window.setTimeout(() => setToast(''), 3000);
+  };
+
+  const load = async () => {
+    const token = localStorage.getItem('admin_token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    setIsFetchingLeads(true);
+    try {
+      const r = await apiFetch('/api/admin/requests', { headers: { Authorization: `Bearer ${token}` } });
+      if (r.status === 401) {
+        localStorage.removeItem('admin_token');
+        navigate('/login');
+        return;
+      }
+      const j = await r.json();
+      if (j.status !== 'success') throw new Error(j.message || 'No pudimos cargar las solicitudes.');
+      setLeads(
+        (j.data || []).map((x: any) => ({
+          id: String(x.id),
+          requestId: x.requestId,
+          clientName: x.requesterName || 'Sin nombre',
+          email: x.requesterEmail || '',
+          company: x.requesterCompany || 'Particular / Directo',
+          phone: x.requesterPhone || '',
+          message: x.message || '',
+          status: toWorkflowStatus(x.status),
+          supportIds: x.supportIds || [],
+          supportNames: x.supportNames || x.supportIds || [],
+          createdAt: x.createdAt || new Date().toISOString(),
+        }))
+      );
+    } catch (e: any) {
+      notify(e.message || 'Error al cargar solicitudes.');
+    } finally {
+      setIsFetchingLeads(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, [navigate]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && selected && !busy) setSelected(null);
+    };
+    if (selected) {
+      document.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [selected, busy]);
+
+  const counts = useMemo(
+    () => ({
+      all: leads.length,
+      request: leads.filter((x) => x.status === 'request').length,
+      in_progress: leads.filter((x) => x.status === 'in_progress').length,
+      done: leads.filter((x) => x.status === 'done').length,
+    }),
+    [leads]
+  );
+
+  const visible = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return leads.filter((item) => {
+      const matchStatus = filter === 'all' || item.status === filter;
+      const matchQuery =
+        !q ||
+        [item.clientName, item.company, item.email, item.phone, item.requestId, ...item.supportNames].some((val) =>
+          String(val || '').toLowerCase().includes(q)
+        );
+      return matchStatus && matchQuery;
+    });
+  }, [leads, filter, searchQuery]);
+
+  const approvalsReady =
+    supports.length > 0 &&
+    supports.every((s) => {
+      const v = Number(approvedPrices[s.canonical_id] || 0);
+      return Number.isFinite(v) && v > 0;
+    });
+
+  const totalApprovedQuote = supports.reduce((sum, s) => sum + (Number(approvedPrices[s.canonical_id]) || 0), 0);
+
+  const persistMediaKit = async (status: 'draft' | 'ready' = 'draft') => {
+    if (!selected || !supports.length || !approvalsReady) {
+      notify('Complete el precio de todos los soportes antes de guardar.');
+      return false;
+    }
+    const token = localStorage.getItem('admin_token');
+    const kitId = `KIT-${selected.requestId}`;
+    const r = await apiFetch('/api/admin/mediakits', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        kitId,
+        sourceRequestId: selected.requestId,
+        status,
+        clientName: selected.clientName,
+        clientEmail: selected.email,
+        clientCompany: selected.company,
+        clientPhone: selected.phone,
+        supportIds: selected.supportIds,
+        approvedPrices,
+        totalAmount: totalApprovedQuote,
+        currency: 'ARS',
+      }),
+    });
+    const j = await r.json().catch(() => null);
+    if (!r.ok || j?.status !== 'success') throw new Error(j?.message || 'No pudimos guardar el Media Kit.');
+    notify(status === 'ready' ? 'Media Kit listo para entrega.' : 'Cotización guardada.');
+    return true;
+  };
+
+  const changeStatus = async (lead: LeadRequest, next: WorkflowStatus) => {
+    setBusy(true);
+    try {
+      const token = localStorage.getItem('admin_token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+      const persisted = next === 'request' ? 'pending' : next === 'in_progress' ? 'contactado' : 'enviado';
+      if (next === 'done') {
+        const saved = await persistMediaKit('ready');
+        if (!saved) throw new Error('No pudimos guardar el Media Kit.');
+      }
+      const r = await apiFetch(`/api/admin/requests/${encodeURIComponent(lead.requestId)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status: persisted }),
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok || j?.status !== 'success') throw new Error(j?.message || 'No pudimos actualizar el estado.');
+      await load();
+      setSelected((x) => (x ? { ...x, status: next } : null));
+      notify(`Solicitud ${labels[next]}`);
+    } catch (e: any) {
+      notify(e.message || 'Error al actualizar.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const open = async (lead: LeadRequest) => {
+    setSelected(lead);
+    setSupports([]);
+    setApprovedPrices({});
+    setLoading(true);
+    try {
+      const r = await apiFetch('/api/supports');
+      const j = await r.json();
+      if (!r.ok || j.status !== 'success') throw new Error('No pudimos cargar los datos del inventario.');
+      const ids = new Set(lead.supportIds);
+      const filtered = (j.data || [])
+        .filter((x: any) => ids.has(x.canonical_id))
+        .map((x: any) => ({
+          canonical_id: x.canonical_id,
+          name: x.name,
+          ciudad: x.ciudad,
+          tipo_soporte: x.tipo_soporte,
+          address: x.address,
+          description: x.description,
+          characteristics: x.characteristics,
+          pricing: x.pricing || null,
+        }));
+      if (filtered.length !== lead.supportIds.length) {
+        const loadedIds = new Set(filtered.map((support: SupportForKit) => support.canonical_id));
+        const missingIds = lead.supportIds.filter((id) => !loadedIds.has(id));
+        throw new Error(`No pudimos recuperar ${missingIds.length} soporte(s) solicitado(s) desde el inventario.`);
+      }
+      setSupports(filtered);
+      const token = localStorage.getItem('admin_token');
+      const kitResponse = await apiFetch(`/api/admin/mediakits/KIT-${encodeURIComponent(lead.requestId)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (kitResponse.ok) {
+        const kitJson = await kitResponse.json().catch(() => null);
+        const savedPrices = kitJson?.data?.approvedPrices;
+        if (savedPrices && typeof savedPrices === 'object') {
+          setApprovedPrices(Object.fromEntries(Object.entries(savedPrices).map(([key, value]) => [key, String(value)])));
+        }
+      }
+    } catch (e: any) {
+      notify(e.message || 'Error al cargar soportes.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const applyBaseCatalogPrices = () => {
+    const newPrices: Record<string, string> = {};
+    supports.forEach((s) => {
+      const total = calculateSupportTotal(s.pricing);
+      if (total > 0) newPrices[s.canonical_id] = String(total);
+    });
+    setApprovedPrices((prev) => ({ ...prev, ...newPrices }));
+    notify('Tarifas base aplicadas desde el catálogo.');
+  };
+
+  const lead = selected
+    ? { name: selected.clientName, email: selected.email, company: selected.company, phone: selected.phone }
+    : null;
+
+  const approvedCount = supports.filter((s) => {
+    const v = Number(approvedPrices[s.canonical_id] || 0);
+    return Number.isFinite(v) && v > 0;
+  }).length;
+
+  const exportSupports: ExportSupport[] = supports.map(
+    (s) => ({ ...s, approvedPriceWithTax: Number(approvedPrices[s.canonical_id] || 0) } as ExportSupport)
+  );
+
+  return (
+    <DashboardShell>
+      <div className="mx-auto max-w-7xl space-y-6 px-4 pb-12 sm:px-6 lg:px-8">
+        {toast && (
+          <div role="status" aria-live="polite" className="fixed right-6 top-20 z-[4500] rounded-xl border border-white/10 bg-gray-950 px-4 py-3 text-xs font-semibold text-white shadow-xl">
+            {toast}
+          </div>
+        )}
+
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-emerald-800">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Gestión Comercial
+            </span>
+            <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-gray-950 sm:text-3xl">Solicitudes de Media Kit</h1>
+            <p className="mt-1 text-xs text-gray-500 sm:text-sm">Flujo comercial: REQUEST → IN PROGRESS → DONE con cotización personalizada.</p>
+          </div>
+          <button type="button" onClick={() => load().catch(() => notify('No pudimos actualizar la bandeja.'))} className="inline-flex min-h-[40px] items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-bold text-gray-800 shadow-2xs transition hover:border-gray-300 hover:bg-gray-50">
+            <RefreshCw className={`h-3.5 w-3.5 ${isFetchingLeads ? 'animate-spin' : ''}`} /> Actualizar bandeja
+          </button>
+        </header>
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {([
+            ['all', 'Todas', counts.all, 'gray'],
+            ['request', 'Nuevas', counts.request, 'blue'],
+            ['in_progress', 'En Proceso', counts.in_progress, 'amber'],
+            ['done', 'Completadas', counts.done, 'emerald'],
+          ] as const).map(([key, label, count, color]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setFilter(key)}
+              className={`rounded-2xl border p-4 text-left transition sm:p-5 ${
+                filter === key
+                  ? color === 'gray'
+                    ? 'border-gray-950 bg-gray-950 text-white'
+                    : color === 'blue'
+                      ? 'border-blue-700 bg-blue-700 text-white'
+                      : color === 'amber'
+                        ? 'border-amber-600 bg-amber-600 text-white'
+                        : 'border-emerald-700 bg-emerald-700 text-white'
+                  : 'border-gray-200 bg-white text-gray-800 hover:border-gray-300'
+              }`}
+            >
+              <span className="text-xs font-bold uppercase tracking-wider opacity-80">{label}</span>
+              <span className="mt-1 block text-2xl font-extrabold tracking-tight sm:text-3xl">{count}</span>
+            </button>
+          ))}
+        </div>
+
+        <section className="space-y-3 rounded-2xl border border-gray-200/90 bg-white p-4 shadow-2xs">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="h-10 rounded-xl border-gray-200 pl-10 text-xs sm:text-sm" placeholder="Buscar por cliente, empresa, correo o código…" aria-label="Buscar solicitudes" />
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500">
+            <span>Mostrando <strong className="font-bold text-gray-950">{visible.length}</strong> de <strong className="font-bold text-gray-950">{leads.length}</strong></span>
+            {(searchQuery || filter !== 'all') && (
+              <button type="button" onClick={() => { setSearchQuery(''); setFilter('all'); }} className="inline-flex items-center gap-1.5 font-bold text-red-600 hover:underline">
+                <FilterX className="h-3.5 w-3.5" /> Limpiar
+              </button>
+            )}
+          </div>
+        </section>
+
+        <div className="space-y-3">
+          {isFetchingLeads && leads.length === 0 && (
+            <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-500">
+              <Loader2 className="h-4 w-4 animate-spin" /> Cargando solicitudes…
+            </div>
+          )}
+          {!isFetchingLeads && visible.length === 0 && (
+            <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
+              <Inbox className="mx-auto mb-2 h-8 w-8 text-gray-300" />
+              No hay solicitudes para este filtro.
+            </div>
+          )}
+          {visible.map((lead) => (
+            <button
+              key={lead.requestId}
+              type="button"
+              onClick={() => open(lead)}
+              className="flex w-full items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 text-left transition hover:border-gray-300 hover:shadow-sm"
+            >
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-gray-950">{lead.clientName}</p>
+                <p className="truncate text-xs text-gray-500">{lead.company} · {lead.requestId}</p>
+              </div>
+              <StatusBadge status={labels[lead.status]} />
+            </button>
+          ))}
+        </div>
+
+        {selected && (
+          <div className="fixed inset-0 z-[4000] flex items-end justify-center bg-gray-950/40 p-0 sm:items-center sm:p-6" role="dialog" aria-modal="true">
+            <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-t-2xl border border-gray-200 bg-white shadow-2xl sm:rounded-2xl">
+              <div className="sticky top-0 flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wide text-gray-500">{labels[selected.status]}</p>
+                  <h2 className="text-base font-semibold text-gray-950">{selected.clientName}</h2>
+                </div>
+                <button type="button" onClick={() => setSelected(null)} className="rounded-lg p-2 text-gray-500 hover:bg-gray-100" aria-label="Cerrar">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="space-y-4 p-4">
+                <div className="grid gap-2 text-xs text-gray-600 sm:grid-cols-2">
+                  <p><span className="font-semibold text-gray-800">Email:</span> {selected.email || '—'}</p>
+                  <p><span className="font-semibold text-gray-800">Tel:</span> {selected.phone || '—'}</p>
+                  <p className="sm:col-span-2"><span className="font-semibold text-gray-800">Empresa:</span> {selected.company}</p>
+                  {selected.message && <p className="sm:col-span-2"><span className="font-semibold text-gray-800">Mensaje:</span> {selected.message}</p>}
+                </div>
+
+                {loading ? (
+                  <div className="flex items-center gap-2 text-sm text-gray-500"><Loader2 className="h-4 w-4 animate-spin" /> Cargando soportes…</div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Soportes ({supports.length})</p>
+                      <button type="button" onClick={applyBaseCatalogPrices} className="text-[11px] font-semibold text-gray-600 hover:text-gray-950">Aplicar tarifas base</button>
+                    </div>
+                    {supports.map((s) => (
+                      <div key={s.canonical_id} className="rounded-lg border border-gray-100 bg-gray-50/60 p-3">
+                        <p className="text-xs font-semibold text-gray-950">{s.name}</p>
+                        <p className="text-[11px] text-gray-500">{s.ciudad} · {s.tipo_soporte}</p>
+                        <label className="mt-2 block text-[10px] font-medium text-gray-500">Precio aprobado</label>
+                        <input
+                          type="number"
+                          min={0}
+                          value={approvedPrices[s.canonical_id] || ''}
+                          onChange={(e) => setApprovedPrices((p) => ({ ...p, [s.canonical_id]: e.target.value }))}
+                          className="mt-1 h-8 w-full rounded-md border border-gray-200 px-2 text-xs outline-none focus:border-gray-900"
+                        />
+                        <p className="mt-1 text-[10px] text-gray-500">Base: {formatSupportCurrency(calculateSupportTotal(s.pricing))}</p>
+                      </div>
+                    ))}
+                    <p className="text-sm font-semibold text-gray-950">Total: {formatSupportCurrency(totalApprovedQuote)} · {approvedCount}/{supports.length} con precio</p>
+                  </div>
+                )}
+
+                <div className="flex flex-wrap gap-2 border-t border-gray-100 pt-4">
+                  {selected.status === 'request' && (
+                    <button type="button" disabled={busy} onClick={() => changeStatus(selected, 'in_progress')} className="rounded-lg bg-amber-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">Marcar en proceso</button>
+                  )}
+                  {selected.status === 'in_progress' && (
+                    <button type="button" disabled={busy || !approvalsReady} onClick={() => changeStatus(selected, 'done')} className="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">Completar y enviar</button>
+                  )}
+                  <button type="button" disabled={busy || !approvalsReady} onClick={() => persistMediaKit('draft').catch((e) => notify(e.message))} className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 disabled:opacity-50">
+                    <Save className="h-3.5 w-3.5" /> Guardar cotización
+                  </button>
+                  {lead && approvalsReady && (
+                    <>
+                      <button type="button" disabled={busy} onClick={async () => { setBusy(true); try { await persistMediaKit('ready'); await downloadMediaKitPdf(lead, exportSupports, selected.requestId); notify('PDF listo'); } catch (e: any) { notify(e.message); } finally { setBusy(false); } }} className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 disabled:opacity-50">
+                        <Download className="h-3.5 w-3.5" /> PDF
+                      </button>
+                      <button type="button" disabled={busy} onClick={async () => { setBusy(true); try { await persistMediaKit('ready'); await downloadMediaKitPpt(lead, exportSupports, selected.requestId); notify('PPT listo'); } catch (e: any) { notify(e.message); } finally { setBusy(false); } }} className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 disabled:opacity-50">
+                        <FileText className="h-3.5 w-3.5" /> PPT
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </DashboardShell>
+  );
 }

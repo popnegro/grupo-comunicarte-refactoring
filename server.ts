@@ -2,10 +2,11 @@ import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
-import { initDatabase, pool } from './src/db';
-import { getAllSupportsFromDB, getSupportByIdFromDB } from './src/server/supportsService';
-import { handleMediakitRequest, getAllMediakitRequestsFromDB } from './src/server/mediakitService';
-import { handleMediaUpload } from './src/server/multimediaUpload';
+import { initDatabase, pool } from './src/db/index.ts';
+import { getAllSupportsFromDB, getSupportByIdFromDB } from './src/server/supportsService.ts';
+import { handleMediakitRequest, getAllMediakitRequestsFromDB } from './src/server/mediakitService.ts';
+import { saveMediaKit, getMediaKit, listMediaKits, updateMediaKitStatus } from './src/server/mediakitManagementService.ts';
+import { handleMediaUpload } from './src/server/multimediaUpload.ts';
 import {
   authenticateAdmin,
   verifyAdminToken,
@@ -24,30 +25,89 @@ import {
   patchSupportPricingByAdmin,
   getSupportRouteByAdmin,
   patchSupportRouteByAdmin,
-} from './src/server/adminService';
+} from './src/server/adminService.ts';
+
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const LOGIN_MAX_ATTEMPTS = 10;
+const loginAttempts = new Map<string, { count: number; resetAt: number }>();
+
+function clientIp(req: { headers: Record<string, unknown>; socket?: { remoteAddress?: string } }): string {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string' && forwarded.trim()) {
+    return forwarded.split(',')[0].trim();
+  }
+  return req.socket?.remoteAddress || 'unknown';
+}
+
+function allowLoginAttempt(ip: string): boolean {
+  const now = Date.now();
+  const entry = loginAttempts.get(ip);
+  if (!entry || now > entry.resetAt) {
+    loginAttempts.set(ip, { count: 1, resetAt: now + LOGIN_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= LOGIN_MAX_ATTEMPTS) return false;
+  entry.count += 1;
+  return true;
+}
+
+const ADMIN_COOKIE = 'gc_admin_token';
+const ADMIN_COOKIE_MAX_AGE = 8 * 60 * 60;
+
+function parseCookies(header?: string): Record<string, string> {
+  if (!header) return {};
+  return header.split(';').reduce<Record<string, string>>((acc, part) => {
+    const idx = part.indexOf('=');
+    if (idx === -1) return acc;
+    const key = part.slice(0, idx).trim();
+    const val = part.slice(idx + 1).trim();
+    if (key) acc[key] = decodeURIComponent(val);
+    return acc;
+  }, {});
+}
+
+function adminAuthHeader(req: { headers: Record<string, unknown> }): string | undefined {
+  const auth = req.headers.authorization;
+  if (typeof auth === 'string' && auth.startsWith('Bearer ')) return auth;
+  const cookies = parseCookies(typeof req.headers.cookie === 'string' ? req.headers.cookie : undefined);
+  const token = cookies[ADMIN_COOKIE];
+  if (token) return `Bearer ${token}`;
+  return undefined;
+}
 
 export async function createApp() {
   const app = express();
 
-  // CORS for the production frontend and local development. Keep the API
-  // explicit rather than using a wildcard so credentialed/authenticated
-  // requests cannot be opened to arbitrary origins.
   const allowedOrigins = (process.env.CORS_ORIGINS || 'https://grupocomunicarte.vercel.app,http://localhost:5173')
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
 
+  const isAllowedOrigin = (origin?: string): boolean => {
+    if (!origin) return true;
+    if (allowedOrigins.includes(origin)) return true;
+    try {
+      const host = new URL(origin).hostname;
+      if (host.endsWith('.vercel.app') || host === 'vercel.app') return true;
+      if (host === 'localhost' || host === '127.0.0.1') return true;
+    } catch {
+      return false;
+    }
+    return false;
+  };
+
   app.use((req, res, next) => {
-    const origin = req.headers.origin;
-    if (origin && allowedOrigins.includes(origin)) {
+    const origin = typeof req.headers.origin === 'string' ? req.headers.origin : undefined;
+    if (origin && isAllowedOrigin(origin)) {
       res.setHeader('Access-Control-Allow-Origin', origin);
       res.setHeader('Vary', 'Origin');
       res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
     }
 
     if (req.method === 'OPTIONS') {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (isAllowedOrigin(origin)) {
         return res.sendStatus(204);
       }
       return res.sendStatus(403);
@@ -58,25 +118,22 @@ export async function createApp() {
 
   app.use(express.json());
 
-  // Initialize Database & Idempotent Seed
   try {
     await initDatabase();
   } catch (err) {
-    console.error('Failed to initialize database during startup:', err);
-    throw err;
+    console.warn('Database initialization warning on startup:', err);
   }
 
-  // API health check with DB connectivity check (P1-5)
   app.get('/api/health', async (_req, res) => {
     try {
       await pool.query('SELECT 1');
       res.status(200).json({ status: 'ok', database: 'connected' });
     } catch (err: any) {
-      res.status(503).json({ status: 'degraded', database: 'disconnected', error: err.message });
+      console.error('Database health check failed:', err);
+      res.status(503).json({ status: 'error', database: 'disconnected' });
     }
   });
 
-  // Supports API routes (Phase 3)
   app.get('/api/supports', async (_req, res) => {
     try {
       const supports = await getAllSupportsFromDB();
@@ -101,7 +158,6 @@ export async function createApp() {
     }
   });
 
-  // MediaKit API routes (Phase 8, 10)
   app.post('/api/mediakit/request', async (req, res) => {
     try {
       const result = await handleMediakitRequest(req.body);
@@ -112,31 +168,44 @@ export async function createApp() {
     }
   });
 
-  // NOTE: GET /api/mediakit/requests is strictly removed from public exposure (P0-2).
-  // Only accessible via protected admin endpoint /api/admin/requests.
-
-  // ==================== ADMIN API ROUTES (FASE 2) ====================
   app.post('/api/admin/login', (req, res) => {
+    const ip = clientIp(req);
+    if (!allowLoginAttempt(ip)) {
+      return res.status(429).json({
+        status: 'error',
+        message: 'Demasiados intentos de acceso. Probá de nuevo en unos minutos.',
+      });
+    }
     const { username, password } = req.body || {};
     const result = authenticateAdmin(username, password);
     if (!result.success) {
       return res.status(401).json({ status: 'error', message: result.message });
     }
+    const secure = process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL);
+    res.setHeader(
+      'Set-Cookie',
+      `${ADMIN_COOKIE}=${encodeURIComponent(result.token!)}; Path=/; Max-Age=${ADMIN_COOKIE_MAX_AGE}; HttpOnly; SameSite=Lax${secure ? '; Secure' : ''}`,
+    );
     res.status(200).json({ status: 'success', token: result.token, message: 'Autenticación exitosa' });
   });
 
-  // Admin Auth Middleware for /api/admin/* (except login)
+  app.post('/api/admin/logout', (_req, res) => {
+    const secure = process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL);
+    res.setHeader(
+      'Set-Cookie',
+      `${ADMIN_COOKIE}=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax${secure ? '; Secure' : ''}`,
+    );
+    res.status(200).json({ status: 'success', message: 'Sesión cerrada' });
+  });
+
   const requireAdmin = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    const authHeader = req.headers.authorization;
+    const authHeader = adminAuthHeader(req);
     if (!verifyAdminToken(authHeader)) {
       return res.status(401).json({ status: 'error', message: 'No autorizado. Se requiere token de administrador válido.' });
     }
     next();
   };
 
-  // Physical media upload: multipart/form-data -> R2 -> support_media.
-  // Keep this route ahead of the JSON media CRUD route and use a route-scoped
-  // raw parser so the existing JSON API remains unchanged.
   app.post(
     '/api/admin/supports/:id/media/upload',
     requireAdmin,
@@ -305,6 +374,49 @@ export async function createApp() {
     }
   });
 
+  app.get('/api/admin/mediakits', requireAdmin, async (_req, res) => {
+    try {
+      const kits = await listMediaKits();
+      res.status(200).json({ status: 'success', data: kits });
+    } catch (err: any) {
+      console.error('Error fetching media kits:', err);
+      res.status(500).json({ status: 'error', message: 'Error interno al obtener Media Kits.' });
+    }
+  });
+
+  app.get('/api/admin/mediakits/:kitId', requireAdmin, async (req, res) => {
+    try {
+      const kit = await getMediaKit(req.params.kitId);
+      if (!kit) return res.status(404).json({ status: 'error', message: 'Media Kit no encontrado.' });
+      res.status(200).json({ status: 'success', data: kit });
+    } catch (err: any) {
+      console.error(`Error fetching media kit ${req.params.kitId}:`, err);
+      res.status(500).json({ status: 'error', message: 'Error interno al obtener el Media Kit.' });
+    }
+  });
+
+  app.post('/api/admin/mediakits', requireAdmin, async (req, res) => {
+    try {
+      const kit = await saveMediaKit(req.body || {});
+      res.status(201).json({ status: 'success', data: kit, message: 'Media Kit guardado.' });
+    } catch (err: any) {
+      console.error('Error saving media kit:', err);
+      const msg = err.message || 'Error al guardar el Media Kit.';
+      res.status(msg.includes('obligatorio') || msg.includes('requiere') ? 400 : 500).json({ status: 'error', message: msg });
+    }
+  });
+
+  app.patch('/api/admin/mediakits/:kitId/status', requireAdmin, async (req, res) => {
+    try {
+      const kit = await updateMediaKitStatus(req.params.kitId, req.body?.status);
+      if (!kit) return res.status(404).json({ status: 'error', message: 'Media Kit no encontrado.' });
+      res.status(200).json({ status: 'success', data: kit, message: 'Estado del Media Kit actualizado.' });
+    } catch (err: any) {
+      console.error(`Error updating media kit ${req.params.kitId}:`, err);
+      res.status(400).json({ status: 'error', message: err.message || 'Error al actualizar el Media Kit.' });
+    }
+  });
+
   app.get('/api/admin/requests', requireAdmin, async (_req, res) => {
     try {
       const requests = await getAllMediakitRequestsFromDB();
@@ -329,7 +441,10 @@ export async function createApp() {
     }
   });
 
-  // Vite middleware for development / static serving for production
+  if (process.env.VERCEL) {
+    return app;
+  }
+
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -350,7 +465,7 @@ export async function createApp() {
 if (!process.env.VERCEL) {
   createApp()
     .then((app) => {
-      const PORT = Number(process.env.PORT) || 3000;
+      const PORT = 3000;
       app.listen(PORT, '0.0.0.0', () => {
         console.log(`Server running on http://0.0.0.0:${PORT}`);
       });

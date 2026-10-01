@@ -17,6 +17,7 @@ interface SelectionContextValue {
   hideToast: () => void;
   isSelected: (id: string) => boolean;
   toggleSelect: (item: InventoryItem) => void;
+  restoreSelection: (ids: string[]) => void;
   removeSelected: (id: string, itemName?: string) => void;
   clearSelection: () => void;
   getSelectedItems: (allItems: InventoryItem[]) => InventoryItem[];
@@ -24,23 +25,34 @@ interface SelectionContextValue {
 
 const SelectionContext = createContext<SelectionContextValue | null>(null);
 
-function getInitialSelectedIds(): Set<string> {
+function readStoredIds(): Set<string> {
   if (typeof window === 'undefined') return new Set();
   try {
-    const raw = window.sessionStorage.getItem(STORAGE_KEY);
+    let raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      const sessionRaw = window.sessionStorage.getItem(STORAGE_KEY);
+      if (sessionRaw) {
+        raw = sessionRaw;
+        window.localStorage.setItem(STORAGE_KEY, sessionRaw);
+        window.sessionStorage.removeItem(STORAGE_KEY);
+      }
+    }
     if (!raw) return new Set();
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed)
-      ? new Set(parsed.filter((id): id is string => typeof id === 'string'))
+      ? new Set(parsed.filter((id): id is string => typeof id === 'string' && id.trim().length > 0))
       : new Set();
   } catch {
-    try { window.sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+    try {
+      window.localStorage.removeItem(STORAGE_KEY);
+      window.sessionStorage.removeItem(STORAGE_KEY);
+    } catch { /* ignore */ }
     return new Set();
   }
 }
 
 export function SelectionProvider({ children }: { children: ReactNode }) {
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(getInitialSelectedIds);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(readStoredIds);
   const [toast, setToast] = useState<SelectionToastData | null>(null);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -66,9 +78,9 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     try {
-      if (selectedIds.size === 0) window.sessionStorage.removeItem(STORAGE_KEY);
-      else window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(selectedIds)));
-    } catch { /* ignore */ }
+      if (selectedIds.size === 0) window.localStorage.removeItem(STORAGE_KEY);
+      else window.localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(selectedIds)));
+    } catch { /* ignore quota */ }
   }, [selectedIds]);
 
   const isSelected = useCallback((id: string) => selectedIds.has(id), [selectedIds]);
@@ -91,6 +103,16 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
       });
     }
   }, [selectedIds, showToast]);
+
+  const restoreSelection = useCallback((ids: string[]) => {
+    const validIds = ids.filter((id): id is string => typeof id === 'string' && id.trim().length > 0);
+    if (!validIds.length) return;
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      validIds.forEach(id => next.add(id));
+      return next;
+    });
+  }, []);
 
   const removeSelected = useCallback((id: string) => {
     setSelectedIds(prev => { if (!prev.has(id)) return prev; const next = new Set(prev); next.delete(id); return next; });
@@ -115,8 +137,19 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
     [selectedIds]
   );
 
-  const value = useMemo(() => ({ selectedIds, selectedCount: selectedIds.size, toast, showToast, hideToast, isSelected, toggleSelect, removeSelected, clearSelection, getSelectedItems }),
-    [selectedIds, toast, showToast, hideToast, isSelected, toggleSelect, removeSelected, clearSelection, getSelectedItems]);
+  const value = useMemo(() => ({
+    selectedIds,
+    selectedCount: selectedIds.size,
+    toast,
+    showToast,
+    hideToast,
+    isSelected,
+    toggleSelect,
+    restoreSelection,
+    removeSelected,
+    clearSelection,
+    getSelectedItems,
+  }), [selectedIds, toast, showToast, hideToast, isSelected, toggleSelect, restoreSelection, removeSelected, clearSelection, getSelectedItems]);
 
   return <SelectionContext.Provider value={value}>{children}</SelectionContext.Provider>;
 }
