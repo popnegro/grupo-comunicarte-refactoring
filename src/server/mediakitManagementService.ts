@@ -1,5 +1,6 @@
 import { pool, isDatabaseConfigured } from '../db/index.ts';
 
+
 export type MediaKitStatus = 'draft' | 'ready' | 'sent' | 'archived';
 
 export interface SaveMediaKitInput {
@@ -93,16 +94,40 @@ export async function saveMediaKit(input: SaveMediaKitInput): Promise<MediaKitRe
   if (clientName.length < 2) throw new Error('El nombre del cliente es obligatorio.');
 
   const supportIds = normalizeSupportIds(input.supportIds);
+
+  if (!isDatabaseConfigured) {
+    throw new Error('La persistencia de Media Kits requiere base de datos configurada.');
+  }
+
+  if (supportIds.length > 0) {
+    const availability = await pool.query(
+      `SELECT canonical_id, disponibilidad, active
+       FROM supports
+       WHERE canonical_id = ANY($1::text[])`,
+      [supportIds],
+    );
+    const rows = new Map<string, { disponibilidad: string | null; active: boolean | null }>(
+      availability.rows.map((row: any) => [String(row.canonical_id), { disponibilidad: row.disponibilidad, active: row.active }]),
+    );
+    const missing = supportIds.find((id) => !rows.has(id));
+    if (missing) throw new Error(`El soporte '${missing}' no existe en el catálogo.`);
+    const unavailable = supportIds.find((id) => {
+      const row = rows.get(id)!;
+      return row.active === false || row.disponibilidad !== 'disponible';
+    });
+    if (unavailable) {
+      const row = rows.get(unavailable)!;
+      const state = row.active === false ? 'inactivo' : String(row.disponibilidad || 'sin disponibilidad');
+      throw new Error(`El soporte '${unavailable}' no está disponible (estado: ${state}) y no puede incluirse en el Media Kit.`);
+    }
+  }
+
   const approvedPrices = Object.fromEntries(
     Object.entries(input.approvedPrices || {}).map(([key, value]) => [key, String(value)])
   );
   const status = normalizeStatus(input.status);
   const kitId = input.kitId?.trim() || makeKitId();
   const totalAmount = input.totalAmount == null || input.totalAmount === '' ? null : Number(input.totalAmount);
-
-  if (!isDatabaseConfigured) {
-    throw new Error('La persistencia de Media Kits requiere base de datos configurada.');
-  }
 
   await ensureTables();
   const client = await pool.connect();
