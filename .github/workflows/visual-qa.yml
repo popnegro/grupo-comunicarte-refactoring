@@ -57,7 +57,9 @@ jobs:
 
       - name: Bootstrap missing baseline
         if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-hit != 'true'
-        run: npx playwright test --update-snapshots=missing
+        run: |
+          npx playwright test --update-snapshots=missing
+          npx playwright test
 
       - name: Run visual regression
         if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-hit == 'true'
