@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ShoppingBag } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { buttonStyles } from '../ui/Button';
 import { useSelection } from '../../context/SelectionContext';
@@ -55,7 +55,7 @@ export function Layout({ children }: { children: ReactNode }) {
         {isMobileMenuOpen && (
           <div className="md:hidden bg-white border-b border-gray-100 py-4 px-4 space-y-3 shadow-lg absolute w-full left-0">
             {navLinks.map((link) => (
-              <Link key={link.path} to={link.path} onClick={() => setIsMobileMenuOpen(false)} className={cn('block px-3 py-2 text-base font-medium rounded-xl', isActive(link.path) ? 'text-black bg-gray-50 font-semibold' : 'text-gray-600 hover:bg-gray-50')}>
+              <Link key={link.path} to={link.path} onClick={closeMobileMenu} className={cn('block px-3 py-2 text-base font-medium rounded-xl', isActive(link.path) ? 'text-black bg-gray-50 font-semibold' : 'text-gray-600 hover:bg-gray-50')}>
                 {link.name}
               </Link>
             ))}
