@@ -12,6 +12,7 @@ import type { InventoryItem, MobileRoute, SupportFamily } from '../../types';
 type SupportType = 'tradicional' | 'led' | 'led_movil';
 type MediaKind = 'image' | 'video';
 type Plaza = 'mendoza' | 'buenos-aires';
+type PreviewVariant = 'showcase' | 'catalog' | 'map';
 
 type FormState = {
   publicName: string;
@@ -135,6 +136,7 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
   const { canonicalId } = useParams(); const navigate = useNavigate(); const mode = explicitMode || (canonicalId ? 'edit' : 'create');
   const [form, setForm] = useState<FormState>(emptyForm); const [loading, setLoading] = useState(mode === 'edit'); const [saving, setSaving] = useState(false); const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<EditorTab>('general');
+  const [previewVariant, setPreviewVariant] = useState<PreviewVariant>('catalog');
 
   const [baseline, setBaseline] = useState<FormState>(emptyForm);
   const [coordHelperVal, setCoordHelperVal] = useState('');
