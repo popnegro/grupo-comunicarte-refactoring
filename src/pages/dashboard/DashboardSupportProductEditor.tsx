@@ -12,7 +12,6 @@ import type { InventoryItem, MobileRoute, SupportFamily } from '../../types';
 type SupportType = 'tradicional' | 'led' | 'led_movil';
 type MediaKind = 'image' | 'video';
 type Plaza = 'mendoza' | 'buenos-aires';
-type PreviewVariant = 'showcase' | 'catalog' | 'map';
 
 type FormState = {
   publicName: string;
@@ -136,7 +135,6 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
   const { canonicalId } = useParams(); const navigate = useNavigate(); const mode = explicitMode || (canonicalId ? 'edit' : 'create');
   const [form, setForm] = useState<FormState>(emptyForm); const [loading, setLoading] = useState(mode === 'edit'); const [saving, setSaving] = useState(false); const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<EditorTab>('general');
-  const [previewVariant, setPreviewVariant] = useState<PreviewVariant>('catalog');
 
   const [baseline, setBaseline] = useState<FormState>(emptyForm);
   const [coordHelperVal, setCoordHelperVal] = useState('');
@@ -269,7 +267,12 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
   if (loading) return <DashboardShell><div className="mx-auto max-w-5xl py-20 text-center text-sm text-gray-500">Cargando soporte…</div></DashboardShell>;
   const typeLabel = form.tipo_soporte === 'led_movil' ? 'LED móvil' : form.tipo_soporte === 'led' ? 'LED' : 'Tradicional';
   return <DashboardShell><div className="mx-auto max-w-7xl space-y-5 pb-14">
-    <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><button onClick={() => handleNavigateWithConfirm('/dashboard/soportes')} className="mb-2 inline-flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-gray-900 min-h-[44px] sm:min-h-0"><ArrowLeft className="h-4 w-4"/> Gestión de Soportes</button><div className="text-eyebrow text-emerald-700">{mode === 'create' ? 'ALTA DE PRODUCTO' : 'EDICIÓN DE PRODUCTO'} · {theme.label}</div><h1 className="mt-2 text-page-title text-gray-900">{mode === 'create' ? 'Nuevo soporte' : form.publicName || 'Editar soporte'}</h1></div><div className="flex flex-wrap gap-2">{canonicalId && <button onClick={() => handleNavigateWithConfirm(`/dashboard/soportes/${encodeURIComponent(canonicalId)}/preview`)} className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-bold text-gray-700 min-h-[44px] sm:min-h-[40px]"><Eye className="h-4 w-4"/> Preview completa</button>}<button onClick={() => handleNavigateWithConfirm('/dashboard/soportes')} className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-bold text-gray-700 min-h-[44px] sm:min-h-[40px]">Cancelar</button><button disabled={saving} onClick={save} className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-4 py-2.5 text-xs font-bold text-white disabled:opacity-50 min-h-[44px] sm:min-h-[40px]"><Save className="h-4 w-4"/>{saving ? 'Guardando…' : mode === 'create' ? 'Crear soporte' : 'Guardar cambios'}</button></div></header>
+    <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><button onClick={() => handleNavigateWithConfirm('/dashboard/soportes')} className="mb-2 inline-flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-gray-900 min-h-[44px] sm:min-h-0"><ArrowLeft className="h-4 w-4"/> Gestión de Soportes</button><div className="text-eyebrow text-emerald-700">{mode === 'create' ? 'ALTA DE PRODUCTO' : 'EDICIÓN DE PRODUCTO'} · {theme.label}</div><h1 className="mt-2 text-page-title text-gray-900">{mode === 'create' ? 'Nuevo soporte' : form.publicName || 'Editar soporte'}</h1></div><div className="flex flex-wrap items-center justify-end gap-2">
+        {isDirty && <span className="mr-1 inline-flex items-center gap-2 text-xs font-semibold text-amber-700" aria-live="polite"><span className="h-2 w-2 rounded-full bg-amber-500" />Cambios sin guardar</span>}
+        {canonicalId && <button onClick={() => handleNavigateWithConfirm(`/dashboard/soportes/${encodeURIComponent(canonicalId)}/preview`)} className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-bold text-gray-700 min-h-[44px] sm:min-h-[40px]"><Eye className="h-4 w-4"/> Preview completa</button>}
+        <button onClick={() => handleNavigateWithConfirm('/dashboard/soportes')} className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-bold text-gray-700 min-h-[44px] sm:min-h-[40px]">Cancelar</button>
+        <button disabled={saving} onClick={save} className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-4 py-2.5 text-xs font-bold text-white disabled:opacity-50 min-h-[44px] sm:min-h-[40px]"><Save className="h-4 w-4"/>{saving ? 'Guardando…' : mode === 'create' ? 'Crear soporte' : 'Guardar cambios'}</button>
+      </div></header>
     {error && <div role="alert" className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</div>}
 
     {/* Navigation Tabs Menu */}
@@ -562,26 +565,16 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
 
       <aside id="support-card-preview" className="lg:sticky lg:top-6">
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <div className="text-eyebrow text-gray-500">REVISIÓN DE PUBLICACIÓN</div>
+              <div className="text-eyebrow text-gray-500">PREVIEW COMPLETA</div>
               <h2 className="mt-1 text-lg font-bold text-gray-900">Cómo se publicará</h2>
+              <p className="mt-1 text-xs text-gray-500">Una única vista canónica compartida por las cuatro secciones del editor.</p>
             </div>
-            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-emerald-700">En tiempo real</span>
+            <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-emerald-700">En tiempo real</span>
           </div>
-          <div className="mb-3 grid grid-cols-3 rounded-xl border border-gray-200 bg-gray-50 p-1" role="tablist" aria-label="Contexto de preview">
-            {([
-              ['showcase', 'Destacada'],
-              ['catalog', 'Catálogo'],
-              ['map', 'Mapa'],
-            ] as const).map(([value, label]) => (
-              <button key={value} type="button" role="tab" aria-selected={previewVariant === value} onClick={() => setPreviewVariant(value)} className={`rounded-lg px-2 py-2 text-[11px] font-bold transition ${previewVariant === value ? 'bg-white text-gray-950 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}>
-                {label}
-              </button>
-            ))}
-          </div>
-          <div className={`rounded-xl bg-gray-50 p-3 ${previewVariant === 'map' ? 'md:px-6' : ''}`}>
-            <SupportCard item={previewItem} variant={previewVariant} />
+          <div className="rounded-xl bg-gray-50 p-3">
+            <SupportCard item={previewItem} variant="catalog" />
           </div>
         </div>
       </aside>
