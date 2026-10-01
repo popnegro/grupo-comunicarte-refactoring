@@ -1,5 +1,5 @@
-import { getSupportCatalog, getSupportDetail } from './supportModel';
-import { InventoryItem } from '../types';
+import { getSupportCatalog, getSupportDetail } from './supportModel.ts';
+import { InventoryItem } from '../types.ts';
 
 /**
  * Public inventory DTO boundary.

@@ -1,8 +1,9 @@
 import { Plaza, TipoSoporte, Disponibilidad } from '../../types';
 import { cn } from '../../lib/utils';
-import { MapPin, MonitorPlay, PanelTop, AlignLeft, Search, X, CheckCircle2, Lock, SlidersHorizontal } from 'lucide-react';
+import { MapPin, MonitorPlay, PanelTop, AlignLeft, Search, X, CheckCircle2, Lock } from 'lucide-react';
 import { ReactNode } from 'react';
 import { Input } from '../ui/Input';
+import { ViewModeToggle, ViewMode } from '../inventory/ViewModeToggle';
 import { useSelection } from '../../context/SelectionContext';
 
 type DisponibilidadFilter = Disponibilidad | 'todos';
@@ -17,6 +18,8 @@ interface MapFilterPanelProps {
   searchText: string;
   setSearchText: (s: string) => void;
   resultsCount: number;
+  viewMode: ViewMode;
+  onViewModeChange: (mode: ViewMode) => void;
 }
 
 export function MapFilterPanel({
@@ -29,21 +32,13 @@ export function MapFilterPanel({
   searchText,
   setSearchText,
   resultsCount,
+  viewMode,
+  onViewModeChange,
 }: MapFilterPanelProps) {
   const { selectedCount } = useSelection();
 
   return (
     <div className="flex h-full flex-col bg-white p-5 sm:p-6">
-      <div className="mb-5 flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-950 text-white">
-          <SlidersHorizontal className="h-3.5 w-3.5" />
-        </div>
-        <div>
-          <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-emerald-700">Inventario</p>
-          <h2 className="text-sm font-black tracking-tight text-gray-950">Filtros</h2>
-        </div>
-      </div>
-
       <div className="relative mb-5">
         <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
         <Input
@@ -85,7 +80,18 @@ export function MapFilterPanel({
         </FilterGroup>
       </div>
 
-      <div className="mt-auto border-t border-gray-100 pt-4">
+      <div className="hidden md:block mt-auto border-t border-gray-100 pt-3">
+        <div className="mb-2 px-1">
+          <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-gray-400">Vista</span>
+        </div>
+        <ViewModeToggle
+          viewMode={viewMode}
+          onViewModeChange={onViewModeChange}
+          className="w-full justify-center rounded-xl bg-gray-50/80 border-gray-200/80 shadow-none"
+        />
+      </div>
+
+      <div className="mt-3 border-t border-gray-100 pt-3">
         <div className="flex items-center justify-between px-1">
           <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-gray-400">
             {selectedCount > 0 ? `${selectedCount} seleccionados` : 'Resultados'}

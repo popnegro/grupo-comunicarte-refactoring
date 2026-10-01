@@ -1,7 +1,9 @@
-import { db, pool } from '../db';
-import { mediakitRequests, mediakitRequestItems } from '../db/schema';
-import { validateSupportsForRequest, getSupportByIdFromDB } from './supportsService';
+import { db, pool, isDatabaseConfigured } from '../db/index.ts';
+import { mediakitRequests, mediakitRequestItems } from '../db/schema.ts';
+import { validateSupportsForRequest, getSupportByIdFromDB } from './supportsService.ts';
 import { eq, desc } from 'drizzle-orm';
+
+const inMemoryRequests: MediakitRecord[] = [];
 
 export interface LeadPayload {
   name: string;
@@ -126,10 +128,22 @@ export async function handleMediakitRequest(body: any): Promise<{
       const r1 = Math.floor(1000 + Math.random() * 9000);
       const r2 = Math.floor(1000 + Math.random() * 9000);
       const candidate = `REQ-${new Date().getFullYear()}-${r1}-${r2}`;
-      const found = await db.select().from(mediakitRequests).where(eq(mediakitRequests.requestId, candidate));
-      if (found.length === 0) {
-        requestId = candidate;
-        break;
+      if (isDatabaseConfigured) {
+        try {
+          const found = await db.select().from(mediakitRequests).where(eq(mediakitRequests.requestId, candidate));
+          if (found.length === 0) {
+            requestId = candidate;
+            break;
+          }
+        } catch {
+          requestId = candidate;
+          break;
+        }
+      } else {
+        if (!inMemoryRequests.some((r) => r.requestId === candidate)) {
+          requestId = candidate;
+          break;
+        }
       }
     }
     if (!requestId) {
@@ -137,6 +151,51 @@ export async function handleMediakitRequest(body: any): Promise<{
     }
 
     const createdAtStr = new Date().toISOString();
+
+    if (!isDatabaseConfigured) {
+      const createdRecord: MediakitRecord = {
+        id: requestId,
+        requestId,
+        requesterName: name,
+        requesterEmail: email,
+        requesterCompany: typeof lead.company === 'string' ? lead.company.trim() : '',
+        requesterPhone: typeof lead.phone === 'string' ? lead.phone.trim() : '',
+        message: typeof lead.message === 'string' ? lead.message.trim() : '',
+        status: 'pending',
+        supportIds: uniqueSelectedIds,
+        supportNames: (validation.matchedSupports || []).map((s) => s.name),
+        lead: {
+          name,
+          email,
+          company: typeof lead.company === 'string' ? lead.company.trim() : '',
+          phone: typeof lead.phone === 'string' ? lead.phone.trim() : '',
+          message: typeof lead.message === 'string' ? lead.message.trim() : '',
+        },
+        selectedIds: uniqueSelectedIds,
+        selectedSupports: (validation.matchedSupports || []).map((sup) => ({
+          canonical_id: sup.canonical_id,
+          name: sup.name,
+          ciudad: sup.ciudad,
+          tipo_soporte: sup.tipo_soporte,
+        })),
+        createdAt: createdAtStr,
+      };
+      inMemoryRequests.unshift(createdRecord);
+
+      return {
+        statusCode: 201,
+        response: {
+          status: 'success',
+          requestId,
+          message: 'Solicitud de Media Kit registrada exitosamente.',
+          data: {
+            requestId,
+            selectedCount: uniqueSelectedIds.length,
+            createdAt: createdAtStr,
+          },
+        },
+      };
+    }
 
     // 4. Atomic Transaction: Insert Request and Items
     const client = await pool.connect();
@@ -198,60 +257,68 @@ export async function handleMediakitRequest(body: any): Promise<{
 }
 
 export async function getAllMediakitRequestsFromDB(): Promise<MediakitRecord[]> {
-  const reqRows = await db.select().from(mediakitRequests).orderBy(desc(mediakitRequests.createdAt));
-  const results: MediakitRecord[] = [];
+  if (!isDatabaseConfigured) {
+    return inMemoryRequests;
+  }
+  try {
+    const reqRows = await db.select().from(mediakitRequests).orderBy(desc(mediakitRequests.createdAt));
+    const results: MediakitRecord[] = [];
 
-  for (const req of reqRows) {
-    const itemRows = await db
-      .select()
-      .from(mediakitRequestItems)
-      .where(eq(mediakitRequestItems.requestId, req.requestId));
+    for (const req of reqRows) {
+      const itemRows = await db
+        .select()
+        .from(mediakitRequestItems)
+        .where(eq(mediakitRequestItems.requestId, req.requestId));
 
-    const selectedIds = itemRows.map((i) => i.supportId);
-    const selectedSupports = [];
+      const selectedIds = itemRows.map((i) => i.supportId);
+      const selectedSupports = [];
 
-    for (const sId of selectedIds) {
-      const sup = await getSupportByIdFromDB(sId);
-      if (sup) {
-        selectedSupports.push({
-          canonical_id: sup.canonical_id,
-          name: sup.name,
-          ciudad: sup.ciudad,
-          tipo_soporte: sup.tipo_soporte,
-        });
+      for (const sId of selectedIds) {
+        const sup = await getSupportByIdFromDB(sId);
+        if (sup) {
+          selectedSupports.push({
+            canonical_id: sup.canonical_id,
+            name: sup.name,
+            ciudad: sup.ciudad,
+            tipo_soporte: sup.tipo_soporte,
+          });
+        }
       }
+
+      const requesterCompany = req.requesterCompany || '';
+      const requesterPhone = req.requesterPhone || '';
+      const message = req.message || '';
+      const status = req.status || 'pending';
+      const supportNames = selectedSupports.map((support) => support.name);
+      const createdAt = req.createdAt ? new Date(req.createdAt).toISOString() : new Date().toISOString();
+
+      results.push({
+        id: req.requestId,
+        requestId: req.requestId,
+        requesterName: req.requesterName,
+        requesterEmail: req.requesterEmail,
+        requesterCompany: requesterCompany,
+        requesterPhone: requesterPhone,
+        message,
+        status,
+        supportIds: selectedIds,
+        supportNames,
+        lead: {
+          name: req.requesterName,
+          email: req.requesterEmail,
+          company: requesterCompany,
+          phone: requesterPhone,
+          message,
+        },
+        selectedIds,
+        selectedSupports,
+        createdAt,
+      });
     }
 
-    const requesterCompany = req.requesterCompany || '';
-    const requesterPhone = req.requesterPhone || '';
-    const message = req.message || '';
-    const status = req.status || 'pending';
-    const supportNames = selectedSupports.map((support) => support.name);
-    const createdAt = req.createdAt ? new Date(req.createdAt).toISOString() : new Date().toISOString();
-
-    results.push({
-      id: req.requestId,
-      requestId: req.requestId,
-      requesterName: req.requesterName,
-      requesterEmail: req.requesterEmail,
-      requesterCompany: requesterCompany,
-      requesterPhone: requesterPhone,
-      message,
-      status,
-      supportIds: selectedIds,
-      supportNames,
-      lead: {
-        name: req.requesterName,
-        email: req.requesterEmail,
-        company: requesterCompany,
-        phone: requesterPhone,
-        message,
-      },
-      selectedIds,
-      selectedSupports,
-      createdAt,
-    });
+    return results;
+  } catch (err) {
+    console.warn('Falling back to in-memory mediakit requests due to DB error:', err);
+    return inMemoryRequests;
   }
-
-  return results;
 }
