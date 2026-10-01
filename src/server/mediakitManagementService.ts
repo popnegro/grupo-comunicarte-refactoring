@@ -66,6 +66,38 @@ async function ensureTables(): Promise<void> {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
+
+    -- Existing databases may contain an older mediakits table created before
+    -- the management schema was introduced. Keep the runtime bootstrap
+    -- additive/idempotent so those databases are upgraded without dropping
+    -- existing data.
+    ALTER TABLE mediakits ADD COLUMN IF NOT EXISTS kit_id TEXT;
+    ALTER TABLE mediakits ADD COLUMN IF NOT EXISTS source_request_id TEXT;
+    ALTER TABLE mediakits ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'draft';
+    ALTER TABLE mediakits ADD COLUMN IF NOT EXISTS client_name TEXT;
+    ALTER TABLE mediakits ADD COLUMN IF NOT EXISTS client_email TEXT;
+    ALTER TABLE mediakits ADD COLUMN IF NOT EXISTS client_company TEXT;
+    ALTER TABLE mediakits ADD COLUMN IF NOT EXISTS client_phone TEXT;
+    ALTER TABLE mediakits ADD COLUMN IF NOT EXISTS support_ids JSONB NOT NULL DEFAULT '[]'::jsonb;
+    ALTER TABLE mediakits ADD COLUMN IF NOT EXISTS approved_prices JSONB NOT NULL DEFAULT '{}'::jsonb;
+    ALTER TABLE mediakits ADD COLUMN IF NOT EXISTS total_amount NUMERIC;
+    ALTER TABLE mediakits ADD COLUMN IF NOT EXISTS currency TEXT NOT NULL DEFAULT 'ARS';
+    ALTER TABLE mediakits ADD COLUMN IF NOT EXISTS notes TEXT;
+    ALTER TABLE mediakits ADD COLUMN IF NOT EXISTS metadata JSONB;
+    ALTER TABLE mediakits ADD COLUMN IF NOT EXISTS pdf_url TEXT;
+    ALTER TABLE mediakits ADD COLUMN IF NOT EXISTS ppt_url TEXT;
+    ALTER TABLE mediakits ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+    ALTER TABLE mediakits ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+    ALTER TABLE mediakit_items ADD COLUMN IF NOT EXISTS kit_id TEXT;
+    ALTER TABLE mediakit_items ADD COLUMN IF NOT EXISTS support_id TEXT;
+    ALTER TABLE mediakit_items ADD COLUMN IF NOT EXISTS approved_price NUMERIC;
+    ALTER TABLE mediakit_items ADD COLUMN IF NOT EXISTS sort_order INTEGER NOT NULL DEFAULT 0;
+    ALTER TABLE mediakit_items ADD COLUMN IF NOT EXISTS metadata JSONB;
+    ALTER TABLE mediakit_items ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+    ALTER TABLE mediakit_items ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_mediakits_kit_id ON mediakits(kit_id);
     CREATE INDEX IF NOT EXISTS idx_mediakits_status ON mediakits(status);
     CREATE INDEX IF NOT EXISTS idx_mediakits_source_request ON mediakits(source_request_id);
     CREATE INDEX IF NOT EXISTS idx_mediakit_items_kit_id ON mediakit_items(kit_id);
