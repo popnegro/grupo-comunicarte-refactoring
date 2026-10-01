@@ -8,7 +8,7 @@ import { downloadMediaKitPdf, downloadMediaKitPpt, ExportSupport } from '../../l
 import { apiFetch } from '../../lib/api';
 
 type Pricing = { exhibition_price?: number | string | null; installation_price?: number | string | null; printing_price?: number | string | null; currency?: string | null };
-type Support = ExportSupport & { pricing?: Pricing | null; imageUrls?: string[]; media?: Array<{ url?: string; media_type?: string; active?: boolean }> };
+type Support = ExportSupport & { disponibilidad?: 'disponible' | 'reservado' | 'inactivo'; pricing?: Pricing | null; imageUrls?: string[]; media?: Array<{ url?: string; media_type?: string; active?: boolean }> };
 type MediaKitStatus = 'draft' | 'ready' | 'sent' | 'archived';
 type PersistedKit = {
   kitId: string;
