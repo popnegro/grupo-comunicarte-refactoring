@@ -276,10 +276,10 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
     <div className="border-b border-gray-200">
       <div role="tablist" aria-label="Secciones del editor" className="flex flex-nowrap overflow-x-auto gap-2 pb-2 scrollbar-none">
         {[
-          { id: 'general', label: 'Información General', icon: Info },
-          { id: 'location', label: 'Ubicación Física', icon: MapPin },
-          { id: 'content', label: 'Contenido y Atributos', icon: Sparkles },
-          { id: 'commercial', label: 'Comercial y Fechas', icon: DollarSign },
+          { id: 'general', label: 'Información', icon: Info },
+          { id: 'location', label: 'Ubicación', icon: MapPin },
+          { id: 'content', label: 'Contenido', icon: Sparkles },
+          { id: 'commercial', label: 'Comercial', icon: DollarSign },
         ].map((t, idx, arr) => {
           const Icon = t.icon;
           const isActive = activeTab === t.id;
@@ -564,10 +564,10 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <div className="text-eyebrow text-gray-500">PREVIEW</div>
-              <h2 className="mt-1 text-lg font-bold text-gray-900">Product Card</h2>
+              <div className="text-eyebrow text-gray-500">REVISIÓN DE PUBLICACIÓN</div>
+              <h2 className="mt-1 text-lg font-bold text-gray-900">Cómo se publicará</h2>
             </div>
-            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-emerald-700">Tiempo real</span>
+            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-emerald-700">En tiempo real</span>
           </div>
           <div className="mb-3 grid grid-cols-3 rounded-xl border border-gray-200 bg-gray-50 p-1" role="tablist" aria-label="Contexto de preview">
             {([

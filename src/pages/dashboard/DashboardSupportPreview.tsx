@@ -56,13 +56,13 @@ export default function DashboardSupportPreview() {
       {item && (
         <div className="grid gap-6 lg:grid-cols-[minmax(0,420px)_1fr] lg:items-start">
           <section>
-            <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-gray-500">Product Card de gestión</div>
+            <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-gray-500">Representación pública</div>
             <SupportCard item={item} variant="dashboard" />
           </section>
 
           <section className="border border-gray-200 bg-white p-5">
-            <h2 className="text-base font-bold text-gray-900">Control de publicación</h2>
-            <p className="mt-1 text-sm text-gray-500">Revisá lo que determina la visibilidad y el contenido de la tarjeta.</p>
+            <h2 className="text-base font-bold text-gray-900">Revisión de publicación</h2>
+            <p className="mt-1 text-sm text-gray-500">Verificá los elementos que determinan cómo verá el soporte el usuario.</p>
             <dl className="mt-5 space-y-3 text-sm">
               <div className="flex items-start justify-between gap-4 border-b border-gray-100 pb-3"><dt className="font-semibold text-gray-500">Publicación</dt><dd className="font-bold text-gray-900">{item.active === false ? 'No publicado' : 'Publicado'}</dd></div>
               <div className="flex items-start justify-between gap-4 border-b border-gray-100 pb-3"><dt className="font-semibold text-gray-500">Disponibilidad</dt><dd className="font-bold text-gray-900">{item.disponibilidad === 'reservado' ? 'Reservado' : 'Disponible'}</dd></div>
