@@ -3,6 +3,7 @@ import { ArrowLeft, ExternalLink, Loader2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
 import { SupportCard } from '../../components/inventory/SupportCard';
+import { getCardFacts } from '../../components/inventory/SupportCardPrimitives';
 import { apiFetch } from '../../lib/api';
 import { InventoryItem } from '../../types';
 
@@ -36,6 +37,18 @@ export default function DashboardSupportPreview() {
 
   if (loading) return <DashboardShell><div className="mx-auto max-w-7xl py-16 text-center text-sm text-gray-500"><Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin" />Cargando vista previa…</div></DashboardShell>;
 
+  const facts = item ? getCardFacts(item) : [];
+  const locationConfigured = item
+    ? Boolean(('address' in item && item.address) || item.ciudad)
+    : false;
+  const checks = item ? [
+    { label: 'Publicación', value: item.active === false ? 'No publicado' : 'Publicado', ok: item.active !== false },
+    { label: 'Disponibilidad', value: item.disponibilidad === 'reservado' ? 'Reservado' : 'Disponible', ok: true },
+    { label: 'Imagen principal', value: item.imageUrls?.[0] ? 'Configurada' : 'Falta imagen', ok: Boolean(item.imageUrls?.[0]) },
+    { label: 'Atributos de la Card', value: `${facts.length}/3 configurados`, ok: facts.length === 3 },
+    { label: 'Ubicación', value: locationConfigured ? 'Configurada' : 'Falta ubicación', ok: locationConfigured },
+  ] : [];
+
   return <DashboardShell>
     <div className="mx-auto max-w-7xl space-y-6 pb-10">
       <header className="flex flex-col gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
@@ -63,13 +76,25 @@ export default function DashboardSupportPreview() {
           <section className="border border-gray-200 bg-white p-5">
             <h2 className="text-base font-bold text-gray-900">Revisión de publicación</h2>
             <p className="mt-1 text-sm text-gray-500">Verificá los elementos que determinan cómo verá el soporte el usuario.</p>
-            <dl className="mt-5 space-y-3 text-sm">
-              <div className="flex items-start justify-between gap-4 border-b border-gray-100 pb-3"><dt className="font-semibold text-gray-500">Publicación</dt><dd className="font-bold text-gray-900">{item.active === false ? 'No publicado' : 'Publicado'}</dd></div>
-              <div className="flex items-start justify-between gap-4 border-b border-gray-100 pb-3"><dt className="font-semibold text-gray-500">Disponibilidad</dt><dd className="font-bold text-gray-900">{item.disponibilidad === 'reservado' ? 'Reservado' : 'Disponible'}</dd></div>
-              <div className="flex items-start justify-between gap-4 border-b border-gray-100 pb-3"><dt className="font-semibold text-gray-500">Imagen principal</dt><dd className="font-bold text-gray-900">{item.imageUrls?.[0] ? 'Configurada' : 'Sin imagen'}</dd></div>
-              <div className="flex items-start justify-between gap-4 border-b border-gray-100 pb-3"><dt className="font-semibold text-gray-500">Atributos visibles</dt><dd className="font-bold text-gray-900">Hasta 3 según tipo</dd></div>
-              <div className="flex items-start justify-between gap-4"><dt className="font-semibold text-gray-500">Código</dt><dd className="font-mono text-xs font-bold text-gray-900">{item.canonical_id}</dd></div>
-            </dl>
+            <div className="mt-5 space-y-3">
+              {checks.map((check) => (
+                <div key={check.label} className="flex items-start justify-between gap-4 border-b border-gray-100 pb-3 last:border-b-0 last:pb-0">
+                  <div>
+                    <div className="font-semibold text-gray-500">{check.label}</div>
+                    {check.label === 'Atributos de la Card' && facts.length > 0 && (
+                      <div className="mt-1 flex flex-wrap gap-1.5">
+                        {facts.map((fact) => <span key={fact.label} className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-700">{fact.label}</span>)}
+                      </div>
+                    )}
+                  </div>
+                  <dd className={check.ok ? 'font-bold text-emerald-700' : 'font-bold text-amber-700'}>{check.value}</dd>
+                </div>
+              ))}
+              <div className="flex items-start justify-between gap-4 pt-1">
+                <dt className="font-semibold text-gray-500">Código</dt>
+                <dd className="font-mono text-xs font-bold text-gray-900">{item.canonical_id}</dd>
+              </div>
+            </div>
           </section>
         </div>
       )}
