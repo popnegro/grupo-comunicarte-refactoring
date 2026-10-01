@@ -26,6 +26,7 @@ export type SupportCardAttributeKey =
   | 'minimum_daily_outings'
   | 'route_duration_hours'
   | 'summary'
+  | 'caras'
   | 'monthly_impacts';
 
 export interface SupportEditorThemeConfig {
@@ -52,7 +53,7 @@ export const SUPPORT_EDITOR_THEMES: Record<SupportEditorTheme, SupportEditorThem
     label: 'Tradicionales',
     family: 'traditional',
     sections: [...COMMON_SECTIONS, 'technical'],
-    recommendedCardAttributes: ['measures', 'summary', 'monthly_impacts'],
+    recommendedCardAttributes: ['measures', 'caras', 'monthly_impacts'],
     hiddenFields: [
       'technical.resolution',
       'technical.daily_frequency',
