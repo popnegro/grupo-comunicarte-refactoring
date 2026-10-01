@@ -43,7 +43,7 @@ export default function DashboardSupportPreview() {
     { label: 'Disponibilidad', value: item.disponibilidad === 'reservado' ? 'Reservado' : 'Disponible', ok: true },
     { label: 'Imagen principal', value: item.imageUrls?.[0] ? 'Configurada' : 'Falta imagen', ok: Boolean(item.imageUrls?.[0]) },
     { label: 'Atributos de la Card', value: `${facts.length}/3 configurados`, ok: facts.length === 3 },
-    { label: 'Ubicación', value: item.address || item.ciudad ? 'Configurada' : 'Falta ubicación', ok: Boolean(item.address || item.ciudad) },
+    { label: 'Ubicación', value: ('address' in item ? item.address : undefined) || item.ciudad ? 'Configurada' : 'Falta ubicación', ok: Boolean(('address' in item ? item.address : undefined) || item.ciudad) },
   ];
 
   return <DashboardShell>
