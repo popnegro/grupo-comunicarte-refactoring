@@ -96,6 +96,10 @@ export default function DashboardMediaKitBuilder() {
   const total = useMemo(() => selected.reduce((sum, s) => sum + (Number(prices[s.canonical_id]) || 0), 0), [selected, prices]);
   const canExport = selected.length > 0 && selected.every(s => Number(prices[s.canonical_id]) > 0) && client.name.trim().length > 0;
   const toggle = (support: Support) => {
+    if (support.disponibilidad !== 'disponible' && !selectedIds.includes(support.canonical_id)) {
+      notify('Solo se pueden agregar soportes disponibles al Media Kit.');
+      return;
+    }
     setSelectedIds(prev => prev.includes(support.canonical_id) ? prev.filter(id => id !== support.canonical_id) : [...prev, support.canonical_id]);
     if (!prices[support.canonical_id]) {
       const base = calculateSupportTotal(support.pricing);
@@ -208,13 +212,14 @@ export default function DashboardMediaKitBuilder() {
                 <div className="mt-3 max-h-80 space-y-2 overflow-y-auto">
                   {filtered.map((s) => {
                     const on = selectedIds.includes(s.canonical_id);
+                    const available = s.disponibilidad === 'disponible';
                     return (
-                      <button key={s.canonical_id} type="button" onClick={() => toggle(s)} className={`flex w-full items-center justify-between gap-3 rounded-lg border px-3 py-2 text-left text-xs transition ${on ? 'border-emerald-300 bg-emerald-50' : 'border-gray-200 hover:bg-gray-50'}`}>
+                      <button key={s.canonical_id} type="button" onClick={() => toggle(s)} disabled={!available && !on} className={`flex w-full items-center justify-between gap-3 rounded-lg border px-3 py-2 text-left text-xs transition ${on ? 'border-emerald-300 bg-emerald-50' : available ? 'border-gray-200 hover:bg-gray-50' : 'border-amber-200 bg-amber-50/60 opacity-70 cursor-not-allowed'}`}>
                         <span className="min-w-0">
                           <span className="block truncate font-semibold text-gray-950">{s.name}</span>
-                          <span className="text-gray-500">{s.ciudad} · {s.tipo_soporte}</span>
+                          <span className="text-gray-500">{s.ciudad} · {s.tipo_soporte}{available ? '' : ` · ${s.disponibilidad === 'reservado' ? 'Reservado' : 'Inactivo'}`}</span>
                         </span>
-                        {on ? <Check className="h-4 w-4 shrink-0 text-emerald-600" /> : <span className="text-gray-400">+</span>}
+                        {on ? <Check className="h-4 w-4 shrink-0 text-emerald-600" /> : available ? <span className="text-gray-400">+</span> : <span className="text-amber-700">—</span>}
                       </button>
                     );
                   })}
