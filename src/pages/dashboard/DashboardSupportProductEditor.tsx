@@ -12,6 +12,7 @@ import type { InventoryItem, MobileRoute, SupportFamily } from '../../types';
 type SupportType = 'tradicional' | 'led' | 'led_movil';
 type MediaKind = 'image' | 'video';
 type Plaza = 'mendoza' | 'buenos-aires';
+type PreviewVariant = 'showcase' | 'catalog' | 'map';
 
 type FormState = {
   publicName: string;
@@ -135,6 +136,7 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
   const { canonicalId } = useParams(); const navigate = useNavigate(); const mode = explicitMode || (canonicalId ? 'edit' : 'create');
   const [form, setForm] = useState<FormState>(emptyForm); const [loading, setLoading] = useState(mode === 'edit'); const [saving, setSaving] = useState(false); const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<EditorTab>('general');
+  const [previewVariant, setPreviewVariant] = useState<PreviewVariant>('catalog');
 
   const [baseline, setBaseline] = useState<FormState>(emptyForm);
   const [coordHelperVal, setCoordHelperVal] = useState('');
@@ -567,8 +569,19 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
             </div>
             <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-emerald-700">Tiempo real</span>
           </div>
-          <div className="rounded-xl bg-gray-50 p-3">
-            <SupportCard item={previewItem} variant="catalog" />
+          <div className="mb-3 grid grid-cols-3 rounded-xl border border-gray-200 bg-gray-50 p-1" role="tablist" aria-label="Contexto de preview">
+            {([
+              ['showcase', 'Destacada'],
+              ['catalog', 'Catálogo'],
+              ['map', 'Mapa'],
+            ] as const).map(([value, label]) => (
+              <button key={value} type="button" role="tab" aria-selected={previewVariant === value} onClick={() => setPreviewVariant(value)} className={`rounded-lg px-2 py-2 text-[11px] font-bold transition ${previewVariant === value ? 'bg-white text-gray-950 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className={`rounded-xl bg-gray-50 p-3 ${previewVariant === 'map' ? 'md:px-6' : ''}`}>
+            <SupportCard item={previewItem} variant={previewVariant} />
           </div>
         </div>
       </aside>

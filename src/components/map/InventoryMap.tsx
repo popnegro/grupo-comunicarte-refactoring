@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Polyline, useMap, CircleMarker, Tooltip, LayerGroup } from 'react-leaflet';
 import L from 'leaflet';
 import { LocationRecord, MobileRoute, InventoryItem, Plaza, getDisponibilidad } from '../../types';
-import { LocationDetail } from './LocationDetail';
+import { SupportCard } from '../inventory/SupportCard';
 import { X, SearchX } from 'lucide-react';
 import { getIcon } from '../../lib/map-icons';
 import { useSelection } from '../../context/SelectionContext';
@@ -117,26 +117,23 @@ export default function InventoryMap({ locations, routes, initialSelectedId, sel
       </MapContainer>
 
       {selectedItem && (
-        <div className="absolute bottom-0 left-0 right-0 md:bottom-auto md:top-4 md:left-auto md:right-4 md:w-[410px] bg-white rounded-t-3xl md:rounded-2xl shadow-2xl md:shadow-xl z-[1000] border-t md:border border-gray-200/80 overflow-hidden flex flex-col max-h-[78vh] md:max-h-[85vh] transition-all">
+        <div className="absolute bottom-0 left-0 right-0 md:bottom-auto md:top-4 md:left-auto md:right-4 md:w-[410px] bg-white rounded-t-3xl md:rounded-2xl shadow-2xl md:shadow-xl z-[1000] border-t md:border border-gray-200/80 overflow-hidden max-h-[82vh] md:max-h-[88vh]">
           <div className="md:hidden pt-2.5 pb-1 flex justify-center shrink-0 bg-white">
             <div className="w-10 h-1 rounded-full bg-gray-300" aria-hidden="true" />
           </div>
-          <div className="px-4 py-3 md:p-4 bg-white md:bg-gray-50/80 flex justify-between items-center border-b border-gray-100 shrink-0">
-            <div>
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">Ficha Técnica</span>
-              <h4 className="text-xs font-bold text-gray-900 truncate max-w-[240px]">{selectedItem.name}</h4>
-            </div>
+          <div className="px-4 py-2.5 bg-white flex justify-between items-center border-b border-gray-100">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">Soporte seleccionado</span>
             <button
               type="button"
               onClick={handleCloseDetail}
-              className="p-2 bg-gray-100 md:bg-white rounded-full text-gray-500 hover:text-black hover:bg-gray-200 transition-colors shadow-2xs min-h-[36px] min-w-[36px] flex items-center justify-center"
+              className="p-2 bg-gray-100 rounded-full text-gray-500 hover:text-black hover:bg-gray-200 transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
               aria-label="Cerrar detalle"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
-          <div className={`px-0 pt-4 overflow-y-auto ${selectedCount > 0 ? 'pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]' : 'pb-6'} md:p-6`}>
-            <LocationDetail item={selectedItem} />
+          <div className={`overflow-y-auto ${selectedCount > 0 ? 'pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]' : 'pb-4'}`}>
+            <SupportCard item={selectedItem} variant="map" />
           </div>
         </div>
       )}
