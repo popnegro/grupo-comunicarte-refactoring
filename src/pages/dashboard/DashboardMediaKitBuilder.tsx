@@ -138,7 +138,7 @@ export default function DashboardMediaKitBuilder() {
     setBusy(true);
     try {
       await persist('ready');
-      await downloadMediaKitPdf({ lead, supports: exportSupports, total, currency: 'ARS', requestId });
+      await downloadMediaKitPdf(lead, exportSupports, requestId);
       notify('PDF generado.');
     } catch (e: any) { notify(e.message || 'No pudimos exportar el PDF.'); }
     finally { setBusy(false); }
@@ -149,7 +149,7 @@ export default function DashboardMediaKitBuilder() {
     setBusy(true);
     try {
       await persist('ready');
-      await downloadMediaKitPpt({ lead, supports: exportSupports, total, currency: 'ARS', requestId });
+      await downloadMediaKitPpt(lead, exportSupports, requestId);
       notify('PPT generado.');
     } catch (e: any) { notify(e.message || 'No pudimos exportar el PPT.'); }
     finally { setBusy(false); }
