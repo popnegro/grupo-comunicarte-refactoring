@@ -38,13 +38,16 @@ export default function DashboardSupportPreview() {
   if (loading) return <DashboardShell><div className="mx-auto max-w-7xl py-16 text-center text-sm text-gray-500"><Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin" />Cargando vista previa…</div></DashboardShell>;
 
   const facts = item ? getCardFacts(item) : [];
+  const locationConfigured = item
+    ? Boolean(('address' in item && item.address) || item.ciudad)
+    : false;
   const checks = item ? [
     { label: 'Publicación', value: item.active === false ? 'No publicado' : 'Publicado', ok: item.active !== false },
     { label: 'Disponibilidad', value: item.disponibilidad === 'reservado' ? 'Reservado' : 'Disponible', ok: true },
     { label: 'Imagen principal', value: item.imageUrls?.[0] ? 'Configurada' : 'Falta imagen', ok: Boolean(item.imageUrls?.[0]) },
     { label: 'Atributos de la Card', value: `${facts.length}/3 configurados`, ok: facts.length === 3 },
-    { label: 'Ubicación', value: ('address' in item ? item.address : undefined) || item.ciudad ? 'Configurada' : 'Falta ubicación', ok: Boolean(('address' in item ? item.address : undefined) || item.ciudad) },
-  ];
+    { label: 'Ubicación', value: locationConfigured ? 'Configurada' : 'Falta ubicación', ok: locationConfigured },
+  ] : [];
 
   return <DashboardShell>
     <div className="mx-auto max-w-7xl space-y-6 pb-10">
