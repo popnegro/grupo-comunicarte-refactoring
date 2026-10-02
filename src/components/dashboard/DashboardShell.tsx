@@ -78,7 +78,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
   }, [location.pathname]);
 
   const navClass = ({ isActive }: { isActive: boolean }) =>
-    `group flex min-h-9 items-center gap-3 rounded-md px-3 py-2 text-xs font-medium transition-colors ${isActive ? 'bg-gray-100 text-gray-950' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-950'}`;
+    `group relative flex min-h-10 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${isActive ? 'bg-gray-950 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-950'}`;
 
   const handleLogout = () => {
     localStorage.removeItem('admin_token');
@@ -111,9 +111,9 @@ export function DashboardShell({ children }: DashboardShellProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f7f5] font-sans text-gray-900 selection:bg-gray-950 selection:text-white">
-      <header className="sticky top-0 z-50 h-14 border-b border-gray-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex h-full w-full max-w-[1600px] items-center justify-between px-3 sm:px-5 lg:px-6">
+    <div className="min-h-screen bg-[#f4f5f3] font-sans text-gray-900 selection:bg-gray-950 selection:text-white">
+      <header className="sticky top-0 z-50 h-16 border-b border-gray-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex h-full w-full max-w-[1680px] items-center justify-between px-3 sm:px-5 lg:px-6">
           <div className="flex min-w-0 items-center gap-2">
             <button type="button" onClick={() => setMobileNavOpen((open) => !open)} className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 md:hidden" aria-label={mobileNavOpen ? 'Cerrar navegación' : 'Abrir navegación'} aria-expanded={mobileNavOpen}>
               {mobileNavOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -121,7 +121,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
             <button type="button" onClick={() => setSidebarCollapsed((collapsed) => !collapsed)} className="hidden h-8 w-8 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-950 md:inline-flex" aria-label={sidebarCollapsed ? 'Expandir navegación' : 'Colapsar navegación'} title={sidebarCollapsed ? 'Expandir navegación' : 'Colapsar navegación'}>
               <PanelLeft className="h-4 w-4" />
             </button>
-            <Link to="/dashboard" className="flex shrink-0 items-center" title="Ir al resumen"><img src="/brand/brand-dark.svg" alt="Grupo Comunicarte" className="h-5 w-auto" /></Link>
+            <Link to="/dashboard" className="flex shrink-0 items-center" title="Ir al resumen"><img src="/brand/brand-dark.svg" alt="Grupo Comunicarte" className="h-6 w-auto" /></Link>
           </div>
           <div className="flex items-center gap-1.5">
             <Link to="/dashboard/solicitudes" className="relative rounded-md p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-950" title={`${newLeadsCount} solicitudes nuevas`} aria-label="Solicitudes nuevas"><Bell className="h-4 w-4" />{newLeadsCount > 0 && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white" />}</Link>
@@ -134,11 +134,11 @@ export function DashboardShell({ children }: DashboardShellProps) {
 
       <div className="relative mx-auto flex w-full max-w-[1600px]">
         {mobileNavOpen && <button type="button" aria-label="Cerrar menú" onClick={() => setMobileNavOpen(false)} className="fixed inset-0 top-14 z-30 bg-gray-950/20 md:hidden" />}
-        <aside className={`${mobileNavOpen ? 'translate-x-0' : '-translate-x-full'} fixed left-0 top-14 bottom-0 z-40 w-[280px] border-r border-gray-200 bg-white px-3 py-4 shadow-xl transition-all duration-200 md:static md:z-auto md:block md:translate-x-0 md:shadow-none ${sidebarCollapsed ? 'md:w-[68px]' : 'md:w-56 lg:w-60'}`}>
-          <nav aria-label="Navegación principal del panel" className="space-y-4">
+        <aside className={`${mobileNavOpen ? 'translate-x-0' : '-translate-x-full'} fixed left-0 top-16 bottom-0 z-40 w-[280px] border-r border-gray-200 bg-white px-3 py-4 shadow-xl transition-all duration-200 md:static md:z-auto md:block md:translate-x-0 md:shadow-none ${sidebarCollapsed ? 'md:w-[68px]' : 'md:w-56 lg:w-60'}`}>
+          <nav aria-label="Navegación principal del panel" className="space-y-6">
             {navGroups.map((group) => (
               <div key={group.label}>
-                {!sidebarCollapsed && <div className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-400">{group.label}</div>}
+                {!sidebarCollapsed && <div className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-gray-400">{group.label}</div>}
                 <div className="space-y-0.5">
                   {group.items.map(({ to, label, icon: Icon, end, count }: any) => (
                     <NavLink key={to} to={to} end={end} className={navClass} title={sidebarCollapsed ? label : undefined}>
@@ -150,13 +150,13 @@ export function DashboardShell({ children }: DashboardShellProps) {
             ))}
           </nav>
 
-          <div className="mt-5 border-t border-gray-100 pt-4">
+          <div className="mt-5 border-t border-gray-100 pt-5">
             <Link to="/inventario" title={sidebarCollapsed ? 'Inventario público' : undefined} className="flex min-h-9 items-center gap-3 rounded-md px-3 py-2 text-xs font-medium text-gray-600 transition hover:bg-gray-50 hover:text-gray-950"><MapPin className="h-4 w-4 shrink-0 text-gray-400" /><span className={sidebarCollapsed ? 'sr-only' : ''}>Inventario público</span><ExternalLink className={sidebarCollapsed ? 'hidden' : 'ml-auto h-3 w-3 text-gray-400'} /></Link>
           </div>
         </aside>
 
-        <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
-          <div className="mb-5 flex min-h-5 items-center gap-1.5 text-xs" aria-label="Breadcrumb"><Link to="/dashboard" className="font-medium text-gray-500 hover:text-gray-950">Resumen</Link>{location.pathname !== '/dashboard' && <><ChevronRight className="h-3 w-3 text-gray-300" aria-hidden="true" /><span className="font-medium text-gray-900" aria-current="page">{currentPage}</span></>}</div>
+        <main className="min-w-0 flex-1 px-4 py-6 sm:px-7 sm:py-7 lg:px-10 lg:py-9">
+          <div className="mb-7 flex min-h-5 items-center gap-2 text-xs" aria-label="Breadcrumb"><Link to="/dashboard" className="font-medium text-gray-500 hover:text-gray-950">Resumen</Link>{location.pathname !== '/dashboard' && <><ChevronRight className="h-3 w-3 text-gray-300" aria-hidden="true" /><span className="font-medium text-gray-900" aria-current="page">{currentPage}</span></>}</div>
           {children}
         </main>
       </div>
