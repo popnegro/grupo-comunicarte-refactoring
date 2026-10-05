@@ -3,6 +3,8 @@ import { Input } from './Input';
 
 export const labelClass = 'text-[11px] font-bold uppercase tracking-wider text-gray-500';
 export const sectionClass = 'rounded-xl border border-gray-200 bg-white p-4';
+export const inputClass = 'h-10 w-full rounded-lg border border-gray-200 bg-white px-3.5 text-sm text-gray-950 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-black/10 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500';
+export const textareaClass = 'w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-black/10';
 
 type FieldProps = {
   label: string;
