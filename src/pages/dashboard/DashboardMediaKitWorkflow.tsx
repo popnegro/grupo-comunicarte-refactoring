@@ -59,7 +59,6 @@ export default function DashboardMediaKitWorkflow() {
     counts,
     visible,
     clearFilters,
-    hasActiveFilters,
   } = useMediaKitLeadFilters(leads);
   const [selected, setSelected] = useState<LeadRequest | null>(null);
   const [supports, setSupports] = useState<SupportForKit[]>([]);
