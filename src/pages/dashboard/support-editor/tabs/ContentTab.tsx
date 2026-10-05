@@ -90,11 +90,11 @@ export function ContentTab({
                 <BadgeField label="Impresión" value={form.traditional.impresion} />
               </div>
               <div className="grid gap-3 md:grid-cols-2">
-                {isEditorFieldVisible(theme, 'technical.summary') && <Field label="Formato" value={form.traditional.formato} onChange={(v) => setNested('traditional', { formato: v })} />
-                {isEditorFieldVisible(theme, 'technical.measures') && <Field label="Medidas" value={form.traditional.medidas} onChange={(v) => setNested('traditional', { medidas: v })} />
-                {isEditorFieldVisible(theme, 'technical.monthly_impacts') && <Field label="Impactos mensuales" value={form.traditional.monthly_impacts} onChange={(v) => setNested('traditional', { monthly_impacts: v })} type="number" />
-                {isEditorFieldVisible(theme, 'technical.caras') && <Field label="Caras" value={form.traditional.caras} onChange={(v) => setNested('traditional', { caras: v })} />
-                {isEditorFieldVisible(theme, 'technical.impresion') && <Field label="Impresión" value={form.traditional.impresion} onChange={(v) => setNested('traditional', { impresion: v })} />
+                {isEditorFieldVisible(theme, 'technical.summary') && <Field label="Formato" value={form.traditional.formato} onChange={(v) => setNested('traditional', { formato: v })} />}
+                {isEditorFieldVisible(theme, 'technical.measures') && <Field label="Medidas" value={form.traditional.medidas} onChange={(v) => setNested('traditional', { medidas: v })} />}
+                {isEditorFieldVisible(theme, 'technical.monthly_impacts') && <Field label="Impactos mensuales" value={form.traditional.monthly_impacts} onChange={(v) => setNested('traditional', { monthly_impacts: v })} type="number" />}
+                {isEditorFieldVisible(theme, 'technical.caras') && <Field label="Caras" value={form.traditional.caras} onChange={(v) => setNested('traditional', { caras: v })} />}
+                {isEditorFieldVisible(theme, 'technical.impresion') && <Field label="Impresión" value={form.traditional.impresion} onChange={(v) => setNested('traditional', { impresion: v })} />}
               </div>
             </div>
           )}
@@ -109,13 +109,13 @@ export function ContentTab({
                 <BadgeField label="Frecuencia" value={form.led.frecuencia} />
               </div>
               <div className="grid gap-3 md:grid-cols-2">
-                {isEditorFieldVisible(theme, 'technical.summary') && <Field label="Formato" value={form.led.formato} onChange={(v) => setNested('led', { formato: v })} />
-                {isEditorFieldVisible(theme, 'technical.measures') && <Field label="Medidas" value={form.led.medidas} onChange={(v) => setNested('led', { medidas: v })} />
-                {isEditorFieldVisible(theme, 'technical.resolution') && <Field label="Resolución" value={form.led.resolucion} onChange={(v) => setNested('led', { resolucion: v })} />
-                {isEditorFieldVisible(theme, 'technical.monthly_impacts') && <Field label="Impactos mensuales" value={form.led.monthly_impacts} onChange={(v) => setNested('led', { monthly_impacts: v })} type="number" />
-                {isEditorFieldVisible(theme, 'technical.daily_frequency') && <Field label="Frecuencia" value={form.led.frecuencia} onChange={(v) => setNested('led', { frecuencia: v })} />
-                {isEditorFieldVisible(theme, 'technical.video_mode') && <Field label="Modo de video" value={form.led.video_mode} onChange={(v) => setNested('led', { video_mode: v })} />
-                {isEditorFieldVisible(theme, 'technical.spot_duration_seconds') && <Field label="Duración de spot" value={form.led.spot_duration} onChange={(v) => setNested('led', { spot_duration: v })} />
+                {isEditorFieldVisible(theme, 'technical.summary') && <Field label="Formato" value={form.led.formato} onChange={(v) => setNested('led', { formato: v })} />}
+                {isEditorFieldVisible(theme, 'technical.measures') && <Field label="Medidas" value={form.led.medidas} onChange={(v) => setNested('led', { medidas: v })} />}
+                {isEditorFieldVisible(theme, 'technical.resolution') && <Field label="Resolución" value={form.led.resolucion} onChange={(v) => setNested('led', { resolucion: v })} />}
+                {isEditorFieldVisible(theme, 'technical.monthly_impacts') && <Field label="Impactos mensuales" value={form.led.monthly_impacts} onChange={(v) => setNested('led', { monthly_impacts: v })} type="number" />}
+                {isEditorFieldVisible(theme, 'technical.daily_frequency') && <Field label="Frecuencia" value={form.led.frecuencia} onChange={(v) => setNested('led', { frecuencia: v })} />}
+                {isEditorFieldVisible(theme, 'technical.video_mode') && <Field label="Modo de video" value={form.led.video_mode} onChange={(v) => setNested('led', { video_mode: v })} />}
+                {isEditorFieldVisible(theme, 'technical.spot_duration_seconds') && <Field label="Duración de spot" value={form.led.spot_duration} onChange={(v) => setNested('led', { spot_duration: v })} />}
               </div>
             </div>
           )}
@@ -130,9 +130,9 @@ export function ContentTab({
                 <BadgeField label="Salidas" value={form.mobile.minimum_daily_outings} />
               </div>
               <div className="grid gap-3 md:grid-cols-2">
-                {isEditorFieldVisible(theme, 'technical.measures') && <Field label="Pantalla / formato" value={form.mobile.pantalla} onChange={(v) => setNested('mobile', { pantalla: v })} />
-                {isEditorFieldVisible(theme, 'technical.route_duration_hours') && <Field label="Duración" value={form.mobile.duration} onChange={(v) => setNested('mobile', { duration: v })} />
-                <div>
+                {isEditorFieldVisible(theme, 'technical.measures') && <Field label="Pantalla / formato" value={form.mobile.pantalla} onChange={(v) => setNested('mobile', { pantalla: v })} />}
+                {isEditorFieldVisible(theme, 'technical.route_duration_hours') && <Field label="Duración" value={form.mobile.duration} onChange={(v) => setNested('mobile', { duration: v })} />}
+                {isEditorFieldVisible(theme, 'technical.monthly_impacts') && <div>
                   <Field
                     label="Impactos mensuales"
                     value={form.mobile.monthly_impacts}
@@ -141,12 +141,12 @@ export function ContentTab({
                     placeholder="Ej. 5782520"
                   />
                   <p className="mt-0.5 text-[11px] text-gray-500">Dato editorial manual.</p>
-                </div>
-                {isEditorFieldVisible(theme, 'technical.resolution') && <Field label="Resolución" value={form.mobile.resolucion} onChange={(v) => setNested('mobile', { resolucion: v })} />
-                {isEditorFieldVisible(theme, 'technical.spot_duration_seconds') && <Field label="Duración de spot" value={form.mobile.spot_duration} onChange={(v) => setNested('mobile', { spot_duration: v })} />
-                {isEditorFieldVisible(theme, 'technical.minimum_daily_outings') && <Field label="Salidas mínimas" value={form.mobile.minimum_daily_outings} onChange={(v) => setNested('mobile', { minimum_daily_outings: v })} />
-                <Field label="Recorrido" value={form.mobile.recorrido} onChange={(v) => setNested('mobile', { recorrido: v })} />
-                {isEditorFieldVisible(theme, 'technical.operation_days') && <Field label="Días de operación" value={form.mobile.operation_days} onChange={(v) => setNested('mobile', { operation_days: v })} />
+                </div>}
+                {isEditorFieldVisible(theme, 'technical.resolution') && <Field label="Resolución" value={form.mobile.resolucion} onChange={(v) => setNested('mobile', { resolucion: v })} />}
+                {isEditorFieldVisible(theme, 'technical.spot_duration_seconds') && <Field label="Duración de spot" value={form.mobile.spot_duration} onChange={(v) => setNested('mobile', { spot_duration: v })} />}
+                {isEditorFieldVisible(theme, 'technical.minimum_daily_outings') && <Field label="Salidas mínimas" value={form.mobile.minimum_daily_outings} onChange={(v) => setNested('mobile', { minimum_daily_outings: v })} />}
+                {isEditorSectionVisible(theme, 'route') && <Field label="Recorrido" value={form.mobile.recorrido} onChange={(v) => setNested('mobile', { recorrido: v })} />
+                {isEditorFieldVisible(theme, 'technical.operation_days') && <Field label="Días de operación" value={form.mobile.operation_days} onChange={(v) => setNested('mobile', { operation_days: v })} />}
               </div>
             </div>
           )}
