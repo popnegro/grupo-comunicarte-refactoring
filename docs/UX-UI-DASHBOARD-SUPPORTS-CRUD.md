@@ -48,3 +48,12 @@ Inventario público
 ```
 
 El contrato funcional del inventario público no se modifica durante el look & feel.
+
+## Deudas técnicas del editor
+
+| ID | Estado | Alcance | Criterio de cierre |
+|---|---|---|---|
+| A7 | DEFERRED | El estado del formulario mantiene numéricos como `string`; `payloadFrom()` transforma al contrato API. | `number | ''` o validación/transformación Zod + tests de vacío, límites e inválidos. |
+| D1 | DEFERRED | `admin_token` permanece en `localStorage`; las mutaciones auditadas usan Bearer. | Sesión mediante cookie `HttpOnly` + `Secure` + `SameSite`, sin token en storage JS y con 401/reautenticación preservados. |
+
+Estas deudas no forman parte del cierre de look & feel. D1 debe tratarse como deuda de seguridad prioritaria y no como mejora cosmética.
