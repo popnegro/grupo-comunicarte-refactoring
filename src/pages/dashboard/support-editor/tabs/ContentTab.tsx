@@ -145,7 +145,7 @@ export function ContentTab({
                 {isEditorFieldVisible(theme, 'technical.resolution') && <Field label="Resolución" value={form.mobile.resolucion} onChange={(v) => setNested('mobile', { resolucion: v })} />}
                 {isEditorFieldVisible(theme, 'technical.spot_duration_seconds') && <Field label="Duración de spot" value={form.mobile.spot_duration} onChange={(v) => setNested('mobile', { spot_duration: v })} />}
                 {isEditorFieldVisible(theme, 'technical.minimum_daily_outings') && <Field label="Salidas mínimas" value={form.mobile.minimum_daily_outings} onChange={(v) => setNested('mobile', { minimum_daily_outings: v })} />}
-                {isEditorSectionVisible(theme, 'route') && <Field label="Recorrido" value={form.mobile.recorrido} onChange={(v) => setNested('mobile', { recorrido: v })} />
+                {isEditorSectionVisible(theme, 'route') && <Field label="Recorrido" value={form.mobile.recorrido} onChange={(v) => setNested('mobile', { recorrido: v })} />}
                 {isEditorFieldVisible(theme, 'technical.operation_days') && <Field label="Días de operación" value={form.mobile.operation_days} onChange={(v) => setNested('mobile', { operation_days: v })} />}
               </div>
             </div>
