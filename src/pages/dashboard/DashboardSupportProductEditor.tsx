@@ -183,7 +183,13 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
           </div>
         </div>
 
-        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.85fr)_minmax(0,1fr)]">
+        <div
+          id={`editor-panel-${activeTab}`}
+          role="tabpanel"
+          aria-labelledby={`editor-tab-${activeTab}`}
+          tabIndex={0}
+          className="grid items-start gap-4 outline-none lg:grid-cols-[minmax(0,1.85fr)_minmax(0,1fr)]"
+        >
           <div className="space-y-3">
             {activeTab === 'general' && (
               <GeneralTab form={form} canonicalId={canonicalId} typeLabel={typeLabel} set={set} />
