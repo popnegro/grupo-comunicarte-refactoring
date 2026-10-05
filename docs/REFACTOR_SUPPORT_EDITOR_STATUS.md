@@ -1,40 +1,53 @@
 # Support Editor Refactor — Status
 
 **Branch:** `feat/dashboard-look-and-feel`  
+**HEAD:** modular orchestrator landed  
 **Date:** 2026-10-05
 
-## Completed (on branch)
+## Completed
 
 | Item | Path |
 |------|------|
-| C1 CI on `feat/**` | `.github/workflows/ci.yml` |
-| A1 types + emptyForm | `src/pages/dashboard/support-editor/types.ts` |
-| A3 Field / tokens | `src/pages/dashboard/support-editor/Field.tsx` |
-| A1/A5 formUtils + `isFormDirty` | `src/pages/dashboard/support-editor/formUtils.ts` |
-| A2 GeneralTab | `src/pages/dashboard/support-editor/tabs/GeneralTab.tsx` |
-| A2 CommercialTab | `src/pages/dashboard/support-editor/tabs/CommercialTab.tsx` |
+| **C1** CI on `feat/**` | `.github/workflows/ci.yml` |
+| **A1** types + emptyForm | `support-editor/types.ts` |
+| **A1** form utils | `support-editor/formUtils.ts` |
+| **A5** field-level `isFormDirty` | `formUtils.ts` |
+| **A3** Field / tokens | `support-editor/Field.tsx` |
+| **A1** `useSupportForm` | `support-editor/useSupportForm.ts` |
+| **A2** GeneralTab | `tabs/GeneralTab.tsx` |
+| **A2** LocationTab | `tabs/LocationTab.tsx` |
+| **A2** ContentTab | `tabs/ContentTab.tsx` |
+| **A2** CommercialTab | `tabs/CommercialTab.tsx` |
+| **A4** theme label + card attrs in Content | ContentTab |
+| **Orchestrator** | `DashboardSupportProductEditor.tsx` (~240 lines, was ~600) |
 
-## Pending (modules ready, not yet swapped)
+## Structure
 
-| Item | Notes |
-|------|-------|
-| LocationTab | Coord helper + Maps URL |
-| ContentTab | MultimediaUploadZone + type-specific fields + theme label |
-| useSupportForm | Load/save/dirty/preview orchestration |
-| DashboardSupportProductEditor | Thin orchestrator (~240 lines) |
-
-Until the orchestrator is swapped, the **monolithic editor remains the runtime source of truth** (branch stays green).
-
-## Design decisions
-
-- Dirty check is **field-level** (`isFormDirty`), not whole-object `JSON.stringify`
-- Themes surface `label` + `recommendedCardAttributes` in Content tab (A4 partial)
-- Tabs are presentational; all side-effects live in `useSupportForm`
-- No backend contract changes
+```
+src/pages/dashboard/
+  DashboardSupportProductEditor.tsx   # thin shell
+  supportEditorThemes.ts              # existing
+  support-editor/
+    types.ts
+    formUtils.ts
+    Field.tsx
+    useSupportForm.ts
+    tabs/
+      GeneralTab.tsx
+      LocationTab.tsx
+      ContentTab.tsx
+      CommercialTab.tsx
+```
 
 ## Next
 
-1. Push LocationTab + ContentTab + useSupportForm + orchestrator
-2. C2: `npm run lint` + `npm run build`
-3. B1 list filters extraction
-4. E visual + G merge gate
+1. **C2** — CI / `npm run lint` + `npm run build` on this branch (auto via feat/**)
+2. **B1** — extract list filters/sort from `DashboardSupportList`
+3. **E** — visual pass (density, radios, CTA)
+4. **G** — human gate + Preview before promote
+
+## Notes
+
+- No backend contract changes
+- Dirty check is field-level (not whole-object JSON.stringify)
+- Themes surface label + recommendedCardAttributes in Content tab
