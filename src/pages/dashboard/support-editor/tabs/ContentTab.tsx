@@ -1,5 +1,5 @@
 import type { FormState } from '../types';
-import { Field, BadgeField, labelClass, sectionClass } from '../Field';
+import { Field, BadgeField, labelClass, sectionClass } from '../../../../components/dashboard/ui/Field';
 import { MultimediaUploadZone } from '../../../../components/inventory/MultimediaUploadZone';
 import type { SupportEditorThemeConfig } from '../../supportEditorThemes';
 
