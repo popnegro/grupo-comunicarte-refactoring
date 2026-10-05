@@ -62,11 +62,11 @@ test('support flow: create → edit → preview → list filter', async ({ page 
   await page.getByRole('button', { name: 'Crear soporte' }).click();
 
   await expect(page.getByRole('status')).toContainText('Soporte guardado correctamente.');
-  await expect(page.getByRole('heading', { name: 'Soporte Smoke 4x4' })).toBeVisible();
+  await expect(page.locator('h1', { hasText: 'Soporte Smoke 4x4' })).toBeVisible();
 
   await page.getByRole('button', { name: 'Preview' }).click();
-  await expect(page.getByRole('heading', { name: 'Soporte Smoke 4x4' })).toBeVisible();
-  await expect(page.getByText('Revisión de publicación')).toBeVisible();
+  await expect(page.locator('h1', { hasText: 'Soporte Smoke 4x4' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Revisión de publicación' })).toBeVisible();
 
   await page.goto('/dashboard/soportes');
   await expect(page.getByRole('heading', { name: 'Gestión de Soportes' })).toBeVisible();
