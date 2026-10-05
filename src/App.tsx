@@ -51,7 +51,7 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/soportes" element={<DashboardSupportList />} />
           <Route path="/dashboard/soportes/new" element={<DashboardSupportProductEditor mode="create" />} />
-          <Route path="/dashboard/soportes/:canonicalId/edit" element={<DashboardSupportProductEditorConnected mode="edit" />} />
+          <Route path="/dashboard/soportes/:canonicalId/edit" element={<DashboardSupportProductEditor mode="edit" />} />
           <Route path="/dashboard/soportes/:canonicalId/preview" element={<DashboardSupportPreview />} />
           <Route path="/dashboard/soportes/:canonicalId/reservation" element={<DashboardSupportReservation />} />
 
