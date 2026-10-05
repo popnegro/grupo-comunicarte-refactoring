@@ -3,7 +3,6 @@ import {
   ArrowUp,
   ArrowDown,
   Edit3,
-  Eye,
   Inbox,
   FilterX,
   Loader2,
@@ -270,7 +269,7 @@ export function SupportListView(props: Props) {
                           <p className="text-[11px] text-gray-500">{item.tipo_soporte}</p>
                         </td>
                         <td className="px-4 py-3.5">
-                          <StatusBadge disponibilidad={item.disponibilidad} active={item.active} />
+                          <StatusBadge status={item.active === false ? 'archived' : item.disponibilidad} />
                         </td>
                         <td className="px-4 py-3.5 font-semibold text-gray-900">
                           {formatSupportCurrency(total, item.pricing?.currency || 'ARS')}
@@ -321,7 +320,7 @@ export function SupportListView(props: Props) {
                     <ActionMenu items={getActionMenuItems(item)} />
                   </div>
                   <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-                    <StatusBadge disponibilidad={item.disponibilidad} active={item.active} />
+                    <StatusBadge status={item.active === false ? 'archived' : item.disponibilidad} />
                     <span className="text-gray-500 capitalize">{item.ciudad?.replace('-', ' ')}</span>
                     <span className="font-semibold text-gray-900">{formatSupportCurrency(total, item.pricing?.currency || 'ARS')}</span>
                   </div>
@@ -343,7 +342,7 @@ export function SupportListView(props: Props) {
           support={supportForReservation}
           isOpen={!!supportForReservation}
           onClose={() => setSupportForReservation(null)}
-          onSaved={() => {
+          onSuccess={() => {
             setSupportForReservation(null);
             load();
           }}
