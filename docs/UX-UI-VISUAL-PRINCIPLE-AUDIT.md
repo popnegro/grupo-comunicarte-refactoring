@@ -30,8 +30,8 @@ La referencia conceptual es el lenguaje de dashboards operativos: jerarquía exp
 | `/contacto` | 🟢 intervenida | Formulario correcto, pero hero y tarjetas podían ocupar menos espacio. | Hero contextual + retorno al Inventario, tarjetas de contacto compactas. |
 | `/login` | 🟢 intervenida | Patrón visual demasiado ornamental para una tarea puntual. | Acceso sobrio, sin fondo decorativo, sombras ni badges redundantes. |
 | `/dashboard` | 🟢 | Ya posee jerarquía ejecutiva, KPI, disponibilidad y solicitudes; CTA principal es contextual. | Mantener como patrón de referencia interno. |
-| `/dashboard/soportes` | 🟡 | La arquitectura de listado y acción principal es correcta; el archivo conserva componentes históricos y un editor muy extenso. | Siguiente bloque: compactar controles y preservar Editar/Nuevo soporte como acciones primarias. |
-| `/dashboard/soportes/:id/edit` | 🟡 | Editor funcional y alineado con el patrón de formulario; requiere revisión visual completa del conjunto de secciones. | Siguiente bloque: reducir ruido por sección y mantener Guardar cambios como acción primaria única. |
+| `/dashboard/soportes` | 🟢 intervenida | Controles y filas con exceso de padding; acciones secundarias competían visualmente. | Filter bar y tabla densificados; `Nuevo soporte` primario, Actualizar/Cancelar discretos; Editar por fila. |
+| `/dashboard/soportes/:id/edit` | 🟢 intervenida | Secciones cardificadas y tokens de campo con padding alto. | Tokens Field densos; tabs con menos aire; theme meta discreta; Guardar cambios como única CTA primaria. |
 | `/dashboard/soportes/:id/preview` | 🟢 intervenida | Acciones correctas pero con exceso de espacio y radios. | Header contextual y superficies compactas. |
 | `/dashboard/soportes/:id/reservation` | 🟢 intervenida | Acción de guardar correcta, pero composición demasiado cardificada. | Flujo compacto con Guardar período como acción primaria. |
 | `/dashboard/solicitudes` | 🟡 | Flujo comercial ya tiene acciones de estado; requiere revisión visual transversal. | Siguiente bloque: priorizar estado, cliente, fecha y acción siguiente. |
@@ -76,6 +76,11 @@ La referencia conceptual es el lenguaje de dashboards operativos: jerarquía exp
 - `src/pages/auth/Login.tsx`
 - `src/pages/dashboard/DashboardSupportPreview.tsx`
 - `src/pages/dashboard/DashboardSupportReservation.tsx`
+- `src/pages/dashboard/support-editor/Field.tsx`
+- `src/pages/dashboard/support-editor/tabs/*`
+- `src/pages/dashboard/DashboardSupportProductEditor.tsx`
+- `src/pages/dashboard/SupportListView.tsx`
+- `src/hooks/useSupportListFilters.ts`
 
 ## Criterio de release
 

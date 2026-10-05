@@ -41,7 +41,7 @@ export default function Login() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[#F9F9F9] px-4 py-10">
+    <div className="relative flex min-h-screen items-center justify-center bg-[#f4f5f3] px-4 py-10">
       <button
         type="button"
         onClick={() => navigate('/')}
@@ -52,14 +52,14 @@ export default function Login() {
         <span>Sitio público</span>
       </button>
 
-      <div className="relative w-full max-w-md">
+      <div className="relative w-full max-w-[440px]">
         <div className="mb-6">
           <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gray-500">Portal administrativo</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-950">Grupo Comunicarte</h1>
+          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-gray-950">Grupo Comunicarte</h1>
           <p className="mt-2 text-sm leading-relaxed text-gray-600">Centro de operaciones para inventario, disponibilidad y solicitudes comerciales.</p>
         </div>
 
-        <div className="border border-gray-200 bg-white p-6 sm:p-7">
+        <div className="rounded-2xl border border-gray-200/80 bg-white p-7 shadow-sm sm:p-9">
           <div className="mb-5 border-b border-gray-100 pb-4">
             <p className="text-sm font-bold text-gray-950">Iniciar sesión</p>
             <p className="mt-1 text-xs text-gray-500">Ingrese sus credenciales autorizadas.</p>
@@ -85,7 +85,7 @@ export default function Login() {
                 aria-describedby={error ? 'login-error-alert' : undefined}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className={`h-10 w-full rounded-lg border px-3 text-sm font-medium text-gray-950 outline-none transition focus:bg-white focus:ring-2 ${error ? 'border-red-300 bg-red-50/30 focus:border-red-500 focus:ring-red-500/20' : 'border-gray-200 bg-gray-50/50 focus:border-gray-900 focus:ring-gray-900/10'}`}
+                className={`h-11 w-full rounded-xl border px-3 text-sm font-medium text-gray-950 outline-none transition focus:bg-white focus:ring-2 ${error ? 'border-red-300 bg-red-50/30 focus:border-red-500 focus:ring-red-500/20' : 'border-gray-200 bg-gray-50/50 focus:border-gray-900 focus:ring-gray-900/10'}`}
                 placeholder="admin"
                 autoComplete="username"
               />
@@ -113,7 +113,7 @@ export default function Login() {
               </div>
             </div>
 
-            <button type="submit" disabled={loading} aria-busy={loading} className={buttonStyles({ size: 'lg', className: 'mt-2 h-10 w-full justify-center rounded-lg bg-gray-950 font-semibold text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60' })}>
+            <button type="submit" disabled={loading} aria-busy={loading} className={buttonStyles({ size: 'lg', className: 'mt-2 h-10 w-full justify-center rounded-xl bg-gray-950 font-semibold text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60' })}>
               {loading ? <span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Validando acceso...</span> : <span className="inline-flex items-center gap-2"><LogIn className="h-4 w-4" />Iniciar sesión</span>}
             </button>
           </form>

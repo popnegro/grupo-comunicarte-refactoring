@@ -5,9 +5,11 @@ on:
     branches:
       - canonical-refinement
       - pmv-production-refinement
+      - 'feat/**'
   pull_request:
     branches:
       - main
+      - canonical-refinement
 
 permissions:
   contents: read
