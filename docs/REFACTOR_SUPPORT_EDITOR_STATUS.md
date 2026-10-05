@@ -3,24 +3,38 @@
 **Branch:** `feat/dashboard-look-and-feel`  
 **Date:** 2026-10-05
 
-## Completed
+## Completed (engineering)
 
 | Block | Item |
 |-------|------|
 | A1–A5 | Editor modular (`support-editor/*` + thin orchestrator) |
 | B1 | List filters hook + thin page + `SupportListView` |
 | C1 | CI on `feat/**` |
-| C2 | TS fix StatusBadge/ReservationModal; local lint+build green |
-| **E** | Visual density pass on list + editor (tokens, spacing, CTA hierarchy) |
+| C2 | TS APIs fixed; local + GH CI lint/build green |
+| E | Visual density (Field tokens, tabs, list, editor shell) |
+| **G** | Human gate doc + automated gates verified; **pending human Preview sign-off** |
 
-## Visual (E)
+## G — Human gate
 
-- Field tokens: `h-9`, `rounded-lg`, section `p-4`, labels 11px
-- Tabs: `mt-3` / `gap-3`, theme meta quiet
-- List: denser filter bar + table rows; primary CTA = Nuevo soporte
-- Editor: secondary actions quiet; primary = Guardar/Crear
+See `docs/HUMAN_GATE_SUPPORTS_REFACTOR.md`.
 
-## Next
+- Machine: lint/build ✅
+- Human: checklist in that doc must be ticked on Preview (desktop + mobile)
 
-1. Confirm GH Actions green on HEAD
-2. **G** — human gate + Preview responsive
+## Structure
+
+```
+src/hooks/useSupportListFilters.ts
+src/pages/dashboard/
+  DashboardSupportList.tsx
+  SupportListView.tsx
+  DashboardSupportProductEditor.tsx
+  DashboardSupportPreview.tsx
+  support-editor/
+    types.ts / formUtils.ts / Field.tsx / useSupportForm.ts
+    tabs/GeneralTab|LocationTab|ContentTab|CommercialTab
+```
+
+## Promote
+
+Blocked only on human Preview checklist + CI green on final HEAD.
