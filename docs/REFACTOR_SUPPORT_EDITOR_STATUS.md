@@ -1,53 +1,44 @@
-# Support Editor Refactor — Status
+# Support Editor & List Refactor — Status
 
 **Branch:** `feat/dashboard-look-and-feel`  
-**HEAD:** modular orchestrator landed  
 **Date:** 2026-10-05
 
 ## Completed
 
+### Editor (A1–A5, C1)
+
 | Item | Path |
 |------|------|
-| **C1** CI on `feat/**` | `.github/workflows/ci.yml` |
-| **A1** types + emptyForm | `support-editor/types.ts` |
-| **A1** form utils | `support-editor/formUtils.ts` |
-| **A5** field-level `isFormDirty` | `formUtils.ts` |
-| **A3** Field / tokens | `support-editor/Field.tsx` |
-| **A1** `useSupportForm` | `support-editor/useSupportForm.ts` |
-| **A2** GeneralTab | `tabs/GeneralTab.tsx` |
-| **A2** LocationTab | `tabs/LocationTab.tsx` |
-| **A2** ContentTab | `tabs/ContentTab.tsx` |
-| **A2** CommercialTab | `tabs/CommercialTab.tsx` |
-| **A4** theme label + card attrs in Content | ContentTab |
-| **Orchestrator** | `DashboardSupportProductEditor.tsx` (~240 lines, was ~600) |
+| CI on `feat/**` | `.github/workflows/ci.yml` |
+| types + formUtils + isFormDirty | `support-editor/` |
+| useSupportForm | `support-editor/useSupportForm.ts` |
+| Field tokens | `support-editor/Field.tsx` |
+| Tabs ×4 | `support-editor/tabs/*` |
+| Thin orchestrator | `DashboardSupportProductEditor.tsx` |
+
+### List (B1)
+
+| Item | Path |
+|------|------|
+| Filter/sort hook | `src/hooks/useSupportListFilters.ts` |
+| Thin list page | `DashboardSupportList.tsx` |
+| Presentation view | `SupportListView.tsx` |
 
 ## Structure
 
 ```
+src/hooks/useSupportListFilters.ts
 src/pages/dashboard/
-  DashboardSupportProductEditor.tsx   # thin shell
-  supportEditorThemes.ts              # existing
+  DashboardSupportList.tsx      # load, archive, duplicate, wire filters
+  SupportListView.tsx           # filters UI, table, cards, modals
+  DashboardSupportProductEditor.tsx
   support-editor/
-    types.ts
-    formUtils.ts
-    Field.tsx
-    useSupportForm.ts
-    tabs/
-      GeneralTab.tsx
-      LocationTab.tsx
-      ContentTab.tsx
-      CommercialTab.tsx
+    types.ts / formUtils.ts / Field.tsx / useSupportForm.ts
+    tabs/GeneralTab|LocationTab|ContentTab|CommercialTab
 ```
 
 ## Next
 
-1. **C2** — CI / `npm run lint` + `npm run build` on this branch (auto via feat/**)
-2. **B1** — extract list filters/sort from `DashboardSupportList`
-3. **E** — visual pass (density, radios, CTA)
-4. **G** — human gate + Preview before promote
-
-## Notes
-
-- No backend contract changes
-- Dirty check is field-level (not whole-object JSON.stringify)
-- Themes surface label + recommendedCardAttributes in Content tab
+1. **C2** — confirm CI lint/build green
+2. **E** — visual density pass
+3. **G** — Preview + human gate
