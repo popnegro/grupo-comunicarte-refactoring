@@ -236,7 +236,7 @@ export function useSupportForm(explicitMode?: 'create' | 'edit') {
         const savedForm = j.data ? normalize(j.data) : form;
         setForm(savedForm);
         setBaseline(savedForm);
-        navigate(`/dashboard/soportes/${encodeURIComponent(id)}/edit`, { replace: true });
+        navigate(`/dashboard/soportes/${encodeURIComponent(id)}/edit`, { replace: true, state: { toast: { type: 'success', message: 'Soporte guardado correctamente.' } } });
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'No se pudo guardar el soporte.');
