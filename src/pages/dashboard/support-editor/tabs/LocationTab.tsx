@@ -33,9 +33,9 @@ export function LocationTab({
       <section className={sectionClass}>
         <div>
           <div className="text-eyebrow text-gray-500">UBICACIÓN FÍSICA</div>
-          <h2 className="mt-1 text-lg font-bold text-gray-900">Georreferenciación y dirección</h2>
+          <h2 className="mt-1 text-base font-bold text-gray-900">Georreferenciación y dirección</h2>
         </div>
-        <div className="mt-5 grid gap-4 md:grid-cols-2">
+        <div className="mt-3 grid gap-3 md:grid-cols-2">
           <div className="md:col-span-2">
             <Field
               label="Ubicación"
@@ -47,7 +47,7 @@ export function LocationTab({
           <Field label="Latitud" value={form.lat} onChange={(v) => set({ lat: v })} />
           <Field label="Longitud" value={form.lng} onChange={(v) => set({ lng: v })} />
 
-          <div className="md:col-span-2 rounded-xl border border-gray-200 bg-gray-50 p-4">
+          <div className="md:col-span-2 rounded-lg border border-gray-200 bg-gray-50 p-3">
             <div className="flex items-center justify-between">
               <div className={labelClass}>Asistente de Coordenadas</div>
               <span className="text-[10px] font-bold text-gray-400">Google Maps / Coords</span>
@@ -96,7 +96,7 @@ export function LocationTab({
                     setCoordHelperError('');
                     setCoordHelperSuccess(false);
                   }}
-                  className="rounded-xl border border-gray-200 bg-white px-3 text-xs font-bold text-gray-500 hover:text-gray-900"
+                  className="rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-500 hover:text-gray-900"
                 >
                   Limpiar
                 </button>
