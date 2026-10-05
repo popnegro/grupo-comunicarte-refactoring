@@ -13,13 +13,19 @@ type FieldProps = {
   type?: string;
   placeholder?: string;
   readOnly?: boolean;
+  id?: string;
 };
 
-export function Field({ label, value, onChange, type = 'text', placeholder, readOnly = false }: FieldProps) {
+const fieldId = (label: string) =>
+  `field-${label.toLowerCase().replace(/[^a-z0-9áéíóúüñ]+/gi, '-').replace(/^-|-$/g, '')}`;
+
+export function Field({ label, value, onChange, type = 'text', placeholder, readOnly = false, id }: FieldProps) {
+  const inputId = id || fieldId(label);
   return (
     <div>
-      <label className={labelClass}>{label}</label>
+      <label htmlFor={inputId} className={labelClass}>{label}</label>
       <Input
+        id={inputId}
         readOnly={readOnly}
         min={type === 'number' ? '0' : undefined}
         inputMode={type === 'number' ? 'decimal' : undefined}
@@ -33,13 +39,14 @@ export function Field({ label, value, onChange, type = 'text', placeholder, read
   );
 }
 
-export function Textarea({ label, value, onChange, placeholder, maxLength, className }: {
-  label: string; value: string; onChange: (v: string) => void; placeholder?: string; maxLength?: number; className?: string;
+export function Textarea({ label, value, onChange, placeholder, maxLength, className, id }: {
+  label: string; value: string; onChange: (v: string) => void; placeholder?: string; maxLength?: number; className?: string; id?: string;
 }) {
+  const textareaId = id || fieldId(label);
   return (
     <div>
-      <label className={labelClass}>{label}</label>
-      <textarea value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} maxLength={maxLength}
+      <label htmlFor={textareaId} className={labelClass}>{label}</label>
+      <textarea id={textareaId} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} maxLength={maxLength}
         className={`mt-0.5 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-black/10 ${className || ''}`} />
     </div>
   );
