@@ -20,11 +20,11 @@ export function GeneralTab({ form, canonicalId, typeLabel, set }: Props) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="text-eyebrow text-gray-500">INFORMACIÓN GENERAL</div>
-            <h2 className="mt-1 text-lg font-bold text-gray-900">Datos básicos del soporte</h2>
+            <h2 className="mt-1 text-base font-bold text-gray-900">Datos básicos del soporte</h2>
           </div>
           <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-bold text-gray-600">{typeLabel}</span>
         </div>
-        <div className="mt-5 grid gap-4 md:grid-cols-2">
+        <div className="mt-3 grid gap-3 md:grid-cols-2">
           <div>
             <label className={labelClass}>Tipología *</label>
             <select
