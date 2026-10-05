@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Download,
   FileText,
@@ -21,28 +21,17 @@ import {
   downloadMediaKitPpt,
   ExportSupport,
 } from '../../lib/adminMediaKitExport';
-
-type WorkflowStatus = 'request' | 'in_progress' | 'done';
+import {
+  LeadRequest,
+  WorkflowStatus,
+  useMediaKitLeadFilters,
+} from '../../hooks/useMediaKitLeadFilters';
 
 type Pricing = {
   exhibition_price?: number | string | null;
   installation_price?: number | string | null;
   printing_price?: number | string | null;
   currency?: string | null;
-};
-
-type LeadRequest = {
-  id: string;
-  requestId: string;
-  clientName: string;
-  email: string;
-  company: string;
-  phone: string;
-  message: string;
-  status: WorkflowStatus;
-  supportIds: string[];
-  supportNames: string[];
-  createdAt: string;
 };
 
 type SupportForKit = ExportSupport & { pricing?: Pricing | null };
@@ -62,8 +51,15 @@ function toWorkflowStatus(status: string): WorkflowStatus {
 export default function DashboardMediaKitWorkflow() {
   const navigate = useNavigate();
   const [leads, setLeads] = useState<LeadRequest[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState<'all' | WorkflowStatus>('all');
+  const {
+    searchQuery,
+    setSearchQuery,
+    filter,
+    setFilter,
+    counts,
+    visible,
+    clearFilters,
+  } = useMediaKitLeadFilters(leads);
   const [selected, setSelected] = useState<LeadRequest | null>(null);
   const [supports, setSupports] = useState<SupportForKit[]>([]);
   const [approvedPrices, setApprovedPrices] = useState<Record<string, string>>({});
@@ -132,29 +128,6 @@ export default function DashboardMediaKitWorkflow() {
       document.body.style.overflow = 'unset';
     };
   }, [selected, busy]);
-
-  const counts = useMemo(
-    () => ({
-      all: leads.length,
-      request: leads.filter((x) => x.status === 'request').length,
-      in_progress: leads.filter((x) => x.status === 'in_progress').length,
-      done: leads.filter((x) => x.status === 'done').length,
-    }),
-    [leads]
-  );
-
-  const visible = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    return leads.filter((item) => {
-      const matchStatus = filter === 'all' || item.status === filter;
-      const matchQuery =
-        !q ||
-        [item.clientName, item.company, item.email, item.phone, item.requestId, ...item.supportNames].some((val) =>
-          String(val || '').toLowerCase().includes(q)
-        );
-      return matchStatus && matchQuery;
-    });
-  }, [leads, filter, searchQuery]);
 
   const approvalsReady =
     supports.length > 0 &&
@@ -305,18 +278,16 @@ export default function DashboardMediaKitWorkflow() {
 
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-emerald-800">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Gestión Comercial
-            </span>
-            <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-gray-950 sm:text-3xl">Solicitudes de Media Kit</h1>
-            <p className="mt-1 text-xs text-gray-500 sm:text-sm">Flujo comercial: REQUEST → IN PROGRESS → DONE con cotización personalizada.</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-gray-500">Gestión comercial</p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-950 sm:text-3xl">Solicitudes de Media Kit</h1>
+            <p className="mt-1 text-xs text-gray-500">REQUEST → IN PROGRESS → DONE · cotización personalizada</p>
           </div>
-          <button type="button" onClick={() => load().catch(() => notify('No pudimos actualizar la bandeja.'))} className="inline-flex min-h-[40px] items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-bold text-gray-800 shadow-2xs transition hover:border-gray-300 hover:bg-gray-50">
-            <RefreshCw className={`h-3.5 w-3.5 ${isFetchingLeads ? 'animate-spin' : ''}`} /> Actualizar bandeja
+          <button type="button" onClick={() => load().catch(() => notify('No pudimos actualizar la bandeja.'))} className="inline-flex min-h-[36px] items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50">
+            <RefreshCw className={`h-3.5 w-3.5 ${isFetchingLeads ? 'animate-spin' : ''}`} /> Actualizar
           </button>
         </header>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {([
             ['all', 'Todas', counts.all, 'gray'],
             ['request', 'Nuevas', counts.request, 'blue'],
@@ -327,7 +298,7 @@ export default function DashboardMediaKitWorkflow() {
               key={key}
               type="button"
               onClick={() => setFilter(key)}
-              className={`rounded-2xl border p-4 text-left transition sm:p-5 ${
+              className={`rounded-lg border px-3 py-2.5 text-left transition ${
                 filter === key
                   ? color === 'gray'
                     ? 'border-gray-950 bg-gray-950 text-white'
@@ -339,51 +310,51 @@ export default function DashboardMediaKitWorkflow() {
                   : 'border-gray-200 bg-white text-gray-800 hover:border-gray-300'
               }`}
             >
-              <span className="text-xs font-bold uppercase tracking-wider opacity-80">{label}</span>
-              <span className="mt-1 block text-2xl font-extrabold tracking-tight sm:text-3xl">{count}</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">{label}</span>
+              <span className="mt-0.5 block text-xl font-semibold tracking-tight">{count}</span>
             </button>
           ))}
         </div>
 
-        <section className="space-y-3 rounded-2xl border border-gray-200/90 bg-white p-4 shadow-2xs">
+        <section className="space-y-2 rounded-lg border border-gray-200 bg-white p-3">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="h-10 rounded-xl border-gray-200 pl-10 text-xs sm:text-sm" placeholder="Buscar por cliente, empresa, correo o código…" aria-label="Buscar solicitudes" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="h-9 rounded-lg border-gray-200 pl-9 text-xs sm:text-sm" placeholder="Buscar por cliente, empresa, correo o código…" aria-label="Buscar solicitudes" />
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500">
-            <span>Mostrando <strong className="font-bold text-gray-950">{visible.length}</strong> de <strong className="font-bold text-gray-950">{leads.length}</strong></span>
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500">
+            <span>Mostrando <strong className="font-semibold text-gray-950">{visible.length}</strong> de <strong className="font-semibold text-gray-950">{leads.length}</strong></span>
             {(searchQuery || filter !== 'all') && (
-              <button type="button" onClick={() => { setSearchQuery(''); setFilter('all'); }} className="inline-flex items-center gap-1.5 font-bold text-red-600 hover:underline">
+              <button type="button" onClick={clearFilters} className="inline-flex items-center gap-1.5 font-semibold text-red-600 hover:underline">
                 <FilterX className="h-3.5 w-3.5" /> Limpiar
               </button>
             )}
           </div>
         </section>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           {isFetchingLeads && leads.length === 0 && (
-            <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-500">
+            <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-500">
               <Loader2 className="h-4 w-4 animate-spin" /> Cargando solicitudes…
             </div>
           )}
           {!isFetchingLeads && visible.length === 0 && (
-            <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
-              <Inbox className="mx-auto mb-2 h-8 w-8 text-gray-300" />
+            <div className="rounded-lg border border-gray-200 bg-white p-6 text-center text-sm text-gray-500">
+              <Inbox className="mx-auto mb-2 h-7 w-7 text-gray-300" />
               No hay solicitudes para este filtro.
             </div>
           )}
-          {visible.map((lead) => (
+          {visible.map((leadItem) => (
             <button
-              key={lead.requestId}
+              key={leadItem.requestId}
               type="button"
-              onClick={() => open(lead)}
-              className="flex w-full items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 text-left transition hover:border-gray-300 hover:shadow-sm"
+              onClick={() => open(leadItem)}
+              className="flex w-full items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-left transition hover:border-gray-300 hover:bg-gray-50/50"
             >
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-gray-950">{lead.clientName}</p>
-                <p className="truncate text-xs text-gray-500">{lead.company} · {lead.requestId}</p>
+                <p className="truncate text-sm font-semibold text-gray-950">{leadItem.clientName}</p>
+                <p className="truncate text-xs text-gray-500">{leadItem.company} · {leadItem.requestId}</p>
               </div>
-              <StatusBadge status={labels[lead.status]} />
+              <StatusBadge status={labels[leadItem.status]} />
             </button>
           ))}
         </div>
@@ -426,12 +397,12 @@ export default function DashboardMediaKitWorkflow() {
                           min={0}
                           value={approvedPrices[s.canonical_id] || ''}
                           onChange={(e) => setApprovedPrices((p) => ({ ...p, [s.canonical_id]: e.target.value }))}
-                          className="mt-1 h-8 w-full rounded-md border border-gray-200 px-2 text-xs outline-none focus:border-gray-900"
+                          className="mt-1 h-8 w-full rounded-md border border-gray-200 px-2 text-xs outline-none focus:border-gray-400"
+                          placeholder={formatSupportCurrency(calculateSupportTotal(s.pricing), s.pricing?.currency || 'ARS')}
                         />
-                        <p className="mt-1 text-[10px] text-gray-500">Base: {formatSupportCurrency(calculateSupportTotal(s.pricing))}</p>
                       </div>
                     ))}
-                    <p className="text-sm font-semibold text-gray-950">Total: {formatSupportCurrency(totalApprovedQuote)} · {approvedCount}/{supports.length} con precio</p>
+                    <p className="text-[11px] text-gray-500">{approvedCount}/{supports.length} precios · total {formatSupportCurrency(totalApprovedQuote, 'ARS')}</p>
                   </div>
                 )}
 
