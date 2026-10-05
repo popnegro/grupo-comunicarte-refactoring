@@ -34,13 +34,11 @@ export function ContentTab({
       <section className={sectionClass}>
         <div>
           <div className="text-eyebrow text-gray-500">CONTENIDO Y ATRIBUTOS</div>
-          <h2 className="mt-1 text-lg font-bold text-gray-900">Multimedia y ficha técnica</h2>
-          <p className="mt-1 text-xs text-gray-500">
-            Theme: {theme.label} · atributos card: {theme.recommendedCardAttributes.join(', ')}
-          </p>
+          <h2 className="mt-1 text-base font-bold text-gray-900">Multimedia y ficha técnica</h2>
+          <p className="mt-0.5 text-[11px] text-gray-400">{theme.label}</p>
         </div>
 
-        <div className="mt-5 space-y-5">
+        <div className="mt-3 space-y-3">
           <MultimediaUploadZone
             canonicalId={canonicalId}
             url={form.coverUrl}
@@ -51,22 +49,22 @@ export function ContentTab({
             onClear={() => set({ coverUrl: '', coverKind: 'image' })}
           />
 
-          <div className="rounded-xl border border-gray-200 p-4">
+          <div className="rounded-lg border border-gray-200 p-3">
             <div className="flex items-center justify-between">
               <div>
                 <div className={labelClass}>Resto multimedia</div>
-                <p className="mt-1 text-xs text-gray-500">Hasta 2 recursos adicionales.</p>
+                <p className="mt-0.5 text-[11px] text-gray-500">Hasta 2 recursos adicionales.</p>
               </div>
               <button
                 type="button"
                 onClick={addRest}
                 disabled={form.restMedia.length >= 2}
-                className="min-h-[44px] rounded-lg border border-gray-200 px-3 py-2 text-xs font-bold text-gray-700 disabled:opacity-50 sm:min-h-0"
+                className="min-h-[40px] rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-bold text-gray-700 disabled:opacity-50 sm:min-h-0"
               >
                 + Cargar más
               </button>
             </div>
-            <div className="mt-4 space-y-4">
+            <div className="mt-3 space-y-3">
               {form.restMedia.map((v, i) => (
                 <MultimediaUploadZone
                   key={`rest-media-${i}`}
@@ -83,15 +81,15 @@ export function ContentTab({
           </div>
 
           {form.tipo_soporte === 'tradicional' && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className={labelClass}>Atributos visibles</div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 <BadgeField label="Formato" value={form.traditional.formato} />
                 <BadgeField label="Medidas" value={form.traditional.medidas} />
                 <BadgeField label="Caras" value={form.traditional.caras} />
                 <BadgeField label="Impresión" value={form.traditional.impresion} />
               </div>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-3 md:grid-cols-2">
                 <Field label="Formato" value={form.traditional.formato} onChange={(v) => setNested('traditional', { formato: v })} />
                 <Field label="Medidas" value={form.traditional.medidas} onChange={(v) => setNested('traditional', { medidas: v })} />
                 <Field label="Impactos mensuales" value={form.traditional.monthly_impacts} onChange={(v) => setNested('traditional', { monthly_impacts: v })} type="number" />
@@ -102,15 +100,15 @@ export function ContentTab({
           )}
 
           {form.tipo_soporte === 'led' && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className={labelClass}>Atributos visibles</div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 <BadgeField label="Formato" value={form.led.formato} />
                 <BadgeField label="Medidas" value={form.led.medidas} />
                 <BadgeField label="Resolución" value={form.led.resolucion} />
                 <BadgeField label="Frecuencia" value={form.led.frecuencia} />
               </div>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-3 md:grid-cols-2">
                 <Field label="Formato" value={form.led.formato} onChange={(v) => setNested('led', { formato: v })} />
                 <Field label="Medidas" value={form.led.medidas} onChange={(v) => setNested('led', { medidas: v })} />
                 <Field label="Resolución" value={form.led.resolucion} onChange={(v) => setNested('led', { resolucion: v })} />
@@ -123,15 +121,15 @@ export function ContentTab({
           )}
 
           {form.tipo_soporte === 'led_movil' && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className={labelClass}>Atributos visibles</div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 <BadgeField label="Pantalla" value={form.mobile.pantalla} />
                 <BadgeField label="Resolución" value={form.mobile.resolucion} />
                 <BadgeField label="Spot" value={form.mobile.spot_duration} />
                 <BadgeField label="Salidas" value={form.mobile.minimum_daily_outings} />
               </div>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-3 md:grid-cols-2">
                 <Field label="Pantalla / formato" value={form.mobile.pantalla} onChange={(v) => setNested('mobile', { pantalla: v })} />
                 <Field label="Duración" value={form.mobile.duration} onChange={(v) => setNested('mobile', { duration: v })} />
                 <div>
@@ -142,7 +140,7 @@ export function ContentTab({
                     type="number"
                     placeholder="Ej. 5782520"
                   />
-                  <p className="mt-1 text-[11px] text-gray-500">Dato editorial manual. No se calcula automáticamente.</p>
+                  <p className="mt-0.5 text-[11px] text-gray-500">Dato editorial manual.</p>
                 </div>
                 <Field label="Resolución" value={form.mobile.resolucion} onChange={(v) => setNested('mobile', { resolucion: v })} />
                 <Field label="Duración de spot" value={form.mobile.spot_duration} onChange={(v) => setNested('mobile', { spot_duration: v })} />
@@ -153,12 +151,12 @@ export function ContentTab({
             </div>
           )}
 
-          <div className="flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3">
+          <div className="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2.5">
             <div className="text-sm font-bold text-gray-900">¿Publicar como destacado?</div>
             <button
               type="button"
               onClick={() => set({ isFeatured: !form.isFeatured })}
-              className={`min-h-[44px] rounded-full px-4 py-2 text-xs font-bold sm:min-h-0 ${
+              className={`min-h-[40px] rounded-full px-3 py-1.5 text-xs font-bold sm:min-h-0 ${
                 form.isFeatured ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600'
               }`}
             >
