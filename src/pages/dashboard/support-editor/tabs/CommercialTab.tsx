@@ -20,16 +20,16 @@ export function CommercialTab({ form, set, setNested, pricingTotal }: Props) {
       <section className={sectionClass}>
         <div>
           <div className="text-eyebrow text-gray-500">COMERCIAL Y FECHAS</div>
-          <h2 className="mt-1 text-lg font-bold text-gray-900">Configuración comercial</h2>
+          <h2 className="mt-1 text-base font-bold text-gray-900">Configuración comercial</h2>
         </div>
-        <div className="mt-5 space-y-5">
-          <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+        <div className="mt-3 space-y-3">
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
             <div className={labelClass}>Disponibilidad</div>
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-2 flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => set({ disponibilidad: 'disponible', reservedFrom: '', reservedUntil: '' })}
-                className={`min-h-[44px] rounded-xl px-4 py-2.5 text-sm font-bold sm:min-h-0 ${
+                className={`min-h-[40px] rounded-lg px-3 py-2 text-xs font-bold sm:min-h-0 ${
                   form.disponibilidad === 'disponible'
                     ? 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200'
                     : 'text-gray-500'
@@ -40,7 +40,7 @@ export function CommercialTab({ form, set, setNested, pricingTotal }: Props) {
               <button
                 type="button"
                 onClick={() => set({ disponibilidad: 'reservado' })}
-                className={`min-h-[44px] rounded-xl px-4 py-2.5 text-sm font-bold sm:min-h-0 ${
+                className={`min-h-[40px] rounded-lg px-3 py-2 text-xs font-bold sm:min-h-0 ${
                   form.disponibilidad === 'reservado'
                     ? 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200'
                     : 'text-gray-500'
@@ -50,19 +50,20 @@ export function CommercialTab({ form, set, setNested, pricingTotal }: Props) {
               </button>
             </div>
             {form.disponibilidad === 'reservado' && (
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <Field label="Desde" type="date" value={form.reservedFrom} onChange={(v) => set({ reservedFrom: v })} />
                 <Field label="Hasta" type="date" value={form.reservedUntil} onChange={(v) => set({ reservedUntil: v })} />
               </div>
             )}
           </div>
-          <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-            <div className={labelClass}>Publicación</div>
-            <div className="mt-3 flex gap-2">
+
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+            <div className={labelClass}>Estado de publicación</div>
+            <div className="mt-2 flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => set({ active: true })}
-                className={`min-h-[44px] rounded-xl px-4 py-2.5 text-sm font-bold sm:min-h-0 ${
+                className={`min-h-[40px] rounded-lg px-3 py-2 text-xs font-bold sm:min-h-0 ${
                   form.active ? 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200' : 'text-gray-500'
                 }`}
               >
@@ -71,7 +72,7 @@ export function CommercialTab({ form, set, setNested, pricingTotal }: Props) {
               <button
                 type="button"
                 onClick={() => set({ active: false })}
-                className={`min-h-[44px] rounded-xl px-4 py-2.5 text-sm font-bold sm:min-h-0 ${
+                className={`min-h-[40px] rounded-lg px-3 py-2 text-xs font-bold sm:min-h-0 ${
                   !form.active ? 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200' : 'text-gray-500'
                 }`}
               >
@@ -79,9 +80,10 @@ export function CommercialTab({ form, set, setNested, pricingTotal }: Props) {
               </button>
             </div>
           </div>
-          <div className="border-t border-gray-100 pt-5">
-            <div className="text-eyebrow text-gray-500">PRICING INTERNO</div>
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
+
+          <div className="border-t border-gray-100 pt-3">
+            <div className="text-[10px] font-extrabold uppercase tracking-wider text-gray-500">PRICING INTERNO</div>
+            <div className="mt-3 grid gap-3 md:grid-cols-2">
               <Field label="Exhibición" value={form.pricing.exhibition} onChange={(v) => setNested('pricing', { exhibition: v })} />
               <Field label="Instalación" value={form.pricing.installation} onChange={(v) => setNested('pricing', { installation: v })} />
               {form.tipo_soporte === 'tradicional' && (
@@ -93,12 +95,12 @@ export function CommercialTab({ form, set, setNested, pricingTotal }: Props) {
               )}
               <Field label="Moneda" value={form.pricing.currency} onChange={(v) => setNested('pricing', { currency: v })} />
             </div>
-            <div className="mt-4 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/60 px-4 py-3">
+            <div className="mt-3 flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50/60 px-3 py-2.5">
               <div>
                 <div className={labelClass}>TOTAL SOPORTE</div>
-                <div className="mt-1 text-xs text-gray-500">Exhibición + Instalación + Impresión</div>
+                <div className="mt-0.5 text-[11px] text-gray-500">Exhibición + Instalación + Impresión</div>
               </div>
-              <div className="text-xl font-extrabold text-emerald-900">
+              <div className="text-lg font-extrabold text-emerald-900">
                 {formatSupportCurrency(pricingTotal, form.pricing.currency || 'ARS')}
               </div>
             </div>
