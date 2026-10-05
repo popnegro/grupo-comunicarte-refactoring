@@ -48,27 +48,27 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
   if (loading) {
     return (
       <DashboardShell>
-        <div className="mx-auto max-w-5xl py-20 text-center text-sm text-gray-500">Cargando soporte…</div>
+        <div className="mx-auto max-w-5xl py-16 text-center text-sm text-gray-500">Cargando soporte…</div>
       </DashboardShell>
     );
   }
 
   return (
     <DashboardShell>
-      <div className="mx-auto max-w-7xl space-y-5 pb-14">
-        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="mx-auto max-w-7xl space-y-4 pb-10">
+        <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <button
               type="button"
               onClick={() => handleNavigateWithConfirm('/dashboard/soportes')}
-              className="mb-2 inline-flex min-h-[44px] items-center gap-2 text-xs font-bold text-gray-500 hover:text-gray-900 sm:min-h-0"
+              className="mb-1 inline-flex min-h-[40px] items-center gap-2 text-xs font-semibold text-gray-500 hover:text-gray-900 sm:min-h-0"
             >
               <ArrowLeft className="h-4 w-4" /> Gestión de Soportes
             </button>
             <div className="text-eyebrow text-emerald-700">
               {mode === 'create' ? 'ALTA DE PRODUCTO' : 'EDICIÓN DE PRODUCTO'} · {theme.label}
             </div>
-            <h1 className="mt-2 text-page-title text-gray-900">
+            <h1 className="mt-1 text-page-title text-gray-900">
               {mode === 'create' ? 'Nuevo soporte' : form.publicName || 'Editar soporte'}
             </h1>
           </div>
@@ -85,15 +85,15 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
                 onClick={() =>
                   handleNavigateWithConfirm(`/dashboard/soportes/${encodeURIComponent(canonicalId)}/preview`)
                 }
-                className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-bold text-gray-700 sm:min-h-[40px]"
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-600 sm:min-h-[36px]"
               >
-                <Eye className="h-4 w-4" /> Preview completa
+                <Eye className="h-4 w-4" /> Preview
               </button>
             )}
             <button
               type="button"
               onClick={() => handleNavigateWithConfirm('/dashboard/soportes')}
-              className="min-h-[44px] rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-bold text-gray-700 sm:min-h-[40px]"
+              className="min-h-[44px] rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-600 sm:min-h-[36px]"
             >
               Cancelar
             </button>
@@ -101,7 +101,7 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
               type="button"
               disabled={saving}
               onClick={save}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-gray-900 px-4 py-2.5 text-xs font-bold text-white disabled:opacity-50 sm:min-h-[40px]"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-xs font-bold text-white disabled:opacity-50 sm:min-h-[36px]"
             >
               <Save className="h-4 w-4" />
               {saving ? 'Guardando…' : mode === 'create' ? 'Crear soporte' : 'Guardar cambios'}
@@ -110,17 +110,13 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
         </header>
 
         {error && (
-          <div role="alert" className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+          <div role="alert" className="rounded-lg border border-red-100 bg-red-50 px-3 py-2.5 text-sm font-semibold text-red-700">
             {error}
           </div>
         )}
 
         <div className="border-b border-gray-200">
-          <div
-            role="tablist"
-            aria-label="Secciones del editor"
-            className="flex flex-nowrap gap-2 overflow-x-auto pb-2 scrollbar-none"
-          >
+          <div role="tablist" aria-label="Secciones del editor" className="flex flex-nowrap gap-1 overflow-x-auto pb-1 scrollbar-none">
             {TAB_ITEMS.map((t, idx, arr) => {
               const Icon = t.icon;
               const isActive = activeTab === t.id;
@@ -156,13 +152,13 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
                   tabIndex={isActive ? 0 : -1}
                   onClick={() => setActiveTab(t.id)}
                   onKeyDown={handleKeyDown}
-                  className={`flex min-h-[44px] items-center gap-2 whitespace-nowrap border-b-2 px-4 py-2.5 text-xs font-bold transition focus:outline-none sm:min-h-0 ${
+                  className={`flex min-h-[40px] items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2 text-xs font-bold transition focus:outline-none sm:min-h-0 ${
                     isActive
                       ? 'border-gray-950 text-gray-950'
                       : 'border-transparent text-gray-500 hover:border-gray-200 hover:text-gray-900'
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-3.5 w-3.5" />
                   <span>{t.label}</span>
                 </button>
               );
@@ -170,8 +166,8 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
           </div>
         </div>
 
-        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.85fr)_minmax(0,1fr)]">
-          <div className="space-y-5">
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.85fr)_minmax(0,1fr)]">
+          <div className="space-y-3">
             {activeTab === 'general' && (
               <GeneralTab form={form} canonicalId={canonicalId} typeLabel={typeLabel} set={set} />
             )}
@@ -205,20 +201,17 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
           </div>
 
           <aside id="support-card-preview" className="lg:sticky lg:top-6">
-            <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-              <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="rounded-xl border border-gray-200 bg-white p-3">
+              <div className="mb-3 flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-eyebrow text-gray-500">PREVIEW COMPLETA</div>
-                  <h2 className="mt-1 text-lg font-bold text-gray-900">Cómo se publicará</h2>
-                  <p className="mt-1 text-xs text-gray-500">
-                    Una única vista canónica compartida por las cuatro secciones del editor.
-                  </p>
+                  <div className="text-eyebrow text-gray-500">PREVIEW</div>
+                  <h2 className="mt-0.5 text-base font-bold text-gray-900">Cómo se publicará</h2>
                 </div>
-                <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-emerald-700">
-                  En tiempo real
+                <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
+                  En vivo
                 </span>
               </div>
-              <div className="rounded-xl bg-gray-50 p-3">
+              <div className="rounded-lg bg-gray-50 p-2">
                 <SupportCard item={previewItem} variant="catalog" />
               </div>
             </div>
@@ -232,11 +225,11 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
               const el = document.getElementById('support-card-preview');
               if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }}
-            className="flex items-center gap-2 rounded-full bg-gray-900 px-4 py-3 text-xs font-bold text-white shadow-xl transition-transform hover:bg-gray-800 active:scale-95"
+            className="flex items-center gap-2 rounded-full bg-gray-900 px-4 py-3 text-xs font-bold text-white shadow-xl"
             aria-label="Ver preview del soporte"
           >
             <Eye className="h-4 w-4" />
-            <span>Ver preview</span>
+            <span>Preview</span>
           </button>
         </div>
       </div>
