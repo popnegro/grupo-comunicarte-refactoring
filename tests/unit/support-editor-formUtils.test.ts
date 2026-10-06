@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { extractCoordsFromUrl, isFormDirty, normalize, payloadFrom } from '../../src/pages/dashboard/support-editor/formUtils';
+import { extractCoordsFromUrl, isFormDirty, normalize, numeric, payloadFrom } from '../../src/pages/dashboard/support-editor/formUtils';
 import { emptyForm } from '../../src/pages/dashboard/support-editor/types';
 
 test('extractCoordsFromUrl parses Google Maps @ coordinates', () => {
@@ -55,4 +55,18 @@ test('isFormDirty detects nested field changes', () => {
   const changed = { ...emptyForm, traditional: { ...emptyForm.traditional, monthly_impacts: '123' } };
   assert.equal(isFormDirty(emptyForm, changed), true);
   assert.equal(isFormDirty(emptyForm, emptyForm), false);
+});
+
+
+test('numeric keeps optional values empty and rejects invalid values', () => {
+  assert.equal(numeric(''), '');
+  assert.equal(numeric(null), '');
+  assert.equal(numeric('123'), 123);
+  assert.equal(numeric('not-a-number'), '');
+});
+
+test('payloadFrom preserves empty optional monthly impacts as null', () => {
+  const form = { ...emptyForm, publicName: 'Soporte test', traditional: { ...emptyForm.traditional, monthly_impacts: '' } };
+  const payload = payloadFrom(form);
+  assert.equal(payload.technical.monthly_impacts, null);
 });
