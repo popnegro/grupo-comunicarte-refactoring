@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { FilePlus2, FileText, MapPin, MonitorSmartphone, ArrowUpRight, ClipboardList, PackageOpen } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
 import { KPICard } from '../../components/dashboard/ui/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/dashboard/ui/Card';
@@ -12,7 +12,6 @@ const emptyStats: Stats = { total:0, available:0, reserved:0, inactive:0, mendoz
 function formatDate(value: unknown) { if (!value) return ''; const d = new Date(String(value)); return Number.isNaN(d.getTime()) ? '' : new Intl.DateTimeFormat('es-AR',{day:'2-digit',month:'short'}).format(d); }
 
 export default function Dashboard() {
-  const navigate = useNavigate();
   const [stats,setStats]=useState<Stats>(emptyStats); const [requests,setRequests]=useState<any[]>([]); const [loading,setLoading]=useState(true); const [error,setError]=useState('');
   useEffect(()=>{ let cancelled=false; (async()=>{try{const [sr,rr]=await Promise.all([apiFetch('/api/admin/stats'),apiFetch('/api/admin/requests')]); const [sj,rj]=await Promise.all([sr.json(),rr.json()]); if(!sr.ok||sj.status!=='success')throw new Error(sj.message||'No pudimos cargar el resumen.'); if(!cancelled){setStats({...emptyStats,...sj.data});setRequests(rj.status==='success'?rj.data:[]);}}catch(e){if(!cancelled)setError(e instanceof Error?e.message:'No pudimos cargar el resumen.');}finally{if(!cancelled)setLoading(false);}})(); return()=>{cancelled=true;};},[]);
   const availableRate=stats.total?Math.round(stats.available/stats.total*100):0; const occupancyRate=stats.total?Math.round(stats.reserved/stats.total*100):0; const recent=requests.slice(0,5);
