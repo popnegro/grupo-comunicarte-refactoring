@@ -42,7 +42,6 @@ export function DashboardShell({ children }: DashboardShellProps) {
     let cancelled = false;
 
     const loadNewLeadsCount = async () => {
-      const token = localStorage.getItem('admin_token');
       if (!token) return;
 
       try {
