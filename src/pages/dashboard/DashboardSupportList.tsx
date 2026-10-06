@@ -29,10 +29,6 @@ export default function DashboardSupportList() {
   };
 
   const load = async () => {
-    if (!token) {
-      navigate('/login');
-      return;
-    }
     setLoading(true);
     try {
       const res = await apiFetch('/api/admin/supports', {
