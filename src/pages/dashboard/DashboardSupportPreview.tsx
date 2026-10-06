@@ -20,9 +20,9 @@ export default function DashboardSupportPreview() {
         const token = localStorage.getItem('admin_token');
         if (!token) return navigate('/login');
         const response = await apiFetch(`/api/admin/supports/${encodeURIComponent(canonicalId || '')}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          
         });
-        if (response.status === 401) return navigate('/login');
+        
         const json = await response.json();
         if (!response.ok || json.status !== 'success') throw new Error(json.message || 'No se pudo cargar la vista previa.');
         setItem(json.data as InventoryItem);
