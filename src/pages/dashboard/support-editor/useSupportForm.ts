@@ -30,13 +30,8 @@ export function useSupportForm(explicitMode?: 'create' | 'edit') {
     let cancelled = false;
     (async () => {
       try {
-        const token = localStorage.getItem('admin_token');
-        if (!token) return navigate('/login');
-        const r = await apiFetch(`/api/admin/supports/${encodeURIComponent(canonicalId)}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const r = await apiFetch(`/api/admin/supports/${encodeURIComponent(canonicalId)}`);
         const j = await r.json();
-        if (r.status === 401) return navigate('/login');
         if (!r.ok || j.status !== 'success') throw new Error(j.message || 'No se pudo cargar el soporte.');
         if (cancelled) return;
         const normalized = normalize(j.data);
@@ -214,8 +209,6 @@ export function useSupportForm(explicitMode?: 'create' | 'edit') {
     setError('');
     setSaving(true);
     try {
-      const token = localStorage.getItem('admin_token');
-      if (!token) return navigate('/login');
       const payload = payloadFrom(form);
       const url =
         mode === 'create'
@@ -223,11 +216,10 @@ export function useSupportForm(explicitMode?: 'create' | 'edit') {
           : `/api/admin/supports/${encodeURIComponent(canonicalId || '')}`;
       const r = await apiFetch(url, {
         method: mode === 'create' ? 'POST' : 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
       const j = await r.json();
-      if (r.status === 401) return navigate('/login');
       if (!r.ok || j.status !== 'success') {
         throw new Error(j.message || 'No se pudo guardar el soporte.');
       }
