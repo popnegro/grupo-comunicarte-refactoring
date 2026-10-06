@@ -33,9 +33,8 @@ export default function DashboardSupportReservation() {
     if (!canonicalId) return;
     (async () => {
       try {
-        const token = localStorage.getItem('admin_token');
-        if (!token) return navigate('/login');
-        const response = await apiFetch(`/api/admin/supports/${encodeURIComponent(canonicalId)}`, { headers: { Authorization: `Bearer ${token}` } });
+
+        const response = await apiFetch(`/api/admin/supports/${encodeURIComponent(canonicalId)}`, {  });
         const json = await response.json();
         
         if (!response.ok || json.status !== 'success') throw new Error(json.message || 'No se pudo cargar el soporte.');
@@ -61,8 +60,7 @@ export default function DashboardSupportReservation() {
     }
     setSaving(true);
     try {
-      const token = localStorage.getItem('admin_token');
-      if (!token) return navigate('/login');
+
       const availableFrom = form.disponibilidad === 'reservado' ? `${form.from}|${form.until}` : null;
       const response = await apiFetch(`/api/admin/supports/${encodeURIComponent(canonicalId)}`, {
         method: 'PATCH',
