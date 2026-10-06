@@ -29,7 +29,6 @@ export default function DashboardSupportList() {
   };
 
   const load = async () => {
-    const token = localStorage.getItem('admin_token');
     if (!token) {
       navigate('/login');
       return;
@@ -58,7 +57,6 @@ export default function DashboardSupportList() {
 
   const handleConfirmArchive = async () => {
     if (!supportToArchive) return;
-    const token = localStorage.getItem('admin_token');
     setIsArchiving(true);
     try {
       const res = await apiFetch(`/api/admin/supports/${encodeURIComponent(supportToArchive.canonical_id)}`, {
@@ -81,7 +79,6 @@ export default function DashboardSupportList() {
   };
 
   const duplicate = async (item: Support) => {
-    const token = localStorage.getItem('admin_token');
     try {
       const detailRes = await apiFetch(`/api/admin/supports/${encodeURIComponent(item.canonical_id)}`, {
         
