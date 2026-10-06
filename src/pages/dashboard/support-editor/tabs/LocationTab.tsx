@@ -1,5 +1,5 @@
 import type { FormState } from '../types';
-import { Field, inputClass, labelClass, sectionClass } from '../Field';
+import { Field, inputClass, labelClass, sectionClass } from '../../../../components/dashboard/ui/Field';
 import { extractCoordsFromUrl } from '../formUtils';
 
 type Props = {

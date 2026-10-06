@@ -1,5 +1,5 @@
 import type { FormState, Plaza, SupportType } from '../types';
-import { Field, inputClass, labelClass, sectionClass, textareaClass } from '../Field';
+import { Field, inputClass, labelClass, sectionClass, textareaClass } from '../../../../components/dashboard/ui/Field';
 
 type Props = {
   form: FormState;

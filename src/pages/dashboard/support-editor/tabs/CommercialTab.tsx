@@ -1,5 +1,5 @@
 import type { FormState } from '../types';
-import { Field, labelClass, sectionClass } from '../Field';
+import { Field, labelClass, sectionClass } from '../../../../components/dashboard/ui/Field';
 import { formatSupportCurrency } from '../../../../lib/supportPricing';
 
 type Props = {

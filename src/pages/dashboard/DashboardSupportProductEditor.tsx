@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { ArrowLeft, DollarSign, Eye, Info, MapPin, Save, Sparkles } from 'lucide-react';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
 import { SupportCard } from '../../components/inventory/SupportCard';
@@ -16,6 +18,16 @@ const TAB_ITEMS: { id: EditorTab; label: string; icon: typeof Info }[] = [
 ];
 
 export default function DashboardSupportProductEditor({ mode: explicitMode }: { mode?: 'create' | 'edit' }) {
+  const location = useLocation();
+  const [toast, setToast] = useState('');
+  useEffect(() => {
+    const message = (location.state as { toast?: { type?: string; message?: string } } | null)?.toast?.message;
+    if (!message) return;
+    setToast(message);
+    const timer = window.setTimeout(() => setToast(''), 3200);
+    return () => window.clearTimeout(timer);
+  }, [location.state]);
+
   const {
     mode,
     canonicalId,
@@ -55,6 +67,11 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
 
   return (
     <DashboardShell>
+      {toast && (
+        <div role="status" aria-live="polite" className="fixed right-4 top-20 z-[60] rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm font-semibold text-emerald-800 shadow-lg">
+          {toast}
+        </div>
+      )}
       <div className="mx-auto max-w-7xl space-y-4 pb-10">
         <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -166,7 +183,13 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
           </div>
         </div>
 
-        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.85fr)_minmax(0,1fr)]">
+        <div
+          id={`editor-panel-${activeTab}`}
+          role="tabpanel"
+          aria-labelledby={`editor-tab-${activeTab}`}
+          tabIndex={0}
+          className="grid items-start gap-4 outline-none lg:grid-cols-[minmax(0,1.85fr)_minmax(0,1fr)]"
+        >
           <div className="space-y-3">
             {activeTab === 'general' && (
               <GeneralTab form={form} canonicalId={canonicalId} typeLabel={typeLabel} set={set} />
