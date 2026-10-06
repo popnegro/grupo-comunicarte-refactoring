@@ -87,7 +87,6 @@ export default function DashboardMediaKitWorkflow() {
     try {
       const r = await apiFetch('/api/admin/requests', { headers: { Authorization: `Bearer ${token}` } });
       if (r.status === 401) {
-        localStorage.removeItem('admin_token');
         navigate('/login');
         return;
       }
@@ -174,7 +173,7 @@ export default function DashboardMediaKitWorkflow() {
     const kitId = `KIT-${selected.requestId}`;
     const r = await apiFetch('/api/admin/mediakits', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         kitId,
         sourceRequestId: selected.requestId,
@@ -210,7 +209,7 @@ export default function DashboardMediaKitWorkflow() {
       }
       const r = await apiFetch(`/api/admin/requests/${encodeURIComponent(lead.requestId)}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: persisted }),
       });
       const j = await r.json().catch(() => null);
@@ -255,7 +254,7 @@ export default function DashboardMediaKitWorkflow() {
       setSupports(filtered);
       const token = localStorage.getItem('admin_token');
       const kitResponse = await apiFetch(`/api/admin/mediakits/KIT-${encodeURIComponent(lead.requestId)}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        
       });
       if (kitResponse.ok) {
         const kitJson = await kitResponse.json().catch(() => null);
