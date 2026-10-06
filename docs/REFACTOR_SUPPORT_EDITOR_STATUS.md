@@ -1,25 +1,25 @@
 # Support Editor & List Refactor — Status
 
-**Branch:** `feat/dashboard-look-and-feel`  
-**Date:** 2026-10-05
+**Branch:** `pmv-production-refinement`  
+**Date:** 2026-10-06
 
 ## Completed (engineering)
 
 | Block | Item |
 |-------|------|
-| A1–A5 | Editor modular (`support-editor/*` + thin orchestrator) |
+| A1–A10 | Editor modular (`support-editor/*` + shared UI + theme governance + feedback + legacy cleanup) |
 | B1 | List filters hook + thin page + `SupportListView` |
 | C1 | CI on `feat/**` |
 | C2 | TS APIs fixed; local + GH CI lint/build green |
 | E | Visual density (Field tokens, tabs, list, editor shell) |
-| **G** | Human gate doc + automated gates verified; **pending human Preview sign-off** |
+| **Security** | HttpOnly admin session + numeric field contract + upload logging cleanup |
 
 ## G — Human gate
 
 See `docs/HUMAN_GATE_SUPPORTS_REFACTOR.md`.
 
-- Machine: lint/build ✅
-- Human: checklist in that doc must be ticked on Preview (desktop + mobile)
+- Machine: lint/build/unit/smoke/Visual QA must be green on final HEAD.
+- Human: final Preview checklist remains the only visual sign-off.
 
 ## Structure
 
@@ -37,4 +37,4 @@ src/pages/dashboard/
 
 ## Promote
 
-Blocked only on human Preview checklist + CI green on final HEAD.
+Blocked only on final machine checks + human Preview checklist.
