@@ -25,13 +25,23 @@ El alta y la edición comparten:
 - preview único sticky en desktop;
 - indicador de cambios sin guardar;
 - CTA contextual: Crear soporte / Guardar cambios;
-- feedback de guardado exitoso.
+- feedback de guardado exitoso;
+- controles de formulario basados en la UI compartida del Dashboard.
 
 ### Theme governance
 
-`supportEditorThemes.ts` gobierna las secciones y campos técnicos visibles. No se deben reintroducir condicionales de UI basados directamente en `tipo_soporte` cuando exista una regla equivalente en el theme.
+`supportEditorThemes.ts` gobierna las secciones y campos técnicos visibles mediante `isEditorSectionVisible()` e `isEditorFieldVisible()`. No se deben reintroducir condicionales de UI basados directamente en `tipo_soporte` cuando exista una regla equivalente en el theme.
 
-### Flujo de aceptación
+### Calidad
+
+- CI: **PASS**
+- Visual QA: **PASS**
+- Smoke E2E: **DONE** — create → edit → preview → list filter
+- Unit tests: **DONE** — normalize / payloadFrom / extractCoordsFromUrl / dirty-check
+- A10 legacy Connected passthrough: **eliminado**
+- `Field.tsx` duplicado del editor: **eliminado**; se usa `components/dashboard/ui/Field.tsx`.
+
+## Flujo de aceptación
 
 ```text
 Explorar
