@@ -78,18 +78,9 @@ export default function DashboardMediaKitWorkflow() {
   };
 
   const load = async () => {
-    const token = localStorage.getItem('admin_token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
     setIsFetchingLeads(true);
     try {
-      const r = await apiFetch('/api/admin/requests', { headers: { Authorization: `Bearer ${token}` } });
-      if (r.status === 401) {
-        navigate('/login');
-        return;
-      }
+      const r = await apiFetch('/api/admin/requests');
       const j = await r.json();
       if (j.status !== 'success') throw new Error(j.message || 'No pudimos cargar las solicitudes.');
       setLeads(
@@ -169,7 +160,6 @@ export default function DashboardMediaKitWorkflow() {
       notify('Complete el precio de todos los soportes antes de guardar.');
       return false;
     }
-    const token = localStorage.getItem('admin_token');
     const kitId = `KIT-${selected.requestId}`;
     const r = await apiFetch('/api/admin/mediakits', {
       method: 'POST',
@@ -197,11 +187,6 @@ export default function DashboardMediaKitWorkflow() {
   const changeStatus = async (lead: LeadRequest, next: WorkflowStatus) => {
     setBusy(true);
     try {
-      const token = localStorage.getItem('admin_token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
       const persisted = next === 'request' ? 'pending' : next === 'in_progress' ? 'contactado' : 'enviado';
       if (next === 'done') {
         const saved = await persistMediaKit('ready');
@@ -252,7 +237,6 @@ export default function DashboardMediaKitWorkflow() {
         throw new Error(`No pudimos recuperar ${missingIds.length} soporte(s) solicitado(s) desde el inventario.`);
       }
       setSupports(filtered);
-      const token = localStorage.getItem('admin_token');
       const kitResponse = await apiFetch(`/api/admin/mediakits/KIT-${encodeURIComponent(lead.requestId)}`, {
         
       });
