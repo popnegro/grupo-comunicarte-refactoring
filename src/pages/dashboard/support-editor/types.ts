@@ -2,6 +2,7 @@ export type SupportType = 'tradicional' | 'led' | 'led_movil';
 export type MediaKind = 'image' | 'video';
 export type Plaza = 'mendoza' | 'buenos-aires';
 export type EditorTab = 'general' | 'location' | 'content' | 'commercial';
+export type NumericFieldValue = number | '';
 
 export type FormState = {
   publicName: string;
@@ -21,9 +22,9 @@ export type FormState = {
   traditional: {
     formato: string;
     medidas: string;
-    caras: string;
+    caras: NumericFieldValue;
     impresion: string;
-    monthly_impacts: string;
+    monthly_impacts: NumericFieldValue;
   };
   led: {
     formato: string;
@@ -31,25 +32,25 @@ export type FormState = {
     resolucion: string;
     frecuencia: string;
     video_mode: string;
-    spot_duration: string;
-    monthly_impacts: string;
+    spot_duration: NumericFieldValue;
+    monthly_impacts: NumericFieldValue;
   };
   mobile: {
     pantalla: string;
     resolucion: string;
-    spot_duration: string;
-    minimum_daily_outings: string;
+    spot_duration: NumericFieldValue;
+    minimum_daily_outings: NumericFieldValue;
     recorrido: string;
     operation_days: string;
-    duration: string;
-    monthly_impacts: string;
+    duration: NumericFieldValue;
+    monthly_impacts: NumericFieldValue;
   };
   pricing: {
-    exhibition: string;
-    installation: string;
-    printing: string;
-    monthly: string;
-    exclusive: string;
+    exhibition: NumericFieldValue;
+    installation: NumericFieldValue;
+    printing: NumericFieldValue;
+    monthly: NumericFieldValue;
+    exclusive: NumericFieldValue;
     currency: string;
   };
   reservedFrom: string;
@@ -72,33 +73,9 @@ export const emptyForm: FormState = {
   coverKind: 'image',
   restMedia: [],
   traditional: { formato: '', medidas: '', caras: '', impresion: '', monthly_impacts: '' },
-  led: {
-    formato: '',
-    medidas: '',
-    resolucion: '',
-    frecuencia: '',
-    video_mode: '',
-    spot_duration: '',
-    monthly_impacts: '',
-  },
-  mobile: {
-    pantalla: '',
-    resolucion: '',
-    spot_duration: '',
-    minimum_daily_outings: '',
-    recorrido: '',
-    operation_days: '',
-    duration: '',
-    monthly_impacts: '',
-  },
-  pricing: {
-    exhibition: '',
-    installation: '',
-    printing: '',
-    monthly: '',
-    exclusive: '',
-    currency: 'ARS',
-  },
+  led: { formato: '', medidas: '', resolucion: '', frecuencia: '', video_mode: '', spot_duration: '', monthly_impacts: '' },
+  mobile: { pantalla: '', resolucion: '', spot_duration: '', minimum_daily_outings: '', recorrido: '', operation_days: '', duration: '', monthly_impacts: '' },
+  pricing: { exhibition: '', installation: '', printing: '', monthly: '', exclusive: '', currency: 'ARS' },
   reservedFrom: '',
   reservedUntil: '',
 };
