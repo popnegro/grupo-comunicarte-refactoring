@@ -42,7 +42,6 @@ export function DashboardShell({ children }: DashboardShellProps) {
     let cancelled = false;
 
     const loadNewLeadsCount = async () => {
-      if (!token) return;
 
       try {
         const response = await apiFetch('/api/admin/requests', {
