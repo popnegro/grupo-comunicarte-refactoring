@@ -17,7 +17,6 @@ export default function DashboardSupportPreview() {
   useEffect(() => {
     const run = async () => {
       try {
-        const token = localStorage.getItem('admin_token');
         if (!token) return navigate('/login');
         const response = await apiFetch(`/api/admin/supports/${encodeURIComponent(canonicalId || '')}`, {
           
