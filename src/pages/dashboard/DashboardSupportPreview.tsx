@@ -17,7 +17,6 @@ export default function DashboardSupportPreview() {
   useEffect(() => {
     const run = async () => {
       try {
-        if (!token) return navigate('/login');
         const response = await apiFetch(`/api/admin/supports/${encodeURIComponent(canonicalId || '')}`, {
           
         });
@@ -32,7 +31,7 @@ export default function DashboardSupportPreview() {
       }
     };
     run();
-  }, [canonicalId, navigate]);
+  }, [canonicalId]);
 
   if (loading) return <DashboardShell><div className="mx-auto max-w-7xl py-16 text-center text-sm text-gray-500"><Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin" />Cargando vista previa…</div></DashboardShell>;
 
