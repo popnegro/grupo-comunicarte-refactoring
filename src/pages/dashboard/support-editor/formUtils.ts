@@ -1,5 +1,5 @@
 import type { SupportFamily } from '../../../types';
-import type { FormState, Plaza, SupportType } from './types';
+import type { FormState, NumericFieldValue, Plaza, SupportType } from './types';
 import { emptyForm } from './types';
 
 export const familyFor = (type: SupportType): SupportFamily =>
@@ -7,39 +7,36 @@ export const familyFor = (type: SupportType): SupportFamily =>
 
 export const text = (v: unknown) => (v == null ? '' : String(v));
 
+/** Numeric form values are deliberately number | '' so empty optional inputs are not coerced to zero. */
+export const numeric = (v: unknown): NumericFieldValue => {
+  if (v === '' || v == null) return '';
+  const n = typeof v === 'number' ? v : Number(v);
+  return Number.isFinite(n) ? n : '';
+};
+
+const numberOrZero = (v: NumericFieldValue) => (v === '' ? 0 : v);
+const numberOrNull = (v: NumericFieldValue) => (v === '' ? null : v);
+
 export const splitPeriod = (v: unknown) => {
   if (typeof v !== 'string' || !v) return { from: '', until: '' };
   const [from, until] = v.split('|');
   return { from: from || '', until: until || '' };
 };
 
-/** Stable dirty check — compares field-by-field without whole-object JSON key-order issues. */
 export function isFormDirty(a: FormState, b: FormState): boolean {
-  if (a.publicName !== b.publicName) return true;
-  if (a.ciudad !== b.ciudad) return true;
-  if (a.tipo_soporte !== b.tipo_soporte) return true;
-  if (a.active !== b.active) return true;
-  if (a.disponibilidad !== b.disponibilidad) return true;
-  if (a.isFeatured !== b.isFeatured) return true;
-  if (a.address !== b.address) return true;
-  if (a.lat !== b.lat) return true;
-  if (a.lng !== b.lng) return true;
-  if (a.mapa_url !== b.mapa_url) return true;
-  if (a.description !== b.description) return true;
-  if (a.coverUrl !== b.coverUrl) return true;
-  if (a.coverKind !== b.coverKind) return true;
-  if (a.reservedFrom !== b.reservedFrom) return true;
-  if (a.reservedUntil !== b.reservedUntil) return true;
-  if (a.restMedia.length !== b.restMedia.length) return true;
-  if (a.restMedia.some((v, i) => v !== b.restMedia[i])) return true;
+  if (a.publicName !== b.publicName || a.ciudad !== b.ciudad || a.tipo_soporte !== b.tipo_soporte) return true;
+  if (a.active !== b.active || a.disponibilidad !== b.disponibilidad || a.isFeatured !== b.isFeatured) return true;
+  if (a.address !== b.address || a.lat !== b.lat || a.lng !== b.lng || a.mapa_url !== b.mapa_url) return true;
+  if (a.description !== b.description || a.coverUrl !== b.coverUrl || a.coverKind !== b.coverKind) return true;
+  if (a.reservedFrom !== b.reservedFrom || a.reservedUntil !== b.reservedUntil) return true;
+  if (a.restMedia.length !== b.restMedia.length || a.restMedia.some((v, i) => v !== b.restMedia[i])) return true;
 
   const nestedKeys = ['traditional', 'led', 'mobile', 'pricing'] as const;
   for (const key of nestedKeys) {
-    const av = a[key] as Record<string, string>;
-    const bv = b[key] as Record<string, string>;
-    for (const k of Object.keys(av)) {
-      if (av[k] !== bv[k]) return true;
-    }
+    const av = a[key] as Record<string, unknown>;
+    const bv = b[key] as Record<string, unknown>;
+    const keys = new Set([...Object.keys(av), ...Object.keys(bv)]);
+    for (const k of keys) if (av[k] !== bv[k]) return true;
   }
   return false;
 }
@@ -47,21 +44,14 @@ export function isFormDirty(a: FormState, b: FormState): boolean {
 export function extractCoordsFromUrl(raw: string): { lat: string; lng: string } | null {
   const cleanText = raw.trim();
   if (!cleanText) return null;
-
   const directMatch = cleanText.match(/^([+-]?\d+(?:\.\d+)?)[,\s]+([+-]?\d+(?:\.\d+)?)$/);
   if (directMatch) return { lat: directMatch[1], lng: directMatch[2] };
-
   const atMatch = cleanText.match(/@([+-]?\d+(?:\.\d+)?),([+-]?\d+(?:\.\d+)?)/);
   if (atMatch) return { lat: atMatch[1], lng: atMatch[2] };
-
-  const queryMatch = cleanText.match(
-    /[?&](?:q|query|loc|location)=([+-]?\d+(?:\.\d+)?),([+-]?\d+(?:\.\d+)?)/,
-  );
+  const queryMatch = cleanText.match(/[?&](?:q|query|loc|location)=([+-]?\d+(?:\.\d+)?),([+-]?\d+(?:\.\d+)?)/);
   if (queryMatch) return { lat: queryMatch[1], lng: queryMatch[2] };
-
   const genericMatch = cleanText.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
   if (genericMatch) return { lat: genericMatch[1], lng: genericMatch[2] };
-
   return null;
 }
 
@@ -90,9 +80,9 @@ export function normalize(item: any): FormState {
     traditional: {
       formato: text(technical.formato || technical.format),
       medidas: text(technical.measures),
-      caras: text(technical.caras),
+      caras: numeric(technical.caras),
       impresion: text(technical.impresion),
-      monthly_impacts: text(technical.monthly_impacts),
+      monthly_impacts: numeric(technical.monthly_impacts),
     },
     led: {
       formato: text(technical.formato || technical.format),
@@ -100,25 +90,25 @@ export function normalize(item: any): FormState {
       resolucion: text(technical.resolution),
       frecuencia: text(technical.daily_frequency),
       video_mode: text(technical.video_mode),
-      spot_duration: text(technical.spot_duration_seconds),
-      monthly_impacts: text(technical.monthly_impacts),
+      spot_duration: numeric(technical.spot_duration_seconds),
+      monthly_impacts: numeric(technical.monthly_impacts),
     },
     mobile: {
       pantalla: text(technical.pantalla || technical.measures),
       resolucion: text(technical.resolution),
-      spot_duration: text(technical.spot_duration_seconds),
-      minimum_daily_outings: text(technical.minimum_daily_outings),
+      spot_duration: numeric(technical.spot_duration_seconds),
+      minimum_daily_outings: numeric(technical.minimum_daily_outings),
       recorrido: text(route.route_name || route.schedule || technical.summary),
       operation_days: text(technical.operation_days || route.weekdays),
-      duration: text(route.duration || technical.route_duration_hours),
-      monthly_impacts: text(technical.monthly_impacts),
+      duration: numeric(route.duration || technical.route_duration_hours),
+      monthly_impacts: numeric(technical.monthly_impacts),
     },
     pricing: {
-      exhibition: text(pricing.exhibition_price),
-      installation: text(pricing.installation_price),
-      printing: text(pricing.printing_price),
-      monthly: text(pricing.monthly_price),
-      exclusive: text(pricing.exclusive_price),
+      exhibition: numeric(pricing.exhibition_price),
+      installation: numeric(pricing.installation_price),
+      printing: numeric(pricing.printing_price),
+      monthly: numeric(pricing.monthly_price),
+      exclusive: numeric(pricing.exclusive_price),
       currency: text(pricing.currency || 'ARS'),
     },
     reservedFrom: text(item?.reservedFrom || period.from),
@@ -127,15 +117,9 @@ export function normalize(item: any): FormState {
 }
 
 export function payloadFrom(form: FormState) {
-  if (form.publicName.trim().length < 2) {
-    throw new Error('Completá el Nombre público del soporte.');
-  }
-  if (form.disponibilidad === 'reservado' && (!form.reservedFrom || !form.reservedUntil)) {
-    throw new Error('Para un soporte reservado, completá Desde y Hasta.');
-  }
-  if (form.disponibilidad === 'reservado' && form.reservedUntil < form.reservedFrom) {
-    throw new Error('La fecha Hasta no puede ser anterior a Desde.');
-  }
+  if (form.publicName.trim().length < 2) throw new Error('Completá el Nombre público del soporte.');
+  if (form.disponibilidad === 'reservado' && (!form.reservedFrom || !form.reservedUntil)) throw new Error('Para un soporte reservado, completá Desde y Hasta.');
+  if (form.disponibilidad === 'reservado' && form.reservedUntil < form.reservedFrom) throw new Error('La fecha Hasta no puede ser anterior a Desde.');
 
   let technical: any = {};
   if (form.tipo_soporte === 'tradicional') {
@@ -143,10 +127,9 @@ export function payloadFrom(form: FormState) {
       summary: form.traditional.formato,
       measures: form.traditional.medidas,
       formato: form.traditional.formato,
-      caras: Number(form.traditional.caras || 0),
+      caras: numberOrZero(form.traditional.caras),
       impresion: form.traditional.impresion,
-      monthly_impacts:
-        form.traditional.monthly_impacts === '' ? null : Number(form.traditional.monthly_impacts),
+      monthly_impacts: numberOrNull(form.traditional.monthly_impacts),
     };
   }
   if (form.tipo_soporte === 'led') {
@@ -157,8 +140,8 @@ export function payloadFrom(form: FormState) {
       resolution: form.led.resolucion,
       daily_frequency: form.led.frecuencia,
       video_mode: form.led.video_mode,
-      spot_duration_seconds: Number(form.led.spot_duration || 0),
-      monthly_impacts: form.led.monthly_impacts === '' ? null : Number(form.led.monthly_impacts),
+      spot_duration_seconds: numberOrZero(form.led.spot_duration),
+      monthly_impacts: numberOrNull(form.led.monthly_impacts),
     };
   }
   if (form.tipo_soporte === 'led_movil') {
@@ -166,12 +149,11 @@ export function payloadFrom(form: FormState) {
       summary: form.mobile.pantalla,
       measures: form.mobile.pantalla,
       resolution: form.mobile.resolucion,
-      spot_duration_seconds: Number(form.mobile.spot_duration || 0),
-      minimum_daily_outings: Number(form.mobile.minimum_daily_outings || 0),
+      spot_duration_seconds: numberOrZero(form.mobile.spot_duration),
+      minimum_daily_outings: numberOrZero(form.mobile.minimum_daily_outings),
       operation_days: form.mobile.operation_days,
-      monthly_impacts:
-        form.mobile.monthly_impacts === '' ? null : Number(form.mobile.monthly_impacts),
-      route_duration_hours: form.mobile.duration === '' ? null : Number(form.mobile.duration),
+      monthly_impacts: numberOrNull(form.mobile.monthly_impacts),
+      route_duration_hours: numberOrNull(form.mobile.duration),
     };
   }
   technical.metadata = { cover_media_type: form.coverKind };
@@ -183,8 +165,7 @@ export function payloadFrom(form: FormState) {
     family: familyFor(form.tipo_soporte),
     active: form.active,
     disponibilidad: form.disponibilidad,
-    availableFrom:
-      form.disponibilidad === 'reservado' ? `${form.reservedFrom}|${form.reservedUntil}` : null,
+    availableFrom: form.disponibilidad === 'reservado' ? `${form.reservedFrom}|${form.reservedUntil}` : null,
     isFeatured: form.isFeatured,
     address: form.address.trim(),
     lat: form.lat === '' ? null : Number(form.lat),
@@ -194,11 +175,11 @@ export function payloadFrom(form: FormState) {
     imageUrls: [form.coverUrl, ...form.restMedia].map((v) => v.trim()).filter(Boolean).slice(0, 3),
     technical,
     pricing: {
-      exhibition_price: Number(form.pricing.exhibition || 0),
-      installation_price: Number(form.pricing.installation || 0),
-      printing_price: Number(form.pricing.printing || 0),
-      monthly_price: Number(form.pricing.monthly || 0),
-      exclusive_price: Number(form.pricing.exclusive || 0),
+      exhibition_price: numberOrZero(form.pricing.exhibition),
+      installation_price: numberOrZero(form.pricing.installation),
+      printing_price: numberOrZero(form.pricing.printing),
+      monthly_price: numberOrZero(form.pricing.monthly),
+      exclusive_price: numberOrZero(form.pricing.exclusive),
       currency: form.pricing.currency,
     },
     ...(form.tipo_soporte === 'led_movil'
@@ -206,7 +187,7 @@ export function payloadFrom(form: FormState) {
           route: {
             route_name: form.mobile.recorrido,
             schedule: form.mobile.operation_days,
-            duration: form.mobile.duration,
+            duration: form.mobile.duration === '' ? null : String(form.mobile.duration),
             route_mode: 'led_mobile',
             routePath: [],
             waypoints: [],
