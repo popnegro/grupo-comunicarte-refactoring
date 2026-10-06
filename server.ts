@@ -186,7 +186,7 @@ export async function createApp() {
       'Set-Cookie',
       `${ADMIN_COOKIE}=${encodeURIComponent(result.token!)}; Path=/; Max-Age=${ADMIN_COOKIE_MAX_AGE}; HttpOnly; SameSite=Lax${secure ? '; Secure' : ''}`,
     );
-    res.status(200).json({ status: 'success', token: result.token, message: 'Autenticación exitosa' });
+    res.status(200).json({ status: 'success', message: 'Autenticación exitosa' });
   });
 
   app.post('/api/admin/logout', (_req, res) => {
