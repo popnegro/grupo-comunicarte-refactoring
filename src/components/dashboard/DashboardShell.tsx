@@ -26,13 +26,16 @@ export function DashboardShell({ children }: DashboardShellProps) {
   const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('admin_token');
-    if (!token) {
-      navigate('/login', { replace: true });
-      return;
-    }
-    setAuthChecked(true);
-  }, [navigate]);
+    let cancelled = false;
+    apiFetch('/api/admin/stats')
+      .then((response) => {
+        if (!cancelled) setAuthChecked(response.ok);
+      })
+      .catch(() => {
+        if (!cancelled) setAuthChecked(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     if (!authChecked) return;
@@ -44,7 +47,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
 
       try {
         const response = await apiFetch('/api/admin/requests', {
-          headers: { Authorization: `Bearer ${token}` },
+          
         });
         if (!response.ok) return;
 
@@ -81,7 +84,6 @@ export function DashboardShell({ children }: DashboardShellProps) {
     `group relative flex min-h-10 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${isActive ? 'bg-gray-950 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-950'}`;
 
   const handleLogout = () => {
-    localStorage.removeItem('admin_token');
     void apiFetch('/api/admin/logout', { method: 'POST' }).finally(() => {
       navigate('/login');
     });
