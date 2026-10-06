@@ -40,7 +40,6 @@ export async function apiFetch(
     path !== '/api/admin/login'
   ) {
     try {
-      localStorage.removeItem('admin_token');
     } catch {
       // ignore storage errors
     }
