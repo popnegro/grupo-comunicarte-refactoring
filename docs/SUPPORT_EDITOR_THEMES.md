@@ -21,6 +21,8 @@ Cada theme define:
 - `hiddenFields`: campos técnicos que no debe ver el operador.
 - `recommendedCardAttributes`: atributos canónicos de la Product Card.
 
+La UI de Contenido aplica `isEditorSectionVisible()` e `isEditorFieldVisible()`; no se debe reintroducir una segunda configuración de visibilidad.
+
 ## Contrato de atributos públicos
 
 - Tradicional: **Medidas · Caras · Impactos / mes**
@@ -53,6 +55,17 @@ DashboardSupportProductEditor
 ```
 
 La lógica de normalización, dirty-check y payload vive en `support-editor/formUtils.ts`; la configuración visual vive en `supportEditorThemes.ts`.
+
+## Estado de cierre
+
+- A3 Shared UI: **DONE**
+- A4 Theme governance: **DONE**
+- A8 Save success feedback: **DONE**
+- A9 Accessible tabs: **DONE**
+- A10 Legacy Connected passthrough: **DONE / eliminado**
+- C3 Smoke E2E create → edit → preview → list filter: **DONE**
+- C4 Unit tests normalize / payloadFrom / extractCoordsFromUrl: **DONE**
+- Visual QA: **PASS** en el último run del commit de cierre PMV.
 
 ## Deuda técnica explícita
 
