@@ -71,22 +71,16 @@ La lógica de normalización, dirty-check y payload vive en `support-editor/form
 
 ### A7 — Tipado numérico del formulario
 
-**Estado:** DEFERRED / no bloqueante para el PMV actual.
+**Estado: DONE.**
 
-El estado de edición mantiene actualmente los valores numéricos como `string` para facilitar la edición de inputs HTML. `payloadFrom()` los transforma al contrato de persistencia.
+Los campos numéricos del estado usan `number | ''`. `normalize()` convierte únicamente valores numéricos finitos y conserva vacío como `''`. `payloadFrom()` transforma explícitamente opcionales vacíos a `null` y aplica cero solo en campos cuyo contrato histórico lo requiere.
 
-**Riesgo:** errores de conversión o validación pueden permanecer ocultos en el estado del formulario y aparecer al construir el payload.
+Tests cubren valores vacíos, inválidos, conversión y payload.
 
-**Criterio de cierre:** migrar los campos numéricos a `number | ''`, o introducir Zod para validar/transformar explícitamente todos los campos numéricos; mantener `''` para opcionales y añadir pruebas de vacío, límites y valores inválidos. `Number(...)` dentro de `payloadFrom()` por sí solo no cierra A7.
+### D1 — Sesión administrativa
 
-### D1 — Token administrativo en localStorage
+**Estado: DONE.**
 
-**Estado:** DEFERRED / deuda de seguridad prioritaria.
+El login establece `gc_admin_token` como cookie `HttpOnly`, `SameSite=Lax` y `Secure` en producción. El token ya no se devuelve al JavaScript ni se persiste en `localStorage`. `apiFetch()` envía `credentials: include`; el backend acepta la cookie y conserva el manejo `401`/reautenticación.
 
-El dashboard obtiene `admin_token` desde `localStorage` y las mutaciones auditadas lo envían mediante `Authorization: Bearer`.
-
-**Riesgo:** un token accesible desde JavaScript puede ser extraído por código ejecutado en el contexto de la aplicación, por ejemplo ante XSS o una dependencia comprometida.
-
-**Criterio de cierre:** migrar la sesión administrativa a cookie `HttpOnly`, `Secure` y `SameSite` apropiados; eliminar la dependencia de `localStorage.admin_token`; preservar `401`/reautenticación; verificar todas las mutaciones protegidas; no registrar tokens ni cabeceras `Authorization`.
-
-**Decisión PMV:** no mezclar esta migración de seguridad transversal con el cierre visual del PMV.
+No se registran tokens ni cabeceras `Authorization` en el flujo de sesión.
