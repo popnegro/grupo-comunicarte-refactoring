@@ -8,7 +8,7 @@ export const textareaClass = 'w-full rounded-lg border border-gray-200 bg-white 
 
 type FieldProps = {
   label: string;
-  value: string;
+  value: string | number;
   onChange: (v: string) => void;
   type?: string;
   placeholder?: string;
@@ -52,8 +52,8 @@ export function Textarea({ label, value, onChange, placeholder, maxLength, class
   );
 }
 
-export function BadgeField({ label, value }: { label: string; value: string }) {
-  if (!value) return null;
+export function BadgeField({ label, value }: { label: string; value: string | number }) {
+  if (value === '' || value == null) return null;
   return (
     <span className="inline-flex items-center rounded-md border border-gray-200 bg-gray-50 px-2 py-1 text-[11px] font-semibold text-gray-800">
       <span className="mr-1 text-gray-500">{label}</span>{value}
