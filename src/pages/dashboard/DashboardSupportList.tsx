@@ -37,13 +37,9 @@ export default function DashboardSupportList() {
     setLoading(true);
     try {
       const res = await apiFetch('/api/admin/supports', {
-        headers: { Authorization: `Bearer ${token}` },
+        
       });
-      if (res.status === 401) {
-        localStorage.removeItem('admin_token');
-        navigate('/login');
-        return;
-      }
+      
       const json = await res.json();
       if (!res.ok || json.status !== 'success') {
         throw new Error(json.message || 'No se pudo cargar el inventario.');
@@ -67,7 +63,7 @@ export default function DashboardSupportList() {
     try {
       const res = await apiFetch(`/api/admin/supports/${encodeURIComponent(supportToArchive.canonical_id)}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        
       });
       const json = await res.json().catch(() => null);
       if (!res.ok || json?.status !== 'success') {
@@ -88,7 +84,7 @@ export default function DashboardSupportList() {
     const token = localStorage.getItem('admin_token');
     try {
       const detailRes = await apiFetch(`/api/admin/supports/${encodeURIComponent(item.canonical_id)}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        
       });
       const detailJson = await detailRes.json();
       if (!detailRes.ok || detailJson.status !== 'success') {
@@ -125,7 +121,7 @@ export default function DashboardSupportList() {
       };
       const res = await apiFetch('/api/admin/supports', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
       const json = await res.json();
