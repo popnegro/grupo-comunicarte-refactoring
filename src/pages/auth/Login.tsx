@@ -25,7 +25,6 @@ export default function Login() {
       });
       const data = await res.json();
       if (!res.ok || data.status !== 'success') throw new Error(data.message || 'Credenciales inválidas. Verifique usuario y contraseña.');
-      localStorage.setItem('admin_token', data.token);
       navigate('/dashboard');
     } catch (err: any) {
       const message = String(err?.message || '');
