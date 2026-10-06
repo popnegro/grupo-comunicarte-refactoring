@@ -37,7 +37,7 @@ export default function DashboardSupportReservation() {
         if (!token) return navigate('/login');
         const response = await apiFetch(`/api/admin/supports/${encodeURIComponent(canonicalId)}`, { headers: { Authorization: `Bearer ${token}` } });
         const json = await response.json();
-        if (response.status === 401) return navigate('/login');
+        
         if (!response.ok || json.status !== 'success') throw new Error(json.message || 'No se pudo cargar el soporte.');
         const data = json.data || {};
         const period = parseLegacyPeriod(data.availableFrom);
@@ -66,11 +66,11 @@ export default function DashboardSupportReservation() {
       const availableFrom = form.disponibilidad === 'reservado' ? `${form.from}|${form.until}` : null;
       const response = await apiFetch(`/api/admin/supports/${encodeURIComponent(canonicalId)}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ disponibilidad: form.disponibilidad, availableFrom }),
       });
       const json = await response.json();
-      if (response.status === 401) return navigate('/login');
+      
       if (!response.ok || json.status !== 'success') throw new Error(json.message || 'No se pudo guardar el período.');
       setMessage('Período de reserva actualizado.');
     } catch (caught) {
