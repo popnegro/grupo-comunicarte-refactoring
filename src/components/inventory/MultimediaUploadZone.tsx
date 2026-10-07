@@ -27,13 +27,11 @@ export function MultimediaUploadZone({ canonicalId, url, kind, label, descriptio
     if (file.size > MAX_SIZE_BYTES) return setError(`El archivo supera el límite de ${MAX_SIZE_MB}MB.`);
     setUploading(true);
     try {
-      const token = localStorage.getItem('admin_token');
-      if (!token) return setError('Sesión inactiva. Por favor ingresá de nuevo.');
       const formData = new FormData();
       formData.append('file', file);
       const response = await apiFetch(`/api/admin/supports/${encodeURIComponent(canonicalId)}/media/upload`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
         body: formData,
       });
       const resJson = await response.json();
