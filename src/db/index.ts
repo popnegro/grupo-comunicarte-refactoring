@@ -12,7 +12,7 @@ const isVercelRuntime = process.env.VERCEL === '1' || process.env.VERCEL === 'tr
 
 const pool = new Pool({
   connectionString,
-  ssl: connectionString!.includes('neon.tech') || connectionString!.includes('sslmode=require') ? { rejectUnauthorized: false } : undefined,
+  ssl: connectionString!.includes('neon.tech') || connectionString!.includes('sslmode=require') ? { rejectUnauthorized: true } : undefined,
 });
 
 export const db = drizzle(pool, { schema });
