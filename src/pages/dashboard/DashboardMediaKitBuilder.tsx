@@ -41,14 +41,7 @@ export default function DashboardMediaKitBuilder() {
   const [requestId, setRequestId] = useState<string>(() => kitIdParam || makeRequestId());
   const notify = (message: string) => { setToast(message); window.setTimeout(() => setToast(''), 3000); };
 
-  const authHeaders = (): HeadersInit => {
-    const token = localStorage.getItem('admin_token');
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  };
-
   useEffect(() => {
-    const token = localStorage.getItem('admin_token');
-    if (!token) { navigate('/login'); return; }
     if (kitIdParam) setRequestId(kitIdParam);
 
     (async () => {
@@ -59,7 +52,7 @@ export default function DashboardMediaKitBuilder() {
         setAllSupports(Array.isArray(supportsJson.data) ? supportsJson.data : []);
 
         if (kitIdParam) {
-          const kitResponse = await apiFetch(`/api/admin/mediakits/${encodeURIComponent(kitIdParam)}`, { headers: authHeaders() });
+          const kitResponse = await apiFetch(`/api/admin/mediakits/${encodeURIComponent(kitIdParam)}`);
           const kitJson = await kitResponse.json();
           if (kitResponse.ok && kitJson.status === 'success' && kitJson.data) {
             const kit = kitJson.data as PersistedKit;
@@ -118,7 +111,7 @@ export default function DashboardMediaKitBuilder() {
   const persist = async (status: MediaKitStatus = 'draft'): Promise<PersistedKit> => {
     const response = await apiFetch('/api/admin/mediakits', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ kitId: requestId, clientName: client.name, clientCompany: client.company || null, clientEmail: client.email || null, clientPhone: client.phone || null, supportIds: selectedIds, approvedPrices: prices, totalAmount: total, currency: 'ARS', status }),
     });
     const json = await response.json();
