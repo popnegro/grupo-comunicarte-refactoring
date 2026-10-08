@@ -2,7 +2,9 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import * as schema from './schema.ts';
 
-const connectionString = process.env.DATABASE_URL?.trim();
+const rawConnectionString = process.env.DATABASE_URL?.trim();
+// Normalize legacy pg connection-string modes to the explicit secure semantics used by current pg versions.
+const connectionString = rawConnectionString?.replace(/([?&])sslmode=(?:prefer|require|verify-ca)(?=&|$)/i, '$1sslmode=verify-full');
 export const isDatabaseConfigured = Boolean(connectionString);
 
 if (!connectionString) {
@@ -12,7 +14,7 @@ const isVercelRuntime = process.env.VERCEL === '1' || process.env.VERCEL === 'tr
 
 const pool = new Pool({
   connectionString,
-  ssl: connectionString!.includes('neon.tech') || connectionString!.includes('sslmode=require') ? { rejectUnauthorized: true } : undefined,
+  ssl: connectionString!.includes('neon.tech') || connectionString!.includes('sslmode=verify-full') ? { rejectUnauthorized: true } : undefined,
 });
 
 export const db = drizzle(pool, { schema });
