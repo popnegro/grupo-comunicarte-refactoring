@@ -27,11 +27,18 @@ import DashboardMediaKitBuilder from './pages/dashboard/DashboardMediaKitBuilder
 function PublicRoutes() {
   const location = useLocation();
   const isProductionDomain = ['grupocomunicarte.com.ar', 'www.grupocomunicarte.com.ar'].includes(window.location.hostname);
+
+  // The production homepage is a standalone page: do not render the functional
+  // site's navigation or footer around the Coming Soon experience.
+  if (isProductionDomain && location.pathname === '/') {
+    return <ComingSoon />;
+  }
+
   return (
     <Layout>
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          <Route path="/" element={isProductionDomain ? <ComingSoon /> : <PageTransition><Home /></PageTransition>} />
+          <Route path="/" element={<PageTransition><Home /></PageTransition>} />
           <Route path="/soportes" element={<PageTransition><Soportes /></PageTransition>} />
           <Route path="/nosotros" element={<PageTransition><Nosotros /></PageTransition>} />
           <Route path="/soluciones" element={<PageTransition><Soluciones /></PageTransition>} />
