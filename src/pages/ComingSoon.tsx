@@ -42,7 +42,7 @@ export default function ComingSoon() {
           >
             Tu marca,
             <br />
-            <span className="text-white/45">en movimiento.</span>
+            <span className="text-white/60">en movimiento.</span>
           </h1>
 
           <p className="mt-8 max-w-xl text-lg leading-8 text-white/65 sm:text-xl">
@@ -86,7 +86,7 @@ export default function ComingSoon() {
       </section>
 
       <footer className="relative z-10 border-t border-white/10 px-6 py-5 sm:px-10 lg:px-12">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 text-xs text-white/40 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 text-xs text-white/60 sm:flex-row sm:items-center sm:justify-between">
           <span>© {new Date().getFullYear()} Grupo Comunicarte</span>
           <span>Publicidad en vía pública · Soportes tradicionales y digitales</span>
         </div>
