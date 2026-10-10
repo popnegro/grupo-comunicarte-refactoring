@@ -1,4 +1,4 @@
-import { ArrowUpRight, Instagram, Mail, MapPin } from 'lucide-react';
+import { ArrowUpRight, Mail, MapPin } from 'lucide-react';
 
 const WHATSAPP_URL = 'https://wa.me/5492616706710';
 const CONTACT_EMAIL = 'ventas@grupocomunicarte.com.ar';
