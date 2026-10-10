@@ -28,9 +28,9 @@ function PublicRoutes() {
   const location = useLocation();
   const isProductionDomain = ['grupocomunicarte.com.ar', 'www.grupocomunicarte.com.ar'].includes(window.location.hostname);
 
-  // The production homepage is a standalone page: do not render the functional
-  // site's navigation or footer around the Coming Soon experience.
-  if (isProductionDomain && location.pathname === '/') {
+  // Keep all public routes on canonical production domains behind the standalone
+  // Coming Soon page. Preview/QA hostnames retain the complete functional PMV.
+  if (isProductionDomain) {
     return <ComingSoon />;
   }
 
