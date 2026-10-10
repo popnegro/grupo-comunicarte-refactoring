@@ -6,6 +6,7 @@ import { SelectionProvider } from './context/SelectionContext';
 
 // Public pages
 import Home from './pages/Home';
+import ComingSoon from './pages/ComingSoon';
 import Inventario from './pages/Inventario';
 import MediaKits from './pages/MediaKits';
 import Soportes from './pages/Soportes';
@@ -25,11 +26,12 @@ import DashboardMediaKitBuilder from './pages/dashboard/DashboardMediaKitBuilder
 
 function PublicRoutes() {
   const location = useLocation();
+  const isProductionDomain = ['grupocomunicarte.com.ar', 'www.grupocomunicarte.com.ar'].includes(window.location.hostname);
   return (
     <Layout>
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<PageTransition><Home /></PageTransition>} />
+          <Route path="/" element={isProductionDomain ? <ComingSoon /> : <PageTransition><Home /></PageTransition>} />
           <Route path="/soportes" element={<PageTransition><Soportes /></PageTransition>} />
           <Route path="/nosotros" element={<PageTransition><Nosotros /></PageTransition>} />
           <Route path="/soluciones" element={<PageTransition><Soluciones /></PageTransition>} />
