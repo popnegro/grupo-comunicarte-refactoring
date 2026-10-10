@@ -1,24 +1,28 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import * as schema from './schema';
-import { fixedLocations, mobileRoutes } from '../data/inventory';
-import { eq } from 'drizzle-orm';
+import * as schema from './schema.ts';
 
-const connectionString = process.env.DATABASE_URL;
+const rawConnectionString = process.env.DATABASE_URL?.trim();
+// Normalize legacy pg connection-string modes to the explicit secure semantics used by current pg versions.
+const connectionString = rawConnectionString?.replace(/([?&])sslmode=(?:prefer|require|verify-ca)(?=&|$)/i, '$1sslmode=verify-full');
+export const isDatabaseConfigured = Boolean(connectionString);
 
 if (!connectionString) {
-  throw new Error('FATAL: DATABASE_URL environment variable is missing. A valid PostgreSQL connection string is required.');
+  throw new Error('DATABASE_URL es obligatorio. Grupo Comunicarte no ejecuta inventario ni operaciones comerciales sin Neon configurado.');
 }
+const isVercelRuntime = process.env.VERCEL === '1' || process.env.VERCEL === 'true';
 
 const pool = new Pool({
   connectionString,
-  ssl: connectionString.includes('neon.tech') || connectionString.includes('sslmode=require') ? { rejectUnauthorized: false } : undefined,
+  ssl: connectionString!.includes('neon.tech') || connectionString!.includes('sslmode=verify-full') ? { rejectUnauthorized: true } : undefined,
 });
 
 export const db = drizzle(pool, { schema });
 
 /**
- * Initializes database tables if they do not exist and runs idempotent seeding.
+ * Database bootstrap is intentionally disabled inside Vercel serverless
+ * requests. Schema/seed work is deployment/startup responsibility for the
+ * persistent Render runtime, never a request/cold-start dependency.
  */
 const BOOTSTRAP_RETRIES = 3;
 const BOOTSTRAP_RETRY_DELAY_MS = 500;
@@ -35,13 +39,18 @@ function sleep(ms: number) {
 }
 
 export async function initDatabase() {
+  if (isVercelRuntime) {
+    console.info('Database bootstrap skipped in Vercel runtime; schema/seed must be managed outside serverless requests.');
+    return;
+  }
   for (let attempt = 1; attempt <= BOOTSTRAP_RETRIES; attempt += 1) {
     try {
       await initializeDatabaseOnce();
       return;
     } catch (err) {
       if (attempt === BOOTSTRAP_RETRIES || !isTransientBootstrapError(err)) {
-        throw err;
+        console.error('Database initialization failed:', err);
+        return;
       }
       console.warn(`Transient database bootstrap failure; retrying (${attempt}/${BOOTSTRAP_RETRIES - 1})`);
       await sleep(BOOTSTRAP_RETRY_DELAY_MS * attempt);
@@ -130,6 +139,7 @@ async function initializeDatabaseOnce() {
         support_canonical_id TEXT PRIMARY KEY,
         summary TEXT,
         measures TEXT,
+        monthly_impacts NUMERIC,
         resolution TEXT,
         turn_on_schedule TEXT,
         daily_frequency TEXT,
@@ -144,6 +154,8 @@ async function initializeDatabaseOnce() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+
+      ALTER TABLE support_technical ADD COLUMN IF NOT EXISTS monthly_impacts NUMERIC;
 
       CREATE TABLE IF NOT EXISTS support_pricing (
         support_canonical_id TEXT PRIMARY KEY,
@@ -296,241 +308,12 @@ async function initializeDatabaseOnce() {
 
     console.log('Database tables and foreign key constraints verified/created successfully.');
 
-    // 2. Idempotent Seed
-    await seedInventory();
+
   } catch (err) {
     console.error('Error initializing database:', err);
     throw err;
   }
 }
 
-async function seedInventory() {
-  const allItems = [...fixedLocations, ...mobileRoutes];
-  for (const item of allItems) {
-    const canonicalId = item.canonical_id;
-    const existing = await db.select().from(schema.supports).where(eq(schema.supports.canonicalId, canonicalId));
-
-    const isMobile = 'waypoints' in item;
-    const family = isMobile ? 'led_mobile' : item.tipo_soporte === 'led' ? 'led' : 'traditional';
-    const latVal = 'lat' in item && item.lat !== null && item.lat !== undefined ? String(item.lat) : null;
-    const lngVal = 'lng' in item && item.lng !== null && item.lng !== undefined ? String(item.lng) : null;
-    const disp = item.disponibilidad ?? 'disponible';
-    const availFrom = item.availableFrom ?? null;
-    const isFeat = item.isFeatured ?? false;
-    const sched = isMobile ? (item as any).schedule : null;
-    const dur = isMobile ? (item as any).duration : null;
-    const wp = isMobile ? (item as any).waypoints : null;
-    const rp = isMobile ? (item as any).routePath : null;
-    const addr = 'address' in item ? (item as any).address : '';
-    const mapaUrlVal = 'mapa_url' in item ? item.mapa_url : '';
-    const imgs = item.imageUrls ?? [];
-
-    if (existing.length === 0) {
-      await db.insert(schema.supports).values({
-        canonicalId,
-        name: item.name,
-        ciudad: item.ciudad,
-        tipoSoporte: item.tipo_soporte,
-        family,
-        active: true,
-        lat: latVal,
-        lng: lngVal,
-        address: addr,
-        description: item.description,
-        characteristics: item.characteristics,
-        mapaUrl: mapaUrlVal,
-        imageUrls: imgs,
-        disponibilidad: disp,
-        availableFrom: availFrom,
-        isFeatured: isFeat,
-        schedule: sched,
-        duration: dur,
-        waypoints: wp,
-        routePath: rp,
-      });
-    } else {
-      // Sync only structural/descriptive fields.
-      // Preserve operational state such as disponibilidad.
-      await db
-        .update(schema.supports)
-        .set({
-          name: item.name,
-          ciudad: item.ciudad,
-          tipoSoporte: item.tipo_soporte,
-          family,
-          lat: latVal,
-          lng: lngVal,
-          address: addr,
-          description: item.description,
-          characteristics: item.characteristics,
-          mapaUrl: mapaUrlVal,
-          imageUrls: imgs,
-          availableFrom: availFrom,
-          isFeatured: isFeat,
-          schedule: sched,
-          duration: dur,
-          waypoints: wp,
-          routePath: rp,
-          updatedAt: new Date(),
-        })
-        .where(eq(schema.supports.canonicalId, canonicalId));
-    }
-
-    const locationRows = await db.select().from(schema.supportLocations).where(eq(schema.supportLocations.supportCanonicalId, canonicalId));
-    if (locationRows.length === 0) {
-      await db.insert(schema.supportLocations).values({
-        supportCanonicalId: canonicalId,
-        name: item.name,
-        ciudad: item.ciudad,
-        family,
-        category: family,
-        lat: latVal,
-        lng: lngVal,
-        address: addr,
-        mapaUrl: mapaUrlVal,
-        availability: disp,
-        availableFrom: availFrom,
-        active: true,
-        isFeatured: isFeat,
-      });
-    }
-
-    const technicalRows = await db.select().from(schema.supportTechnical).where(eq(schema.supportTechnical.supportCanonicalId, canonicalId));
-    if (technicalRows.length === 0) {
-      await db.insert(schema.supportTechnical).values({
-        supportCanonicalId: canonicalId,
-        summary: item.description,
-        measures: item.characteristics,
-        requirements: isMobile ? 'Requiere recepción de video por campaña' : null,
-        turnOnSchedule: isMobile ? (item as any).schedule ?? null : null,
-        dailyFrequency: isMobile ? 'Mínimo 180 salidas diarias' : null,
-        spotDurationSeconds: isMobile ? 10 : null,
-        minimumDailyOutings: isMobile ? 180 : null,
-        maxAdvertisers: isMobile ? 8 : null,
-        routeDurationHours: isMobile ? '4' : null,
-        operationDays: isMobile ? 'Lunes a Viernes' : null,
-        videoMode: isMobile ? 'single_campaign_video' : null,
-      });
-    }
-
-    const pricingRows = await db.select().from(schema.supportPricing).where(eq(schema.supportPricing.supportCanonicalId, canonicalId));
-    if (pricingRows.length === 0) {
-      await db.insert(schema.supportPricing).values({
-        supportCanonicalId: canonicalId,
-        exhibitionPrice: '0',
-        installationPrice: '0',
-        printingPrice: '0',
-        monthlyPrice: '0',
-        exclusivePrice: '0',
-        currency: 'ARS',
-        taxIncluded: false,
-        pricePublic: false,
-      });
-    }
-
-    // support_routes aplica únicamente a soportes móviles.
-    // No crear rutas artificiales para cartelería/LED fijo.
-    if (isMobile) {
-      const routeRows = await db
-        .select()
-        .from(schema.supportRoutes)
-        .where(eq(schema.supportRoutes.supportCanonicalId, canonicalId));
-
-      if (routeRows.length === 0) {
-        await db.insert(schema.supportRoutes).values({
-          supportCanonicalId: canonicalId,
-          routeName: 'Recorrido predeterminado',
-          routeMode: family,
-          routePath: rp || [],
-          waypoints: wp || [],
-          defaultRoute: true,
-          schedule: sched,
-          duration: dur,
-          hours: '09:00-20:00',
-          weekdays: 'lunes-viernes',
-          maxAdvertisers: 8,
-          spotDurationSeconds: 10,
-          minimumDailyOutings: 180,
-          metadata: {
-            modalities: [
-              'pauta compartida',
-              'uso exclusivo',
-              'recorrido personalizado',
-              'activaciones',
-            ],
-          },
-          active: true,
-        });
-      }
-    }
-
-    const faceRows = await db.select().from(schema.supportFaces).where(eq(schema.supportFaces.supportCanonicalId, canonicalId));
-    if (faceRows.length === 0) {
-      if (isMobile) {
-        await db.insert(schema.supportFaces).values({
-          supportCanonicalId: canonicalId,
-          faceKey: 'left',
-          label: 'Cara lateral izquierda',
-          side: 'left',
-          widthMeters: '4',
-          heightMeters: '2',
-          widthPixels: 1024,
-          heightPixels: 512,
-          substrate: 'LED P3',
-          sortOrder: 1,
-        });
-        await db.insert(schema.supportFaces).values({
-          supportCanonicalId: canonicalId,
-          faceKey: 'right',
-          label: 'Cara lateral derecha',
-          side: 'right',
-          widthMeters: '4',
-          heightMeters: '2',
-          widthPixels: 1024,
-          heightPixels: 512,
-          substrate: 'LED P3',
-          sortOrder: 2,
-        });
-        await db.insert(schema.supportFaces).values({
-          supportCanonicalId: canonicalId,
-          faceKey: 'rear',
-          label: 'Cara posterior',
-          side: 'rear',
-          widthMeters: '2',
-          heightMeters: '2',
-          widthPixels: 512,
-          heightPixels: 512,
-          substrate: 'LED P3',
-          sortOrder: 3,
-        });
-      } else {
-        await db.insert(schema.supportFaces).values({
-          supportCanonicalId: canonicalId,
-          faceKey: 'front',
-          label: 'Cara principal',
-          side: 'front',
-          substrate: item.characteristics,
-          sortOrder: 1,
-        });
-      }
-    }
-
-    const mediaRows = await db.select().from(schema.supportMedia).where(eq(schema.supportMedia.supportCanonicalId, canonicalId));
-    if (mediaRows.length === 0) {
-      for (const [index, imageUrl] of imgs.entries()) {
-        await db.insert(schema.supportMedia).values({
-          supportCanonicalId: canonicalId,
-          mediaType: 'image',
-          url: imageUrl,
-          title: item.name,
-          alt: item.name,
-          sortOrder: index,
-          active: true,
-        });
-      }
-    }
-  }
-  console.log('Inventory seed completed successfully.');
-}
 
 export { pool };

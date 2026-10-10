@@ -1,0 +1,91 @@
+name: Visual QA
+
+on:
+  pull_request:
+    branches: [main, pmv-production-refinement, 'feat/**']
+  push:
+    branches: [main, pmv-production-refinement]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: visual-qa-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  visual:
+    name: Visual QA
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --user 1001
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build
+        run: npm run build
+
+      - name: Start preview server
+        run: |
+          nohup npm run preview -- --host 0.0.0.0 > /tmp/gc-preview.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:4173/ >/dev/null && break
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:4173/ >/dev/null
+
+      - name: Restore visual baseline
+        id: baseline
+        uses: actions/cache/restore@v4
+        with:
+          path: tests/visual/__snapshots__
+          key: visual-baseline-${{ github.base_ref || github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            visual-baseline-${{ github.base_ref || github.ref_name }}-
+
+      - name: Bootstrap missing baseline
+        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-hit != 'true'
+        continue-on-error: true
+        run: npx playwright test --update-snapshots
+
+      - name: Validate bootstrapped baseline
+        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-hit != 'true'
+        run: npx playwright test
+
+      - name: Run visual regression
+        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-hit == 'true'
+        run: npx playwright test
+
+      - name: Refresh baseline on trusted branch
+        if: github.event_name == 'push'
+        run: npx playwright test --update-snapshots=all
+
+      - name: Save trusted baseline
+        if: github.event_name == 'push'
+        uses: actions/cache/save@v4
+        with:
+          path: tests/visual/__snapshots__
+          key: visual-baseline-${{ github.ref_name }}-${{ github.sha }}
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: visual-qa-report
+          path: |
+            playwright-report/
+            test-results/visual/
+            /tmp/gc-preview.log
+          retention-days: 14
