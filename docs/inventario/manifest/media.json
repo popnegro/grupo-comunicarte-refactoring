@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "description": "Manifest canónico de multimedia por soporte. Los canonical_id deben coincidir exactamente con los registros del inventario.",
+  "supports": {}
+}
