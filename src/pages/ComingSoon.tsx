@@ -1,9 +1,29 @@
+import { useEffect } from 'react';
 import { ArrowUpRight, Mail, MapPin } from 'lucide-react';
 
 const WHATSAPP_URL = 'https://wa.me/5492616706710';
 const CONTACT_EMAIL = 'ventas@grupocomunicarte.com.ar';
 
 export default function ComingSoon() {
+  useEffect(() => {
+    const previousTitle = document.title;
+    const description = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    const previousDescription = description?.content;
+
+    document.title = 'Grupo Comunicarte | Próximamente';
+    if (description) {
+      description.content =
+        'Estamos renovando nuestro sitio para mostrar nuevas formas de conectar marcas con personas en Mendoza, Buenos Aires y más allá.';
+    }
+
+    return () => {
+      document.title = previousTitle;
+      if (description && previousDescription !== undefined) {
+        description.content = previousDescription;
+      }
+    };
+  }, []);
+
   return (
     <main
       className="relative flex min-h-screen flex-col overflow-hidden bg-neutral-950 text-white"
