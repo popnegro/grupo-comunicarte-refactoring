@@ -64,20 +64,32 @@ jobs:
         if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-matched-key == ''
         run: npx playwright test
 
-      - name: Bootstrap new map snapshots when absent
-        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-matched-key != ''
+      - name: Capture map baseline from base branch
+        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-matched-key != '' && !startsWith(steps.baseline.outputs.cache-matched-key, format('visual-baseline-{0}-', github.event.pull_request.head.ref))
         run: |
-          desktop_snapshot="tests/visual/__snapshots__/chromium-desktop/inventory.spec.ts/inventory-map-responsive.png"
-          mobile_snapshot="tests/visual/__snapshots__/chromium-mobile/inventory.spec.ts/inventory-map-responsive.png"
-          if [ ! -f "$desktop_snapshot" ] || [ ! -f "$mobile_snapshot" ]; then
-            npx playwright test -g "mapa mantiene marcadores, tipologías normalizadas y detalle en escritorio/móvil" --update-snapshots
-            {
-              echo "## Visual QA: new map snapshots"
-              echo "The restored baseline did not contain the new responsive map screenshots. Only the map test was run in snapshot-update mode; all existing snapshots are still checked by the full regression run."
-            } >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "Responsive map snapshots already exist; no snapshots were regenerated."
-          fi
+          git fetch --no-tags origin "${{ github.base_ref }}"
+          git worktree add --detach /tmp/gc-baseline FETCH_HEAD
+          cp tests/visual/inventory.spec.ts /tmp/gc-baseline/tests/visual/inventory.spec.ts
+          cp tests/visual/screenshot.css /tmp/gc-baseline/tests/visual/screenshot.css
+          cp playwright.config.ts /tmp/gc-baseline/playwright.config.ts
+          ln -s "$GITHUB_WORKSPACE/node_modules" /tmp/gc-baseline/node_modules
+          cd /tmp/gc-baseline
+          npm run build
+          nohup npm run preview -- --host 0.0.0.0 --port 4174 > /tmp/gc-baseline-preview.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:4174/ >/dev/null && break
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:4174/ >/dev/null
+          PLAYWRIGHT_BASE_URL=http://127.0.0.1:4174 npx playwright test -g "mapa responsive: marcadores y encuadre" --update-snapshots
+          mkdir -p "$GITHUB_WORKSPACE/tests/visual/__snapshots__/chromium-desktop/inventory.spec.ts"
+          mkdir -p "$GITHUB_WORKSPACE/tests/visual/__snapshots__/chromium-mobile/inventory.spec.ts"
+          cp tests/visual/__snapshots__/chromium-desktop/inventory.spec.ts/inventory-map-responsive.png "$GITHUB_WORKSPACE/tests/visual/__snapshots__/chromium-desktop/inventory.spec.ts/"
+          cp tests/visual/__snapshots__/chromium-mobile/inventory.spec.ts/inventory-map-responsive.png "$GITHUB_WORKSPACE/tests/visual/__snapshots__/chromium-mobile/inventory.spec.ts/"
+          {
+            echo "## Visual QA: map baseline from base branch"
+            echo "The responsive map screenshot was captured from the base branch before running the PR regression suite; map layout is now compared against that historical rendering."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Summarize baseline bootstrap
         if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-matched-key == ''
