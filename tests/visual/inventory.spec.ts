@@ -60,6 +60,16 @@ test.describe('Inventario · regresión visual', () => {
     await expect(page.getByText('Pendiente de mapeo').first()).toBeVisible();
   });
 
+  test('el filtro distingue Pantallas LED de registros heredados sin mapear', async ({ page }) => {
+    const typeFilter = page.getByRole('combobox', { name: 'Filtrar por tipo de soporte' });
+    await typeFilter.selectOption('pantallas_led');
+    await expect(page.getByText('Sin resultados con estos filtros')).toBeVisible();
+    await typeFilter.selectOption('pendiente_mapeo');
+    await expect(page.getByRole('article')).toHaveCount(1);
+    await expect(page.getByRole('article').getByText('Pendiente de mapeo')).toBeVisible();
+    await expect(page.getByText('Pórtico Acceso Norte')).toHaveCount(0);
+  });
+
   test('selección cambia el estado visual sin perder la acción secundaria', async ({ page }) => {
     await page.getByRole('button', { name: 'Seleccionar' }).first().click();
     await expect(page.getByRole('button', { name: 'Quitar selección' }).first()).toBeVisible();

@@ -1,5 +1,7 @@
 import { Search, SlidersHorizontal, LocateFixed, X } from 'lucide-react';
 import { Plaza, TipoSoporte, Disponibilidad } from '../../types';
+
+export type InventoryTypeFilter = TipoSoporte | 'pantallas_led' | 'pendiente_mapeo' | 'todos';
 import { Input } from '../ui/Input';
 import { ViewModeToggle, ViewMode } from './ViewModeToggle';
 
@@ -8,8 +10,8 @@ type DisponibilidadFilter = Disponibilidad | 'todos';
 interface InventoryToolbarProps {
   selectedPlaza: Plaza | 'todos';
   setSelectedPlaza: (value: Plaza | 'todos') => void;
-  selectedTipo: TipoSoporte | 'todos';
-  setSelectedTipo: (value: TipoSoporte | 'todos') => void;
+  selectedTipo: InventoryTypeFilter;
+  setSelectedTipo: (value: InventoryTypeFilter) => void;
   selectedDisponibilidad: DisponibilidadFilter;
   setSelectedDisponibilidad: (value: DisponibilidadFilter) => void;
   searchText: string;
@@ -80,14 +82,15 @@ export function InventoryToolbar({
 
       <select
         value={selectedTipo}
-        onChange={(event) => setSelectedTipo(event.target.value as TipoSoporte | 'todos')}
+        onChange={(event) => setSelectedTipo(event.target.value as InventoryTypeFilter)}
         aria-label="Filtrar por tipo de soporte"
         className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-xs font-medium text-gray-700 outline-none transition focus:border-gray-400"
       >
         <option value="todos">Todos los tipos</option>
         <option value="tradicional">Tradicionales</option>
-        <option value="led">Pantallas LED</option>
+        <option value="pantallas_led">Pantallas LED</option>
         <option value="led_movil">LED Móvil</option>
+        <option value="pendiente_mapeo">Pendiente de mapeo</option>
       </select>
 
       <select
