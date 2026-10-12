@@ -14,7 +14,10 @@ const fixture = {
 };
 
 test.describe('Inventario · regresión visual', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    if (testInfo.title.includes('mobile')) {
+      await page.setViewportSize({ width: 390, height: 844 });
+    }
     await page.route('**/api/supports', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(fixture) });
     });
