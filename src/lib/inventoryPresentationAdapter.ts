@@ -52,7 +52,9 @@ function mapType(item: InventoryItem): InventoryPresentationType {
 }
 
 function mapOperationalState(item: InventoryItem): InventoryOperationalState {
-  if (item.active === false) return 'Inactivo';
+  // Legacy data overloaded "inactivo" into disponibilidad. Preserve it as
+  // operational state while keeping reservation availability independent.
+  if (item.active === false || getDisponibilidad(item) === 'inactivo') return 'Inactivo';
 
   const metadata = item.technical?.metadata;
   const rawState =
