@@ -57,7 +57,7 @@ test.describe('Inventario · regresión visual', () => {
     await expect(page.locator('.leaflet-tooltip').first()).toContainText('Tradicional');
     await markers.nth(1).click();
     await expect(page.getByText('Soporte seleccionado')).toBeVisible();
-    await expect(page.getByText('Pendiente de mapeo').first()).toBeVisible();
+    await expect(page.getByRole('article').getByText('Pendiente de mapeo')).toBeVisible();
   });
 
   test('el filtro distingue Pantallas LED de registros heredados sin mapear', async ({ page }) => {
