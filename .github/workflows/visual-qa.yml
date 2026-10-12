@@ -64,9 +64,20 @@ jobs:
         if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-matched-key == ''
         run: npx playwright test
 
-      - name: Bootstrap new snapshots only
+      - name: Bootstrap new map snapshots when absent
         if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-matched-key != ''
-        run: npx playwright test --update-snapshots=missing
+        run: |
+          desktop_snapshot="tests/visual/__snapshots__/chromium-desktop/inventory.spec.ts/inventory-map-responsive.png"
+          mobile_snapshot="tests/visual/__snapshots__/chromium-mobile/inventory.spec.ts/inventory-map-responsive.png"
+          if [ ! -f "$desktop_snapshot" ] || [ ! -f "$mobile_snapshot" ]; then
+            npx playwright test -g "mapa mantiene marcadores, tipologías normalizadas y detalle en escritorio/móvil" --update-snapshots
+            {
+              echo "## Visual QA: new map snapshots"
+              echo "The restored baseline did not contain the new responsive map screenshots. Only the map test was run in snapshot-update mode; all existing snapshots are still checked by the full regression run."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Responsive map snapshots already exist; no snapshots were regenerated."
+          fi
 
       - name: Summarize baseline bootstrap
         if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-matched-key == ''
