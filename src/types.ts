@@ -39,6 +39,7 @@ export interface SupportTechnicalData {
   format?: string;
   caras?: number | null;
   impresion?: string;
+  monthly_impacts?: number | string | null;
   spot_duration_seconds?: number | null;
   minimum_daily_outings?: number | null;
   max_advertisers?: number | null;

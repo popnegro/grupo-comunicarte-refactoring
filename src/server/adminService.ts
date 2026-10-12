@@ -1,6 +1,6 @@
 import crypto from 'crypto';
-import { mediakitRequests, supports } from '../db/schema';
-import { getAllMediakitRequestsFromDB } from './mediakitService';
+import { mediakitRequests, supports } from '../db/schema.ts';
+import { getAllMediakitRequestsFromDB } from './mediakitService.ts';
 import {
   createSupportMediaRecord,
   deleteSupportMediaRecord,
@@ -20,9 +20,9 @@ import {
   SupportWritePayload,
   validateFamily,
   validateAvailability,
-} from './supportModel';
-import { getAllSupportsFromDB, getSupportByIdFromDB } from './supportsService';
-import { db } from '../db';
+} from './supportModel.ts';
+import { getAllSupportsFromDB, getSupportByIdFromDB } from './supportsService.ts';
+import { db } from '../db/index.ts';
 import { and, count, eq } from 'drizzle-orm';
 
 const ADMIN_USER = process.env.ADMIN_USER;
@@ -40,7 +40,7 @@ const adminUser = ADMIN_USER;
 const adminPassword = ADMIN_PASSWORD;
 const adminSecret = ADMIN_SECRET;
 
-function canonicalizeEditorMedia(data: SupportWritePayload): SupportWritePayload {
+function canonicalizeEditorMedia<T extends SupportWritePayload>(data: T): T {
   if (data.media !== undefined || !Array.isArray(data.imageUrls)) return data;
 
   const urls = data.imageUrls.map((url) => String(url).trim()).filter(Boolean).slice(0, 3);
@@ -63,9 +63,11 @@ function canonicalizeEditorMedia(data: SupportWritePayload): SupportWritePayload
 }
 
 export function authenticateAdmin(username: string, password: string): { success: boolean; token?: string; message?: string } {
-  if (username === adminUser && password === adminPassword) {
+  const user = String(username ?? '').trim();
+  const pass = String(password ?? '');
+  if (user === adminUser && pass === adminPassword) {
     const expiresAt = Date.now() + 8 * 3600 * 1000;
-    const payload = `${username}:${expiresAt}`;
+    const payload = `${user}:${expiresAt}`;
     const signature = crypto.createHmac('sha256', adminSecret).update(payload).digest('hex');
     const token = Buffer.from(`${payload}:${signature}`).toString('base64');
     return { success: true, token };
@@ -81,8 +83,9 @@ export function verifyAdminToken(authHeader?: string): boolean {
     const decoded = Buffer.from(parts[1], 'base64').toString('utf8');
     const [username, expiresAtStr, signature] = decoded.split(':');
     if (!username || !expiresAtStr || !signature) return false;
+    if (username !== adminUser) return false;
     const expiresAt = Number(expiresAtStr);
-    if (Date.now() > expiresAt) return false;
+    if (!Number.isFinite(expiresAt) || Date.now() > expiresAt) return false;
 
     const payload = `${username}:${expiresAt}`;
     const expectedSignature = crypto.createHmac('sha256', adminSecret).update(payload).digest('hex');
@@ -103,8 +106,7 @@ export async function getAdminStats() {
   const inactive = allSupports.filter((s: any) => s.active === false).length;
 
   const mendozaSupports = allSupports.filter((s: any) => s.active !== false && (s.ciudad || '').toLowerCase() === 'mendoza');
-  const mendozaTotal = mendozaSupports.length;
-  const mendozaAvailable = mendozaSupports.filter((s: any) => s.disponibilidad === 'disponible').length;
+  const mendozaTotal = mendozaSupports.filter((s: any) => s.disponibilidad === 'disponible').length;
 
   const buenosAiresSupports = allSupports.filter((s: any) => s.active !== false && (s.ciudad || '').toLowerCase() === 'buenos-aires');
   const buenosAiresTotal = buenosAiresSupports.length;
@@ -114,6 +116,8 @@ export async function getAdminStats() {
   const ledCount = allSupports.filter((s: any) => s.active !== false && (s.family === 'led' || s.tipo_soporte === 'led')).length;
   const movilCount = allSupports.filter((s: any) => s.active !== false && (s.family === 'led_mobile' || s.tipo_soporte === 'led_movil')).length;
 
+  const plazaCount = new Set(allSupports.filter((s: any) => s.active !== false).map((s: any) => String(s.ciudad || '').trim().toLowerCase()).filter(Boolean)).size;
+
   const totalRequests = allRequests.length;
   const pendingRequests = allRequests.filter((r: any) => r.status === 'pending' || r.status === 'nuevo').length;
 
@@ -122,14 +126,15 @@ export async function getAdminStats() {
     available,
     reserved,
     inactive,
-    mendozaTotal,
-    mendozaAvailable,
+    mendozaTotal: mendozaSupports.length,
+    mendozaAvailable: mendozaTotal,
     buenosAiresTotal,
     buenosAiresAvailable,
     tradicionalCount,
     ledCount,
     movilCount,
     totalRequests,
+    plazaCount,
     pendingRequests,
   };
 }

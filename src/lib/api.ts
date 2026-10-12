@@ -8,9 +8,9 @@ export function apiUrl(path: string): string {
     throw new Error(`API path inválido: ${path}`);
   }
 
-  // Production is served by the same Vercel deployment as the API. Keep API
-  // calls same-origin so login/admin requests do not depend on cross-origin
-  // CORS configuration or stale Render URLs from VITE_API_URL.
+  // Production is served by the same deployment as the API. Keep admin/public
+  // API calls same-origin in production; VITE_API_URL remains available for
+  // local development and external API environments.
   if (import.meta.env.PROD) {
     return path;
   }
@@ -18,9 +18,35 @@ export function apiUrl(path: string): string {
   return `${API_URL}${path}`;
 }
 
-export function apiFetch(
+/**
+ * Same-origin aware fetch for API routes.
+ * Sends cookies (HttpOnly session) and optional Authorization bearer.
+ * On 401 from protected admin endpoints, clears the session and sends the user to /login.
+ */
+export async function apiFetch(
   path: string,
   init?: RequestInit
 ): Promise<Response> {
-  return fetch(apiUrl(path), init);
+  const headers = new Headers(init?.headers || {});
+  const response = await fetch(apiUrl(path), {
+    ...init,
+    headers,
+    credentials: 'include',
+  });
+
+  if (
+    response.status === 401 &&
+    path.startsWith('/api/admin') &&
+    path !== '/api/admin/login'
+  ) {
+    try {
+    } catch {
+      // ignore storage errors
+    }
+    if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+      window.location.assign('/login');
+    }
+  }
+
+  return response;
 }
