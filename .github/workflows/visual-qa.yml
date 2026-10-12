@@ -64,12 +64,9 @@ jobs:
         if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-matched-key == ''
         run: npx playwright test
 
-      - name: Save PR baseline for subsequent comparisons
-        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-matched-key == '' && success()
-        uses: actions/cache/save@v4
-        with:
-          path: tests/visual/__snapshots__
-          key: visual-baseline-${{ github.event.pull_request.head.ref }}-${{ github.sha }}
+      - name: Bootstrap new snapshots only
+        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-matched-key != ''
+        run: npx playwright test --update-snapshots=missing
 
       - name: Summarize baseline bootstrap
         if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-matched-key == ''
@@ -86,6 +83,13 @@ jobs:
       - name: Run visual regression
         if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-matched-key != ''
         run: npx playwright test
+
+      - name: Save PR baseline for subsequent comparisons
+        if: github.event_name == 'pull_request' && success()
+        uses: actions/cache/save@v4
+        with:
+          path: tests/visual/__snapshots__
+          key: visual-baseline-${{ github.event.pull_request.head.ref }}-${{ github.sha }}
 
       - name: Refresh baseline on trusted branch
         if: github.event_name == 'push'
