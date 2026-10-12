@@ -55,17 +55,14 @@ jobs:
           restore-keys: |
             visual-baseline-${{ github.base_ref || github.ref_name }}-
 
-      - name: Bootstrap missing baseline
-        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-matched-key == ''
-        continue-on-error: true
-        run: npx playwright test --update-snapshots
-
-      - name: Validate bootstrapped baseline
+      - name: Require trusted visual baseline on pull requests
         if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-hit != 'true'
-        run: npx playwright test
+        run: |
+          echo "::error::No exact trusted visual baseline is available for this PR. Generate and commit the desktop/mobile snapshots from a trusted branch before running visual regression."
+          exit 1
 
-      - name: Run visual regression
-        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-matched-key != ''
+      - name: Run visual regression against trusted baseline
+        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-hit == 'true'
         run: npx playwright test
 
       - name: Refresh baseline on trusted branch
