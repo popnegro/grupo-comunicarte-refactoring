@@ -24,6 +24,7 @@ import {
 
 type WorkflowStatus = 'request' | 'in_progress' | 'done';
 type ProposalDurationUnit = 'días' | 'semanas' | 'meses' | 'indefinido';
+type ProposalCurrency = 'ARS' | 'USD' | 'Por definir';
 type ProposalPeriod = { fechaInicio: string; fechaFin: string; duracionValor: string; duracionUnidad: ProposalDurationUnit };
 
 type Pricing = {
@@ -76,6 +77,8 @@ export default function DashboardMediaKitWorkflow() {
   const [supports, setSupports] = useState<SupportForKit[]>([]);
   const [approvedPrices, setApprovedPrices] = useState<Record<string, string>>({});
   const [period, setPeriod] = useState<ProposalPeriod>({ fechaInicio: '', fechaFin: '', duracionValor: '', duracionUnidad: 'meses' });
+  const [proposalAmount, setProposalAmount] = useState('');
+  const [proposalCurrency, setProposalCurrency] = useState<ProposalCurrency>('ARS');
   const [loading, setLoading] = useState(false);
   const [isFetchingLeads, setIsFetchingLeads] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -166,6 +169,8 @@ export default function DashboardMediaKitWorkflow() {
   const periodInvalid = Boolean(period.fechaInicio && period.fechaFin && period.fechaFin < period.fechaInicio);
   const durationInvalid = period.duracionUnidad !== 'indefinido' && Boolean(period.duracionValor) &&
     (!Number.isInteger(Number(period.duracionValor)) || Number(period.duracionValor) <= 0);
+  const proposalAmountInvalid = proposalCurrency !== 'Por definir' && Boolean(proposalAmount.trim()) &&
+    (!Number.isFinite(Number(proposalAmount)) || Number(proposalAmount) < 0);
   const proposalPeriodLabel = [
     period.fechaInicio || period.fechaFin ? [period.fechaInicio, period.fechaFin].filter(Boolean).join(' – ') : '',
     period.duracionUnidad === 'indefinido' ? 'Duración indefinida' : period.duracionValor ? `${period.duracionValor} ${period.duracionUnidad}` : '',
@@ -178,6 +183,7 @@ export default function DashboardMediaKitWorkflow() {
     }
     if (periodInvalid) throw new Error('La fecha de finalización no puede ser anterior al inicio.');
     if (durationInvalid) throw new Error('La duración debe ser un número entero mayor que cero.');
+    if (proposalAmountInvalid) throw new Error('El monto global debe ser un número válido igual o mayor que cero.');
     const kitId = `KIT-${selected.requestId}`;
     const r = await apiFetch('/api/admin/mediakits', {
       method: 'POST',
@@ -192,14 +198,18 @@ export default function DashboardMediaKitWorkflow() {
         clientPhone: selected.phone,
         supportIds: selected.supportIds,
         approvedPrices,
-        totalAmount: totalApprovedQuote,
-        currency: 'ARS',
+        totalAmount: proposalCurrency === 'Por definir' ? null : proposalAmount.trim() ? Number(proposalAmount) : totalApprovedQuote,
+        currency: proposalCurrency,
         metadata: {
           proposalPeriod: {
             fechaInicio: period.fechaInicio || null,
             fechaFin: period.fechaFin || null,
             duracionValor: period.duracionValor ? Number(period.duracionValor) : null,
             duracionUnidad: period.duracionUnidad,
+          },
+          proposalAmount: {
+            amount: proposalCurrency === 'Por definir' ? null : proposalAmount.trim() ? Number(proposalAmount) : totalApprovedQuote,
+            currency: proposalCurrency,
           },
         },
       }),
@@ -240,6 +250,8 @@ export default function DashboardMediaKitWorkflow() {
     setSupports([]);
     setApprovedPrices({});
     setPeriod({ fechaInicio: '', fechaFin: '', duracionValor: '', duracionUnidad: 'meses' });
+    setProposalAmount('');
+    setProposalCurrency('ARS');
     setLoading(true);
     try {
       const r = await apiFetch('/api/supports');
@@ -269,6 +281,14 @@ export default function DashboardMediaKitWorkflow() {
       });
       if (kitResponse.ok) {
         const kitJson = await kitResponse.json().catch(() => null);
+        const savedAmount = kitJson?.data?.metadata?.proposalAmount;
+        if (savedAmount && typeof savedAmount === 'object') {
+          setProposalAmount(savedAmount.amount == null ? '' : String(savedAmount.amount));
+          setProposalCurrency(savedAmount.currency === 'USD' || savedAmount.currency === 'Por definir' ? savedAmount.currency : 'ARS');
+        } else if (kitJson?.data) {
+          setProposalAmount(kitJson.data.totalAmount == null ? '' : String(kitJson.data.totalAmount));
+          setProposalCurrency(kitJson.data.currency === 'USD' || kitJson.data.currency === 'Por definir' ? kitJson.data.currency : 'ARS');
+        }
         const savedPrices = kitJson?.data?.approvedPrices;
         if (savedPrices && typeof savedPrices === 'object') {
           setApprovedPrices(Object.fromEntries(Object.entries(savedPrices).map(([key, value]) => [key, String(value)])));
@@ -301,7 +321,7 @@ export default function DashboardMediaKitWorkflow() {
   };
 
   const lead = selected
-    ? { name: selected.clientName, email: selected.email, company: selected.company, phone: selected.phone, proposalPeriod: proposalPeriodLabel }
+    ? { name: selected.clientName, email: selected.email, company: selected.company, phone: selected.phone, proposalPeriod: proposalPeriodLabel, proposalAmount: proposalCurrency === 'Por definir' ? 'Por definir' : proposalAmount.trim() ? `${proposalCurrency} ${Number(proposalAmount).toLocaleString('es-AR', { maximumFractionDigits: 2 })}` : `${proposalCurrency} ${totalApprovedQuote.toLocaleString('es-AR', { maximumFractionDigits: 2 })}` }
     : null;
 
   const approvedCount = supports.filter((s) => {
@@ -430,6 +450,15 @@ export default function DashboardMediaKitWorkflow() {
                   {selected.message && <p className="sm:col-span-2"><span className="font-semibold text-gray-800">Mensaje:</span> {selected.message}</p>}
                 </div>
 
+                <section className="rounded-xl border border-gray-200 bg-gray-50/70 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">Monto global acordado</p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <label className="block text-xs font-medium text-gray-600">Monto total<input type="number" min={0} step="0.01" value={proposalAmount} disabled={proposalCurrency === 'Por definir'} onChange={(e) => setProposalAmount(e.target.value)} placeholder={proposalCurrency === 'Por definir' ? 'Por definir' : String(totalApprovedQuote)} className="mt-1 h-9 w-full rounded-lg border border-gray-200 bg-white px-2 text-xs disabled:bg-gray-100" /></label>
+                    <label className="block text-xs font-medium text-gray-600">Moneda<select value={proposalCurrency} onChange={(e) => { const value = e.target.value as ProposalCurrency; setProposalCurrency(value); if (value === 'Por definir') setProposalAmount(''); }} className="mt-1 h-9 w-full rounded-lg border border-gray-200 bg-white px-2 text-xs"><option value="ARS">ARS · Peso argentino</option><option value="USD">USD · Dólar estadounidense</option><option value="Por definir">Por definir</option></select></label>
+                  </div>
+                  {proposalAmountInvalid && <p role="alert" className="mt-2 text-xs font-medium text-red-700">El monto global debe ser un número válido igual o mayor que cero.</p>}
+                  <p className="mt-2 text-[10px] text-gray-500">El monto global es el acordado con el cliente; las tarifas base quedan como referencia interna.</p>
+                </section>
                 <section className="rounded-xl border border-gray-200 bg-gray-50/70 p-3">
                   <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">Tiempo de la propuesta</p>
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">
