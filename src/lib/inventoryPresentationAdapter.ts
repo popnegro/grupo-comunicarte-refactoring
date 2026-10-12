@@ -6,10 +6,8 @@ import {
 
 /**
  * Read-only presentation contract for the OOH inventory redesign.
- *
- * Deliberately excludes SupportPricing: this adapter is for commercial
- * inventory views and must never expose internal exhibition/installation/
- * printing prices. It does not write to or mutate the source inventory.
+ * Internal exhibition, installation and printing prices are intentionally
+ * excluded. This adapter never mutates the source inventory.
  */
 export type InventoryPresentationType =
   | 'Tradicional'
@@ -61,42 +59,57 @@ function mapOperationalState(item: InventoryItem): InventoryOperationalState {
       ? (metadata as Record<string, unknown>).estadoOperativo
       : undefined;
 
-  if (rawState === 'Operativo' || rawState === 'Mantenimiento' ||
-      rawState === 'Inactivo' || rawState === 'En revisión') {
+  if (
+    rawState === 'Operativo' ||
+    rawState === 'Mantenimiento' ||
+    rawState === 'Inactivo' ||
+    rawState === 'En revisión'
+  ) {
     return rawState;
   }
 
-  // The current model does not have a first-class operational-state field.
+  // The current domain model has no first-class operational-state field.
   return 'En revisión';
 }
 
 /**
- * Converts the current API/domain model to the redesign's display model.
- * This is intentionally one-way until a persistence contract for editing is
- * verified. Unknown classifications are shown as "Pendiente de mapeo".
+ * Converts the existing API/domain model to the redesign's display model.
+ * One-way until a verified persistence contract for editing is available.
  */
 export function toInventoryPresentationItem(
   item: InventoryItem,
 ): InventoryPresentationItem {
-  const mobile = isMobileRoute(item);
-  const firstWaypoint = mobile ? item.waypoints[0] : undefined;
-  const address = mobile ? (firstWaypoint?.name ?? '') : item.address;
-  const lat = mobile ? firstWaypoint?.lat : item.lat;
-  const lng = mobile ? firstWaypoint?.lng : item.lng;
   const technical = item.technical;
+  let direccion = '';
+  let lat: number | null | undefined;
+  let lng: number | null | undefined;
+
+  if (isMobileRoute(item)) {
+    const firstWaypoint = item.waypoints[0];
+    direccion = firstWaypoint?.name ?? '';
+    lat = firstWaypoint?.lat;
+    lng = firstWaypoint?.lng;
+  } else {
+    direccion = item.address;
+    lat = item.lat;
+    lng = item.lng;
+  }
 
   return {
     id: item.canonical_id,
     nombre: item.name,
     tipo: mapType(item),
-    direccion: address,
+    direccion,
     localidad: item.ciudad === 'buenos-aires' ? 'Buenos Aires' : 'Mendoza',
-    disponibilidad: getDisponibilidad(item) === 'reservado' ? 'Reservado' : 'Disponible',
+    disponibilidad:
+      getDisponibilidad(item) === 'reservado' ? 'Reservado' : 'Disponible',
     destacado: Boolean(item.isFeatured),
     medidas: technical?.measures || undefined,
     formato: technical?.format || undefined,
     impactoMensual:
-      technical?.monthly_impacts == null ? undefined : String(technical.monthly_impacts),
+      technical?.monthly_impacts == null
+        ? undefined
+        : String(technical.monthly_impacts),
     caras: technical?.caras == null ? undefined : technical.caras,
     estadoOperativo: mapOperationalState(item),
     latitud: lat == null ? undefined : lat,
