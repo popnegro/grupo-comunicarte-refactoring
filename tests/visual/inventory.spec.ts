@@ -62,8 +62,10 @@ test.describe('Inventario · regresión visual', () => {
 
   test('soporte destacado muestra la etiqueta editorial', async ({ page }) => {
     await page.route('**/api/supports', async (route) => {
-      const featuredFixture = structuredClone(fixture);
-      featuredFixture.data[0].isFeatured = true;
+      const featuredFixture = {
+        ...fixture,
+        data: fixture.data.map((item, index) => index === 0 ? { ...item, isFeatured: true } : item),
+      };
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(featuredFixture) });
     });
     await page.reload();
