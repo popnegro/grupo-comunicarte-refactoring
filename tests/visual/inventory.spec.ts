@@ -7,8 +7,8 @@ const image = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
 const fixture = {
   status: 'success',
   data: [
-    { canonical_id: 'qa-tradicional-01', name: 'Pórtico Acceso Norte', ciudad: 'mendoza', tipo_soporte: 'tradicional', family: 'traditional', address: 'Acceso Norte · Mendoza', description: 'Soporte tradicional de prueba visual.', characteristics: 'Formato premium', disponibilidad: 'disponible', imageUrls: [image], technical: { measures: '12 × 5 m', caras: 2, monthly_impacts: 125000 } },
-    { canonical_id: 'qa-led-01', name: 'Pantalla LED Centro', ciudad: 'mendoza', tipo_soporte: 'led', family: 'led', address: 'Centro · Mendoza', description: 'Pantalla LED de prueba visual.', characteristics: 'Alta resolución', disponibilidad: 'disponible', imageUrls: [image], technical: { measures: '8 × 4 m', resolution: 'P6', monthly_impacts: 240000 } },
+    { canonical_id: 'qa-tradicional-01', name: 'Pórtico Acceso Norte', lat: -32.88, lng: -68.82, ciudad: 'mendoza', tipo_soporte: 'tradicional', family: 'traditional', address: 'Acceso Norte · Mendoza', description: 'Soporte tradicional de prueba visual.', characteristics: 'Formato premium', disponibilidad: 'disponible', imageUrls: [image], technical: { measures: '12 × 5 m', caras: 2, monthly_impacts: 125000 } },
+    { canonical_id: 'qa-led-01', name: 'Pantalla LED Centro', lat: 0, lng: -68.84, ciudad: 'mendoza', tipo_soporte: 'led', family: 'led', address: 'Centro · Mendoza', description: 'Pantalla LED de prueba visual.', characteristics: 'Alta resolución', disponibilidad: 'disponible', imageUrls: [image], technical: { measures: '8 × 4 m', resolution: 'P6', monthly_impacts: 240000 } },
     { canonical_id: 'qa-led-movil-01', name: 'Circuito LED Móvil', ciudad: 'mendoza', tipo_soporte: 'led_movil', family: 'led_mobile', description: 'Circuito móvil de prueba visual.', characteristics: 'Ruta urbana', disponibilidad: 'reservado', imageUrls: [image], duration: '8 h', schedule: 'Lun–Vie', waypoints: [{ name: 'Centro', lat: -32.89, lng: -68.84 }], routePath: [[-32.89, -68.84]], technical: { spot_duration_seconds: 15, monthly_impacts: 180000 } },
   ],
 };
