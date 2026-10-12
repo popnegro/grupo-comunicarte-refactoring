@@ -23,6 +23,8 @@ import {
 } from '../../lib/adminMediaKitExport';
 
 type WorkflowStatus = 'request' | 'in_progress' | 'done';
+type ProposalDurationUnit = 'días' | 'semanas' | 'meses' | 'indefinido';
+type ProposalPeriod = { fechaInicio: string; fechaFin: string; duracionValor: string; duracionUnidad: ProposalDurationUnit };
 
 type Pricing = {
   exhibition_price?: number | string | null;
@@ -73,6 +75,7 @@ export default function DashboardMediaKitWorkflow() {
   const [selected, setSelected] = useState<LeadRequest | null>(null);
   const [supports, setSupports] = useState<SupportForKit[]>([]);
   const [approvedPrices, setApprovedPrices] = useState<Record<string, string>>({});
+  const [period, setPeriod] = useState<ProposalPeriod>({ fechaInicio: '', fechaFin: '', duracionValor: '', duracionUnidad: 'meses' });
   const [loading, setLoading] = useState(false);
   const [isFetchingLeads, setIsFetchingLeads] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -160,12 +163,21 @@ export default function DashboardMediaKitWorkflow() {
     });
 
   const totalApprovedQuote = supports.reduce((sum, s) => sum + (Number(approvedPrices[s.canonical_id]) || 0), 0);
+  const periodInvalid = Boolean(period.fechaInicio && period.fechaFin && period.fechaFin < period.fechaInicio);
+  const durationInvalid = period.duracionUnidad !== 'indefinido' && Boolean(period.duracionValor) &&
+    (!Number.isInteger(Number(period.duracionValor)) || Number(period.duracionValor) <= 0);
+  const proposalPeriodLabel = [
+    period.fechaInicio || period.fechaFin ? [period.fechaInicio, period.fechaFin].filter(Boolean).join(' – ') : '',
+    period.duracionUnidad === 'indefinido' ? 'Duración indefinida' : period.duracionValor ? `${period.duracionValor} ${period.duracionUnidad}` : '',
+  ].filter(Boolean).join(' · ') || undefined;
 
   const persistMediaKit = async (status: 'draft' | 'ready' = 'draft') => {
     if (!selected || !supports.length || !approvalsReady) {
       notify('Complete el precio de todos los soportes antes de guardar.');
       return false;
     }
+    if (periodInvalid) throw new Error('La fecha de finalización no puede ser anterior al inicio.');
+    if (durationInvalid) throw new Error('La duración debe ser un número entero mayor que cero.');
     const kitId = `KIT-${selected.requestId}`;
     const r = await apiFetch('/api/admin/mediakits', {
       method: 'POST',
@@ -182,6 +194,14 @@ export default function DashboardMediaKitWorkflow() {
         approvedPrices,
         totalAmount: totalApprovedQuote,
         currency: 'ARS',
+        metadata: {
+          proposalPeriod: {
+            fechaInicio: period.fechaInicio || null,
+            fechaFin: period.fechaFin || null,
+            duracionValor: period.duracionValor ? Number(period.duracionValor) : null,
+            duracionUnidad: period.duracionUnidad,
+          },
+        },
       }),
     });
     const j = await r.json().catch(() => null);
@@ -252,6 +272,15 @@ export default function DashboardMediaKitWorkflow() {
         if (savedPrices && typeof savedPrices === 'object') {
           setApprovedPrices(Object.fromEntries(Object.entries(savedPrices).map(([key, value]) => [key, String(value)])));
         }
+        const savedPeriod = kitJson?.data?.metadata?.proposalPeriod;
+        if (savedPeriod && typeof savedPeriod === 'object') {
+          setPeriod({
+            fechaInicio: typeof savedPeriod.fechaInicio === 'string' ? savedPeriod.fechaInicio : '',
+            fechaFin: typeof savedPeriod.fechaFin === 'string' ? savedPeriod.fechaFin : '',
+            duracionValor: savedPeriod.duracionValor == null ? '' : String(savedPeriod.duracionValor),
+            duracionUnidad: savedPeriod.duracionUnidad === 'días' || savedPeriod.duracionUnidad === 'semanas' || savedPeriod.duracionUnidad === 'meses' || savedPeriod.duracionUnidad === 'indefinido' ? savedPeriod.duracionUnidad : 'meses',
+          });
+        }
       }
     } catch (e: any) {
       notify(e.message || 'Error al cargar soportes.');
@@ -271,7 +300,7 @@ export default function DashboardMediaKitWorkflow() {
   };
 
   const lead = selected
-    ? { name: selected.clientName, email: selected.email, company: selected.company, phone: selected.phone }
+    ? { name: selected.clientName, email: selected.email, company: selected.company, phone: selected.phone, proposalPeriod: proposalPeriodLabel }
     : null;
 
   const approvedCount = supports.filter((s) => {
@@ -399,6 +428,19 @@ export default function DashboardMediaKitWorkflow() {
                   <p className="sm:col-span-2"><span className="font-semibold text-gray-800">Empresa:</span> {selected.company}</p>
                   {selected.message && <p className="sm:col-span-2"><span className="font-semibold text-gray-800">Mensaje:</span> {selected.message}</p>}
                 </div>
+
+                <section className="rounded-xl border border-gray-200 bg-gray-50/70 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">Tiempo de la propuesta</p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <label className="block text-xs font-medium text-gray-600">Fecha de inicio<input type="date" value={period.fechaInicio} onChange={(e) => setPeriod((p) => ({ ...p, fechaInicio: e.target.value }))} className="mt-1 h-9 w-full rounded-lg border border-gray-200 bg-white px-2 text-xs" /></label>
+                    <label className="block text-xs font-medium text-gray-600">Fecha de finalización<input type="date" min={period.fechaInicio || undefined} value={period.fechaFin} onChange={(e) => setPeriod((p) => ({ ...p, fechaFin: e.target.value }))} className="mt-1 h-9 w-full rounded-lg border border-gray-200 bg-white px-2 text-xs" /></label>
+                    <label className="block text-xs font-medium text-gray-600">Duración<input type="number" min={1} step={1} value={period.duracionValor} disabled={period.duracionUnidad === 'indefinido'} onChange={(e) => setPeriod((p) => ({ ...p, duracionValor: e.target.value }))} placeholder="Cantidad" className="mt-1 h-9 w-full rounded-lg border border-gray-200 bg-white px-2 text-xs disabled:bg-gray-100" /></label>
+                    <label className="block text-xs font-medium text-gray-600">Unidad<select value={period.duracionUnidad} onChange={(e) => setPeriod((p) => ({ ...p, duracionUnidad: e.target.value as ProposalDurationUnit, duracionValor: e.target.value === 'indefinido' ? '' : p.duracionValor }))} className="mt-1 h-9 w-full rounded-lg border border-gray-200 bg-white px-2 text-xs"><option value="días">Días</option><option value="semanas">Semanas</option><option value="meses">Meses</option><option value="indefinido">Indefinido</option></select></label>
+                  </div>
+                  {periodInvalid && <p role="alert" className="mt-2 text-xs font-medium text-red-700">La fecha final no puede ser anterior a la inicial.</p>}
+                  {durationInvalid && <p role="alert" className="mt-2 text-xs font-medium text-red-700">La duración debe ser un entero mayor que cero.</p>}
+                  <p className="mt-2 text-[10px] text-gray-500">Se guarda como metadato del Media Kit; no cambia la disponibilidad de los soportes.</p>
+                </section>
 
                 {loading ? (
                   <div className="flex items-center gap-2 text-sm text-gray-500"><Loader2 className="h-4 w-4 animate-spin" /> Cargando soportes…</div>
