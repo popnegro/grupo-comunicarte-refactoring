@@ -23,7 +23,7 @@ function MapUpdater({ locations, routes, userLocation }: { locations: LocationRe
     const validLocations = locations.filter(loc => loc.lat !== null && loc.lng !== null);
     if (validLocations.length === 0 && routes.length === 0) return;
     const bounds = L.latLngBounds([]);
-    validLocations.forEach(loc => { if (loc.lat && loc.lng) bounds.extend([loc.lat, loc.lng]); });
+    validLocations.forEach(loc => { if (loc.lat !== null && loc.lng !== null) bounds.extend([loc.lat, loc.lng]); });
     routes.forEach(route => { if (route.routePath?.length) route.routePath.forEach(point => bounds.extend(point as [number, number])); });
     if (userLocation) {
       map.flyTo(userLocation, 13, { duration: 0.8 });
