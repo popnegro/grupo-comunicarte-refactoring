@@ -56,7 +56,7 @@ jobs:
             visual-baseline-${{ github.base_ref || github.ref_name }}-
 
       - name: Bootstrap missing baseline
-        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-hit != 'true'
+        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-matched-key == ''
         continue-on-error: true
         run: npx playwright test --update-snapshots
 
@@ -65,7 +65,7 @@ jobs:
         run: npx playwright test
 
       - name: Run visual regression
-        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-hit == 'true'
+        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-matched-key != ''
         run: npx playwright test
 
       - name: Refresh baseline on trusted branch
