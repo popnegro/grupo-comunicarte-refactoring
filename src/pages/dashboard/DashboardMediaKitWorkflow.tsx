@@ -428,15 +428,60 @@ export default function DashboardMediaKitWorkflow() {
                   <button type="button" disabled={busy || !approvalsReady} onClick={() => persistMediaKit('draft').catch((e) => notify(e.message))} className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 disabled:opacity-50">
                     <Save className="h-3.5 w-3.5" /> Guardar cotización
                   </button>
-                  {lead && approvalsReady && (
-                    <>
-                      <button type="button" disabled={busy} onClick={async () => { setBusy(true); try { await persistMediaKit('ready'); await downloadMediaKitPdf(lead, exportSupports, selected.requestId); notify('PDF listo'); } catch (e: any) { notify(e.message); } finally { setBusy(false); } }} className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 disabled:opacity-50">
-                        <Download className="h-3.5 w-3.5" /> PDF
-                      </button>
-                      <button type="button" disabled={busy} onClick={async () => { setBusy(true); try { await persistMediaKit('ready'); await downloadMediaKitPpt(lead, exportSupports, selected.requestId); notify('PPT listo'); } catch (e: any) { notify(e.message); } finally { setBusy(false); } }} className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 disabled:opacity-50">
-                        <FileText className="h-3.5 w-3.5" /> PPT
-                      </button>
-                    </>
+                  {lead && (
+                    <section aria-labelledby="mediakit-materials-heading" className="w-full space-y-3 rounded-xl border border-gray-200 bg-gray-50 p-3">
+                      <div>
+                        <h3 id="mediakit-materials-heading" className="text-xs font-bold uppercase tracking-wide text-gray-800">Materiales del Media Kit</h3>
+                        <p className="mt-1 text-xs text-gray-500">Descargá una versión lista para compartir o una presentación editable. Completá los precios de todos los soportes para habilitar las descargas.</p>
+                      </div>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <button
+                          type="button"
+                          disabled={busy || !approvalsReady}
+                          aria-label="Descargar Media Kit en PDF"
+                          onClick={async () => {
+                            setBusy(true);
+                            try {
+                              const saved = await persistMediaKit('ready');
+                              if (!saved) return;
+                              await downloadMediaKitPdf(lead, exportSupports, selected.requestId);
+                              notify('PDF generado y descarga iniciada.');
+                            } catch (e: any) {
+                              notify(e.message || 'No pudimos generar el PDF.');
+                            } finally {
+                              setBusy(false);
+                            }
+                          }}
+                          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-800 transition hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <Download className="h-4 w-4" /> Descargar PDF
+                        </button>
+                        <button
+                          type="button"
+                          disabled={busy || !approvalsReady}
+                          aria-label="Descargar PowerPoint editable PPTX"
+                          onClick={async () => {
+                            setBusy(true);
+                            try {
+                              const saved = await persistMediaKit('ready');
+                              if (!saved) return;
+                              await downloadMediaKitPpt(lead, exportSupports, selected.requestId);
+                              notify('PowerPoint editable generado y descarga iniciada.');
+                            } catch (e: any) {
+                              notify(e.message || 'No pudimos generar el PowerPoint.');
+                            } finally {
+                              setBusy(false);
+                            }
+                          }}
+                          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-800 transition hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <FileText className="h-4 w-4" /> Descargar PowerPoint editable (.pptx)
+                        </button>
+                      </div>
+                      {!approvalsReady && (
+                        <p role="status" className="text-xs text-amber-700">Las descargas se habilitan cuando todos los soportes tienen un precio aprobado válido.</p>
+                      )}
+                    </section>
                   )}
                 </div>
               </div>
