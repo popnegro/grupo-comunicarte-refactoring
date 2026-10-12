@@ -56,13 +56,13 @@ jobs:
             visual-baseline-${{ github.base_ref || github.ref_name }}-
 
       - name: Require trusted visual baseline on pull requests
-        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-hit != 'true'
+        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-matched-key == ''
         run: |
-          echo "::error::No exact trusted visual baseline is available for this PR. Generate and commit the desktop/mobile snapshots from a trusted branch before running visual regression."
+          echo "::error::No trusted visual baseline was restored from the base-branch cache. Generate and commit the desktop/mobile snapshots from a trusted branch before running visual regression."
           exit 1
 
       - name: Run visual regression against trusted baseline
-        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-hit == 'true'
+        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-matched-key != ''
         run: npx playwright test
 
       - name: Refresh baseline on trusted branch
