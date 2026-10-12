@@ -95,7 +95,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
         { to: '/dashboard', label: 'Dashboard', icon: BarChart3, end: true },
         { to: '/dashboard/soportes', label: 'Inventario', icon: MonitorSmartphone },
         { to: '/dashboard/solicitudes', label: 'Solicitudes Media Kit', icon: FileText, count: newLeadsCount },
-        { to: '/dashboard/mediakits/nuevo', label: 'Propuestas / Crear Media Kit', icon: FilePlus2 },
+        { to: '/dashboard/mediakits/nuevo', label: 'Propuestas', icon: FilePlus2 },
       ],
     },
   ];
