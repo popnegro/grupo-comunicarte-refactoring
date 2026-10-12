@@ -412,7 +412,8 @@ export default function DashboardMediaKitWorkflow() {
                       <div key={s.canonical_id} className="rounded-lg border border-gray-100 bg-gray-50/60 p-3">
                         <p className="text-xs font-semibold text-gray-950">{s.name}</p>
                         <p className="text-[11px] text-gray-500">{s.ciudad} · {s.tipo_soporte}</p>
-                        <label className="mt-2 block text-[10px] font-medium text-gray-500">Precio aprobado</label>
+                        <label className="mt-2 block text-[10px] font-medium text-gray-700">Monto acordado con el cliente</label>
+                        <p className="text-[10px] leading-4 text-gray-500">Este importe se incluye en el Media Kit que se entrega.</p>
                         <input
                           type="number"
                           min={0}
@@ -420,7 +421,7 @@ export default function DashboardMediaKitWorkflow() {
                           onChange={(e) => setApprovedPrices((p) => ({ ...p, [s.canonical_id]: e.target.value }))}
                           className="mt-1 h-8 w-full rounded-md border border-gray-200 px-2 text-xs outline-none focus:border-gray-900"
                         />
-                        <p className="mt-1 text-[10px] text-gray-500">Base: {formatSupportCurrency(calculateSupportTotal(s.pricing))}</p>
+                        <p className="mt-1 text-[10px] text-gray-500">Tarifa base interna (solo referencia; no se exporta): {formatSupportCurrency(calculateSupportTotal(s.pricing))}</p>
                       </div>
                     ))}
                     <p className="text-sm font-semibold text-gray-950">Total: {formatSupportCurrency(totalApprovedQuote)} · {approvedCount}/{supports.length} con precio</p>
