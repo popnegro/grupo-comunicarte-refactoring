@@ -72,6 +72,26 @@ test('payloadFrom preserves empty optional monthly impacts as null', () => {
 });
 
 
+test('getCardFacts includes measures, format, faces and monthly impacts when present', async () => {
+  const { getCardFacts } = await import('../../src/components/inventory/SupportCardPrimitives');
+  const item = {
+    canonical_id: 'SC-FACTS-01',
+    name: 'Soporte con ficha completa',
+    ciudad: 'mendoza',
+    tipo_soporte: 'tradicional',
+    lat: -32.9,
+    lng: -68.8,
+    address: 'Dirección de prueba',
+    description: 'Ficha de prueba',
+    characteristics: '',
+    mapa_url: '',
+    technical: { measures: '8 x 4 m', format: 'Backlight', caras: 2, monthly_impacts: 420000 },
+  } as import('../../src/types').InventoryItem;
+  const facts = getCardFacts(item);
+  assert.deepEqual(facts.map((fact) => fact.label), ['Medidas', 'Formato', 'Caras', 'Impactos / mes']);
+  assert.equal(facts[1].value, 'Backlight');
+});
+
 test('inventory presentation adapter keeps ambiguous LED type unmapped and excludes internal pricing', async () => {
   const { toInventoryPresentationItem } = await import('../../src/lib/inventoryPresentationAdapter');
   const item = {

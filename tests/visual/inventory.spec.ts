@@ -60,6 +60,16 @@ test.describe('Inventario · regresión visual', () => {
     await expect(page.getByRole('article').getByText('Pendiente de mapeo')).toBeVisible();
   });
 
+  test('soporte destacado muestra la etiqueta editorial', async ({ page }) => {
+    await page.route('**/api/supports', async (route) => {
+      const featuredFixture = structuredClone(fixture);
+      featuredFixture.data[0].isFeatured = true;
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(featuredFixture) });
+    });
+    await page.reload();
+    await expect(page.getByRole('article').first().getByText('Destacado')).toBeVisible();
+  });
+
   test('el filtro distingue Pantallas LED de registros heredados sin mapear', async ({ page }) => {
     const typeFilter = page.getByRole('combobox', { name: 'Filtrar por tipo de soporte' });
     await typeFilter.selectOption('pantallas_led');
