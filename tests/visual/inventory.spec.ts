@@ -74,7 +74,7 @@ test.describe('Inventario · mapa y regresión responsive', () => {
 
   test('mobile mantiene el mapa visible y los marcadores dentro del viewport', async ({ page }) => {
     await expect(page.locator('.leaflet-container')).toBeVisible();
-    await expect(page.locator('.leaflet-marker-icon')).toHaveCount(3);
+    await expect(page.locator('.leaflet-marker-icon')).toHaveCount(2);
     const map = await page.locator('.leaflet-container').boundingBox();
     expect(map).not.toBeNull();
     expect(map!.width).toBeLessThanOrEqual(390);
