@@ -164,7 +164,11 @@ export default function Inventario() {
             <div className="flex h-full flex-col items-center justify-center gap-3 bg-gray-50 px-4 text-center" role="status">
               <p className="text-base font-semibold text-gray-950">Sin resultados con estos filtros</p>
               <p className="max-w-sm text-sm text-gray-600">
-                Probá ampliar la búsqueda o limpiar plaza, tipo y disponibilidad para ver el inventario completo.
+                {selectedTipo === 'pantallas_led'
+                  ? 'Con los filtros actuales no hay soportes confirmados como Pantallas LED. Los registros LED heredados aparecen como “Pendiente de mapeo”.'
+                  : selectedTipo === 'pendiente_mapeo'
+                    ? 'No hay registros pendientes de mapeo con los filtros actuales. Probá cambiar plaza o disponibilidad.'
+                    : 'Probá ampliar la búsqueda o limpiar plaza, tipo y disponibilidad para ver el inventario completo.'}
               </p>
               <Button onClick={handleResetFilters} className="mt-2 min-h-10 rounded-lg px-4">
                 Limpiar filtros
