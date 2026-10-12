@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import InventoryMap from '../components/map/InventoryMap';
 import { useInventory } from '../hooks/useInventory';
-import { Plaza, TipoSoporte, Disponibilidad, InventoryItem } from '../types';
+import { Plaza, Disponibilidad, InventoryItem } from '../types';
 import { ViewMode } from '../components/inventory/ViewModeToggle';
 import { InventoryToolbar, type InventoryTypeFilter } from '../components/inventory/InventoryToolbar';
 import { toInventoryPresentationItem } from '../lib/inventoryPresentationAdapter';
