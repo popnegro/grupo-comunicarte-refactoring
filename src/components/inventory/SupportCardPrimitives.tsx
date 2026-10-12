@@ -1,5 +1,6 @@
 import { ArrowLeft, ArrowRight, MapPin, Monitor, Play } from 'lucide-react';
 import { InventoryItem, MobileRoute, getDisponibilidad, isMobileRoute } from '../../types';
+import { toInventoryPresentationItem } from '../../lib/inventoryPresentationAdapter';
 
 export function formatImpacts(value?: number | string | null) {
   if (value === null || value === undefined || value === '') return null;
@@ -73,7 +74,7 @@ export function StatusBadge({ item, dark = false }: { item: InventoryItem; dark?
 }
 
 export function TypeBadge({ item }: { item: InventoryItem }) {
-  const label = item.tipo_soporte === 'led_movil' ? 'LED Móvil' : item.tipo_soporte === 'led' ? 'LED' : 'Tradicional';
+  const label = toInventoryPresentationItem(item).tipo;
   return <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-600"><Monitor className="h-3.5 w-3.5" />{label}</span>;
 }
 
