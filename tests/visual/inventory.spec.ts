@@ -40,14 +40,21 @@ test.describe('Inventario · regresión visual', () => {
   });
 
 
-  test('mapa mantiene marcadores, tipologías normalizadas y detalle en escritorio/móvil', async ({ page }) => {
+  test('mapa responsive: marcadores y encuadre', async ({ page }) => {
+    await page.goto('/inventario?vista=mapa');
+    const map = page.locator('.leaflet-container');
+    await expect(map).toBeVisible();
+    await expect(page.locator('.leaflet-marker-icon')).toHaveCount(2);
+    await expect(map).toHaveScreenshot('inventory-map-responsive.png', { stylePath: 'tests/visual/screenshot.css' });
+  });
+
+  test('mapa mantiene tipologías normalizadas y detalle en escritorio/móvil', async ({ page }) => {
     await page.goto('/inventario?vista=mapa');
     await expect(page.locator('.leaflet-container')).toBeVisible();
     const markers = page.locator('.leaflet-marker-icon');
     await expect(markers).toHaveCount(2);
     await markers.first().hover();
     await expect(page.locator('.leaflet-tooltip').first()).toContainText('Tradicional');
-    await expect(page.locator('.leaflet-container')).toHaveScreenshot('inventory-map-responsive.png', { stylePath: 'tests/visual/screenshot.css' });
     await markers.nth(1).click();
     await expect(page.getByText('Soporte seleccionado')).toBeVisible();
     await expect(page.getByText('Pendiente de mapeo').first()).toBeVisible();
