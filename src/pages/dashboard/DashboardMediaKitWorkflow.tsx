@@ -53,6 +53,12 @@ const labels: Record<WorkflowStatus, string> = {
   done: 'DONE',
 };
 
+function formatRequestDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Fecha pendiente';
+  return date.toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
 function toWorkflowStatus(status: string): WorkflowStatus {
   if (status === 'contactado' || status === 'in_progress') return 'in_progress';
   if (status === 'enviado' || status === 'quoted' || status === 'done' || status === 'cerrado') return 'done';
@@ -365,6 +371,9 @@ export default function DashboardMediaKitWorkflow() {
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-gray-950">{lead.clientName}</p>
                 <p className="truncate text-xs text-gray-500">{lead.company} · {lead.requestId}</p>
+                <p className="mt-1 truncate text-[11px] text-gray-500">
+                  {lead.supportNames.length} {lead.supportNames.length === 1 ? 'soporte' : 'soportes'} · {formatRequestDate(lead.createdAt)}
+                </p>
               </div>
               <StatusBadge status={labels[lead.status]} />
             </button>
