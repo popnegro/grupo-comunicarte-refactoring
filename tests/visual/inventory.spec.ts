@@ -64,6 +64,7 @@ test.describe('Inventario · regresión visual', () => {
     const typeFilter = page.getByRole('combobox', { name: 'Filtrar por tipo de soporte' });
     await typeFilter.selectOption('pantallas_led');
     await expect(page.getByText('Sin resultados con estos filtros')).toBeVisible();
+    await expect(page.getByText('Con los filtros actuales no hay soportes confirmados como Pantallas LED.')).toBeVisible();
     await typeFilter.selectOption('pendiente_mapeo');
     await expect(page.getByRole('article')).toHaveCount(1);
     await expect(page.getByRole('article').getByText('Pendiente de mapeo')).toBeVisible();
