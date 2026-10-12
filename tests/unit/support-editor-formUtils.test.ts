@@ -150,3 +150,25 @@ test('inventory presentation adapter classifies known support types conservative
   assert.equal(result.localidad, 'Buenos Aires');
   assert.equal(result.estadoOperativo, 'En revisión');
 });
+
+
+test('inventory adapter keeps legacy inactive state separate from reservation availability', async () => {
+  const { toInventoryPresentationItem } = await import('../../src/lib/inventoryPresentationAdapter');
+  const item = {
+    canonical_id: 'SC-LEGACY-INACTIVE',
+    name: 'Soporte inactivo heredado',
+    ciudad: 'mendoza',
+    tipo_soporte: 'tradicional',
+    lat: -32.9,
+    lng: -68.8,
+    address: 'Dirección de prueba',
+    description: '',
+    characteristics: '',
+    disponibilidad: 'inactivo',
+    active: true,
+  } as import('../../src/types').InventoryItem;
+
+  const result = toInventoryPresentationItem(item);
+  assert.equal(result.disponibilidad, 'Disponible');
+  assert.equal(result.estadoOperativo, 'Inactivo');
+});
