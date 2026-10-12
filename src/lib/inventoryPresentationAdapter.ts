@@ -44,6 +44,7 @@ export interface InventoryPresentationItem {
 function mapType(item: InventoryItem): InventoryPresentationType {
   if (item.tipo_soporte === 'tradicional') return 'Tradicional';
   if (item.tipo_soporte === 'led_movil') return 'LED móvil';
+  if ((item.tipo_soporte as string) === 'pantallas_led') return 'Pantallas LED';
 
   // Legacy "led" does not distinguish fixed LED screens from other LED
   // inventory. Do not guess a commercial classification.

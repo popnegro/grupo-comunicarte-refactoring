@@ -4,7 +4,8 @@ import InventoryMap from '../components/map/InventoryMap';
 import { useInventory } from '../hooks/useInventory';
 import { Plaza, TipoSoporte, Disponibilidad, InventoryItem } from '../types';
 import { ViewMode } from '../components/inventory/ViewModeToggle';
-import { InventoryToolbar } from '../components/inventory/InventoryToolbar';
+import { InventoryToolbar, type InventoryTypeFilter } from '../components/inventory/InventoryToolbar';
+import { toInventoryPresentationItem } from '../lib/inventoryPresentationAdapter';
 import { SupportCardGrid } from '../components/inventory/SupportCardGrid';
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { useSelection } from '../context/SelectionContext';
@@ -28,12 +29,17 @@ export default function Inventario() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { fixedLocations, mobileRoutes, loading, error, refetch } = useInventory();
   const plazaParam = searchParams.get('plaza') as Plaza | 'todos' | null;
-  const tipoParam = searchParams.get('tipo') as TipoSoporte | 'todos' | null;
+  const rawTipoParam = searchParams.get('tipo');
+  const tipoParam: InventoryTypeFilter | null = rawTipoParam === 'led'
+    ? 'pendiente_mapeo'
+    : rawTipoParam === 'tradicional' || rawTipoParam === 'led_movil' || rawTipoParam === 'pantallas_led' || rawTipoParam === 'pendiente_mapeo'
+      ? rawTipoParam
+      : null;
   const dispParam = searchParams.get('disponibilidad') as DisponibilidadFilter | null;
   const vistaParam = searchParams.get('vista') as ViewMode | null;
   const queryParam = searchParams.get('q') ?? '';
   const [selectedPlaza, setSelectedPlaza] = useState<Plaza | 'todos'>(plazaParam || 'todos');
-  const [selectedTipo, setSelectedTipo] = useState<TipoSoporte | 'todos'>(tipoParam || 'todos');
+  const [selectedTipo, setSelectedTipo] = useState<InventoryTypeFilter>(tipoParam || 'todos');
   const [selectedDisponibilidad, setSelectedDisponibilidad] = useState<DisponibilidadFilter>(dispParam || 'todos');
   const [viewMode, setViewMode] = useState<ViewMode>(vistaParam === 'catalogo' ? 'catalogo' : 'mapa');
   const selectedSoporteId = searchParams.get('soporte');
@@ -94,23 +100,30 @@ export default function Inventario() {
   const query = searchText.trim().toLowerCase();
   const matchesSearch = useCallback((item: InventoryItem) => {
     if (!query) return true;
-    const haystack = [item.name, item.canonical_id, item.tipo_soporte, item.ciudad, 'address' in item ? item.address : ''].join(' ').toLowerCase();
+    const haystack = [item.name, item.canonical_id, item.tipo_soporte, toInventoryPresentationItem(item).tipo, item.ciudad, 'address' in item ? item.address : ''].join(' ').toLowerCase();
     return haystack.includes(query);
   }, [query]);
+  const matchesTipo = useCallback((item: InventoryItem) => {
+    if (selectedTipo === 'todos') return true;
+    const canonicalType = toInventoryPresentationItem(item).tipo;
+    if (selectedTipo === 'pantallas_led') return canonicalType === 'Pantallas LED';
+    if (selectedTipo === 'pendiente_mapeo') return canonicalType === 'Pendiente de mapeo';
+    return item.tipo_soporte === selectedTipo;
+  }, [selectedTipo]);
   const matchesDisponibilidad = useCallback((item: InventoryItem) => {
     if (selectedDisponibilidad === 'todos') return true;
     return (item.disponibilidad ?? 'disponible') === selectedDisponibilidad;
   }, [selectedDisponibilidad]);
   const filteredLocations = useMemo(() => fixedLocations.filter((loc) => {
     const matchPlaza = selectedPlaza === 'todos' || loc.ciudad === selectedPlaza;
-    const matchTipo = selectedTipo === 'todos' || loc.tipo_soporte === selectedTipo;
+    const matchTipo = matchesTipo(loc);
     return matchPlaza && matchTipo && matchesDisponibilidad(loc) && matchesSearch(loc);
-  }), [fixedLocations, selectedPlaza, selectedTipo, matchesDisponibilidad, matchesSearch]);
+  }), [fixedLocations, selectedPlaza, matchesTipo, matchesDisponibilidad, matchesSearch]);
   const filteredRoutes = useMemo(() => mobileRoutes.filter((route) => {
     const matchPlaza = selectedPlaza === 'todos' || route.ciudad === selectedPlaza;
-    const matchTipo = selectedTipo === 'todos' || route.tipo_soporte === selectedTipo;
+    const matchTipo = matchesTipo(route);
     return matchPlaza && matchTipo && matchesDisponibilidad(route) && matchesSearch(route);
-  }), [mobileRoutes, selectedPlaza, selectedTipo, matchesDisponibilidad, matchesSearch]);
+  }), [mobileRoutes, selectedPlaza, matchesTipo, matchesDisponibilidad, matchesSearch]);
   const allFilteredItems = useMemo(() => {
     const items = [...filteredLocations, ...filteredRoutes];
     if (!userLocation) return items;
