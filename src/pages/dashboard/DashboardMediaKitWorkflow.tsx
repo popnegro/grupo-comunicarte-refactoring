@@ -239,6 +239,7 @@ export default function DashboardMediaKitWorkflow() {
     setSelected(lead);
     setSupports([]);
     setApprovedPrices({});
+    setPeriod({ fechaInicio: '', fechaFin: '', duracionValor: '', duracionUnidad: 'meses' });
     setLoading(true);
     try {
       const r = await apiFetch('/api/supports');
