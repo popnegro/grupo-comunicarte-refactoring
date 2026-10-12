@@ -7,8 +7,8 @@ const image = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
 const fixture = {
   status: 'success',
   data: [
-    { canonical_id: 'qa-tradicional-01', name: 'Pórtico Acceso Norte', ciudad: 'mendoza', tipo_soporte: 'tradicional', family: 'traditional', address: 'Acceso Norte · Mendoza', description: 'Soporte tradicional de prueba visual.', characteristics: 'Formato premium', disponibilidad: 'disponible', imageUrls: [image], technical: { measures: '12 × 5 m', caras: 2, monthly_impacts: 125000 } },
-    { canonical_id: 'qa-led-01', name: 'Pantalla LED Centro', ciudad: 'mendoza', tipo_soporte: 'led', family: 'led', address: 'Centro · Mendoza', description: 'Pantalla LED de prueba visual.', characteristics: 'Alta resolución', disponibilidad: 'disponible', imageUrls: [image], technical: { measures: '8 × 4 m', resolution: 'P6', monthly_impacts: 240000 } },
+    { canonical_id: 'qa-tradicional-01', name: 'Pórtico Acceso Norte', lat: -32.88, lng: -68.82, ciudad: 'mendoza', tipo_soporte: 'tradicional', family: 'traditional', address: 'Acceso Norte · Mendoza', description: 'Soporte tradicional de prueba visual.', characteristics: 'Formato premium', disponibilidad: 'disponible', imageUrls: [image], technical: { measures: '12 × 5 m', caras: 2, monthly_impacts: 125000 } },
+    { canonical_id: 'qa-led-01', name: 'Pantalla LED Centro', lat: 0, lng: -68.84, ciudad: 'mendoza', tipo_soporte: 'led', family: 'led', address: 'Centro · Mendoza', description: 'Pantalla LED de prueba visual.', characteristics: 'Alta resolución', disponibilidad: 'disponible', imageUrls: [image], technical: { measures: '8 × 4 m', resolution: 'P6', monthly_impacts: 240000 } },
     { canonical_id: 'qa-led-movil-01', name: 'Circuito LED Móvil', ciudad: 'mendoza', tipo_soporte: 'led_movil', family: 'led_mobile', description: 'Circuito móvil de prueba visual.', characteristics: 'Ruta urbana', disponibilidad: 'reservado', imageUrls: [image], duration: '8 h', schedule: 'Lun–Vie', waypoints: [{ name: 'Centro', lat: -32.89, lng: -68.84 }], routePath: [[-32.89, -68.84]], technical: { spot_duration_seconds: 15, monthly_impacts: 180000 } },
   ],
 };
@@ -44,5 +44,46 @@ test.describe('Inventario · regresión visual', () => {
     await expect(page.getByRole('button', { name: 'Quitar selección' }).first()).toBeVisible();
     await expect(page.getByRole('button', { name: 'Ver soporte' }).first()).toBeVisible();
     await expect(page.locator('article').first()).toHaveScreenshot('inventory-card-selected.png', { stylePath: 'tests/visual/screenshot.css' });
+  });
+});
+
+
+test.describe('Inventario · mapa y regresión responsive', () => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    if (testInfo.title.includes('mobile')) {
+      await page.setViewportSize({ width: 390, height: 844 });
+    }
+    await page.route('**/api/supports', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(fixture) });
+    });
+    // Keep map tiles deterministic while still exercising Leaflet's real layout,
+    // zoom/fitBounds behavior and marker rendering.
+    await page.route('https://{a-c}.tile.openstreetmap.org/**', async (route) => {
+      await route.continue();
+    });
+    await page.goto('/inventario?vista=mapa');
+    await expect(page.locator('.leaflet-container')).toBeVisible();
+    await expect(page.locator('.leaflet-marker-icon').first()).toBeVisible();
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('desktop muestra el mapa y todos los soportes geolocalizados', async ({ page }) => {
+    await expect(page.locator('.leaflet-marker-icon')).toHaveCount(2);
+    await expect(page.locator('.leaflet-container')).toHaveScreenshot('inventory-map-desktop.png', {
+      stylePath: 'tests/visual/screenshot.css',
+      animations: 'disabled',
+    });
+  });
+
+  test('mobile mantiene el mapa visible y los marcadores dentro del viewport', async ({ page }) => {
+    await expect(page.locator('.leaflet-container')).toBeVisible();
+    await expect(page.locator('.leaflet-marker-icon')).toHaveCount(2);
+    const map = await page.locator('.leaflet-container').boundingBox();
+    expect(map).not.toBeNull();
+    expect(map!.width).toBeLessThanOrEqual(390);
+    await expect(page.locator('.leaflet-container')).toHaveScreenshot('inventory-map-mobile.png', {
+      stylePath: 'tests/visual/screenshot.css',
+      animations: 'disabled',
+    });
   });
 });
