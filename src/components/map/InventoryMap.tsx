@@ -5,6 +5,7 @@ import { LocationRecord, MobileRoute, InventoryItem, Plaza, getDisponibilidad } 
 import { SupportCard } from '../inventory/SupportCard';
 import { X, SearchX } from 'lucide-react';
 import { getIcon } from '../../lib/map-icons';
+import { toInventoryPresentationItem } from '../../lib/inventoryPresentationAdapter';
 import { useSelection } from '../../context/SelectionContext';
 
 interface InventoryMapProps {
@@ -75,7 +76,7 @@ export default function InventoryMap({ locations, routes, initialSelectedId, sel
                 <div className="px-3 py-2 text-left min-w-[160px] max-w-[220px]">
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <span className="text-[9px] font-extrabold uppercase tracking-wider text-gray-500">
-                      {loc.tipo_soporte.replace('_', ' ')}
+                      {toInventoryPresentationItem(loc).tipo}
                     </span>
                     <span
                       className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
