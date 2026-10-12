@@ -46,3 +46,41 @@ test.describe('Inventario · regresión visual', () => {
     await expect(page.locator('article').first()).toHaveScreenshot('inventory-card-selected.png', { stylePath: 'tests/visual/screenshot.css' });
   });
 });
+
+
+test.describe('Inventario · mapa y regresión responsive', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.route('**/api/supports', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(fixture) });
+    });
+    // Keep map tiles deterministic while still exercising Leaflet's real layout,
+    // zoom/fitBounds behavior and marker rendering.
+    await page.route('https://{a-c}.tile.openstreetmap.org/**', async (route) => {
+      await route.continue();
+    });
+    await page.goto('/inventario?vista=mapa');
+    await expect(page.locator('.leaflet-container')).toBeVisible();
+    await expect(page.locator('.leaflet-marker-icon').first()).toBeVisible();
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('desktop muestra el mapa y todos los soportes geolocalizados', async ({ page }) => {
+    await expect(page.locator('.leaflet-marker-icon')).toHaveCount(3);
+    await expect(page.locator('.leaflet-container')).toHaveScreenshot('inventory-map-desktop.png', {
+      stylePath: 'tests/visual/screenshot.css',
+      animations: 'disabled',
+    });
+  });
+
+  test('mobile mantiene el mapa visible y los marcadores dentro del viewport', async ({ page }) => {
+    await expect(page.locator('.leaflet-container')).toBeVisible();
+    await expect(page.locator('.leaflet-marker-icon')).toHaveCount(3);
+    const map = await page.locator('.leaflet-container').boundingBox();
+    expect(map).not.toBeNull();
+    expect(map!.width).toBeLessThanOrEqual(390);
+    await expect(page.locator('.leaflet-container')).toHaveScreenshot('inventory-map-mobile.png', {
+      stylePath: 'tests/visual/screenshot.css',
+      animations: 'disabled',
+    });
+  });
+});
