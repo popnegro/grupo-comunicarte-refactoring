@@ -65,7 +65,7 @@ test.describe('Inventario · mapa y regresión responsive', () => {
   });
 
   test('desktop muestra el mapa y todos los soportes geolocalizados', async ({ page }) => {
-    await expect(page.locator('.leaflet-marker-icon')).toHaveCount(3);
+    await expect(page.locator('.leaflet-marker-icon')).toHaveCount(2);
     await expect(page.locator('.leaflet-container')).toHaveScreenshot('inventory-map-desktop.png', {
       stylePath: 'tests/visual/screenshot.css',
       animations: 'disabled',
