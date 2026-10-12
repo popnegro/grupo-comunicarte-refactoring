@@ -47,10 +47,10 @@ test.describe('Inventario · regresión visual', () => {
     await expect(markers).toHaveCount(2);
     await markers.first().hover();
     await expect(page.locator('.leaflet-tooltip').first()).toContainText('Tradicional');
+    await expect(page.locator('.leaflet-container')).toHaveScreenshot('inventory-map-responsive.png', { stylePath: 'tests/visual/screenshot.css' });
     await markers.nth(1).click();
     await expect(page.getByText('Soporte seleccionado')).toBeVisible();
     await expect(page.getByText('Pendiente de mapeo').first()).toBeVisible();
-    await expect(page).toHaveScreenshot('inventory-map-responsive.png', { stylePath: 'tests/visual/screenshot.css' });
   });
 
   test('selección cambia el estado visual sin perder la acción secundaria', async ({ page }) => {
