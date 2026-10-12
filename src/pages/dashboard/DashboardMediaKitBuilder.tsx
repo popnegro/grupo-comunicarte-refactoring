@@ -28,6 +28,18 @@ type PersistedKit = {
 
 const makeRequestId = () => `MK-${new Date().getFullYear()}-${Date.now().toString(36).toUpperCase()}`;
 
+function formatProposalPeriod(period: ProposalPeriod): string | undefined {
+  const dates = period.fechaInicio || period.fechaFin
+    ? [period.fechaInicio, period.fechaFin].filter(Boolean).join(' – ')
+    : '';
+  const duration = period.duracionUnidad === 'indefinido'
+    ? 'Duración indefinida'
+    : period.duracionValor
+      ? `${period.duracionValor} ${period.duracionUnidad}`
+      : '';
+  return [dates, duration].filter(Boolean).join(' · ') || undefined;
+}
+
 export default function DashboardMediaKitBuilder() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -102,7 +114,9 @@ export default function DashboardMediaKitBuilder() {
   const selected = useMemo(() => allSupports.filter((s) => selectedIds.includes(s.canonical_id)), [allSupports, selectedIds]);
   const total = useMemo(() => selected.reduce((sum, s) => sum + (Number(prices[s.canonical_id]) || 0), 0), [selected, prices]);
   const periodInvalid = Boolean(period.fechaInicio && period.fechaFin && period.fechaFin < period.fechaInicio);
-  const canExport = selected.length > 0 && selected.every(s => Number(prices[s.canonical_id]) > 0) && client.name.trim().length > 0 && !periodInvalid;
+  const durationInvalid = period.duracionUnidad !== 'indefinido' && Boolean(period.duracionValor) &&
+    (!Number.isInteger(Number(period.duracionValor)) || Number(period.duracionValor) <= 0);
+  const canExport = selected.length > 0 && selected.every(s => Number(prices[s.canonical_id]) > 0) && client.name.trim().length > 0 && !periodInvalid && !durationInvalid;
   const toggle = (support: Support) => {
     if (support.disponibilidad !== 'disponible' && !selectedIds.includes(support.canonical_id)) {
       notify('Solo se pueden agregar soportes disponibles al Media Kit.');
@@ -121,9 +135,17 @@ export default function DashboardMediaKitBuilder() {
     notify('Tarifas base aplicadas.');
   };
   const exportSupports: ExportSupport[] = selected.map(s => ({ ...s, approvedPriceWithTax: Number(prices[s.canonical_id] || 0) }));
-  const lead = { name: client.name || 'Cliente', company: client.company, email: client.email, phone: client.phone };
+  const lead = {
+    name: client.name || 'Cliente',
+    company: client.company,
+    email: client.email,
+    phone: client.phone,
+    proposalPeriod: formatProposalPeriod(period),
+  };
 
   const persist = async (status: MediaKitStatus = 'draft'): Promise<PersistedKit> => {
+    if (periodInvalid) throw new Error('La fecha de finalización no puede ser anterior al inicio.');
+    if (durationInvalid) throw new Error('La duración debe ser un número entero mayor que cero.');
     const response = await apiFetch('/api/admin/mediakits', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -254,6 +276,7 @@ export default function DashboardMediaKitBuilder() {
                   </label>
                 </div>
                 {periodInvalid && <p role="alert" className="mt-2 text-xs font-medium text-red-700">La fecha de finalización no puede ser anterior al inicio.</p>}
+                {durationInvalid && <p role="alert" className="mt-2 text-xs font-medium text-red-700">La duración debe ser un número entero mayor que cero.</p>}
                 <p className="mt-2 text-[11px] text-gray-500">El período se guarda como metadato de la propuesta; no modifica reservas ni disponibilidad.</p>
               </div>
 
