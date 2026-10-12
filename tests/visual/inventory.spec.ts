@@ -41,7 +41,7 @@ test.describe('Inventario · regresión visual', () => {
 
 
   test('mapa responsive: marcadores y encuadre', async ({ page }) => {
-    await page.goto('/inventario?vista=mapa');
+    await page.getByRole('radio', { name: 'Mapa' }).click();
     const map = page.locator('.leaflet-container');
     await expect(map).toBeVisible();
     await expect(page.locator('.leaflet-marker-icon')).toHaveCount(2);
@@ -49,7 +49,7 @@ test.describe('Inventario · regresión visual', () => {
   });
 
   test('mapa mantiene tipologías normalizadas y detalle en escritorio/móvil', async ({ page }) => {
-    await page.goto('/inventario?vista=mapa');
+    await page.getByRole('radio', { name: 'Mapa' }).click();
     await expect(page.locator('.leaflet-container')).toBeVisible();
     const markers = page.locator('.leaflet-marker-icon');
     await expect(markers).toHaveCount(2);
