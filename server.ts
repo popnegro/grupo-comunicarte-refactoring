@@ -85,14 +85,7 @@ export async function createApp() {
 
   const isAllowedOrigin = (origin?: string): boolean => {
     if (!origin) return true;
-    if (allowedOrigins.includes(origin)) return true;
-    try {
-      const host = new URL(origin).hostname;
-      if (host === 'localhost' || host === '127.0.0.1') return true;
-    } catch {
-      return false;
-    }
-    return false;
+    return allowedOrigins.includes(origin);
   };
 
   app.use((req, res, next) => {
