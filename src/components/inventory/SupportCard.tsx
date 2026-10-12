@@ -53,6 +53,11 @@ export function SupportCard({ item, variant = 'catalog', selectable = false, onR
         alt={alt}
       />
       <div className="absolute left-3 top-3"><StatusBadge item={item} /></div>
+      {item.isFeatured && (
+        <span className={`absolute right-3 ${variant === 'selectable' ? 'top-12' : 'top-3'} rounded-full bg-amber-300 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-slate-950 shadow-sm`}>
+          Destacado
+        </span>
+      )}
     </div>
   );
 
