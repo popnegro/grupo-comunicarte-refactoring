@@ -55,14 +55,13 @@ jobs:
           restore-keys: |
             visual-baseline-${{ github.base_ref || github.ref_name }}-
 
-      - name: Bootstrap missing baseline
+      - name: Require trusted visual baseline
         if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-hit != 'true'
-        continue-on-error: true
-        run: npx playwright test --update-snapshots
-
-      - name: Validate bootstrapped baseline
-        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-hit != 'true'
-        run: npx playwright test
+        run: |
+          echo "::error::No trusted visual baseline was restored for this PR. A green result must come from comparison against a baseline saved by a trusted branch push, not snapshots generated during this pull request."
+          echo "## Visual QA blocked: trusted baseline missing" >> "$GITHUB_STEP_SUMMARY"
+          echo "No trusted screenshot baseline was restored. This run is not a visual regression PASS; seed or restore the baseline from a trusted branch, then rerun." >> "$GITHUB_STEP_SUMMARY"
+          exit 1
 
       - name: Run visual regression
         if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-hit == 'true'
