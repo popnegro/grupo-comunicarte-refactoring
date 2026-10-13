@@ -7,8 +7,9 @@ import type { InventoryItem, MobileRoute } from '../../../types';
 import { emptyForm, type EditorTab, type FormState } from './types';
 import { familyFor, isFormDirty, normalize, payloadFrom } from './formUtils';
 
-export function useSupportForm(explicitMode?: 'create' | 'edit', onSaved?: () => void) {
-  const { canonicalId } = useParams();
+export function useSupportForm(explicitMode?: 'create' | 'edit', onSaved?: () => void, explicitCanonicalId?: string) {
+  const routeParams = useParams();
+  const canonicalId = explicitCanonicalId || routeParams.canonicalId;
   const navigate = useNavigate();
   const mode = explicitMode || (canonicalId ? 'edit' : 'create');
 
