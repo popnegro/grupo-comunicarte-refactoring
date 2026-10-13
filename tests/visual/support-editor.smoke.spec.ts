@@ -85,3 +85,61 @@ test('support flow: create → edit → preview → list filter', async ({ page 
   }
   await expect(page.getByText('Mostrando 1 de 1 soportes')).toBeVisible();
 });
+
+test('dashboard support editor layout remains usable after opening edit', async ({ page }) => {
+  await page.route('**/api/admin/stats', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ status: 'success', data: {} }),
+    });
+  });
+
+  await page.route('**/api/admin/requests', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ status: 'success', data: [] }),
+    });
+  });
+
+  await page.route('**/api/admin/supports/**', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ status: 'success', data: support }),
+      });
+      return;
+    }
+    await route.continue();
+  });
+
+  await page.route('**/api/admin/supports', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ status: 'success', data: [support] }),
+      });
+      return;
+    }
+    await route.continue();
+  });
+
+  await page.goto('/dashboard/soportes');
+  await expect(page.getByRole('heading', { name: 'Gestión de Soportes' })).toBeVisible();
+
+  const editButton = page.getByRole('button', { name: 'Editar', exact: true }).first();
+  await expect(editButton).toBeVisible();
+  await editButton.click();
+  await expect(page.getByRole('heading', { name: 'Soporte Smoke 4x4' })).toBeVisible();
+
+  // Capture the whole viewport so the baseline reveals the real navigation
+  // pattern: the prior full-page editor versus the candidate responsive drawer.
+  await expect(page).toHaveScreenshot('dashboard-support-edit-flow.png', {
+    fullPage: true,
+    stylePath: 'tests/visual/screenshot.css',
+  });
+});
+
