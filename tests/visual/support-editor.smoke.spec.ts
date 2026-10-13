@@ -133,7 +133,7 @@ test('dashboard support editor layout remains usable after opening edit', async 
   const editButton = page.getByRole('button', { name: 'Editar', exact: true }).first();
   await expect(editButton).toBeVisible();
   await editButton.click();
-  await expect(page.getByRole('heading', { name: 'Soporte Smoke 4x4' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Soporte Smoke 4x4' }).first()).toBeVisible();
 
   // Capture the whole viewport so the baseline reveals the real navigation
   // pattern: the prior full-page editor versus the candidate responsive drawer.
