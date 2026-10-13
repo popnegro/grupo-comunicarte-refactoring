@@ -17,9 +17,9 @@ const TAB_ITEMS: { id: EditorTab; label: string; icon: typeof Info }[] = [
   { id: 'commercial', label: 'Comercial', icon: DollarSign },
 ];
 
-type EditorProps = { mode?: 'create' | 'edit'; embedded?: boolean; onDirtyChange?: (dirty: boolean) => void; onClose?: () => void; onSaved?: () => void };
+type EditorProps = { mode?: 'create' | 'edit'; supportId?: string; embedded?: boolean; onDirtyChange?: (dirty: boolean) => void; onClose?: () => void; onSaved?: () => void };
 
-export default function DashboardSupportProductEditor({ mode: explicitMode, embedded = false, onDirtyChange, onClose, onSaved }: EditorProps) {
+export default function DashboardSupportProductEditor({ mode: explicitMode, supportId, embedded = false, onDirtyChange, onClose, onSaved }: EditorProps) {
   const location = useLocation();
   const [toast, setToast] = useState('');
   const Shell = embedded ? Fragment : DashboardShell;
@@ -58,7 +58,7 @@ export default function DashboardSupportProductEditor({ mode: explicitMode, embe
     save,
     handleNavigateWithConfirm,
     typeLabel,
-  } = useSupportForm(explicitMode, onSaved);
+  } = useSupportForm(explicitMode, onSaved, supportId);
 
   useEffect(() => { onDirtyChange?.(isDirty); }, [isDirty, onDirtyChange]);
 
