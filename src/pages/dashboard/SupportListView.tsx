@@ -334,7 +334,7 @@ export function SupportListView(props: Props) {
                   </div>
                   <button
                     type="button"
-                    onClick={() => navigate(`/dashboard/soportes/${encodeURIComponent(item.canonical_id)}/edit`)}
+                    onClick={() => { setEditorDirty(false); setEditingSupportId(item.canonical_id); }}
                     className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-gray-800"
                   >
                     <Edit3 className="h-3.5 w-3.5" />
