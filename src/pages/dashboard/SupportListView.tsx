@@ -361,6 +361,7 @@ export function SupportListView(props: Props) {
                 <DashboardSupportProductEditor
                   key={editingSupportId || 'new-support'}
                   mode={isCreatingSupport ? 'create' : 'edit'}
+                  supportId={editingSupportId || undefined}
                   embedded
                   onDirtyChange={setEditorDirty}
                   onClose={requestEditorClose}
