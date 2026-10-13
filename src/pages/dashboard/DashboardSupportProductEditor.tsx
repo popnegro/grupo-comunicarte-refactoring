@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ArrowLeft, DollarSign, Eye, Info, MapPin, Save, Sparkles } from 'lucide-react';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
@@ -17,9 +17,12 @@ const TAB_ITEMS: { id: EditorTab; label: string; icon: typeof Info }[] = [
   { id: 'commercial', label: 'Comercial', icon: DollarSign },
 ];
 
-export default function DashboardSupportProductEditor({ mode: explicitMode }: { mode?: 'create' | 'edit' }) {
+type EditorProps = { mode?: 'create' | 'edit'; embedded?: boolean; onDirtyChange?: (dirty: boolean) => void; onClose?: () => void; onSaved?: () => void };
+
+export default function DashboardSupportProductEditor({ mode: explicitMode, embedded = false, onDirtyChange, onClose, onSaved }: EditorProps) {
   const location = useLocation();
   const [toast, setToast] = useState('');
+  const Shell = embedded ? Fragment : DashboardShell;
   useEffect(() => {
     const message = (location.state as { toast?: { type?: string; message?: string } } | null)?.toast?.message;
     if (!message) return;
@@ -55,18 +58,20 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
     save,
     handleNavigateWithConfirm,
     typeLabel,
-  } = useSupportForm(explicitMode);
+  } = useSupportForm(explicitMode, onSaved);
+
+  useEffect(() => { onDirtyChange?.(isDirty); }, [isDirty, onDirtyChange]);
 
   if (loading) {
     return (
-      <DashboardShell>
-        <div className="mx-auto max-w-5xl py-16 text-center text-sm text-gray-500">Cargando soporte…</div>
-      </DashboardShell>
+      <Shell>
+        <div className="mx-auto max-w-5xl py-8 text-center text-sm text-gray-500">Cargando soporte…</div>
+      </Shell>
     );
   }
 
   return (
-    <DashboardShell>
+    <Shell>
       {toast && (
         <div role="status" aria-live="polite" className="fixed right-4 top-20 z-[60] rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm font-semibold text-emerald-800 shadow-lg">
           {toast}
@@ -77,7 +82,7 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
           <div>
             <button
               type="button"
-              onClick={() => handleNavigateWithConfirm('/dashboard/soportes')}
+              onClick={() => embedded ? onClose?.() : handleNavigateWithConfirm('/dashboard/soportes')}
               className="mb-1 inline-flex min-h-[40px] items-center gap-2 text-xs font-semibold text-gray-500 hover:text-gray-900 sm:min-h-0"
             >
               <ArrowLeft className="h-4 w-4" /> Gestión de Soportes
@@ -256,6 +261,6 @@ export default function DashboardSupportProductEditor({ mode: explicitMode }: { 
           </button>
         </div>
       </div>
-    </DashboardShell>
+    </Shell>
   );
 }
