@@ -349,7 +349,7 @@ export function SupportListView(props: Props) {
         {(editingSupportId || isCreatingSupport) && (
           <div className="fixed inset-0 z-[4000] flex justify-end" role="presentation">
             <button type="button" aria-label="Cerrar editor de soporte" className="absolute inset-0 bg-slate-950/40" onClick={requestEditorClose} />
-            <aside role="dialog" aria-modal="true" aria-labelledby="inventory-editor-title" className="relative z-10 flex h-full w-full max-w-3xl flex-col overflow-y-auto bg-white shadow-2xl">
+            <aside role="dialog" aria-modal="true" aria-labelledby="inventory-editor-title" className="relative z-10 flex h-full w-full max-w-[420px] flex-col overflow-y-auto bg-white shadow-2xl">
               <header className="sticky top-0 z-20 flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3 sm:px-6">
                 <div>
                   <h2 id="inventory-editor-title" className="text-sm font-bold text-gray-950">{isCreatingSupport ? 'Nuevo soporte' : 'Editar soporte'}</h2>
