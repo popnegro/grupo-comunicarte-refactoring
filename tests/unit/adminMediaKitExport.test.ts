@@ -105,10 +105,10 @@ test('PDF embeds only the images belonging to each page', async () => {
     const pdf = new TextDecoder().decode(await blob.arrayBuffer());
     const pageBodies = [...pdf.matchAll(/\d+ 0 obj\n<< \/Type \/Page ([\s\S]*?)\nendobj/g)].map((m) => m[1]);
     assert.equal(pageBodies.length, 2, 'three supports should produce two pages');
-    assert.match(pageBodies[0], /\\/Im1 \\d+ 0 R/);
-    assert.match(pageBodies[0], /\\/Im2 \\d+ 0 R/);
-    assert.doesNotMatch(pageBodies[0], /\\/Im3 \\d+ 0 R/, 'page one must not reference page two image');
-    assert.match(pageBodies[1], /\\/Im3 \\d+ 0 R/);
+    assert.match(pageBodies[0], /\/Im1 \d+ 0 R/);
+    assert.match(pageBodies[0], /\/Im2 \d+ 0 R/);
+    assert.doesNotMatch(pageBodies[0], /\/Im3 \d+ 0 R/, 'page one must not reference page two image');
+    assert.match(pageBodies[1], /\/Im3 \d+ 0 R/);
     assert.doesNotMatch(pageBodies[1], /\/Im1 \d+ 0 R|\/Im2 \d+ 0 R/, 'page two must not reference page one images');
   } finally {
     for (const [key, descriptor] of Object.entries(original)) {
