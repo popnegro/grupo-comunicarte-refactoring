@@ -70,3 +70,53 @@ test('Media Kit PPTX is a valid editable Office package with slide text', async 
   assert.match(slideXml, /Cliente QA/);
   assert.match(slideXml, /<p:sp>/, 'text and shapes must be native editable PowerPoint objects');
 });
+
+test('PDF embeds only the images belonging to each page', async () => {
+  const jpeg = '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////2wBDAf//////////////////////////////////////////////////////////////////////////////////////wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAX/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIQAxAAAAH/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/9oACAEBAAE/AK//2Q==';
+  const original = {
+    window: Object.getOwnPropertyDescriptor(globalThis, 'window'),
+    fetch: Object.getOwnPropertyDescriptor(globalThis, 'fetch'),
+    Image: Object.getOwnPropertyDescriptor(globalThis, 'Image'),
+    document: Object.getOwnPropertyDescriptor(globalThis, 'document'),
+    createObjectURL: Object.getOwnPropertyDescriptor(URL, 'createObjectURL'),
+    revokeObjectURL: Object.getOwnPropertyDescriptor(URL, 'revokeObjectURL'),
+  };
+  Object.defineProperty(globalThis, 'window', { configurable: true, value: {} });
+  Object.defineProperty(globalThis, 'fetch', { configurable: true, value: async () => new Response(new Blob([Uint8Array.from([1, 2, 3])]), { status: 200 }) });
+  Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: () => 'blob:qa-image' });
+  Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: () => undefined });
+  Object.defineProperty(globalThis, 'Image', { configurable: true, value: class {
+    naturalWidth = 1;
+    naturalHeight = 1;
+    onload?: () => void;
+    onerror?: () => void;
+    set src(_value: string) { queueMicrotask(() => this.onload?.()); }
+  } });
+  Object.defineProperty(globalThis, 'document', { configurable: true, value: {
+    createElement: () => ({
+      width: 1, height: 1,
+      getContext: () => ({ drawImage: () => undefined }),
+      toDataURL: () => `data:image/jpeg;base64,${jpeg}`,
+    }),
+  } });
+  try {
+    const withImages = supports.map((support, i) => ({ ...support, imageUrl: `https://qa.example.test/${i}.jpg` }));
+    const blob = await generateMediaKitPdf(lead, withImages, 'QA-IMAGE-REFS');
+    const pdf = new TextDecoder().decode(await blob.arrayBuffer());
+    const pageBodies = [...pdf.matchAll(/\\d+ 0 obj\\n<< \\/Type \\/Page ([\\s\\S]*?)\\nendobj/g)].map((m) => m[1]);
+    assert.equal(pageBodies.length, 2, 'three supports should produce two pages');
+    assert.match(pageBodies[0], /\\/Im1 0 R/);
+    assert.match(pageBodies[0], /\\/Im2 0 R/);
+    assert.doesNotMatch(pageBodies[0], /\\/Im3 0 R/, 'page one must not reference page two image');
+    assert.match(pageBodies[1], /\\/Im3 0 R/);
+    assert.doesNotMatch(pageBodies[1], /\\/Im1 0 R|\\/Im2 0 R/, 'page two must not reference page one images');
+  } finally {
+    for (const [key, descriptor] of Object.entries(original)) {
+      if (key === 'createObjectURL' || key === 'revokeObjectURL') {
+        if (descriptor) Object.defineProperty(URL, key, descriptor);
+        else delete (URL as any)[key];
+      } else if (descriptor) Object.defineProperty(globalThis, key === 'Image' ? 'Image' : key, descriptor);
+      else delete (globalThis as any)[key];
+    }
+  }
+});
