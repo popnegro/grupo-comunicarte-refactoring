@@ -37,35 +37,53 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Start preview server
+      # For pull requests, render the trusted base branch first and capture
+      # its screenshots using the candidate's visual scenarios. Then compare
+      # the candidate build against those base-branch screenshots.
+      - name: Checkout trusted base branch
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.base_ref }}
+          path: baseline-source
+
+      - name: Install and build trusted base
+        if: github.event_name == 'pull_request'
+        working-directory: baseline-source
         run: |
-          nohup npm run preview -- --host 0.0.0.0 > /tmp/gc-preview.log 2>&1 &
+          npm install --no-audit --no-fund
+          npm run build
+
+      - name: Start trusted base preview
+        if: github.event_name == 'pull_request'
+        working-directory: baseline-source
+        run: |
+          nohup npm run preview -- --host 0.0.0.0 --port 4174 > /tmp/gc-baseline-preview.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:4174/ >/dev/null && break
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:4174/ >/dev/null
+
+      - name: Capture trusted base screenshots
+        if: github.event_name == 'pull_request'
+        env:
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:4174
+        run: npx playwright test --update-snapshots=all
+
+      - name: Start candidate preview
+        run: |
+          nohup npm run preview -- --host 0.0.0.0 --port 4173 > /tmp/gc-preview.log 2>&1 &
           for i in $(seq 1 30); do
             curl -fsS http://127.0.0.1:4173/ >/dev/null && break
             sleep 1
           done
           curl -fsS http://127.0.0.1:4173/ >/dev/null
 
-      - name: Restore visual baseline
-        id: baseline
-        uses: actions/cache/restore@v4
-        with:
-          path: tests/visual/__snapshots__
-          key: visual-baseline-${{ github.base_ref || github.ref_name }}-${{ github.sha }}
-          restore-keys: |
-            visual-baseline-${{ github.base_ref || github.ref_name }}-
-
-      - name: Bootstrap missing baseline
-        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-hit != 'true'
-        continue-on-error: true
-        run: npx playwright test --update-snapshots
-
-      - name: Validate bootstrapped baseline
-        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-hit != 'true'
-        run: npx playwright test
-
-      - name: Run visual regression
-        if: github.event_name == 'pull_request' && steps.baseline.outputs.cache-hit == 'true'
+      - name: Run visual regression against trusted base
+        if: github.event_name == 'pull_request'
+        env:
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:4173
         run: npx playwright test
 
       - name: Refresh baseline on trusted branch

@@ -9,12 +9,12 @@ import { apiFetch } from '../../lib/api';
 interface DashboardShellProps { children: ReactNode; }
 
 const pageLabels: Record<string, string> = {
-  '/dashboard': 'Resumen',
-  '/dashboard/soportes': 'Soportes',
+  '/dashboard': 'Dashboard',
+  '/dashboard/soportes': 'Inventario',
   '/dashboard/soportes/new': 'Nuevo soporte',
-  '/dashboard/solicitudes': 'Solicitudes',
-  '/dashboard/mediakits': 'Solicitudes',
-  '/dashboard/mediakits/nuevo': 'Nuevo Media Kit',
+  '/dashboard/solicitudes': 'Solicitudes Media Kit',
+  '/dashboard/mediakits': 'Solicitudes Media Kit',
+  '/dashboard/mediakits/nuevo': 'Crear Media Kit',
 };
 
 export function DashboardShell({ children }: DashboardShellProps) {
@@ -87,19 +87,15 @@ export function DashboardShell({ children }: DashboardShellProps) {
     });
   };
 
+  // Use existing routes only: no placeholder destinations are added to the sidebar.
   const navGroups = [
     {
-      label: 'Operación',
+      label: 'Principal',
       items: [
-        { to: '/dashboard', label: 'Resumen', icon: BarChart3, end: true },
-        { to: '/dashboard/soportes', label: 'Soportes', icon: MonitorSmartphone },
-        { to: '/dashboard/solicitudes', label: 'Solicitudes', icon: FileText, count: newLeadsCount },
-      ],
-    },
-    {
-      label: 'Comercial',
-      items: [
-        { to: '/dashboard/mediakits/nuevo', label: 'Crear Media Kit', icon: FilePlus2 },
+        { to: '/dashboard', label: 'Dashboard', icon: BarChart3, end: true },
+        { to: '/dashboard/soportes', label: 'Inventario', icon: MonitorSmartphone },
+        { to: '/dashboard/solicitudes', label: 'Solicitudes Media Kit', icon: FileText, count: newLeadsCount },
+        { to: '/dashboard/mediakits/nuevo', label: 'Propuestas', icon: FilePlus2 },
       ],
     },
   ];

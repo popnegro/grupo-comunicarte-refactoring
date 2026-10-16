@@ -7,8 +7,9 @@ import type { InventoryItem, MobileRoute } from '../../../types';
 import { emptyForm, type EditorTab, type FormState } from './types';
 import { familyFor, isFormDirty, normalize, payloadFrom } from './formUtils';
 
-export function useSupportForm(explicitMode?: 'create' | 'edit') {
-  const { canonicalId } = useParams();
+export function useSupportForm(explicitMode?: 'create' | 'edit', onSaved?: () => void, explicitCanonicalId?: string) {
+  const routeParams = useParams();
+  const canonicalId = explicitCanonicalId || routeParams.canonicalId;
   const navigate = useNavigate();
   const mode = explicitMode || (canonicalId ? 'edit' : 'create');
 
@@ -228,14 +229,15 @@ export function useSupportForm(explicitMode?: 'create' | 'edit') {
         const savedForm = j.data ? normalize(j.data) : form;
         setForm(savedForm);
         setBaseline(savedForm);
-        navigate(`/dashboard/soportes/${encodeURIComponent(id)}/edit`, { replace: true, state: { toast: { type: 'success', message: 'Soporte guardado correctamente.' } } });
+        if (onSaved) onSaved();
+        else navigate(`/dashboard/soportes/${encodeURIComponent(id)}/edit`, { replace: true, state: { toast: { type: 'success', message: 'Soporte guardado correctamente.' } } });
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'No se pudo guardar el soporte.');
     } finally {
       setSaving(false);
     }
-  }, [form, mode, canonicalId, navigate]);
+  }, [form, mode, canonicalId, navigate, onSaved]);
 
   const typeLabel =
     form.tipo_soporte === 'led' ? 'LED' : form.tipo_soporte === 'led_movil' ? 'LED móvil' : 'Tradicional';
