@@ -19,6 +19,7 @@ import { calculateSupportTotal, formatSupportCurrency } from '../../lib/supportP
 import {
   downloadMediaKitPdf,
   downloadMediaKitPpt,
+  sendMediaKitToLead,
   ExportSupport,
 } from '../../lib/adminMediaKitExport';
 
@@ -70,6 +71,7 @@ export default function DashboardMediaKitWorkflow() {
   const [loading, setLoading] = useState(false);
   const [isFetchingLeads, setIsFetchingLeads] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [deliveryPrepared, setDeliveryPrepared] = useState(false);
   const [toast, setToast] = useState('');
 
   const notify = (m: string) => {
@@ -211,6 +213,7 @@ export default function DashboardMediaKitWorkflow() {
 
   const open = async (lead: LeadRequest) => {
     setSelected(lead);
+    setDeliveryPrepared(false);
     setSupports([]);
     setApprovedPrices({});
     setLoading(true);
@@ -251,6 +254,24 @@ export default function DashboardMediaKitWorkflow() {
       notify(e.message || 'Error al cargar soportes.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const prepareDelivery = async () => {
+    if (!lead || !selected || !approvalsReady) return;
+    setBusy(true);
+    try {
+      const saved = await persistMediaKit('ready');
+      if (!saved) return;
+      const result = await sendMediaKitToLead(lead, exportSupports, selected.requestId);
+      setDeliveryPrepared(true);
+      notify(result === 'shared'
+        ? 'Archivos preparados para compartir. Confirmá la entrega cuando hayas completado el envío.'
+        : 'PDF y PPTX descargados; revisá el borrador de correo, adjuntá ambos archivos y envialo. Luego confirmá la entrega.');
+    } catch (e: any) {
+      notify(e.message || 'No pudimos preparar los materiales para la entrega.');
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -422,8 +443,11 @@ export default function DashboardMediaKitWorkflow() {
                   {selected.status === 'request' && (
                     <button type="button" disabled={busy} onClick={() => changeStatus(selected, 'in_progress')} className="rounded-lg bg-amber-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">Marcar en proceso</button>
                   )}
-                  {selected.status === 'in_progress' && (
-                    <button type="button" disabled={busy || !approvalsReady} onClick={() => changeStatus(selected, 'done')} className="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">Completar y enviar</button>
+                  {selected.status === 'in_progress' && !deliveryPrepared && (
+                    <button type="button" disabled={busy || !approvalsReady} onClick={() => prepareDelivery()} className="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">Preparar entrega</button>
+                  )}
+                  {selected.status === 'in_progress' && deliveryPrepared && (
+                    <button type="button" disabled={busy} onClick={() => changeStatus(selected, 'done')} className="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">Confirmar entrega realizada</button>
                   )}
                   <button type="button" disabled={busy || !approvalsReady} onClick={() => persistMediaKit('draft').catch((e) => notify(e.message))} className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 disabled:opacity-50">
                     <Save className="h-3.5 w-3.5" /> Guardar cotización
