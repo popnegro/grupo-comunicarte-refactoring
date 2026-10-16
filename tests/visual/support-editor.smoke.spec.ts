@@ -159,3 +159,79 @@ test('dashboard support editor layout remains usable after opening edit', async 
   }
 });
 
+
+
+test('canonical inventory list visual regression: desktop and mobile', async ({ page }) => {
+  await page.route('**/api/admin/stats', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'success', data: {} }) });
+  });
+  await page.route('**/api/admin/requests', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'success', data: [] }) });
+  });
+  await page.route('**/api/admin/supports/**', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'success', data: support }) });
+      return;
+    }
+    await route.continue();
+  });
+  await page.route('**/api/admin/supports', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'success', data: [support] }) });
+      return;
+    }
+    await route.continue();
+  });
+
+  await page.goto('/dashboard/soportes');
+  await expect(page.getByRole('heading', { name: 'Gestión de Soportes' })).toBeVisible();
+  await expect(page).toHaveScreenshot('inventory-canonical.png', { fullPage: true });
+});
+
+test('canonical requests inbox visual regression: desktop and mobile', async ({ page }) => {
+  await page.route('**/api/admin/stats', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'success', data: {} }) });
+  });
+  await page.route('**/api/admin/requests', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        status: 'success',
+        data: [
+          {
+            id: 'qa-request-01',
+            requestId: 'REQ-QA-001',
+            requesterName: 'Cliente QA Norte',
+            requesterEmail: 'norte@example.test',
+            requesterCompany: 'Empresa QA',
+            requesterPhone: '2615550101',
+            message: 'Consulta de validación visual.',
+            status: 'pending',
+            supportIds: ['smoke-trad-01'],
+            supportNames: ['Soporte Smoke 4x4'],
+            createdAt: '2026-10-01T12:00:00.000Z',
+          },
+          {
+            id: 'qa-request-02',
+            requestId: 'REQ-QA-002',
+            requesterName: 'Cliente QA Sur',
+            requesterEmail: 'sur@example.test',
+            requesterCompany: 'Comercio QA',
+            requesterPhone: '2615550102',
+            message: '',
+            status: 'contactado',
+            supportIds: ['smoke-trad-01'],
+            supportNames: ['Soporte Smoke 4x4'],
+            createdAt: '2026-10-02T12:00:00.000Z',
+          },
+        ],
+      }),
+    });
+  });
+
+  await page.goto('/dashboard/solicitudes');
+  await expect(page.getByRole('heading', { name: 'Solicitudes de Media Kit' })).toBeVisible();
+  await expect(page.getByText('Cliente QA Norte')).toBeVisible();
+  await expect(page).toHaveScreenshot('requests-canonical.png', { fullPage: true });
+});
