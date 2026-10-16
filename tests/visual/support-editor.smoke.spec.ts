@@ -294,7 +294,8 @@ test('request detail prepares materials before confirming delivery', async ({ pa
   await page.getByRole('button', { name: /Cliente QA Norte/ }).click();
   const prepare = page.getByRole('button', { name: 'Preparar entrega', exact: true });
   if (!(await prepare.count())) test.skip(true, 'Trusted baseline predates the two-step delivery confirmation.');
-  await page.getByLabel('Precio aprobado').fill('125000');
+  await expect(page.getByText('Soporte Smoke 4x4')).toBeVisible();
+  await page.locator('input[type="number"]').first().fill('125000');
   await page.getByRole('button', { name: 'Preparar entrega', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Confirmar entrega realizada' })).toBeVisible();
   await expect(page.getByText(/Archivos preparados para compartir/)).toBeVisible();
