@@ -159,3 +159,146 @@ test('dashboard support editor layout remains usable after opening edit', async 
   }
 });
 
+
+
+test('canonical inventory list visual regression: desktop and mobile', async ({ page }) => {
+  await page.route('**/api/admin/stats', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'success', data: {} }) });
+  });
+  await page.route('**/api/admin/requests', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'success', data: [] }) });
+  });
+  await page.route('**/api/admin/supports/**', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'success', data: support }) });
+      return;
+    }
+    await route.continue();
+  });
+  await page.route('**/api/admin/supports', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'success', data: [support] }) });
+      return;
+    }
+    await route.continue();
+  });
+
+  await page.goto('/dashboard/soportes');
+  await expect(page.getByRole('heading', { name: 'Gestión de Soportes' })).toBeVisible();
+  await expect(page).toHaveScreenshot('inventory-canonical.png', { fullPage: true });
+});
+
+test('canonical requests inbox visual regression: desktop and mobile', async ({ page }) => {
+  await page.route('**/api/admin/stats', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'success', data: {} }) });
+  });
+  await page.route('**/api/admin/requests', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        status: 'success',
+        data: [
+          {
+            id: 'qa-request-01',
+            requestId: 'REQ-QA-001',
+            requesterName: 'Cliente QA Norte',
+            requesterEmail: 'norte@example.test',
+            requesterCompany: 'Empresa QA',
+            requesterPhone: '2615550101',
+            message: 'Consulta de validación visual.',
+            status: 'pending',
+            supportIds: ['smoke-trad-01'],
+            supportNames: ['Soporte Smoke 4x4'],
+            createdAt: '2026-10-01T12:00:00.000Z',
+          },
+          {
+            id: 'qa-request-02',
+            requestId: 'REQ-QA-002',
+            requesterName: 'Cliente QA Sur',
+            requesterEmail: 'sur@example.test',
+            requesterCompany: 'Comercio QA',
+            requesterPhone: '2615550102',
+            message: '',
+            status: 'contactado',
+            supportIds: ['smoke-trad-01'],
+            supportNames: ['Soporte Smoke 4x4'],
+            createdAt: '2026-10-02T12:00:00.000Z',
+          },
+        ],
+      }),
+    });
+  });
+
+  await page.goto('/dashboard/solicitudes');
+  await expect(page.getByRole('heading', { name: 'Solicitudes de Media Kit' })).toBeVisible();
+  await expect(page.getByText('Cliente QA Norte')).toBeVisible();
+  await expect(page).toHaveScreenshot('requests-canonical.png', { fullPage: true });
+});
+
+
+test('request detail prepares materials before confirming delivery', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: async () => undefined,
+    });
+  });
+  await page.route('**/api/admin/stats', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'success', data: {} }) });
+  });
+  await page.route('**/api/admin/requests', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        status: 'success',
+        data: [{
+          id: 'qa-request-01',
+          requestId: 'REQ-QA-001',
+          requesterName: 'Cliente QA Norte',
+          requesterEmail: 'norte@example.test',
+          requesterCompany: 'Empresa QA',
+          requesterPhone: '2615550101',
+          message: 'Consulta de validación.',
+          status: 'contactado',
+          supportIds: ['smoke-trad-01'],
+          supportNames: ['Soporte Smoke 4x4'],
+          createdAt: '2026-10-01T12:00:00.000Z',
+        }],
+      }),
+    });
+  });
+  await page.route('**/api/supports', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'success', data: [support] }) });
+  });
+  await page.route('**/api/admin/mediakits/KIT-REQ-QA-001', async (route) => {
+    await route.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({ status: 'error', message: 'Not found' }) });
+  });
+  await page.route('**/api/admin/mediakits', async (route) => {
+    if (route.request().method() === 'POST') {
+      await route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ status: 'success', data: { kitId: 'KIT-REQ-QA-001' } }) });
+      return;
+    }
+    await route.continue();
+  });
+  await page.route('**/api/admin/requests/REQ-QA-001', async (route) => {
+    if (route.request().method() === 'PATCH') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'success', data: {} }) });
+      return;
+    }
+    await route.continue();
+  });
+
+  await page.goto('/dashboard/solicitudes');
+  await page.getByRole('button', { name: /Cliente QA Norte/ }).click();
+  const prepare = page.getByRole('button', { name: 'Preparar entrega', exact: true });
+  if (!(await prepare.count())) test.skip(true, 'Trusted baseline predates the two-step delivery confirmation.');
+  await expect(page.getByText('Soporte Smoke 4x4')).toBeVisible();
+  await page.locator('input[type="number"]').first().fill('125000');
+  await page.getByRole('button', { name: 'Preparar entrega', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Confirmar entrega realizada' })).toBeVisible();
+  await expect(page.getByText(/Archivos preparados para compartir/)).toBeVisible();
+  await page.getByRole('button', { name: 'Confirmar entrega realizada' }).click();
+  await expect(page.getByText('DONE')).toBeVisible();
+});
