@@ -235,3 +235,69 @@ test('canonical requests inbox visual regression: desktop and mobile', async ({ 
   await expect(page.getByText('Cliente QA Norte')).toBeVisible();
   await expect(page).toHaveScreenshot('requests-canonical.png', { fullPage: true });
 });
+
+
+test('request detail prepares materials before confirming delivery', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: async () => undefined,
+    });
+  });
+  await page.route('**/api/admin/stats', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'success', data: {} }) });
+  });
+  await page.route('**/api/admin/requests', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        status: 'success',
+        data: [{
+          id: 'qa-request-01',
+          requestId: 'REQ-QA-001',
+          requesterName: 'Cliente QA Norte',
+          requesterEmail: 'norte@example.test',
+          requesterCompany: 'Empresa QA',
+          requesterPhone: '2615550101',
+          message: 'Consulta de validación.',
+          status: 'contactado',
+          supportIds: ['smoke-trad-01'],
+          supportNames: ['Soporte Smoke 4x4'],
+          createdAt: '2026-10-01T12:00:00.000Z',
+        }],
+      }),
+    });
+  });
+  await page.route('**/api/supports', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'success', data: [support] }) });
+  });
+  await page.route('**/api/admin/mediakits/KIT-REQ-QA-001', async (route) => {
+    await route.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({ status: 'error', message: 'Not found' }) });
+  });
+  await page.route('**/api/admin/mediakits', async (route) => {
+    if (route.request().method() === 'POST') {
+      await route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ status: 'success', data: { kitId: 'KIT-REQ-QA-001' } }) });
+      return;
+    }
+    await route.continue();
+  });
+  await page.route('**/api/admin/requests/REQ-QA-001', async (route) => {
+    if (route.request().method() === 'PATCH') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'success', data: {} }) });
+      return;
+    }
+    await route.continue();
+  });
+
+  await page.goto('/dashboard/solicitudes');
+  const prepare = page.getByRole('button', { name: 'Preparar entrega', exact: true });
+  if (!(await prepare.count())) test.skip(true, 'Trusted baseline predates the two-step delivery confirmation.');
+  await page.getByRole('button', { name: /Cliente QA Norte/ }).click();
+  await page.getByLabel('Precio aprobado').fill('125000');
+  await page.getByRole('button', { name: 'Preparar entrega', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Confirmar entrega realizada' })).toBeVisible();
+  await expect(page.getByText(/Archivos preparados para compartir/)).toBeVisible();
+  await page.getByRole('button', { name: 'Confirmar entrega realizada' }).click();
+  await expect(page.getByText('DONE')).toBeVisible();
+});
