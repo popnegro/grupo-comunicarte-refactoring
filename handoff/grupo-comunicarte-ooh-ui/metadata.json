@@ -1,8 +1,0 @@
-{
-  "name": "Remix Grupo Comunicarte - OOH Dashboard",
-  "description": "Plataforma de gestión de inventario y solicitudes de media kits para publicidad OOH (Out Of Home).",
-  "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
-}
