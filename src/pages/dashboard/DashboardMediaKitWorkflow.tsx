@@ -23,6 +23,9 @@ import {
 } from '../../lib/adminMediaKitExport';
 
 type WorkflowStatus = 'request' | 'in_progress' | 'done';
+type ProposalDurationUnit = 'días' | 'semanas' | 'meses' | 'indefinido';
+type ProposalCurrency = 'ARS' | 'USD' | 'Por definir';
+type ProposalPeriod = { fechaInicio: string; fechaFin: string; duracionValor: string; duracionUnidad: ProposalDurationUnit };
 
 type Pricing = {
   exhibition_price?: number | string | null;
@@ -53,6 +56,12 @@ const labels: Record<WorkflowStatus, string> = {
   done: 'DONE',
 };
 
+function formatRequestDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Fecha pendiente';
+  return date.toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
 function toWorkflowStatus(status: string): WorkflowStatus {
   if (status === 'contactado' || status === 'in_progress') return 'in_progress';
   if (status === 'enviado' || status === 'quoted' || status === 'done' || status === 'cerrado') return 'done';
@@ -67,6 +76,9 @@ export default function DashboardMediaKitWorkflow() {
   const [selected, setSelected] = useState<LeadRequest | null>(null);
   const [supports, setSupports] = useState<SupportForKit[]>([]);
   const [approvedPrices, setApprovedPrices] = useState<Record<string, string>>({});
+  const [period, setPeriod] = useState<ProposalPeriod>({ fechaInicio: '', fechaFin: '', duracionValor: '', duracionUnidad: 'meses' });
+  const [proposalAmount, setProposalAmount] = useState('');
+  const [proposalCurrency, setProposalCurrency] = useState<ProposalCurrency>('ARS');
   const [loading, setLoading] = useState(false);
   const [isFetchingLeads, setIsFetchingLeads] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -154,12 +166,24 @@ export default function DashboardMediaKitWorkflow() {
     });
 
   const totalApprovedQuote = supports.reduce((sum, s) => sum + (Number(approvedPrices[s.canonical_id]) || 0), 0);
+  const periodInvalid = Boolean(period.fechaInicio && period.fechaFin && period.fechaFin < period.fechaInicio);
+  const durationInvalid = period.duracionUnidad !== 'indefinido' && Boolean(period.duracionValor) &&
+    (!Number.isInteger(Number(period.duracionValor)) || Number(period.duracionValor) <= 0);
+  const proposalAmountInvalid = proposalCurrency !== 'Por definir' && Boolean(proposalAmount.trim()) &&
+    (!Number.isFinite(Number(proposalAmount)) || Number(proposalAmount) < 0);
+  const proposalPeriodLabel = [
+    period.fechaInicio || period.fechaFin ? [period.fechaInicio, period.fechaFin].filter(Boolean).join(' – ') : '',
+    period.duracionUnidad === 'indefinido' ? 'Duración indefinida' : period.duracionValor ? `${period.duracionValor} ${period.duracionUnidad}` : '',
+  ].filter(Boolean).join(' · ') || undefined;
 
   const persistMediaKit = async (status: 'draft' | 'ready' = 'draft') => {
     if (!selected || !supports.length || !approvalsReady) {
       notify('Complete el precio de todos los soportes antes de guardar.');
       return false;
     }
+    if (periodInvalid) throw new Error('La fecha de finalización no puede ser anterior al inicio.');
+    if (durationInvalid) throw new Error('La duración debe ser un número entero mayor que cero.');
+    if (proposalAmountInvalid) throw new Error('El monto global debe ser un número válido igual o mayor que cero.');
     const kitId = `KIT-${selected.requestId}`;
     const r = await apiFetch('/api/admin/mediakits', {
       method: 'POST',
@@ -174,8 +198,20 @@ export default function DashboardMediaKitWorkflow() {
         clientPhone: selected.phone,
         supportIds: selected.supportIds,
         approvedPrices,
-        totalAmount: totalApprovedQuote,
-        currency: 'ARS',
+        totalAmount: proposalCurrency === 'Por definir' ? null : proposalAmount.trim() ? Number(proposalAmount) : totalApprovedQuote,
+        currency: proposalCurrency,
+        metadata: {
+          proposalPeriod: {
+            fechaInicio: period.fechaInicio || null,
+            fechaFin: period.fechaFin || null,
+            duracionValor: period.duracionValor ? Number(period.duracionValor) : null,
+            duracionUnidad: period.duracionUnidad,
+          },
+          proposalAmount: {
+            amount: proposalCurrency === 'Por definir' ? null : proposalAmount.trim() ? Number(proposalAmount) : totalApprovedQuote,
+            currency: proposalCurrency,
+          },
+        },
       }),
     });
     const j = await r.json().catch(() => null);
@@ -213,6 +249,9 @@ export default function DashboardMediaKitWorkflow() {
     setSelected(lead);
     setSupports([]);
     setApprovedPrices({});
+    setPeriod({ fechaInicio: '', fechaFin: '', duracionValor: '', duracionUnidad: 'meses' });
+    setProposalAmount('');
+    setProposalCurrency('ARS');
     setLoading(true);
     try {
       const r = await apiFetch('/api/supports');
@@ -242,9 +281,26 @@ export default function DashboardMediaKitWorkflow() {
       });
       if (kitResponse.ok) {
         const kitJson = await kitResponse.json().catch(() => null);
+        const savedAmount = kitJson?.data?.metadata?.proposalAmount;
+        if (savedAmount && typeof savedAmount === 'object') {
+          setProposalAmount(savedAmount.amount == null ? '' : String(savedAmount.amount));
+          setProposalCurrency(savedAmount.currency === 'USD' || savedAmount.currency === 'Por definir' ? savedAmount.currency : 'ARS');
+        } else if (kitJson?.data) {
+          setProposalAmount(kitJson.data.totalAmount == null ? '' : String(kitJson.data.totalAmount));
+          setProposalCurrency(kitJson.data.currency === 'USD' || kitJson.data.currency === 'Por definir' ? kitJson.data.currency : 'ARS');
+        }
         const savedPrices = kitJson?.data?.approvedPrices;
         if (savedPrices && typeof savedPrices === 'object') {
           setApprovedPrices(Object.fromEntries(Object.entries(savedPrices).map(([key, value]) => [key, String(value)])));
+        }
+        const savedPeriod = kitJson?.data?.metadata?.proposalPeriod;
+        if (savedPeriod && typeof savedPeriod === 'object') {
+          setPeriod({
+            fechaInicio: typeof savedPeriod.fechaInicio === 'string' ? savedPeriod.fechaInicio : '',
+            fechaFin: typeof savedPeriod.fechaFin === 'string' ? savedPeriod.fechaFin : '',
+            duracionValor: savedPeriod.duracionValor == null ? '' : String(savedPeriod.duracionValor),
+            duracionUnidad: savedPeriod.duracionUnidad === 'días' || savedPeriod.duracionUnidad === 'semanas' || savedPeriod.duracionUnidad === 'meses' || savedPeriod.duracionUnidad === 'indefinido' ? savedPeriod.duracionUnidad : 'meses',
+          });
         }
       }
     } catch (e: any) {
@@ -265,7 +321,7 @@ export default function DashboardMediaKitWorkflow() {
   };
 
   const lead = selected
-    ? { name: selected.clientName, email: selected.email, company: selected.company, phone: selected.phone }
+    ? { name: selected.clientName, email: selected.email, company: selected.company, phone: selected.phone, proposalPeriod: proposalPeriodLabel, proposalAmount: proposalCurrency === 'Por definir' ? 'Por definir' : proposalAmount.trim() ? `${proposalCurrency} ${Number(proposalAmount).toLocaleString('es-AR', { maximumFractionDigits: 2 })}` : `${proposalCurrency} ${totalApprovedQuote.toLocaleString('es-AR', { maximumFractionDigits: 2 })}` }
     : null;
 
   const approvedCount = supports.filter((s) => {
@@ -273,9 +329,9 @@ export default function DashboardMediaKitWorkflow() {
     return Number.isFinite(v) && v > 0;
   }).length;
 
-  const exportSupports: ExportSupport[] = supports.map(
-    (s) => ({ ...s, approvedPriceWithTax: Number(approvedPrices[s.canonical_id] || 0) } as ExportSupport)
-  );
+  // Public deliverables carry only the explicitly agreed global amount. Never
+  // pass per-support internal/base prices into PDF or PPT generation.
+  const exportSupports: ExportSupport[] = supports.map((s) => ({ ...s } as ExportSupport));
 
   return (
     <DashboardShell>
@@ -365,6 +421,9 @@ export default function DashboardMediaKitWorkflow() {
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-gray-950">{lead.clientName}</p>
                 <p className="truncate text-xs text-gray-500">{lead.company} · {lead.requestId}</p>
+                <p className="mt-1 truncate text-[11px] text-gray-500">
+                  {lead.supportNames.length} {lead.supportNames.length === 1 ? 'soporte' : 'soportes'} · {formatRequestDate(lead.createdAt)}
+                </p>
               </div>
               <StatusBadge status={labels[lead.status]} />
             </button>
@@ -391,6 +450,28 @@ export default function DashboardMediaKitWorkflow() {
                   {selected.message && <p className="sm:col-span-2"><span className="font-semibold text-gray-800">Mensaje:</span> {selected.message}</p>}
                 </div>
 
+                <section className="rounded-xl border border-gray-200 bg-gray-50/70 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">Monto global acordado</p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <label className="block text-xs font-medium text-gray-600">Monto total<input type="number" min={0} step="0.01" value={proposalAmount} disabled={proposalCurrency === 'Por definir'} onChange={(e) => setProposalAmount(e.target.value)} placeholder={proposalCurrency === 'Por definir' ? 'Por definir' : String(totalApprovedQuote)} className="mt-1 h-9 w-full rounded-lg border border-gray-200 bg-white px-2 text-xs disabled:bg-gray-100" /></label>
+                    <label className="block text-xs font-medium text-gray-600">Moneda<select value={proposalCurrency} onChange={(e) => { const value = e.target.value as ProposalCurrency; setProposalCurrency(value); if (value === 'Por definir') setProposalAmount(''); }} className="mt-1 h-9 w-full rounded-lg border border-gray-200 bg-white px-2 text-xs"><option value="ARS">ARS · Peso argentino</option><option value="USD">USD · Dólar estadounidense</option><option value="Por definir">Por definir</option></select></label>
+                  </div>
+                  {proposalAmountInvalid && <p role="alert" className="mt-2 text-xs font-medium text-red-700">El monto global debe ser un número válido igual o mayor que cero.</p>}
+                  <p className="mt-2 text-[10px] text-gray-500">El monto global es el acordado con el cliente; las tarifas base quedan como referencia interna.</p>
+                </section>
+                <section className="rounded-xl border border-gray-200 bg-gray-50/70 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">Tiempo de la propuesta</p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <label className="block text-xs font-medium text-gray-600">Fecha de inicio<input type="date" value={period.fechaInicio} onChange={(e) => setPeriod((p) => ({ ...p, fechaInicio: e.target.value }))} className="mt-1 h-9 w-full rounded-lg border border-gray-200 bg-white px-2 text-xs" /></label>
+                    <label className="block text-xs font-medium text-gray-600">Fecha de finalización<input type="date" min={period.fechaInicio || undefined} value={period.fechaFin} onChange={(e) => setPeriod((p) => ({ ...p, fechaFin: e.target.value }))} className="mt-1 h-9 w-full rounded-lg border border-gray-200 bg-white px-2 text-xs" /></label>
+                    <label className="block text-xs font-medium text-gray-600">Duración<input type="number" min={1} step={1} value={period.duracionValor} disabled={period.duracionUnidad === 'indefinido'} onChange={(e) => setPeriod((p) => ({ ...p, duracionValor: e.target.value }))} placeholder="Cantidad" className="mt-1 h-9 w-full rounded-lg border border-gray-200 bg-white px-2 text-xs disabled:bg-gray-100" /></label>
+                    <label className="block text-xs font-medium text-gray-600">Unidad<select value={period.duracionUnidad} onChange={(e) => setPeriod((p) => ({ ...p, duracionUnidad: e.target.value as ProposalDurationUnit, duracionValor: e.target.value === 'indefinido' ? '' : p.duracionValor }))} className="mt-1 h-9 w-full rounded-lg border border-gray-200 bg-white px-2 text-xs"><option value="días">Días</option><option value="semanas">Semanas</option><option value="meses">Meses</option><option value="indefinido">Indefinido</option></select></label>
+                  </div>
+                  {periodInvalid && <p role="alert" className="mt-2 text-xs font-medium text-red-700">La fecha final no puede ser anterior a la inicial.</p>}
+                  {durationInvalid && <p role="alert" className="mt-2 text-xs font-medium text-red-700">La duración debe ser un entero mayor que cero.</p>}
+                  <p className="mt-2 text-[10px] text-gray-500">Se guarda como metadato del Media Kit; no cambia la disponibilidad de los soportes.</p>
+                </section>
+
                 {loading ? (
                   <div className="flex items-center gap-2 text-sm text-gray-500"><Loader2 className="h-4 w-4 animate-spin" /> Cargando soportes…</div>
                 ) : (
@@ -403,7 +484,8 @@ export default function DashboardMediaKitWorkflow() {
                       <div key={s.canonical_id} className="rounded-lg border border-gray-100 bg-gray-50/60 p-3">
                         <p className="text-xs font-semibold text-gray-950">{s.name}</p>
                         <p className="text-[11px] text-gray-500">{s.ciudad} · {s.tipo_soporte}</p>
-                        <label className="mt-2 block text-[10px] font-medium text-gray-500">Precio aprobado</label>
+                        <label className="mt-2 block text-[10px] font-medium text-gray-700">Monto acordado con el cliente</label>
+                        <p className="text-[10px] leading-4 text-gray-500">Este importe se incluye en el Media Kit que se entrega.</p>
                         <input
                           type="number"
                           min={0}
@@ -411,7 +493,7 @@ export default function DashboardMediaKitWorkflow() {
                           onChange={(e) => setApprovedPrices((p) => ({ ...p, [s.canonical_id]: e.target.value }))}
                           className="mt-1 h-8 w-full rounded-md border border-gray-200 px-2 text-xs outline-none focus:border-gray-900"
                         />
-                        <p className="mt-1 text-[10px] text-gray-500">Base: {formatSupportCurrency(calculateSupportTotal(s.pricing))}</p>
+                        <p className="mt-1 text-[10px] text-gray-500">Tarifa base interna (solo referencia; no se exporta): {formatSupportCurrency(calculateSupportTotal(s.pricing))}</p>
                       </div>
                     ))}
                     <p className="text-sm font-semibold text-gray-950">Total: {formatSupportCurrency(totalApprovedQuote)} · {approvedCount}/{supports.length} con precio</p>

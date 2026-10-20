@@ -7,8 +7,8 @@ const image = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
 const fixture = {
   status: 'success',
   data: [
-    { canonical_id: 'qa-tradicional-01', name: 'Pórtico Acceso Norte', ciudad: 'mendoza', tipo_soporte: 'tradicional', family: 'traditional', address: 'Acceso Norte · Mendoza', description: 'Soporte tradicional de prueba visual.', characteristics: 'Formato premium', disponibilidad: 'disponible', imageUrls: [image], technical: { measures: '12 × 5 m', caras: 2, monthly_impacts: 125000 } },
-    { canonical_id: 'qa-led-01', name: 'Pantalla LED Centro', ciudad: 'mendoza', tipo_soporte: 'led', family: 'led', address: 'Centro · Mendoza', description: 'Pantalla LED de prueba visual.', characteristics: 'Alta resolución', disponibilidad: 'disponible', imageUrls: [image], technical: { measures: '8 × 4 m', resolution: 'P6', monthly_impacts: 240000 } },
+    { canonical_id: 'qa-tradicional-01', name: 'Pórtico Acceso Norte', ciudad: 'mendoza', tipo_soporte: 'tradicional', family: 'traditional', address: 'Acceso Norte · Mendoza', lat: -32.86, lng: -68.83, description: 'Soporte tradicional de prueba visual.', characteristics: 'Formato premium', disponibilidad: 'disponible', imageUrls: [image], technical: { measures: '12 × 5 m', caras: 2, monthly_impacts: 125000 } },
+    { canonical_id: 'qa-led-01', name: 'Pantalla LED Centro', ciudad: 'mendoza', tipo_soporte: 'led', family: 'led', address: 'Centro · Mendoza', lat: -32.89, lng: -68.84, description: 'Pantalla LED de prueba visual.', characteristics: 'Alta resolución', disponibilidad: 'disponible', imageUrls: [image], technical: { measures: '8 × 4 m', resolution: 'P6', monthly_impacts: 240000 } },
     { canonical_id: 'qa-led-movil-01', name: 'Circuito LED Móvil', ciudad: 'mendoza', tipo_soporte: 'led_movil', family: 'led_mobile', description: 'Circuito móvil de prueba visual.', characteristics: 'Ruta urbana', disponibilidad: 'reservado', imageUrls: [image], duration: '8 h', schedule: 'Lun–Vie', waypoints: [{ name: 'Centro', lat: -32.89, lng: -68.84 }], routePath: [[-32.89, -68.84]], technical: { spot_duration_seconds: 15, monthly_impacts: 180000 } },
   ],
 };
@@ -37,6 +37,50 @@ test.describe('Inventario · regresión visual', () => {
     await expect(page.getByRole('button', { name: 'Seleccionar' }).first()).toBeVisible();
     await expect(page.getByRole('button', { name: 'Consultar disponibilidad' })).toBeVisible();
     await expect(page).toHaveScreenshot('inventory-catalog-mobile.png', { stylePath: 'tests/visual/screenshot.css' });
+  });
+
+
+  test('mapa responsive: marcadores y encuadre', async ({ page }) => {
+    await page.getByRole('radio', { name: 'Mapa' }).click();
+    const map = page.locator('.leaflet-container');
+    await expect(map).toBeVisible();
+    await expect(page.locator('.leaflet-marker-icon')).toHaveCount(2);
+    await expect(map).toHaveScreenshot('inventory-map-responsive.png', { stylePath: 'tests/visual/screenshot.css' });
+  });
+
+  test('mapa mantiene tipologías normalizadas y detalle en escritorio/móvil', async ({ page }) => {
+    await page.getByRole('radio', { name: 'Mapa' }).click();
+    await expect(page.locator('.leaflet-container')).toBeVisible();
+    const markers = page.locator('.leaflet-marker-icon');
+    await expect(markers).toHaveCount(2);
+    await markers.first().hover();
+    await expect(page.locator('.leaflet-tooltip').first()).toContainText('Tradicional');
+    await markers.nth(1).click();
+    await expect(page.getByText('Soporte seleccionado')).toBeVisible();
+    await expect(page.getByRole('article').getByText('Pendiente de mapeo')).toBeVisible();
+  });
+
+  test('soporte destacado muestra la etiqueta editorial', async ({ page }) => {
+    await page.route('**/api/supports', async (route) => {
+      const featuredFixture = {
+        ...fixture,
+        data: fixture.data.map((item, index) => index === 0 ? { ...item, isFeatured: true } : item),
+      };
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(featuredFixture) });
+    });
+    await page.reload();
+    await expect(page.getByRole('article').first().getByText('Destacado')).toBeVisible();
+  });
+
+  test('el filtro distingue Pantallas LED de registros heredados sin mapear', async ({ page }) => {
+    const typeFilter = page.getByRole('combobox', { name: 'Filtrar por tipo de soporte' });
+    await typeFilter.selectOption('pantallas_led');
+    await expect(page.getByText('Sin resultados con estos filtros')).toBeVisible();
+    await expect(page.getByText('Con los filtros actuales no hay soportes confirmados como Pantallas LED.')).toBeVisible();
+    await typeFilter.selectOption('pendiente_mapeo');
+    await expect(page.getByRole('article')).toHaveCount(1);
+    await expect(page.getByRole('article').getByText('Pendiente de mapeo')).toBeVisible();
+    await expect(page.getByText('Pórtico Acceso Norte')).toHaveCount(0);
   });
 
   test('selección cambia el estado visual sin perder la acción secundaria', async ({ page }) => {
