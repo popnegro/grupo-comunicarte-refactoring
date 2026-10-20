@@ -148,7 +148,9 @@ export default function DashboardMediaKitBuilder() {
     setPrices(next);
     notify('Tarifas base aplicadas.');
   };
-  const exportSupports: ExportSupport[] = selected.map(s => ({ ...s, approvedPriceWithTax: Number(prices[s.canonical_id] || 0) }));
+  // Public deliverables carry only the explicitly agreed global amount. Never
+  // pass per-support internal/base prices into PDF or PPT generation.
+  const exportSupports: ExportSupport[] = selected.map((s) => ({ ...s }));
   const lead = {
     name: client.name || 'Cliente',
     company: client.company,

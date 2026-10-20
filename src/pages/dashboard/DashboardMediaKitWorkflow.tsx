@@ -329,9 +329,9 @@ export default function DashboardMediaKitWorkflow() {
     return Number.isFinite(v) && v > 0;
   }).length;
 
-  const exportSupports: ExportSupport[] = supports.map(
-    (s) => ({ ...s, approvedPriceWithTax: Number(approvedPrices[s.canonical_id] || 0) } as ExportSupport)
-  );
+  // Public deliverables carry only the explicitly agreed global amount. Never
+  // pass per-support internal/base prices into PDF or PPT generation.
+  const exportSupports: ExportSupport[] = supports.map((s) => ({ ...s } as ExportSupport));
 
   return (
     <DashboardShell>

@@ -1,6 +1,6 @@
 # Theme template integration audit
 
-**Scope:** PR #77, `feat/theme` → `main`  
+**Scope:** PR #77, `feat/theme` → `main`
 **Decision:** keep both archives as references; do not integrate either application wholesale.
 
 ## Current application baseline
@@ -18,8 +18,8 @@ Preserve the existing application architecture, route behavior, API contracts, a
 
 ## 1. mapcn
 
-**Archive:** `mapcn-main.zip`  
-**License file:** MIT; copyright notice must be retained for copied portions.  
+**Archive:** `mapcn-main.zip`
+**License file:** MIT; copyright notice must be retained for copied portions.
 **Upstream stack declared in archive:** Next.js 16, React 19.2.3, Tailwind CSS 4, MapLibre GL 6.3.
 
 ### Assessment
@@ -38,8 +38,8 @@ The archive README also states that its default CARTO basemap requires a CARTO E
 
 ## 2. Studio Admin (next-shadcn-admin-dashboard)
 
-**Archive:** `next-shadcn-admin-dashboard-main.zip`  
-**License file:** MIT; copyright notice must be retained for copied portions.  
+**Archive:** `next-shadcn-admin-dashboard-main.zip`
+**License file:** MIT; copyright notice must be retained for copied portions.
 **Upstream stack declared in archive:** Next.js 16, React 19.3, Tailwind CSS 4, shadcn, Base UI and a newer set of UI/data-table dependencies.
 
 ### Assessment
