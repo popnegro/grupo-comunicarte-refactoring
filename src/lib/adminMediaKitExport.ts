@@ -18,7 +18,6 @@ export interface ExportLead { name: string; email: string; company?: string; pho
 const clean=(v?:string)=>(v||'').replace(/\r?\n/g,' ').trim();
 const pdfWinAnsiEscapes: Record<string, string> = { 'á': '\\341', 'é': '\\351', 'í': '\\355', 'ó': '\\363', 'ú': '\\372', 'ñ': '\\361', 'ü': '\\374', 'Á': '\\301', 'É': '\\311', 'Í': '\\315', 'Ó': '\\323', 'Ú': '\\332', 'Ñ': '\\321', 'Ü': '\\334', '¿': '\\277', '¡': '\\241', '·': '\\267', '×': '\\327', '–': '\\226', '—': '\\227', '€': '\\200', '“': '\\223', '”': '\\224', '’': '\\222', '…': '\\205' };
 const esc=(v?:string)=>clean(v).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)').replace(/[^\x20-\x7E]/g,(char)=>pdfWinAnsiEscapes[char]||'?');
-const money=(v?:number)=>Number(v)>0?`ARS ${Number(v).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}`:'';
 const wrap=(v:string,max=54)=>{const out:string[]=[];let line='';for(const w of clean(v).split(/\s+/).filter(Boolean)){const n=line?`${line} ${w}`:w;if(n.length>max&&line){out.push(line);line=w;}else line=n;}if(line)out.push(line);return out;};
 const text=(l:string[],value:string,x:number,y:number,size:number,bold=false)=>l.push('BT',`/${bold?'F2':'F1'} ${size} Tf`,`${x} ${y} Td`,`(${esc(value)}) Tj`,'ET');
 const box=(l:string[],x:number,y:number,w:number,h:number,fill:string,stroke?:string)=>{l.push(`${fill} rg`,`${x} ${y} ${w} ${h} re f`);if(stroke)l.push(`${stroke} RG`,`${x} ${y} ${w} ${h} re S`);};
