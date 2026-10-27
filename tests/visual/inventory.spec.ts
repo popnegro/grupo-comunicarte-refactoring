@@ -24,7 +24,7 @@ test.describe('Inventario · regresión visual', () => {
     await page.waitForLoadState('networkidle');
   });
 
-  test('desktop mantiene jerarquía, estados y atributos de las tarjetas', async ({ page }) => {
+  test('desktop mantiene jerarquía, estados y atributos de las tarjetas', async ({ page }, testInfo) => {
     await expect(page.locator('article').first().getByText('Disponible', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Consultar disponibilidad' })).toBeVisible();
     if (process.env.VISUAL_BASELINE_MODE !== 'true') {
@@ -33,21 +33,24 @@ test.describe('Inventario · regresión visual', () => {
       await expect(page.getByText('8 h')).toBeVisible();
       await expect(page.getByRole('article').nth(1).getByText('Pendiente de mapeo')).toBeVisible();
     }
+    await page.screenshot({ path: testInfo.outputPath('candidate-inventory-catalog-desktop.png'), fullPage: true });
     await expect(page).toHaveScreenshot('inventory-catalog-desktop.png', { stylePath: 'tests/visual/screenshot.css' });
   });
 
-  test('mobile mantiene tarjetas legibles y acciones accesibles', async ({ page }) => {
+  test('mobile mantiene tarjetas legibles y acciones accesibles', async ({ page }, testInfo) => {
     await expect(page.getByRole('button', { name: 'Seleccionar' }).first()).toBeVisible();
     await expect(page.getByRole('button', { name: 'Consultar disponibilidad' })).toBeVisible();
+    await page.screenshot({ path: testInfo.outputPath('candidate-inventory-catalog-mobile.png'), fullPage: true });
     await expect(page).toHaveScreenshot('inventory-catalog-mobile.png', { stylePath: 'tests/visual/screenshot.css' });
   });
 
 
-  test('mapa responsive: marcadores y encuadre', async ({ page }) => {
+  test('mapa responsive: marcadores y encuadre', async ({ page }, testInfo) => {
     await page.getByRole('radio', { name: 'Mapa' }).click();
     const map = page.locator('.leaflet-container');
     await expect(map).toBeVisible();
     await expect(page.locator('.leaflet-marker-icon')).toHaveCount(2);
+    await map.screenshot({ path: testInfo.outputPath('candidate-inventory-map-responsive.png') });
     await expect(map).toHaveScreenshot('inventory-map-responsive.png', { stylePath: 'tests/visual/screenshot.css' });
   });
 
@@ -86,10 +89,11 @@ test.describe('Inventario · regresión visual', () => {
     await expect(page.getByText('Pórtico Acceso Norte')).toHaveCount(0);
   });
 
-  test('selección cambia el estado visual sin perder la acción secundaria', async ({ page }) => {
+  test('selección cambia el estado visual sin perder la acción secundaria', async ({ page }, testInfo) => {
     await page.getByRole('button', { name: 'Seleccionar' }).first().click();
     await expect(page.getByRole('button', { name: 'Quitar selección' }).first()).toBeVisible();
     await expect(page.getByRole('button', { name: 'Ver soporte' }).first()).toBeVisible();
+    await page.locator('article').first().screenshot({ path: testInfo.outputPath('candidate-inventory-card-selected.png') });
     await expect(page.locator('article').first()).toHaveScreenshot('inventory-card-selected.png', { stylePath: 'tests/visual/screenshot.css' });
   });
 });
