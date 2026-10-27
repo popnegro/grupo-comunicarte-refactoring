@@ -365,8 +365,8 @@ export default function DashboardMediaKitWorkflow() {
     return Number.isFinite(v) && v > 0;
   }).length;
 
-  // Export only prices explicitly agreed with the client. The internal catalog
-  // pricing lives in s.pricing and is deliberately excluded from deliverables.
+  // Client-facing exports carry only the global commercial amount, never
+  // per-support values that could originate from the confidential base catalog.
   const exportSupports: ExportSupport[] = supports.map((s) => ({
     canonical_id: s.canonical_id,
     name: s.name,
@@ -379,10 +379,7 @@ export default function DashboardMediaKitWorkflow() {
     image_url: s.image_url,
     imageUrls: s.imageUrls,
     media: s.media,
-    approvedPriceWithTax: Number(approvedPrices[s.canonical_id]) > 0
-      ? Number(approvedPrices[s.canonical_id])
-      : undefined,
-  }));
+  } as ExportSupport));
 
   const prepareDelivery = async () => {
     if (!lead || !selected || !approvalsReady) return;
