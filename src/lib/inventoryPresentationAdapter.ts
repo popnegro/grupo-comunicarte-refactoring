@@ -13,6 +13,8 @@ export type InventoryPresentationType =
   | 'Tradicional'
   | 'LED móvil'
   | 'Pantallas LED'
+  | 'Outdoor'
+  | 'Indoor'
   | 'Pendiente de mapeo';
 
 export type InventoryPresentationAvailability = 'Disponible' | 'Reservado';
@@ -42,6 +44,20 @@ export interface InventoryPresentationItem {
 }
 
 function mapType(item: InventoryItem): InventoryPresentationType {
+  // Explicit commercial classification only; never infer Outdoor/Indoor from support format.
+  const metadata = item.technical?.metadata;
+  const commercialCategory =
+    metadata && typeof metadata === 'object'
+      ? (metadata as Record<string, unknown>).categoriaComercial
+      : undefined;
+  if (
+    commercialCategory === 'Tradicional' ||
+    commercialCategory === 'Pantallas LED' ||
+    commercialCategory === 'LED móvil' ||
+    commercialCategory === 'Outdoor' ||
+    commercialCategory === 'Indoor'
+  ) return commercialCategory;
+
   if (item.tipo_soporte === 'tradicional') return 'Tradicional';
   if (item.tipo_soporte === 'led_movil') return 'LED móvil';
   if ((item.tipo_soporte as string) === 'pantallas_led') return 'Pantallas LED';
