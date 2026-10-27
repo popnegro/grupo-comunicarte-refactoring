@@ -52,7 +52,7 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           GITHUB_WORKSPACE: ${{ github.workspace }}
         run: |
-          set -euo pipefail
+          set -eu
           git fetch --no-tags origin "$BASE_REF"
           git worktree add --detach /tmp/gc-baseline "$BASE_SHA"
 
