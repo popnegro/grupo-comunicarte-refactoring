@@ -160,7 +160,7 @@ export default function DashboardMediaKitBuilder() {
     email: client.email,
     phone: client.phone,
     proposalPeriod: formatProposalPeriod(period),
-    proposalAmount: proposalCurrency === 'Por definir' ? 'Por definir' : proposalAmount.trim() ? `${proposalCurrency} ${Number(proposalAmount).toLocaleString('es-AR', { maximumFractionDigits: 2 })}` : `${proposalCurrency} ${total.toLocaleString('es-AR', { maximumFractionDigits: 2 })}`,
+    proposalAmount: proposalCurrency === 'Por definir' || !proposalAmount.trim() ? '' : `${proposalCurrency} ${Number(proposalAmount).toLocaleString('es-AR', { maximumFractionDigits: 2 })}`,
   };
 
   const persist = async (status: MediaKitStatus = 'draft'): Promise<PersistedKit> => {
@@ -179,7 +179,7 @@ export default function DashboardMediaKitBuilder() {
         clientPhone: client.phone || null,
         supportIds: selectedIds,
         approvedPrices: prices,
-        totalAmount: proposalCurrency === 'Por definir' ? null : proposalAmount.trim() ? Number(proposalAmount) : total,
+        totalAmount: proposalCurrency === 'Por definir' || !proposalAmount.trim() ? null : Number(proposalAmount),
         currency: proposalCurrency,
         status,
         metadata: {
@@ -289,7 +289,7 @@ export default function DashboardMediaKitBuilder() {
                   </label>
                 </div>
                 {proposalAmountInvalid && <p role="alert" className="mt-2 text-xs font-medium text-red-700">El monto global debe ser un número válido igual o mayor que cero.</p>}
-                <p className="mt-2 text-[11px] text-gray-500">Si el monto queda vacío, se usa la suma de los precios aprobados por soporte. El monto global se distingue de las tarifas base internas.</p>
+                <p className="mt-2 text-[11px] text-gray-500">El documento para el cliente muestra únicamente el monto global acordado. Si aún no está definido, se indicará “Inversión sujeta a cotización”; las tarifas por soporte son internas.</p>
               </div>
 
               <div className="rounded-xl border border-gray-200 bg-white p-4">
