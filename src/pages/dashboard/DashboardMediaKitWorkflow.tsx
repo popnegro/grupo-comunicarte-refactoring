@@ -224,23 +224,50 @@ export default function DashboardMediaKitWorkflow() {
 
   const changeStatus = async (lead: LeadRequest, next: WorkflowStatus) => {
     setBusy(true);
+    let mediaKitMarkedSent = false;
     try {
       const persisted = next === 'request' ? 'pending' : next === 'in_progress' ? 'contactado' : 'enviado';
       if (next === 'done') {
         const saved = await persistMediaKit('ready');
         if (!saved) throw new Error('No pudimos guardar el Media Kit.');
+
+        const kitStatusResponse = await apiFetch(`/api/admin/mediakits/${encodeURIComponent(`KIT-${lead.requestId}`)}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'sent' }),
+        });
+        const kitStatusResult = await kitStatusResponse.json().catch(() => null);
+        if (!kitStatusResponse.ok || kitStatusResult?.status !== 'success') {
+          throw new Error(kitStatusResult?.message || 'No pudimos registrar el Media Kit como enviado.');
+        }
+        mediaKitMarkedSent = true;
       }
+
       const r = await apiFetch(`/api/admin/requests/${encodeURIComponent(lead.requestId)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: persisted }),
       });
       const j = await r.json().catch(() => null);
-      if (!r.ok || j?.status !== 'success') throw new Error(j?.message || 'No pudimos actualizar el estado.');
+      if (!r.ok || j?.status !== 'success') {
+        throw new Error(j?.message || 'No pudimos actualizar el estado de la solicitud.');
+      }
+
       await load();
       setSelected((x) => (x ? { ...x, status: next } : null));
       notify(`Solicitud ${labels[next]}`);
     } catch (e: any) {
+      if (mediaKitMarkedSent) {
+        try {
+          await apiFetch(`/api/admin/mediakits/${encodeURIComponent(`KIT-${lead.requestId}`)}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'ready' }),
+          });
+        } catch (rollbackError) {
+          console.error('Could not roll back Media Kit status after request update failed:', rollbackError);
+        }
+      }
       notify(e.message || 'Error al actualizar.');
     } finally {
       setBusy(false);
