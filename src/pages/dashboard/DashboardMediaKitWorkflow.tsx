@@ -225,6 +225,7 @@ export default function DashboardMediaKitWorkflow() {
   const changeStatus = async (lead: LeadRequest, next: WorkflowStatus) => {
     setBusy(true);
     let mediaKitMarkedSent = false;
+    let requestStatusUpdated = false;
     try {
       const persisted = next === 'request' ? 'pending' : next === 'in_progress' ? 'contactado' : 'enviado';
       if (next === 'done') {
@@ -252,18 +253,23 @@ export default function DashboardMediaKitWorkflow() {
       if (!r.ok || j?.status !== 'success') {
         throw new Error(j?.message || 'No pudimos actualizar el estado de la solicitud.');
       }
+      requestStatusUpdated = true;
 
       await load();
       setSelected((x) => (x ? { ...x, status: next } : null));
       notify(`Solicitud ${labels[next]}`);
     } catch (e: any) {
-      if (mediaKitMarkedSent) {
+      if (mediaKitMarkedSent && !requestStatusUpdated) {
         try {
-          await apiFetch(`/api/admin/mediakits/${encodeURIComponent(`KIT-${lead.requestId}`)}/status`, {
+          const rollbackResponse = await apiFetch(`/api/admin/mediakits/${encodeURIComponent(`KIT-${lead.requestId}`)}/status`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: 'ready' }),
           });
+          const rollbackResult = await rollbackResponse.json().catch(() => null);
+          if (!rollbackResponse.ok || rollbackResult?.status !== 'success') {
+            console.error('Could not roll back Media Kit status after request update failed:', rollbackResult?.message || rollbackResponse.status);
+          }
         } catch (rollbackError) {
           console.error('Could not roll back Media Kit status after request update failed:', rollbackError);
         }
