@@ -10,7 +10,7 @@ import { apiFetch } from '../../lib/api';
 type Pricing = { exhibition_price?: number | string | null; installation_price?: number | string | null; printing_price?: number | string | null; currency?: string | null };
 type Support = ExportSupport & { disponibilidad?: 'disponible' | 'reservado' | 'inactivo'; pricing?: Pricing | null; imageUrls?: string[]; media?: Array<{ url?: string; media_type?: string; active?: boolean }> };
 type MediaKitStatus = 'draft' | 'ready' | 'sent' | 'archived';
-type ProposalDurationUnit = 'días' | 'semanas' | 'meses' | 'indefinido';
+type ProposalDurationUnit = 'días' | 'semanas' | 'meses' | 'quincenas' | 'otros' | 'indefinido';
 type ProposalCurrency = 'ARS' | 'USD' | 'Por definir';
 type ProposalPeriod = { fechaInicio: string; fechaFin: string; duracionValor: string; duracionUnidad: ProposalDurationUnit };
 type PersistedKit = {
@@ -35,9 +35,11 @@ function formatProposalPeriod(period: ProposalPeriod): string | undefined {
     : '';
   const duration = period.duracionUnidad === 'indefinido'
     ? 'Duración indefinida'
-    : period.duracionValor
-      ? `${period.duracionValor} ${period.duracionUnidad}`
-      : '';
+    : period.duracionUnidad === 'otros'
+      ? (period.duracionValor ? `Período: ${period.duracionValor}` : 'Período: otros (a definir)')
+      : period.duracionValor
+        ? `${period.duracionValor} ${period.duracionUnidad}`
+        : '';
   return [dates, duration].filter(Boolean).join(' · ') || undefined;
 }
 
@@ -101,7 +103,7 @@ export default function DashboardMediaKitBuilder() {
                 fechaInicio: typeof p.fechaInicio === 'string' ? p.fechaInicio : '',
                 fechaFin: typeof p.fechaFin === 'string' ? p.fechaFin : '',
                 duracionValor: p.duracionValor == null ? '' : String(p.duracionValor),
-                duracionUnidad: p.duracionUnidad === 'días' || p.duracionUnidad === 'semanas' || p.duracionUnidad === 'meses' || p.duracionUnidad === 'indefinido' ? p.duracionUnidad : 'meses',
+                duracionUnidad: p.duracionUnidad === 'días' || p.duracionUnidad === 'semanas' || p.duracionUnidad === 'meses' || p.duracionUnidad === 'quincenas' || p.duracionUnidad === 'otros' || p.duracionUnidad === 'indefinido' ? p.duracionUnidad : 'meses',
               });
             }
             setRequestId(kit.kitId || kitIdParam);
@@ -301,15 +303,17 @@ export default function DashboardMediaKitBuilder() {
                   </label>
                   <label className="block text-xs font-medium text-gray-600">
                     Duración contratada
-                    <input type="number" min={1} step={1} value={period.duracionValor} onChange={(e) => setPeriod((p) => ({ ...p, duracionValor: e.target.value }))} disabled={period.duracionUnidad === 'indefinido'} placeholder="Cantidad" className="mt-1 h-10 w-full rounded-lg border border-gray-200 px-3 text-sm text-gray-900 outline-none focus:border-gray-900 disabled:bg-gray-100" />
+                    <input type={period.duracionUnidad === 'otros' ? 'text' : 'number'} min={period.duracionUnidad === 'otros' ? undefined : 1} step={period.duracionUnidad === 'otros' ? undefined : 1} value={period.duracionValor} onChange={(e) => setPeriod((p) => ({ ...p, duracionValor: e.target.value }))} disabled={period.duracionUnidad === 'indefinido'} placeholder={period.duracionUnidad === 'otros' ? 'Describir período acordado' : 'Cantidad'} className="mt-1 h-10 w-full rounded-lg border border-gray-200 px-3 text-sm text-gray-900 outline-none focus:border-gray-900 disabled:bg-gray-100" />
                   </label>
                   <label className="block text-xs font-medium text-gray-600">
                     Unidad de duración
-                    <select value={period.duracionUnidad} onChange={(e) => setPeriod((p) => ({ ...p, duracionUnidad: e.target.value as ProposalDurationUnit, duracionValor: e.target.value === 'indefinido' ? '' : p.duracionValor }))} className="mt-1 h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900 outline-none focus:border-gray-900">
-                      <option value="días">Días</option>
-                      <option value="semanas">Semanas</option>
-                      <option value="meses">Meses</option>
-                      <option value="indefinido">Indefinido</option>
+                    <select value={period.duracionUnidad} onChange={(e) => setPeriod((p) => ({ ...p, duracionUnidad: e.target.value as ProposalDurationUnit, duracionValor: e.target.value === 'indefinido' || e.target.value === 'otros' ? '' : p.duracionValor }))} className="mt-1 h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900 outline-none focus:border-gray-900">
+                      <option value="meses">Mensual (meses)</option>
+                      <option value="quincenas">Quincenal</option>
+                      <option value="otros">Otros</option>
+                      <option value="días">Días (legado)</option>
+                      <option value="semanas">Semanas (legado)</option>
+                      <option value="indefinido">Indefinido (legado)</option>
                     </select>
                   </label>
                 </div>
