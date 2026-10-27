@@ -62,10 +62,18 @@ function canonicalizeEditorMedia<T extends SupportWritePayload>(data: T): T {
   };
 }
 
+function constantTimeStringEqual(actual: string, expected: string): boolean {
+  const actualDigest = crypto.createHash('sha256').update(actual).digest();
+  const expectedDigest = crypto.createHash('sha256').update(expected).digest();
+  return crypto.timingSafeEqual(actualDigest, expectedDigest);
+}
+
 export function authenticateAdmin(username: string, password: string): { success: boolean; token?: string; message?: string } {
   const user = String(username ?? '').trim();
   const pass = String(password ?? '');
-  if (user === adminUser && pass === adminPassword) {
+  const userMatches = constantTimeStringEqual(user, adminUser);
+  const passwordMatches = constantTimeStringEqual(pass, adminPassword);
+  if (userMatches && passwordMatches) {
     const expiresAt = Date.now() + 8 * 3600 * 1000;
     const payload = `${user}:${expiresAt}`;
     const signature = crypto.createHmac('sha256', adminSecret).update(payload).digest('hex');
