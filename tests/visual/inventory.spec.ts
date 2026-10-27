@@ -31,6 +31,7 @@ test.describe('Inventario · regresión visual', () => {
       await expect(page.getByText('12 × 5 m')).toBeVisible();
       await expect(page.getByText('P6')).toBeVisible();
       await expect(page.getByText('8 h')).toBeVisible();
+      await expect(page.getByRole('article').nth(1).getByText('Pendiente de mapeo')).toBeVisible();
     }
     await expect(page).toHaveScreenshot('inventory-catalog-desktop.png', { stylePath: 'tests/visual/screenshot.css' });
   });
