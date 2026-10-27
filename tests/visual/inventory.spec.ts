@@ -33,14 +33,14 @@ test.describe('Inventario · regresión visual', () => {
       await expect(page.getByText('8 h')).toBeVisible();
       await expect(page.getByRole('article').nth(1).getByText('Pendiente de mapeo')).toBeVisible();
     }
-    await page.screenshot({ path: testInfo.outputPath('candidate-inventory-catalog-desktop.png'), fullPage: true });
+    await page.screenshot({ path: testInfo.outputPath('candidate-inventory-catalog-desktop.png') });
     await expect(page).toHaveScreenshot('inventory-catalog-desktop.png', { stylePath: 'tests/visual/screenshot.css' });
   });
 
   test('mobile mantiene tarjetas legibles y acciones accesibles', async ({ page }, testInfo) => {
     await expect(page.getByRole('button', { name: 'Seleccionar' }).first()).toBeVisible();
     await expect(page.getByRole('button', { name: 'Consultar disponibilidad' })).toBeVisible();
-    await page.screenshot({ path: testInfo.outputPath('candidate-inventory-catalog-mobile.png'), fullPage: true });
+    await page.screenshot({ path: testInfo.outputPath('candidate-inventory-catalog-mobile.png') });
     await expect(page).toHaveScreenshot('inventory-catalog-mobile.png', { stylePath: 'tests/visual/screenshot.css' });
   });
 
