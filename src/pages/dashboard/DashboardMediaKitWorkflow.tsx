@@ -365,9 +365,24 @@ export default function DashboardMediaKitWorkflow() {
     return Number.isFinite(v) && v > 0;
   }).length;
 
-  // Public deliverables carry only the explicitly agreed global amount. Never
-  // pass per-support internal/base prices into PDF or PPT generation.
-  const exportSupports: ExportSupport[] = supports.map((s) => ({ ...s } as ExportSupport));
+  // Export only prices explicitly agreed with the client. The internal catalog
+  // pricing lives in s.pricing and is deliberately excluded from deliverables.
+  const exportSupports: ExportSupport[] = supports.map((s) => ({
+    canonical_id: s.canonical_id,
+    name: s.name,
+    ciudad: s.ciudad,
+    tipo_soporte: s.tipo_soporte,
+    address: s.address,
+    description: s.description,
+    characteristics: s.characteristics,
+    imageUrl: s.imageUrl,
+    image_url: s.image_url,
+    imageUrls: s.imageUrls,
+    media: s.media,
+    approvedPriceWithTax: Number(approvedPrices[s.canonical_id]) > 0
+      ? Number(approvedPrices[s.canonical_id])
+      : undefined,
+  }));
 
   const prepareDelivery = async () => {
     if (!lead || !selected || !approvalsReady) return;
