@@ -32,7 +32,7 @@ export default function Inventario() {
   const rawTipoParam = searchParams.get('tipo');
   const tipoParam: InventoryTypeFilter | null = rawTipoParam === 'led'
     ? 'pendiente_mapeo'
-    : rawTipoParam === 'tradicional' || rawTipoParam === 'led_movil' || rawTipoParam === 'pantallas_led' || rawTipoParam === 'pendiente_mapeo'
+    : rawTipoParam === 'tradicional' || rawTipoParam === 'led_movil' || rawTipoParam === 'pantallas_led' || rawTipoParam === 'outdoor' || rawTipoParam === 'indoor' || rawTipoParam === 'pendiente_mapeo'
       ? rawTipoParam
       : null;
   const dispParam = searchParams.get('disponibilidad') as DisponibilidadFilter | null;
@@ -107,6 +107,8 @@ export default function Inventario() {
     if (selectedTipo === 'todos') return true;
     const canonicalType = toInventoryPresentationItem(item).tipo;
     if (selectedTipo === 'pantallas_led') return canonicalType === 'Pantallas LED';
+    if (selectedTipo === 'outdoor') return canonicalType === 'Outdoor';
+    if (selectedTipo === 'indoor') return canonicalType === 'Indoor';
     if (selectedTipo === 'pendiente_mapeo') return canonicalType === 'Pendiente de mapeo';
     return item.tipo_soporte === selectedTipo;
   }, [selectedTipo]);
