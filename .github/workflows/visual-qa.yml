@@ -72,7 +72,7 @@ jobs:
           done
           curl -fsS http://127.0.0.1:4174/ >/dev/null
 
-          PLAYWRIGHT_BASE_URL=http://127.0.0.1:4174 npx playwright test \
+          VISUAL_BASELINE_MODE=true PLAYWRIGHT_BASE_URL=http://127.0.0.1:4174 npx playwright test \
             -g "desktop mantiene jerarquía|mobile mantiene tarjetas|mapa responsive: marcadores y encuadre|selección cambia el estado visual" \
             --update-snapshots
 
