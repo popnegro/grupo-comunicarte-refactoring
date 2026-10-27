@@ -61,7 +61,13 @@ function parseCookies(header?: string): Record<string, string> {
     if (idx === -1) return acc;
     const key = part.slice(0, idx).trim();
     const val = part.slice(idx + 1).trim();
-    if (key) acc[key] = decodeURIComponent(val);
+    if (key) {
+      try {
+        acc[key] = decodeURIComponent(val);
+      } catch {
+        // Ignore malformed cookie values so they cannot abort authentication middleware.
+      }
+    }
     return acc;
   }, {});
 }
