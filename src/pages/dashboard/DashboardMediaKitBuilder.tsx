@@ -128,11 +128,12 @@ export default function DashboardMediaKitBuilder() {
   const selected = useMemo(() => allSupports.filter((s) => selectedIds.includes(s.canonical_id)), [allSupports, selectedIds]);
   const total = useMemo(() => selected.reduce((sum, s) => sum + (Number(prices[s.canonical_id]) || 0), 0), [selected, prices]);
   const periodInvalid = Boolean(period.fechaInicio && period.fechaFin && period.fechaFin < period.fechaInicio);
-  const durationInvalid = period.duracionUnidad !== 'indefinido' && Boolean(period.duracionValor) &&
+  const durationInvalid = period.duracionUnidad !== 'indefinido' && period.duracionUnidad !== 'otros' && Boolean(period.duracionValor) &&
     (!Number.isInteger(Number(period.duracionValor)) || Number(period.duracionValor) <= 0);
+  const otherDurationMissing = period.duracionUnidad === 'otros' && !period.duracionValor.trim();
   const proposalAmountInvalid = proposalCurrency !== 'Por definir' && Boolean(proposalAmount.trim()) &&
     (!Number.isFinite(Number(proposalAmount)) || Number(proposalAmount) < 0);
-  const canExport = selected.length > 0 && selected.every(s => Number(prices[s.canonical_id]) > 0) && client.name.trim().length > 0 && !periodInvalid && !durationInvalid && !proposalAmountInvalid;
+  const canExport = selected.length > 0 && selected.every(s => Number(prices[s.canonical_id]) > 0) && client.name.trim().length > 0 && !periodInvalid && !durationInvalid && !otherDurationMissing && !proposalAmountInvalid;
   const toggle = (support: Support) => {
     if (support.disponibilidad !== 'disponible' && !selectedIds.includes(support.canonical_id)) {
       notify('Solo se pueden agregar soportes disponibles al Media Kit.');
@@ -165,6 +166,7 @@ export default function DashboardMediaKitBuilder() {
   const persist = async (status: MediaKitStatus = 'draft'): Promise<PersistedKit> => {
     if (periodInvalid) throw new Error('La fecha de finalización no puede ser anterior al inicio.');
     if (durationInvalid) throw new Error('La duración debe ser un número entero mayor que cero.');
+    if (otherDurationMissing) throw new Error('Describí el período acordado en “Otros”.');
     if (proposalAmountInvalid) throw new Error('El monto global debe ser un número válido igual o mayor que cero.');
     const response = await apiFetch('/api/admin/mediakits', {
       method: 'POST',
@@ -184,7 +186,7 @@ export default function DashboardMediaKitBuilder() {
           proposalPeriod: {
             fechaInicio: period.fechaInicio || null,
             fechaFin: period.fechaFin || null,
-            duracionValor: period.duracionValor ? Number(period.duracionValor) : null,
+            duracionValor: period.duracionValor ? (period.duracionUnidad === 'otros' ? period.duracionValor.trim() : Number(period.duracionValor)) : null,
             duracionUnidad: period.duracionUnidad,
           },
           proposalAmount: {
