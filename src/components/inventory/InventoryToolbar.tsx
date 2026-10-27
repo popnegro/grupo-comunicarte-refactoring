@@ -57,13 +57,13 @@ export function InventoryToolbar({
         />
       </div>
 
-      <button type="button" onClick={onNearMe} disabled={locating} className={`flex h-9 shrink-0 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition ${nearMeActive ? "border-gray-950 bg-gray-950 text-white" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"} disabled:cursor-wait disabled:opacity-60`} aria-label="Buscar soportes cerca de mi ubicación">
+      <button type="button" onClick={onNearMe} disabled={locating} className={`flex h-10 shrink-0 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition ${nearMeActive ? "border-gray-950 bg-gray-950 text-white" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"} disabled:cursor-wait disabled:opacity-60`} aria-label="Buscar soportes cerca de mi ubicación">
         <LocateFixed className={`h-3.5 w-3.5 ${locating ? 'animate-pulse' : ''}`} aria-hidden="true" />
         {locating ? 'Ubicando...' : nearMeActive ? 'Cerca de tu ubicación' : 'Cerca de mí'}
       </button>
 
       {nearMeActive && onClearNearMe && (
-        <button type="button" onClick={onClearNearMe} className="flex h-9 shrink-0 items-center gap-1 rounded-lg border border-gray-200 bg-white px-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-50" aria-label="Quitar búsqueda cerca de mi ubicación">
+        <button type="button" onClick={onClearNearMe} className="flex h-10 shrink-0 items-center gap-1 rounded-lg border border-gray-200 bg-white px-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-gray-950/20" aria-label="Quitar búsqueda cerca de mi ubicación">
           <X className="h-3.5 w-3.5" aria-hidden="true" />
           <span className="hidden sm:inline">Quitar</span>
         </button>
@@ -73,7 +73,7 @@ export function InventoryToolbar({
         value={selectedPlaza}
         onChange={(event) => setSelectedPlaza(event.target.value as Plaza | 'todos')}
         aria-label="Filtrar por plaza"
-        className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-xs font-medium text-gray-700 outline-none transition focus:border-gray-400"
+        className="h-10 rounded-lg border border-gray-200 bg-white px-3 text-xs font-medium text-gray-700 outline-none transition focus:border-gray-400 focus-visible:ring-2 focus-visible:ring-gray-950/20"
       >
         <option value="todos">Todas las plazas</option>
         <option value="mendoza">Mendoza</option>
