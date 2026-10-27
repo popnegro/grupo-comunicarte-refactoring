@@ -190,7 +190,7 @@ export default function DashboardMediaKitBuilder() {
             duracionUnidad: period.duracionUnidad,
           },
           proposalAmount: {
-            amount: proposalCurrency === 'Por definir' ? null : proposalAmount.trim() ? Number(proposalAmount) : total,
+            amount: proposalCurrency === 'Por definir' || !proposalAmount.trim() ? null : Number(proposalAmount),
             currency: proposalCurrency,
           },
         },
