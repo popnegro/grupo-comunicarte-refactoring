@@ -21,7 +21,8 @@ test.describe('Inventario · regresión visual', () => {
     await page.goto('/inventario?vista=catalogo');
     await expect(page.getByRole('article')).toHaveCount(3);
     await expect(page.getByText('Impactos / mes').first()).toBeVisible();
-    await page.waitForLoadState('networkidle');
+    // UI readiness is established by the assertions above. Avoid networkidle: analytics,
+    // map tiles, and deployment-level requests can keep the browser network active indefinitely.
   });
 
   test('desktop mantiene jerarquía, estados y atributos de las tarjetas', async ({ page }, testInfo) => {
