@@ -79,7 +79,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
   }, [location.pathname]);
 
   const navClass = ({ isActive }: { isActive: boolean }) =>
-    `group relative flex min-h-10 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${isActive ? 'bg-gray-950 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-950'}`;
+    `group relative flex min-h-10 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${isActive ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-blue-50 hover:text-blue-700'}`;
 
   const handleLogout = () => {
     void apiFetch('/api/admin/logout', { method: 'POST' }).finally(() => {
@@ -142,7 +142,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
                 <div className="space-y-0.5">
                   {group.items.map(({ to, label, icon: Icon, end, count }: any) => (
                     <NavLink key={to} to={to} end={end} className={navClass} title={sidebarCollapsed ? label : undefined}>
-                      {({ isActive }) => <><Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-emerald-600' : 'text-gray-400'}`} /><span className={sidebarCollapsed ? 'sr-only' : ''}>{label}</span>{count ? <span className={`${sidebarCollapsed ? 'ml-auto h-1.5 w-1.5 p-0' : 'ml-auto px-1.5 py-0.5'} shrink-0 rounded-full bg-emerald-50 text-[10px] font-semibold text-emerald-800 ${sidebarCollapsed ? 'bg-emerald-500' : ''}`}>{sidebarCollapsed ? null : count}</span> : null}{isActive && !sidebarCollapsed && <ChevronRight className="ml-auto h-3 w-3 text-gray-400" />}</>}
+                      {({ isActive }) => <><Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-blue-100' : 'text-gray-400'}`} /><span className={sidebarCollapsed ? 'sr-only' : ''}>{label}</span>{count ? <span className={`${sidebarCollapsed ? 'ml-auto h-1.5 w-1.5 p-0' : 'ml-auto px-1.5 py-0.5'} shrink-0 rounded-full bg-blue-50 text-[10px] font-semibold text-blue-700 ${sidebarCollapsed ? 'bg-blue-500' : ''}`}>{sidebarCollapsed ? null : count}</span> : null}{isActive && !sidebarCollapsed && <ChevronRight className="ml-auto h-3 w-3 text-gray-400" />}</>}
                     </NavLink>
                   ))}
                 </div>

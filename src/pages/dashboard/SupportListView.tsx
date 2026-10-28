@@ -90,9 +90,9 @@ export function SupportListView(props: Props) {
       return <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 opacity-60 group-hover:opacity-100" />;
     }
     return sortOrder === 'asc' ? (
-      <ArrowUp className="w-3.5 h-3.5 text-gray-950 font-bold" />
+      <ArrowUp className="w-3.5 h-3.5 text-blue-700 font-bold" />
     ) : (
-      <ArrowDown className="w-3.5 h-3.5 text-gray-950 font-bold" />
+      <ArrowDown className="w-3.5 h-3.5 text-blue-700 font-bold" />
     );
   };
 
@@ -111,8 +111,8 @@ export function SupportListView(props: Props) {
 
         <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
               Inventario OOH & DOOH
             </span>
             <h1 className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-950">
@@ -136,7 +136,7 @@ export function SupportListView(props: Props) {
             <button
               type="button"
               onClick={() => navigate('/dashboard/soportes/new')}
-              className="inline-flex items-center gap-2 rounded-lg bg-gray-950 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 min-h-[44px] sm:min-h-[36px]"
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 min-h-[44px] sm:min-h-[36px]"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>Nuevo soporte</span>
@@ -151,32 +151,32 @@ export function SupportListView(props: Props) {
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="pl-9 h-9 text-sm rounded-lg border-gray-200 focus-visible:ring-gray-900/10 focus-visible:border-gray-900"
+                className="pl-9 h-9 text-sm rounded-lg border-gray-200 focus-visible:ring-blue-600/15 focus-visible:border-blue-600"
                 placeholder="Buscar por nombre, código o dirección..."
                 aria-label="Buscar soportes"
               />
             </div>
 
-            <select value={plaza} onChange={(e) => setPlaza(e.target.value)} aria-label="Filtrar por plaza" className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10">
+            <select value={plaza} onChange={(e) => setPlaza(e.target.value)} aria-label="Filtrar por plaza" className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15">
               <option value="todas">Todas las plazas</option>
               <option value="mendoza">Mendoza</option>
               <option value="buenos-aires">Buenos Aires</option>
             </select>
 
-            <select value={type} onChange={(e) => setType(e.target.value)} aria-label="Filtrar por formato" className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10">
+            <select value={type} onChange={(e) => setType(e.target.value)} aria-label="Filtrar por formato" className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15">
               <option value="todos">Todos los formatos</option>
               <option value="tradicional">Tradicional</option>
               <option value="led">Pantalla LED</option>
               <option value="led_movil">LED Móvil</option>
             </select>
 
-            <select value={availability} onChange={(e) => setAvailability(e.target.value)} aria-label="Filtrar por disponibilidad" className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10">
+            <select value={availability} onChange={(e) => setAvailability(e.target.value)} aria-label="Filtrar por disponibilidad" className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15">
               <option value="todos">Disponibilidad</option>
               <option value="disponible">Disponible</option>
               <option value="reservado">Reservado</option>
             </select>
 
-            <select value={active} onChange={(e) => setActive(e.target.value)} aria-label="Filtrar por estado activo" className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10">
+            <select value={active} onChange={(e) => setActive(e.target.value)} aria-label="Filtrar por estado activo" className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15">
               <option value="todos">Estado</option>
               <option value="activos">Solo activos</option>
               <option value="inactivos">Solo archivados</option>
@@ -185,8 +185,8 @@ export function SupportListView(props: Props) {
 
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-2 text-xs text-gray-500">
             <span>
-              Mostrando <strong className="text-gray-950 font-bold">{visible.length}</strong> de{' '}
-              <strong className="text-gray-950 font-bold">{supports.length}</strong> soportes
+              Mostrando <strong className="text-blue-700 font-bold">{visible.length}</strong> de{' '}
+              <strong className="text-blue-700 font-bold">{supports.length}</strong> soportes
             </span>
             {hasActiveFilters && (
               <button type="button" onClick={clearFilters} className="inline-flex items-center gap-1.5 font-bold text-red-600 hover:text-red-700 hover:underline min-h-[40px] sm:min-h-0">
@@ -203,25 +203,25 @@ export function SupportListView(props: Props) {
               <thead className="border-b border-gray-200 bg-gray-50/80 text-xs font-bold uppercase tracking-wider text-gray-600 select-none">
                 <tr>
                   <th className="px-3 py-2.5">
-                    <button type="button" onClick={() => handleSort('name')} className="group inline-flex items-center gap-1.5 hover:text-gray-950">
+                    <button type="button" onClick={() => handleSort('name')} className="group inline-flex items-center gap-1.5 hover:text-blue-700">
                       <span>Soporte / Código</span>
                       {renderSortIcon('name')}
                     </button>
                   </th>
                   <th className="px-3 py-2.5">
-                    <button type="button" onClick={() => handleSort('ciudad')} className="group inline-flex items-center gap-1.5 hover:text-gray-950">
+                    <button type="button" onClick={() => handleSort('ciudad')} className="group inline-flex items-center gap-1.5 hover:text-blue-700">
                       <span>Plaza / Formato</span>
                       {renderSortIcon('ciudad')}
                     </button>
                   </th>
                   <th className="px-3 py-2.5">
-                    <button type="button" onClick={() => handleSort('disponibilidad')} className="group inline-flex items-center gap-1.5 hover:text-gray-950">
+                    <button type="button" onClick={() => handleSort('disponibilidad')} className="group inline-flex items-center gap-1.5 hover:text-blue-700">
                       <span>Disponibilidad</span>
                       {renderSortIcon('disponibilidad')}
                     </button>
                   </th>
                   <th className="px-3 py-2.5">
-                    <button type="button" onClick={() => handleSort('price')} className="group inline-flex items-center gap-1.5 hover:text-gray-950">
+                    <button type="button" onClick={() => handleSort('price')} className="group inline-flex items-center gap-1.5 hover:text-blue-700">
                       <span>Tarifa Total</span>
                       {renderSortIcon('price')}
                     </button>
@@ -255,7 +255,7 @@ export function SupportListView(props: Props) {
                   visible.map((item) => {
                     const total = calculateSupportTotal(item.pricing);
                     return (
-                      <tr key={item.canonical_id} className="hover:bg-gray-50/80">
+                      <tr key={item.canonical_id} className="hover:bg-blue-50/40">
                         <td className="px-3 py-2.5">
                           <p className="font-bold text-gray-950 truncate">{item.name}</p>
                           <p className="text-[11px] text-gray-500 font-mono">{item.canonical_id}</p>
