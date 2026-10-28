@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FilePlus2, FileText, MapPin, MonitorSmartphone, ArrowUpRight, ClipboardList, PackageOpen } from 'lucide-react';
+import { FilePlus2, FileText, MapPin, MonitorSmartphone, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { DashboardShell } from '../../components/dashboard/DashboardShell';
 import { KPICard } from '../../components/dashboard/ui/KPICard';
