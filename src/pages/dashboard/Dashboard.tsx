@@ -19,9 +19,8 @@ export default function Dashboard() {
   const Header = () => (
     <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p className="text-xs font-medium text-slate-500">Centro de trabajo</p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-900 sm:text-3xl">Resumen</h1>
-        <p className="mt-1 text-sm text-slate-500">Una vista rápida de lo que requiere atención y del estado del inventario.</p>
+        <h1 className="text-[26px] font-bold tracking-tight text-[#1E293B]">Dashboard</h1>
+        <p className="mt-1 text-sm text-[#64748B]">Resumen comercial de soportes y solicitudes.</p>
       </div>
       <Link to="/dashboard/mediakits/nuevo" className="inline-flex min-h-9 shrink-0 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-xs font-semibold text-white transition hover:bg-blue-700"><FilePlus2 className="h-3.5 w-3.5 text-blue-100"/>Nuevo Media Kit</Link>
     </header>
@@ -32,22 +31,6 @@ export default function Dashboard() {
 
   return <DashboardShell><div className="mx-auto max-w-[1320px] space-y-7 pb-10">
     <Header/>
-
-    <section aria-label="Accesos de trabajo" className="grid gap-3 md:grid-cols-3">
-      <Link to="/dashboard/soportes" className="group rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20">
-        <div className="flex items-start justify-between gap-4"><span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#EFF4FF] text-[#2563EB]"><PackageOpen className="h-4 w-4"/></span><ArrowUpRight className="h-4 w-4 text-slate-400 transition group-hover:text-slate-700"/></div>
-        <p className="mt-3 text-sm font-semibold text-slate-900">Gestionar soportes</p><p className="mt-0.5 text-xs text-slate-500">Editar, revisar disponibilidad y administrar inventario.</p>
-      </Link>
-      <Link to="/dashboard/solicitudes" className="group rounded-lg border border-slate-200 bg-white p-4 transition hover:border-slate-300 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20">
-        <div className="flex items-start justify-between gap-4"><span className="flex h-8 w-8 items-center justify-center rounded-md bg-[#EFF4FF] text-[#2563EB]"><ClipboardList className="h-4 w-4"/></span><ArrowUpRight className="h-4 w-4 text-slate-400 transition group-hover:text-slate-700"/></div>
-        <div className="mt-3 flex items-center gap-2"><p className="text-sm font-semibold text-slate-900">Revisar solicitudes</p>{stats.pendingRequests>0&&<span className="rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">{stats.pendingRequests} pendientes</span>}</div>
-        <p className="mt-0.5 text-xs text-slate-500">Consultar contactos y avanzar oportunidades comerciales.</p>
-      </Link>
-      <Link to="/dashboard/mediakits/nuevo" className="group rounded-lg border border-slate-200 bg-white p-4 transition hover:border-slate-300 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20">
-        <div className="flex items-start justify-between gap-4"><span className="flex h-8 w-8 items-center justify-center rounded-md bg-[#EFF4FF] text-[#2563EB]"><FilePlus2 className="h-4 w-4"/></span><ArrowUpRight className="h-4 w-4 text-slate-400 transition group-hover:text-slate-700"/></div>
-        <p className="mt-3 text-sm font-semibold text-slate-900">Crear Media Kit</p><p className="mt-0.5 text-xs text-slate-500">Seleccionar soportes y preparar una propuesta comercial.</p>
-      </Link>
-    </section>
 
     <section aria-label="Indicadores principales" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <KPICard title="Soportes" value={stats.total} unit={`${stats.available} disponibles`} icon={MonitorSmartphone} footer={`${availableRate}% del inventario disponible`} />
