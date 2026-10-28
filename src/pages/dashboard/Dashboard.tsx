@@ -53,11 +53,5 @@ export default function Dashboard() {
       </Card>
     </div>
 
-    <Card>
-      <CardHeader className="border-b border-slate-100"><CardTitle>Inventario por tipología</CardTitle><p className="mt-1 text-xs text-slate-500">Distribución de soportes registrados en el sistema.</p></CardHeader>
-      <CardContent className="grid gap-3 pt-4 sm:grid-cols-3">
-        {([['Tradicionales',stats.tradicionalCount],['Pantallas LED',stats.ledCount],['LED móvil',stats.movilCount]] as const).map(([label,value])=><div key={label} className="rounded-md border border-slate-200 bg-slate-50/40 px-4 py-3"><span className="block text-xs font-medium text-slate-500">{label}</span><span className="mt-1 block text-xl font-semibold tracking-tight text-slate-900">{value}</span></div>)}
-      </CardContent>
-    </Card>
   </div></DashboardShell>;
 }
