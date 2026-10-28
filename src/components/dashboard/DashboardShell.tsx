@@ -97,7 +97,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
           </nav>
           <div className="mt-auto space-y-1 border-t border-[#E2E8F0] pt-4">
             <Link to="/inventario" className="flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium text-[#475569] transition hover:bg-white/70"><Building2 size={19} strokeWidth={1.7} className="text-[#5B6B86]"/><span className="flex-1">Inventario público</span><ChevronRight size={15} className="text-slate-400"/></Link>
-            <button type="button" onClick={handleLogout} className="flex min-h-10 w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-[13px] font-medium text-[#475569] transition hover:bg-white/70 hover:text-red-700"><LogOut size={19} strokeWidth={1.7} className="text-[#5B6B86}"/>Cerrar sesión</button>
+            <button type="button" onClick={handleLogout} className="flex min-h-10 w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-[13px] font-medium text-[#475569] transition hover:bg-white/70 hover:text-red-700"><LogOut size={19} strokeWidth={1.7} className="text-[#5B6B86]"/>Cerrar sesión</button>
             <div className="mt-3 flex items-center gap-2.5 rounded-lg bg-[#E8EDF5] p-3"><span className="h-[30px] w-[34px] shrink-0 rounded bg-[#CBD5E1]"/><div><p className="text-[11px] font-medium text-[#475569]">Panel de administración</p><p className="mt-0.5 text-[11px] text-[#64748B]">Grupo Comunicarte</p></div></div>
           </div>
         </aside>
