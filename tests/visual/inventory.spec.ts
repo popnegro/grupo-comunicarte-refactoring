@@ -26,6 +26,7 @@ test.describe('Inventario · regresión visual', () => {
   });
 
   test('desktop mantiene jerarquía, estados y atributos de las tarjetas', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'chromium-desktop', 'Snapshot desktop solo en proyecto desktop');
     await expect(page.locator('article').first().getByText('Disponible', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Consultar disponibilidad' })).toBeVisible();
     if (process.env.VISUAL_BASELINE_MODE !== 'true') {
@@ -39,6 +40,7 @@ test.describe('Inventario · regresión visual', () => {
   });
 
   test('mobile mantiene tarjetas legibles y acciones accesibles', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'chromium-mobile', 'Snapshot mobile solo en proyecto mobile');
     await expect(page.getByRole('button', { name: 'Seleccionar' }).first()).toBeVisible();
     await expect(page.getByRole('button', { name: 'Consultar disponibilidad' })).toBeVisible();
     await page.screenshot({ path: testInfo.outputPath('candidate-inventory-catalog-mobile.png') });
