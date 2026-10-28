@@ -24,7 +24,7 @@ test('normalize preserves editorial monthly impacts', () => {
     tipo_soporte: 'tradicional',
     technical: { measures: '430 x 460 cm.', monthly_impacts: 123 },
   });
-  assert.equal(normalized.traditional.monthly_impacts, '123');
+  assert.equal(normalized.traditional.monthly_impacts, 123);
 });
 
 test('payloadFrom produces canonical numeric payloads', () => {
@@ -35,14 +35,14 @@ test('payloadFrom produces canonical numeric payloads', () => {
     traditional: {
       ...emptyForm.traditional,
       medidas: '430 x 460 cm.',
-      caras: '2',
-      monthly_impacts: '123',
+      caras: 2,
+      monthly_impacts: 123,
     },
     pricing: {
       ...emptyForm.pricing,
-      exhibition: '1000',
-      installation: '200',
-      printing: '300',
+      exhibition: 1000,
+      installation: 200,
+      printing: 300,
     },
   };
   const payload = payloadFrom(form);

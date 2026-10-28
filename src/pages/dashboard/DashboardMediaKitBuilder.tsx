@@ -133,7 +133,7 @@ export default function DashboardMediaKitBuilder() {
   const otherDurationMissing = period.duracionUnidad === 'otros' && !period.duracionValor.trim();
   const proposalAmountInvalid = proposalCurrency !== 'Por definir' && Boolean(proposalAmount.trim()) &&
     (!Number.isFinite(Number(proposalAmount)) || Number(proposalAmount) < 0);
-  const canExport = selected.length > 0 && selected.every(s => Number(prices[s.canonical_id]) > 0) && client.name.trim().length > 0 && !periodInvalid && !durationInvalid && !otherDurationMissing && !proposalAmountInvalid;
+  const canExport = selected.length > 0 && client.name.trim().length > 0 && !periodInvalid && !durationInvalid && !otherDurationMissing && !proposalAmountInvalid;
   const toggle = (support: Support) => {
     if (support.disponibilidad !== 'disponible' && !selectedIds.includes(support.canonical_id)) {
       notify('Solo se pueden agregar soportes disponibles al Media Kit.');
@@ -213,7 +213,7 @@ export default function DashboardMediaKitBuilder() {
   };
 
   const exportPdf = async () => {
-    if (!canExport) { notify('Completá cliente, soportes y precios.'); return; }
+    if (!canExport) { notify('Completá el cliente, seleccioná al menos un soporte y revisá el monto global acordado.'); return; }
     setBusy(true);
     try {
       await persist('ready');
@@ -280,7 +280,7 @@ export default function DashboardMediaKitBuilder() {
                 <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Monto global acordado</p>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   <label className="block text-xs font-medium text-gray-600">Monto total
-                    <input type="number" min={0} step="0.01" value={proposalAmount} disabled={proposalCurrency === 'Por definir'} onChange={(e) => setProposalAmount(e.target.value)} placeholder={proposalCurrency === 'Por definir' ? 'Por definir' : String(total)} className="mt-1 h-10 w-full rounded-lg border border-gray-200 px-3 text-sm text-gray-900 outline-none focus:border-gray-900 disabled:bg-gray-100" />
+                    <input type="number" min={0} step="0.01" value={proposalAmount} disabled={proposalCurrency === 'Por definir'} onChange={(e) => setProposalAmount(e.target.value)} placeholder={proposalCurrency === 'Por definir' ? 'Por definir' : 'Ingresá el monto acordado'} className="mt-1 h-10 w-full rounded-lg border border-gray-200 px-3 text-sm text-gray-900 outline-none focus:border-gray-900 disabled:bg-gray-100" />
                   </label>
                   <label className="block text-xs font-medium text-gray-600">Moneda
                     <select value={proposalCurrency} onChange={(e) => { const value = e.target.value as ProposalCurrency; setProposalCurrency(value); if (value === 'Por definir') setProposalAmount(''); }} className="mt-1 h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900 outline-none focus:border-gray-900">
