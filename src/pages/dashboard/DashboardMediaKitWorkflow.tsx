@@ -411,8 +411,8 @@ export default function DashboardMediaKitWorkflow() {
 
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-emerald-800">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Gestión Comercial
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-blue-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-600" /> Gestión Comercial
             </span>
             <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-gray-950 sm:text-3xl">Solicitudes de Media Kit</h1>
             <p className="mt-1 text-xs text-gray-500 sm:text-sm">Flujo comercial: REQUEST → IN PROGRESS → DONE con cotización personalizada.</p>
@@ -441,7 +441,7 @@ export default function DashboardMediaKitWorkflow() {
                       ? 'border-blue-700 bg-blue-700 text-white'
                       : color === 'amber'
                         ? 'border-amber-600 bg-amber-600 text-white'
-                        : 'border-emerald-700 bg-emerald-700 text-white'
+                        : 'border-blue-700 bg-blue-700 text-white'
                   : 'border-gray-200 bg-white text-gray-800 hover:border-gray-300'
               }`}
             >
@@ -466,41 +466,40 @@ export default function DashboardMediaKitWorkflow() {
           </div>
         </section>
 
-        <div className="space-y-3">
-          {isFetchingLeads && leads.length === 0 && (
-            <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-500">
-              <Loader2 className="h-4 w-4 animate-spin" /> Cargando solicitudes…
+        <section className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm" aria-label="Tabla de solicitudes de Media Kit">
+          {isFetchingLeads && leads.length === 0 ? (
+            <div className="flex items-center gap-2 p-8 text-sm text-gray-500"><Loader2 className="h-4 w-4 animate-spin" /> Cargando solicitudes…</div>
+          ) : !visible.length ? (
+            <div className="p-10 text-center text-sm text-gray-500"><Inbox className="mx-auto mb-2 h-8 w-8 text-gray-300" />No hay solicitudes para este filtro.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[760px] border-collapse text-left text-xs">
+                <thead className="border-b border-gray-200 bg-gray-50/90 text-[10px] font-bold uppercase tracking-wide text-gray-500">
+                  <tr><th className="px-4 py-3">ID</th><th className="px-4 py-3">Cliente</th><th className="px-4 py-3">Campaña / empresa</th><th className="px-4 py-3">Media Kit</th><th className="px-4 py-3">Fecha solicitud</th><th className="px-4 py-3">Estado</th><th className="px-4 py-3 text-right">Acciones</th></tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {visible.map((lead) => (
+                    <tr key={lead.requestId} className="group transition-colors hover:bg-blue-50/40">
+                      <td className="whitespace-nowrap px-4 py-3.5 font-semibold text-blue-700">{lead.requestId}</td>
+                      <td className="px-4 py-3.5"><p className="max-w-[150px] truncate font-semibold text-gray-900">{lead.clientName}</p><p className="mt-0.5 max-w-[150px] truncate text-[10px] text-gray-500">{lead.email || 'Sin correo'}</p></td>
+                      <td className="px-4 py-3.5"><p className="max-w-[170px] truncate font-medium text-gray-800">{lead.company}</p><p className="mt-0.5 text-[10px] text-gray-500">{lead.supportNames.length} {lead.supportNames.length === 1 ? 'soporte' : 'soportes'}</p></td>
+                      <td className="whitespace-nowrap px-4 py-3.5 text-gray-700">{lead.supportNames.length ? 'Kit personalizado' : 'Pendiente'}</td>
+                      <td className="whitespace-nowrap px-4 py-3.5 text-gray-600">{formatRequestDate(lead.createdAt)}</td>
+                      <td className="whitespace-nowrap px-4 py-3.5"><StatusBadge status={labels[lead.status]} /></td>
+                      <td className="whitespace-nowrap px-4 py-3.5 text-right"><button type="button" onClick={() => open(lead)} className="inline-flex min-h-8 items-center rounded-md border border-gray-200 bg-white px-3 text-[11px] font-semibold text-gray-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600">Ver solicitud</button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
-          {!isFetchingLeads && visible.length === 0 && (
-            <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
-              <Inbox className="mx-auto mb-2 h-8 w-8 text-gray-300" />
-              No hay solicitudes para este filtro.
-            </div>
-          )}
-          {visible.map((lead) => (
-            <button
-              key={lead.requestId}
-              type="button"
-              onClick={() => open(lead)}
-              className="flex w-full items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 text-left transition hover:border-gray-300 hover:shadow-sm"
-            >
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-gray-950">{lead.clientName}</p>
-                <p className="truncate text-xs text-gray-500">{lead.company} · {lead.requestId}</p>
-                <p className="mt-1 truncate text-[11px] text-gray-500">
-                  {lead.supportNames.length} {lead.supportNames.length === 1 ? 'soporte' : 'soportes'} · {formatRequestDate(lead.createdAt)}
-                </p>
-              </div>
-              <StatusBadge status={labels[lead.status]} />
-            </button>
-          ))}
-        </div>
+          <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3 text-[10px] text-gray-500"><span>{visible.length} solicitudes visibles</span><span>Grupo Comunicarte · Gestión comercial</span></div>
+        </section>
 
         {selected && (
-          <div className="fixed inset-0 z-[4000] flex items-end justify-center bg-gray-950/40 p-0 sm:items-center sm:p-6" role="dialog" aria-modal="true">
-            <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-t-2xl border border-gray-200 bg-white shadow-2xl sm:rounded-2xl">
-              <div className="sticky top-0 flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
+          <div className="fixed inset-0 z-[4000] flex justify-end bg-gray-950/35" role="dialog" aria-modal="true">
+            <div className="h-full max-h-screen w-full max-w-[460px] overflow-y-auto border-l border-gray-200 bg-[#f8fafc] shadow-2xl">
+              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white px-5 py-4">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wide text-gray-500">{labels[selected.status]}</p>
                   <h2 className="text-base font-semibold text-gray-950">{selected.clientName}</h2>
@@ -509,7 +508,7 @@ export default function DashboardMediaKitWorkflow() {
                   <X className="h-4 w-4" />
                 </button>
               </div>
-              <div className="space-y-4 p-4">
+              <div className="space-y-4 p-5">
                 <div className="grid gap-2 text-xs text-gray-600 sm:grid-cols-2">
                   <p><span className="font-semibold text-gray-800">Email:</span> {selected.email || '—'}</p>
                   <p><span className="font-semibold text-gray-800">Tel:</span> {selected.phone || '—'}</p>
@@ -572,10 +571,10 @@ export default function DashboardMediaKitWorkflow() {
                     <button type="button" disabled={busy} onClick={() => changeStatus(selected, 'in_progress')} className="rounded-lg bg-amber-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">Marcar en proceso</button>
                   )}
                   {selected.status === 'in_progress' && !deliveryPrepared && (
-                    <button type="button" disabled={busy || !approvalsReady} onClick={() => prepareDelivery()} className="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">Preparar entrega</button>
+                    <button type="button" disabled={busy || !approvalsReady} onClick={() => prepareDelivery()} className="rounded-lg bg-blue-700 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">Preparar entrega</button>
                   )}
                   {selected.status === 'in_progress' && deliveryPrepared && (
-                    <button type="button" disabled={busy} onClick={() => changeStatus(selected, 'done')} className="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">Confirmar entrega realizada</button>
+                    <button type="button" disabled={busy} onClick={() => changeStatus(selected, 'done')} className="rounded-lg bg-blue-700 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">Confirmar entrega realizada</button>
                   )}
                   <button type="button" disabled={busy || !approvalsReady} onClick={() => persistMediaKit('draft').catch((e) => notify(e.message))} className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 disabled:opacity-50">
                     <Save className="h-3.5 w-3.5" /> Guardar cotización
