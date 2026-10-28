@@ -96,4 +96,17 @@ test.describe('Inventario · regresión visual', () => {
     await page.locator('article').first().screenshot({ path: testInfo.outputPath('candidate-inventory-card-selected.png') });
     await expect(page.locator('article').first()).toHaveScreenshot('inventory-card-selected.png', { stylePath: 'tests/visual/screenshot.css' });
   });
+
+
+  test('limpiar filtros aparece con filtros activos y restaura el inventario', async ({ page }) => {
+    const plaza = page.getByRole('combobox', { name: 'Filtrar por plaza' });
+    const clear = page.getByRole('button', { name: 'Limpiar todos los filtros' });
+    await expect(clear).toHaveCount(0);
+    await plaza.selectOption('mendoza');
+    await expect(clear).toBeVisible();
+    await clear.click();
+    await expect(plaza).toHaveValue('todos');
+    await expect(page.getByRole('article')).toHaveCount(3);
+    await expect(clear).toHaveCount(0);
+  });
 });
