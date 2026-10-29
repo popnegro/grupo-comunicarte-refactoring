@@ -85,7 +85,7 @@ async function makePdf(lead:ExportLead,supports:ExportSupport[],requestId:string
       text(lines,'Disponibilidad sujeta a confirmacion comercial.',40,36,7);
     }
     text(lines,`Grupo Comunicarte  /  Media Kit  /  Pagina ${pi+1} de ${groups.length}`,40,20,7);
-    const content=new TextEncoder().encode(lines.join('\\n'));
+    const content=new TextEncoder().encode(lines.join('\n'));
     const contentObj=objects.push({body:`<< /Length ${content.length} >>`,stream:content})-1;
     const xobjects=[`/Font << /F1 3 0 R /F2 4 0 R >>`];
     if(logoObj>=0)xobjects.push(`/Logo ${logoObj+1} 0 R`);
